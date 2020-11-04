@@ -1,0 +1,136 @@
+plugins {
+    id 'java'
+    id "com.github.spotbugs" version "4.5.1"
+    id 'checkstyle'
+    id 'jacoco'
+}
+
+group 'software.amazon.neptune.jdbc'
+version '1.0-SNAPSHOT'
+description 'neptune-jdbc-driver'
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_1_8
+}
+
+// Silently agree to build scan terms.
+if (hasProperty('buildScan')) {
+    buildScan {
+        termsOfServiceUrl = 'https://gradle.com/terms-of-service'
+        termsOfServiceAgree = 'yes'
+    }
+}
+
+jar {
+    manifest {
+        attributes 'Implementation-Version': archiveVersion
+    }
+}
+
+test {
+    useJUnitPlatform()
+}
+
+/**
+ * CheckStyle Plugin
+ */
+apply plugin: 'checkstyle'
+checkstyle {
+    toolVersion '7.8.1'
+    configFile file("config/checkstyle/checkstyle-rules.xml")
+    ignoreFailures = false
+}
+checkstyleMain {
+    source = 'src/main/java'
+}
+checkstyleTest {
+    source = 'src/test/java'
+}
+
+/**
+ * SpotBugs Plugin
+ */
+spotbugs {
+    showStackTraces = false
+    reportsDir = file("$buildDir/reports/spotbugs")
+    ignoreFailures = false
+}
+spotbugsMain {
+    // Configure HTML report
+    reports {
+        html {
+            enabled = true
+            destination = file("$buildDir/reports/spotbugs/html/spotbugs.html")
+            stylesheet = 'fancy-hist.xsl'
+        }
+    }
+}
+
+/**
+ * JaCoCo Plugin
+ */
+jacoco {
+    toolVersion = "0.8.5"
+}
+jacocoTestReport {
+    reports {
+        html.enabled true
+    }
+    afterEvaluate {
+        classDirectories.setFrom(files(classDirectories.files.collect {
+            fileTree(dir: it)
+        }))
+    }
+}
+test.finalizedBy(project.tasks.jacocoTestReport)
+jacocoTestCoverageVerification {
+    violationRules {
+        rule {
+            element = 'CLASS'
+            excludes = [
+            ]
+            limit {
+                counter = 'LINE'
+                minimum = 0.85
+            }
+            limit {
+                counter = 'BRANCH'
+                minimum = 0.85
+            }
+        }
+    }
+    afterEvaluate {
+        classDirectories.setFrom(files(classDirectories.files.collect {
+            fileTree(dir: it)
+        }))
+    }
+}
+check.dependsOn jacocoTestCoverageVerification
+jacocoTestCoverageVerification.dependsOn jacocoTestReport
+
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation group: 'org.slf4j', name: 'slf4j-log4j12', version: '1.7.29'
+
+    implementation group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.13.3'
+    implementation group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.13.3'
+
+    implementation group: 'com.google.guava', name: 'guava', version: '29.0-jre'
+
+    compileOnly 'org.projectlombok:lombok:1.18.16'
+    annotationProcessor 'org.projectlombok:lombok:1.18.16'
+
+    testImplementation  group: 'junit', name: 'junit', version: '4.12'
+
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.4.0'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.4.0'
+
+    testImplementation group: 'org.mockito', name: 'mockito-core', version: '2.1.0'
+
+    implementation group: 'com.puppycrawl.tools', name: 'checkstyle', version: '8.8'
+}
