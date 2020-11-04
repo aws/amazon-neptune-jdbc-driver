@@ -59,13 +59,31 @@ spotbugs {
 spotbugsMain {
     // Configure HTML report
     reports {
-        html {
+        xml {
             enabled = true
-            destination = file("$buildDir/reports/spotbugs/html/spotbugs.html")
-            stylesheet = 'fancy-hist.xsl'
+            destination = file("$buildDir/reports/spotbugs/html/spotbugs.xml")
         }
     }
 }
+
+task checkSpotBugsReport {
+    doLast {
+        def xmlReport = spotbugsMain.reports.getByName("XML")
+        def slurped = new XmlSlurper().parse(xmlReport.destination)
+        def bugsFound = slurped.BugInstance.size()
+        slurped.BugInstance.each {
+            println "SpotBugs Error"
+            println "\tShort Message:\t\t${it.ShortMessage}"
+            println "\tLong Message:\t\t${it.LongMessage}"
+            println "\tSource of Error:\t${it.SourceLine.Message}"
+        }
+        if (bugsFound > 0) {
+            throw new Exception("Encountered SpotBugs errors, see above.")
+        }
+    }
+}
+
+spotbugsMain.finalizedBy checkSpotBugsReport
 
 /**
  * JaCoCo Plugin

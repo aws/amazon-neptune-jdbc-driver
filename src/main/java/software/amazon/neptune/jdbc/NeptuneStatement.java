@@ -1,0 +1,302 @@
+/*
+ * Copyright <2020> Amazon.com, final Inc. or its affiliates. All Rights Reserved.
+ *
+ * Licensed under the Apache License, final Version 2.0 (the "License").
+ * You may not use this file except in compliance with the License.
+ * A copy of the License is located at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * or in the "license" file accompanying this file. This file is distributed
+ * on an "AS IS" BASIS, final WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, final either
+ * express or implied. See the License for the specific language governing
+ * permissions and limitations under the License.
+ *
+ */
+
+package software.amazon.neptune.jdbc;
+
+import software.amazon.neptune.jdbc.opencypher.OpenCypherNeptuneResultSet;
+
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.SQLWarning;
+import java.util.concurrent.atomic.AtomicBoolean;
+
+/**
+ * Abstract implementation of java.sql.Statement for Neptune JDBC Driver.
+ * Concrete implementations will be provided in query language specific implementations.
+ */
+public abstract class NeptuneStatement implements java.sql.Statement {
+    private final AtomicBoolean isClosed = new AtomicBoolean(false);
+
+    @Override
+    public ResultSet executeQuery(final String sql) throws SQLException {
+        verifyOpen();
+        return new OpenCypherNeptuneResultSet();
+    }
+
+    @Override
+    public int executeUpdate(final String sql) throws SQLException {
+        verifyOpen();
+        return 0;
+    }
+
+    @Override
+    public void close() throws SQLException {
+
+    }
+
+    @Override
+    public int getMaxFieldSize() throws SQLException {
+        verifyOpen();
+        return 0;
+    }
+
+    @Override
+    public void setMaxFieldSize(final int max) throws SQLException {
+        verifyOpen();
+
+    }
+
+    @Override
+    public int getMaxRows() throws SQLException {
+        verifyOpen();
+        return 0;
+    }
+
+    @Override
+    public void setMaxRows(final int max) throws SQLException {
+        verifyOpen();
+
+    }
+
+    @Override
+    public void setEscapeProcessing(final boolean enable) throws SQLException {
+        verifyOpen();
+
+    }
+
+    @Override
+    public int getQueryTimeout() throws SQLException {
+        verifyOpen();
+        return 0;
+    }
+
+    @Override
+    public void setQueryTimeout(final int seconds) throws SQLException {
+        verifyOpen();
+
+    }
+
+    @Override
+    public void cancel() throws SQLException {
+        verifyOpen();
+
+    }
+
+    @Override
+    public SQLWarning getWarnings() throws SQLException {
+        verifyOpen();
+        return null;
+    }
+
+    @Override
+    public void clearWarnings() throws SQLException {
+        verifyOpen();
+
+    }
+
+    @Override
+    public void setCursorName(final String name) throws SQLException {
+        verifyOpen();
+
+    }
+
+    @Override
+    public boolean execute(final String sql) throws SQLException {
+        verifyOpen();
+        return false;
+    }
+
+    @Override
+    public ResultSet getResultSet() throws SQLException {
+        verifyOpen();
+        return null;
+    }
+
+    @Override
+    public int getUpdateCount() throws SQLException {
+        verifyOpen();
+        return 0;
+    }
+
+    @Override
+    public boolean getMoreResults() throws SQLException {
+        verifyOpen();
+        return false;
+    }
+
+    @Override
+    public void setFetchDirection(final int direction) throws SQLException {
+        verifyOpen();
+
+    }
+
+    @Override
+    public int getFetchDirection() throws SQLException {
+        verifyOpen();
+        return 0;
+    }
+
+    @Override
+    public void setFetchSize(final int rows) throws SQLException {
+        verifyOpen();
+
+    }
+
+    @Override
+    public int getFetchSize() throws SQLException {
+        verifyOpen();
+        return 0;
+    }
+
+    @Override
+    public int getResultSetConcurrency() throws SQLException {
+        verifyOpen();
+        return 0;
+    }
+
+    @Override
+    public int getResultSetType() throws SQLException {
+        verifyOpen();
+        return 0;
+    }
+
+    @Override
+    public void addBatch(final String sql) throws SQLException {
+        verifyOpen();
+
+    }
+
+    @Override
+    public void clearBatch() throws SQLException {
+        verifyOpen();
+
+    }
+
+    @Override
+    public int[] executeBatch() throws SQLException {
+        verifyOpen();
+        return new int[0];
+    }
+
+    @Override
+    public Connection getConnection() throws SQLException {
+        verifyOpen();
+        return null;
+    }
+
+    @Override
+    public boolean getMoreResults(final int current) throws SQLException {
+        verifyOpen();
+        return false;
+    }
+
+    @Override
+    public ResultSet getGeneratedKeys() throws SQLException {
+        verifyOpen();
+        return null;
+    }
+
+    @Override
+    public int executeUpdate(final String sql, final int autoGeneratedKeys) throws SQLException {
+        verifyOpen();
+        return 0;
+    }
+
+    @Override
+    public int executeUpdate(final String sql, final int[] columnIndexes) throws SQLException {
+        verifyOpen();
+        return 0;
+    }
+
+    @Override
+    public int executeUpdate(final String sql, final String[] columnNames) throws SQLException {
+        verifyOpen();
+        return 0;
+    }
+
+    @Override
+    public boolean execute(final String sql, final int autoGeneratedKeys) throws SQLException {
+        verifyOpen();
+        return false;
+    }
+
+    @Override
+    public boolean execute(final String sql, final int[] columnIndexes) throws SQLException {
+        verifyOpen();
+        return false;
+    }
+
+    @Override
+    public boolean execute(final String sql, final String[] columnNames) throws SQLException {
+        verifyOpen();
+        return false;
+    }
+
+    @Override
+    public int getResultSetHoldability() throws SQLException {
+        verifyOpen();
+        return 0;
+    }
+
+    @Override
+    public boolean isClosed() throws SQLException {
+        return isClosed.get();
+    }
+
+    @Override
+    public void setPoolable(final boolean poolable) throws SQLException {
+        verifyOpen();
+    }
+
+    @Override
+    public boolean isPoolable() throws SQLException {
+        verifyOpen();
+        return false;
+    }
+
+    @Override
+    public void closeOnCompletion() throws SQLException {
+        verifyOpen();
+    }
+
+    @Override
+    public boolean isCloseOnCompletion() throws SQLException {
+        verifyOpen();
+        return false;
+    }
+
+    @Override
+    public <T> T unwrap(final Class<T> iface) throws SQLException {
+        return null;
+    }
+
+    @Override
+    public boolean isWrapperFor(final Class<?> iface) throws SQLException {
+        return false;
+    }
+
+    /**
+     * Verify the statement is open.
+     *
+     * @throws SQLException if the statement is closed.
+     */
+    private void verifyOpen() throws SQLException {
+        // if (isClosed.get()) {
+        // TODO: Throw SQLException
+        // }
+    }
+}
