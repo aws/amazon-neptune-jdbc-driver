@@ -42,10 +42,13 @@ jobs:
       run: ./gradlew build
     - name: Copy Build
       run: |
-        mkdir jarfile
-        cp target/*.jar jarfile
+        mkdir output
+        mkdir output/jarfile
+        mkdir output/reports
+        cp build/libs/*.jar output/jarfile
+        cp -R build/reports output/reports
     - name: Upload Build
       uses: actions/upload-artifact@v1
       with:
-        name: jarfile
-        path: jarfile
+        name: output
+        path: output
