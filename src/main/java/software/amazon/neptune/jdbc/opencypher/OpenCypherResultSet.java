@@ -16,10 +16,10 @@
 
 package software.amazon.neptune.jdbc.opencypher;
 
-import software.amazon.neptune.jdbc.NeptuneResultSet;
+import software.amazon.neptune.jdbc.ResultSet;
 
 /**
  * Implementation of java.sql.ResultSet for OpenCypher.
  */
-public class OpenCypherNeptuneResultSet extends NeptuneResultSet {
+public class OpenCypherResultSet extends ResultSet {
 }

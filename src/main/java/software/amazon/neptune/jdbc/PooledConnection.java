@@ -24,7 +24,7 @@ import java.sql.SQLException;
 /**
  * Implementation of javax.sql.PooledConnection for Neptune JDBC Driver.
  */
-public class NeptunePooledConnection implements javax.sql.PooledConnection {
+public class PooledConnection implements javax.sql.PooledConnection {
     @Override
     public Connection getConnection() throws SQLException {
         return null;

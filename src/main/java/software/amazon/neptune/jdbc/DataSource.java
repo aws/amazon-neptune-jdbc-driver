@@ -28,7 +28,7 @@ import java.util.logging.Logger;
  * for Neptune JDBC Driver.
  * Concrete implementations will be provided in query language specific implementations.
  */
-public abstract class NeptuneDataSource implements javax.sql.DataSource, javax.sql.ConnectionPoolDataSource {
+public abstract class DataSource implements javax.sql.DataSource, javax.sql.ConnectionPoolDataSource {
     // TODO: Make function to return specific data source (OpenCypher/Gremlin/SPARQL).
     @Override
     public Connection getConnection() throws SQLException {

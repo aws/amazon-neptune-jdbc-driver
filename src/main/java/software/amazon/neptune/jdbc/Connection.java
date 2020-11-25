@@ -16,7 +16,7 @@
 
 package software.amazon.neptune.jdbc;
 
-import software.amazon.neptune.jdbc.opencypher.OpenCypherNeptunePreparedStatement;
+import software.amazon.neptune.jdbc.opencypher.OpenCypherPreparedStatement;
 
 import java.sql.Array;
 import java.sql.Blob;
@@ -41,7 +41,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * Abstract implementation of java.sql.Connection for Neptune JDBC Driver.
  * Concrete implementations will be provided in query language specific implementations.
  */
-public abstract class NeptuneConnection implements java.sql.Connection {
+public abstract class Connection implements java.sql.Connection {
     private final AtomicBoolean isClosed = new AtomicBoolean(false);
 
     @Override
@@ -53,7 +53,7 @@ public abstract class NeptuneConnection implements java.sql.Connection {
     @Override
     public PreparedStatement prepareStatement(final String sql) throws SQLException {
         verifyOpen();
-        return new OpenCypherNeptunePreparedStatement();
+        return new OpenCypherPreparedStatement();
     }
 
     @Override

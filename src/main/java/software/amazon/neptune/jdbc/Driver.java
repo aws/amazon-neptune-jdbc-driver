@@ -26,7 +26,7 @@ import java.util.logging.Logger;
 /**
  * Implementation of java.sql.Driver for Neptune JDBC Driver.
  */
-public class NeptuneDriver implements java.sql.Driver {
+public class Driver implements java.sql.Driver {
     @Override
     public Connection connect(final String url, final Properties info) throws SQLException {
         return null;
