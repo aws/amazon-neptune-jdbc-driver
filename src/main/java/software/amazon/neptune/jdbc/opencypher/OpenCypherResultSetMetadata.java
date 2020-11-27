@@ -16,10 +16,10 @@
 
 package software.amazon.neptune.jdbc.opencypher;
 
-import software.amazon.neptune.jdbc.NeptuneConnection;
+import software.amazon.neptune.jdbc.ResultSetMetaData;
 
 /**
- * Implementation of java.sql.connection for OpenCypher.
+ * Implementation of java.sql.ResultSetMetadata for OpenCypher.
  */
-public class OpenCypherNeptuneConnection extends NeptuneConnection {
+public class OpenCypherResultSetMetadata extends ResultSetMetaData {
 }

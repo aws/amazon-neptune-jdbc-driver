@@ -22,7 +22,7 @@ import java.sql.SQLException;
  * Abstract implementation of java.sql.ResultSetMetaData for Neptune JDBC Driver.
  * Concrete implementations will be provided in query language specific implementations.
  */
-public abstract class NeptuneResultSetMetaData implements java.sql.ResultSetMetaData {
+public abstract class ResultSetMetaData implements java.sql.ResultSetMetaData {
     @Override
     public int getColumnCount() throws SQLException {
         return 0;

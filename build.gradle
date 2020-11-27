@@ -37,7 +37,7 @@ test {
  */
 apply plugin: 'checkstyle'
 checkstyle {
-    toolVersion '7.8.1'
+    toolVersion '8.37'
     configFile file("config/checkstyle/checkstyle-rules.xml")
     ignoreFailures = false
 }
@@ -55,6 +55,7 @@ spotbugs {
     showStackTraces = false
     reportsDir = file("$buildDir/reports/spotbugs")
     ignoreFailures = false
+    includeFilter = file("config/spotbugs/spotbugs-exclude.xml")
 }
 spotbugsMain {
     // Configure HTML report
@@ -178,4 +179,6 @@ dependencies {
     testImplementation group: 'org.mockito', name: 'mockito-core', version: '2.1.0'
 
     implementation group: 'com.puppycrawl.tools', name: 'checkstyle', version: '8.8'
+
+    compile group: 'com.google.code.findbugs', name: 'annotations', version: '3.0.1'
 }

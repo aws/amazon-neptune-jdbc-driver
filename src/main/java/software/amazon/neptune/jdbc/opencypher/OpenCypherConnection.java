@@ -16,10 +16,10 @@
 
 package software.amazon.neptune.jdbc.opencypher;
 
-import software.amazon.neptune.jdbc.NeptuneStatement;
+import software.amazon.neptune.jdbc.Connection;
 
 /**
- * Implementation of java.sql.Statement for OpenCypher.
+ * Implementation of java.sql.connection for OpenCypher.
  */
-public class OpenCypherNeptuneStatement extends NeptuneStatement {
+public class OpenCypherConnection extends Connection {
 }

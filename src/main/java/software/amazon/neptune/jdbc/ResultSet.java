@@ -41,7 +41,7 @@ import java.util.Map;
  * Abstract implementation of java.sql.ResultSet for Neptune JDBC Driver.
  * Concrete implementations will be provided in query language specific implementations.
  */
-public abstract class NeptuneResultSet implements java.sql.ResultSet {
+public abstract class ResultSet implements java.sql.ResultSet {
     @Override
     public boolean next() throws SQLException {
         return false;

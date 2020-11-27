@@ -25,7 +25,7 @@ import java.sql.SQLException;
  * Abstract implementation of java.sql.DatabaseMetaData for Neptune JDBC Driver.
  * Concrete implementations will be provided in query language specific implementations.
  */
-public abstract class NeptuneDatabaseMetaData implements java.sql.DatabaseMetaData {
+public abstract class DatabaseMetaData implements java.sql.DatabaseMetaData {
 
     @Override
     public boolean allProceduresAreCallable() throws SQLException {

@@ -16,7 +16,7 @@
 
 package software.amazon.neptune.jdbc;
 
-import software.amazon.neptune.jdbc.opencypher.OpenCypherNeptuneResultSet;
+import software.amazon.neptune.jdbc.opencypher.OpenCypherResultSet;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -28,13 +28,13 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * Abstract implementation of java.sql.Statement for Neptune JDBC Driver.
  * Concrete implementations will be provided in query language specific implementations.
  */
-public abstract class NeptuneStatement implements java.sql.Statement {
+public abstract class Statement implements java.sql.Statement {
     private final AtomicBoolean isClosed = new AtomicBoolean(false);
 
     @Override
     public ResultSet executeQuery(final String sql) throws SQLException {
         verifyOpen();
-        return new OpenCypherNeptuneResultSet();
+        return new OpenCypherResultSet();
     }
 
     @Override

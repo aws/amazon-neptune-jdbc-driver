@@ -16,7 +16,7 @@
 
 package software.amazon.neptune.jdbc;
 
-import software.amazon.neptune.jdbc.opencypher.OpenCypherNeptuneResultSet;
+import software.amazon.neptune.jdbc.opencypher.OpenCypherResultSet;
 
 import java.io.InputStream;
 import java.io.Reader;
@@ -43,10 +43,10 @@ import java.util.Calendar;
 /**
  * Implementation of java.sql.PreparedStatement for Neptune JDBC Driver.
  */
-public abstract class NeptunePreparedStatement implements java.sql.PreparedStatement {
+public abstract class PreparedStatement implements java.sql.PreparedStatement {
     @Override
     public ResultSet executeQuery() throws SQLException {
-        return new OpenCypherNeptuneResultSet();
+        return new OpenCypherResultSet();
     }
 
     @Override
@@ -321,7 +321,7 @@ public abstract class NeptunePreparedStatement implements java.sql.PreparedState
 
     @Override
     public ResultSet executeQuery(final String sql) throws SQLException {
-        return new OpenCypherNeptuneResultSet();
+        return new OpenCypherResultSet();
     }
 
     @Override

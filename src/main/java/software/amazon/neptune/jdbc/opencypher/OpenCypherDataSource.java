@@ -16,10 +16,10 @@
 
 package software.amazon.neptune.jdbc.opencypher;
 
-import software.amazon.neptune.jdbc.NeptunePreparedStatement;
+import software.amazon.neptune.jdbc.DataSource;
 
 /**
- * Implementation of java.sql.PreparedStatement for OpenCypher.
+ * Implementation of javax.sql.DataSource and javax.sql.ConnectionPoolDataSource for OpenCypher.
  */
-public class OpenCypherNeptunePreparedStatement extends NeptunePreparedStatement {
+public class OpenCypherDataSource extends DataSource {
 }

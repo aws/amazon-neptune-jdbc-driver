@@ -46,6 +46,15 @@
 
     <module name="SuppressWarningsFilter"/>
 
+    <!-- Checks for Size Violations.                    -->
+    <!-- See http://checkstyle.sf.net/config_sizes.html -->
+    <module name="LineLength">
+        <property name="max" value="120"/>
+        <property name="ignorePattern" value="(^ *\** *)|(^import )"/>
+    </module>
+    <!--        <module name="MethodLength"/>-->
+    <!--        <module name="ParameterNumber"/>-->
+
     <module name="TreeWalker">
 
         <!-- Suppress checkstyle using @SuppressWarnings -->
@@ -77,23 +86,19 @@
             <property name="separateLineBetweenGroups" value="false"/>
         </module>
 
-
-        <!-- Checks for Size Violations.                    -->
-        <!-- See http://checkstyle.sf.net/config_sizes.html -->
-        <module name="LineLength">
-            <property name="max" value="120"/>
-            <property name="ignorePattern" value="(^ *\** *)|(^import )"/>
+        <module name="JavadocMethod">
+            <property name="scope" value="public"/>
+            <property name="allowMissingParamTags" value="true"/>
         </module>
-        <!--        <module name="MethodLength"/>-->
-        <!--        <module name="ParameterNumber"/>-->
 
         <!-- Checks for Javadoc comments.                     -->
         <!-- See http://checkstyle.sf.net/config_javadoc.html -->
         <module name="JavadocMethod">
             <property name="allowMissingParamTags" value="true"/>
-            <property name="allowMissingThrowsTags" value="true"/>
-            <property name="allowMissingJavadoc" value="true"/>
             <property name="allowMissingReturnTag" value="true"/>
+        </module>
+
+        <module name="MissingJavadocMethod">
             <property name="allowMissingPropertyJavadoc" value="true"/>
         </module>
 
