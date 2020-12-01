@@ -41,7 +41,7 @@
 
     <!-- Supressions file -->
     <module name="SuppressionFilter">
-        <property name="file" value="./config/checkstyle/suppressions.xml"/>
+        <property name="file" value="${config_loc}/suppressions.xml"/>
     </module>
 
     <module name="SuppressWarningsFilter"/>
@@ -139,7 +139,6 @@
         <!-- Modifier Checks                                    -->
         <!-- See http://checkstyle.sf.net/config_modifiers.html -->
         <module name="ModifierOrder"/>
-        <module name="RedundantModifier"/>
 
         <!-- Checks for blocks. You know, those {}'s         -->
         <!-- See http://checkstyle.sf.net/config_blocks.html -->
