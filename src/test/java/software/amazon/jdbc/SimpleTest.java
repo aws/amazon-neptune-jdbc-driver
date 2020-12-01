@@ -14,12 +14,11 @@
  *
  */
 
-package software.amazon.neptune.jdbc.opencypher;
-
-import software.amazon.neptune.jdbc.ResultSet;
+package software.amazon.jdbc;
 
 /**
- * Implementation of java.sql.ResultSet for OpenCypher.
+ * Simple test to check generation of objects.
+ * TODO: Delete when tests are introduced.
  */
-public class OpenCypherResultSet extends ResultSet {
+public class SimpleTest {
 }

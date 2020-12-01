@@ -1,28 +1,30 @@
 /*
- * Copyright <2020> Amazon.com, Inc. or its affiliates. All Rights Reserved.
+ * Copyright <2020> Amazon.com, final Inc. or its affiliates. All Rights Reserved.
  *
- * Licensed under the Apache License, Version 2.0 (the "License").
+ * Licensed under the Apache License, final Version 2.0 (the "License").
  * You may not use this file except in compliance with the License.
  * A copy of the License is located at
  *
  *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * or in the "license" file accompanying this file. This file is distributed
- * on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
+ * on an "AS IS" BASIS, final WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, final either
  * express or implied. See the License for the specific language governing
  * permissions and limitations under the License.
  *
  */
 
-package software.amazon.neptune.jdbc;
+package software.amazon.neptune.opencypher;
 
+import software.amazon.jdbc.ResultSetMetaData;
 import java.sql.SQLException;
 
 /**
- * Abstract implementation of java.sql.ResultSetMetaData for Neptune JDBC Driver.
- * Concrete implementations will be provided in query language specific implementations.
+ * OpenCypher implementation of ResultSetMetadata.
  */
-public abstract class ResultSetMetaData implements java.sql.ResultSetMetaData {
+public class OpenCypherResultSetMetadata extends ResultSetMetaData implements java.sql.ResultSetMetaData {
+
+    // TODO: All below are just default stub implementations.
     @Override
     public int getColumnCount() throws SQLException {
         return 0;
@@ -126,15 +128,5 @@ public abstract class ResultSetMetaData implements java.sql.ResultSetMetaData {
     @Override
     public String getColumnClassName(final int column) throws SQLException {
         return null;
-    }
-
-    @Override
-    public <T> T unwrap(final Class<T> iface) throws SQLException {
-        return null;
-    }
-
-    @Override
-    public boolean isWrapperFor(final Class<?> iface) throws SQLException {
-        return false;
     }
 }
