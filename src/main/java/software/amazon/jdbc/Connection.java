@@ -81,13 +81,15 @@ public abstract class Connection implements java.sql.Connection {
             throw SqlError.createSQLClientInfoException(LOGGER, SqlError.CONN_CLOSED, failures);
         }
         connectionProperties.clear();
-        for (final String name : properties.stringPropertyNames()) {
-            if (ConnectionProperty.isSupportedProperty(name)) {
-                final String value = properties.getProperty(name);
-                connectionProperties.put(name, value);
-                LOGGER.debug("Successfully set client info with name {{}} and value {{}}", name, value);
-            } else {
-                addWarning(new SQLWarning(Warning.lookup(Warning.UNSUPPORTED_PROPERTY, name)));
+        if (properties != null) {
+            for (final String name : properties.stringPropertyNames()) {
+                if (ConnectionProperty.isSupportedProperty(name)) {
+                    final String value = properties.getProperty(name);
+                    connectionProperties.put(name, value);
+                    LOGGER.debug("Successfully set client info with name {{}} and value {{}}", name, value);
+                } else {
+                    addWarning(new SQLWarning(Warning.lookup(Warning.UNSUPPORTED_PROPERTY, name)));
+                }
             }
         }
         LOGGER.debug("Successfully set client info with all properties.");
@@ -141,17 +143,12 @@ public abstract class Connection implements java.sql.Connection {
 
     @Override
     public void setClientInfo(final String name, final String value) throws SQLClientInfoException {
-        if (isClosed.get()) {
-            final Map<String, ClientInfoStatus> failures = new HashMap<>();
-            failures.put(name, ClientInfoStatus.REASON_UNKNOWN);
-            throw SqlError.createSQLClientInfoException(LOGGER, SqlError.CONN_CLOSED, failures);
-        }
-
-        if (ConnectionProperty.isSupportedProperty(name)) {
-            connectionProperties.put(name, value);
-            LOGGER.debug("Successfully set client info with name {{}} and value {{}}", name, value);
+        if ((name != null) && (value != null)) {
+            final Properties properties = new Properties();
+            properties.setProperty(name, value);
+            setClientInfo(properties);
         } else {
-            addWarning(new SQLWarning(Warning.lookup(Warning.UNSUPPORTED_PROPERTY, name)));
+            setClientInfo(null);
         }
     }
 
@@ -181,10 +178,9 @@ public abstract class Connection implements java.sql.Connection {
 
     /**
      * Set a new warning if there were none, or add a new warning to the end of the list.
-     *
      * @param warning the {@link SQLWarning} to be set.SQLError
      */
-    private void addWarning(final SQLWarning warning) {
+    protected void addWarning(final SQLWarning warning) {
         LOGGER.warn(warning.getMessage());
         if (this.warnings == null) {
             this.warnings = warning;
@@ -193,9 +189,17 @@ public abstract class Connection implements java.sql.Connection {
         this.warnings.setNextWarning(warning);
     }
 
+    protected abstract void doClose();
+
+    @Override
+    public void close() {
+        if (!isClosed.getAndSet(true)) {
+            doClose();
+        }
+    }
+
     /**
      * Verify the connection is open.
-     *
      * @throws SQLException if the connection is closed.
      */
     protected void verifyOpen() throws SQLException {
@@ -291,7 +295,6 @@ public abstract class Connection implements java.sql.Connection {
     }
 
     @Override
-
     public boolean isReadOnly() throws SQLException {
         return true;
     }

@@ -41,4 +41,15 @@ public class OpenCypherDataSource extends software.amazon.jdbc.DataSource implem
     public PooledConnection getPooledConnection(final String user, final String password) throws SQLException {
         return new OpenCypherPooledConnection(getConnection(user, password));
     }
+
+    // TODO: Implement
+    @Override
+    public void setLoginTimeout(final int seconds) throws SQLException {
+
+    }
+
+    @Override
+    public int getLoginTimeout() throws SQLException {
+        return 0;
+    }
 }

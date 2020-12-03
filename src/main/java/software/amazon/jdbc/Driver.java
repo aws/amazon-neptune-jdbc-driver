@@ -21,7 +21,6 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.lang.management.ManagementFactory;
 import java.nio.charset.StandardCharsets;
-import java.sql.Connection;
 import java.sql.DriverPropertyInfo;
 import java.sql.SQLException;
 import java.sql.SQLFeatureNotSupportedException;
@@ -31,7 +30,7 @@ import java.util.logging.Logger;
 /**
  * Abstract implementation of Driver for JDBC Driver.
  */
-public class Driver implements java.sql.Driver {
+public abstract class Driver implements java.sql.Driver {
     static final int DRIVER_MAJOR_VERSION;
     static final int DRIVER_MINOR_VERSION;
     static final String DRIVER_VERSION;
@@ -95,20 +94,11 @@ public class Driver implements java.sql.Driver {
     }
 
     @Override
-    public Connection connect(final String url, final Properties info) throws SQLException {
-        return null;
-    }
-
-    @Override
-    public boolean acceptsURL(final String url) throws SQLException {
-        return false;
-    }
-
-    @Override
     public DriverPropertyInfo[] getPropertyInfo(final String url, final Properties info) throws SQLException {
         return new DriverPropertyInfo[0];
     }
 
+    // TODO: Fix functions below.
     @Override
     public int getMajorVersion() {
         return 0;

@@ -58,16 +58,6 @@ public abstract class DataSource implements javax.sql.DataSource, javax.sql.Conn
     }
 
     @Override
-    public int getLoginTimeout() throws SQLException {
-        return 0;
-    }
-
-    @Override
-    public void setLoginTimeout(final int seconds) throws SQLException {
-
-    }
-
-    @Override
     public Logger getParentLogger() throws SQLFeatureNotSupportedException {
         return LOGGER;
     }
