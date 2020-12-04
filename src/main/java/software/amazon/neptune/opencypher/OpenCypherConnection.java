@@ -73,4 +73,8 @@ public class OpenCypherConnection extends software.amazon.jdbc.Connection implem
     public java.sql.PreparedStatement prepareStatement(final String sql) throws SQLException {
         return new OpenCypherPreparedStatement(this, sql);
     }
+
+    public Object getQueryExecutor() {
+
+    }
 }

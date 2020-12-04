@@ -411,6 +411,7 @@ public abstract class PreparedStatement extends software.amazon.jdbc.Statement i
         throw new SQLFeatureNotSupportedException(SqlError.lookup(SqlError.PARAMETERS_NOT_SUPPORTED));
     }
 
+    @Deprecated
     @Override
     public void setUnicodeStream(final int parameterIndex, final InputStream x, final int length)
             throws SQLException {
