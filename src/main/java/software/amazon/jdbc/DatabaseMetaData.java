@@ -296,7 +296,7 @@ public abstract class DatabaseMetaData implements java.sql.DatabaseMetaData {
 
     @Override
     public boolean nullsAreSortedAtEnd() {
-        return true;
+        return false;
     }
 
     @Override

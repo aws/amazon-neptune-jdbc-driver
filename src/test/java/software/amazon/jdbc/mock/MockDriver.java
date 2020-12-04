@@ -14,11 +14,24 @@
  *
  */
 
-package software.amazon.jdbc;
+package software.amazon.jdbc.mock;
+
+import software.amazon.jdbc.Driver;
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.util.Properties;
 
 /**
- * Simple test to check generation of objects.
- * TODO: Delete when tests are introduced.
+ * Mock implementation for Driver object so it can be instantiated and tested.
  */
-public class SimpleTest {
+public class MockDriver extends Driver implements java.sql.Driver {
+    @Override
+    public Connection connect(final String url, final Properties info) throws SQLException {
+        return null;
+    }
+
+    @Override
+    public boolean acceptsURL(final String url) throws SQLException {
+        return false;
+    }
 }
