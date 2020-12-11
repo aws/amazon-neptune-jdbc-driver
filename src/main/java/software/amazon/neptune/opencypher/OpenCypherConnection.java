@@ -26,13 +26,26 @@ import java.util.concurrent.Executor;
  * OpenCypher implementation of Connection.
  */
 public class OpenCypherConnection extends software.amazon.jdbc.Connection implements java.sql.Connection {
-
     /**
      * OpenCypherConnection constructor, initializes super class.
      * @param connectionProperties Properties Object.
      */
-    public OpenCypherConnection(@NonNull final Properties connectionProperties) {
+    public OpenCypherConnection(@NonNull final Properties connectionProperties) throws SQLException {
         super(connectionProperties);
+        validateProperties();
+    }
+
+    private void validateProperties() throws SQLException {
+        if (!getConnectionProperties().containsKey("endpoint")) {
+            throw new SQLException("Connection property does not contain a valid endpoint.");
+        }
+        // If connection basic auth:
+        /*if (!connectionProperties.containsKey("user")) {
+            throw new SQLException("Connection property does not contain a valid endpoint.");
+        }
+        if (!connectionProperties.containsKey("password")) {
+            throw new SQLException("Connection property does not contain a valid endpoint.");
+        }*/
     }
 
     @Override
@@ -63,18 +76,18 @@ public class OpenCypherConnection extends software.amazon.jdbc.Connection implem
         // TODO.
     }
 
+    private OpenCypherQueryExecutor getQueryExecutor() {
+        return new OpenCypherQueryExecutor(new OpenCypherConnectionProperties(getConnectionProperties()));
+    }
+
     @Override
     public java.sql.Statement createStatement(final int resultSetType, final int resultSetConcurrency)
             throws SQLException {
-        return new OpenCypherStatement(this);
+        return new OpenCypherStatement(this, getQueryExecutor());
     }
 
     @Override
     public java.sql.PreparedStatement prepareStatement(final String sql) throws SQLException {
-        return new OpenCypherPreparedStatement(this, sql);
-    }
-
-    public Object getQueryExecutor() {
-
+        return new OpenCypherPreparedStatement(this, sql, getQueryExecutor());
     }
 }

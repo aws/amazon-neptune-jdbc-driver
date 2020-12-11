@@ -55,6 +55,10 @@ public abstract class Connection implements java.sql.Connection {
         this.connectionProperties = connectionProperties;
     }
 
+    protected Properties getConnectionProperties() {
+        return connectionProperties;
+    }
+
     /*
         Functions that have their implementation in this Connection class.
      */
@@ -102,9 +106,6 @@ public abstract class Connection implements java.sql.Connection {
             LOGGER.debug("Null value is passed as name, falling back to get client info with null.");
             return null;
         }
-        connectionProperties.putIfAbsent(
-                ConnectionProperty.APPLICATION_NAME.getConnectionProperty(),
-                Driver.APPLICATION_NAME);
         return connectionProperties.getProperty(name);
     }
 

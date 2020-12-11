@@ -160,26 +160,47 @@ repositories {
     mavenCentral()
 }
 
-dependencies {
-    implementation group: 'org.slf4j', name: 'slf4j-log4j12', version: '1.7.29'
+ext {
+    log4jVersion = '2.13.3'
+    lombokVersion = '1.18.16'
+    jupiterVersion = '5.4.0'
+    neo4jDBVersion = '3.5.19'
+    neo4jDriverVersion = '4.2.0'
+}
 
+subprojects {
+    tasks.withType(Test) {
+        // Gradle documentation suggests using this number of cores.
+        maxParallelForks = Runtime.runtime.availableProcessors().intdiv(2) ?: 1
+    }
+}
+
+dependencies {
+    // Logging
+    implementation group: 'org.slf4j', name: 'slf4j-log4j12', version: '1.7.29'
     implementation group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.13.3'
     implementation group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.13.3'
-    implementation group: 'org.neo4j.driver', name: 'neo4j-java-driver', version: '4.2.0'
 
+    // Utilities
     implementation group: 'com.google.guava', name: 'guava', version: '29.0-jre'
-
     compileOnly 'org.projectlombok:lombok:1.18.16'
     annotationProcessor 'org.projectlombok:lombok:1.18.16'
 
+    // Testing
     testImplementation  group: 'junit', name: 'junit', version: '4.12'
-
-    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.4.0'
-    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.4.0'
-
+    testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-api', version: jupiterVersion
+    testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-engine', version: jupiterVersion
     testImplementation group: 'org.mockito', name: 'mockito-core', version: '2.1.0'
 
+    // Code analysis
     implementation group: 'com.puppycrawl.tools', name: 'checkstyle', version: '8.8'
-
     compile group: 'com.google.code.findbugs', name: 'annotations', version: '3.0.1'
+
+    // OpenCypher related
+    implementation group: 'org.neo4j.driver', name: 'neo4j-java-driver', version: neo4jDriverVersion
+    testCompile group: 'org.neo4j.test', name: 'neo4j-harness', version: neo4jDBVersion
+    testCompile group: 'org.neo4j', name: 'neo4j-common', version: neo4jDBVersion, classifier: "tests"
+    testCompile group: 'org.neo4j.community', name: 'it-test-support', version: neo4jDBVersion
+    testCompile group: 'org.neo4j', name: 'neo4j-kernel', version: neo4jDBVersion, classifier: "tests"
+    testCompile group: 'org.neo4j', name: 'neo4j-io', version: neo4jDBVersion, classifier: "tests"
 }

@@ -21,7 +21,6 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.lang.management.ManagementFactory;
 import java.nio.charset.StandardCharsets;
-import java.sql.DriverPropertyInfo;
 import java.sql.SQLException;
 import java.sql.SQLFeatureNotSupportedException;
 import java.util.Properties;
@@ -94,8 +93,8 @@ public abstract class Driver implements java.sql.Driver {
     }
 
     @Override
-    public DriverPropertyInfo[] getPropertyInfo(final String url, final Properties info) throws SQLException {
-        return new DriverPropertyInfo[0];
+    public java.sql.DriverPropertyInfo[] getPropertyInfo(final String url, final Properties info) throws SQLException {
+        return new java.sql.DriverPropertyInfo[0];
     }
 
     // TODO: Fix functions below.

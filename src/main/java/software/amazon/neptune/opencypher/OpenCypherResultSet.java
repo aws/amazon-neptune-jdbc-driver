@@ -18,6 +18,7 @@ package software.amazon.neptune.opencypher;
 
 import org.neo4j.driver.Record;
 import org.neo4j.driver.Result;
+import org.neo4j.driver.Session;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.List;
@@ -29,6 +30,7 @@ public class OpenCypherResultSet extends software.amazon.jdbc.ResultSet implemen
     private final Result result;
     private final List<String> columns;
     private final List<Record> rows;
+    private final Session session;
     private final boolean wasNull = false;
     private int rowIndex = -1;
 
@@ -37,8 +39,9 @@ public class OpenCypherResultSet extends software.amazon.jdbc.ResultSet implemen
      * @param statement Statement Object.
      * @param result Result Object.
      */
-    OpenCypherResultSet(final java.sql.Statement statement, final Result result) {
+    OpenCypherResultSet(final java.sql.Statement statement, final Result result, final Session session) {
         super(statement);
+        this.session = session;
         this.result = result;
         this.rows = result.list();
         this.columns = result.keys();
@@ -47,6 +50,7 @@ public class OpenCypherResultSet extends software.amazon.jdbc.ResultSet implemen
     @Override
     protected void doClose() {
         result.consume();
+        session.close();
     }
 
     @Override

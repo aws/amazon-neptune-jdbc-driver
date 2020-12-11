@@ -19,7 +19,6 @@ package software.amazon.neptune.opencypher;
 import org.neo4j.driver.Config;
 import org.neo4j.driver.Driver;
 import org.neo4j.driver.GraphDatabase;
-import org.neo4j.driver.Result;
 import org.neo4j.driver.Session;
 import org.neo4j.driver.SessionConfig;
 import java.sql.SQLException;
@@ -28,10 +27,9 @@ import java.sql.SQLException;
  * OpenCypher implementation of QueryExecution.
  */
 public class OpenCypherQueryExecutor {
+    private final Driver driver;
     private static final int MAX_FETCH_SIZE = Integer.MAX_VALUE;
-    private final java.sql.Statement statement;
     private final int fetchSize = -1;
-    private final String uri;
     private boolean isConfigChange = false;
     private boolean isSessionConfigChange = false;
     private int queryTimeout = -1;
@@ -40,15 +38,17 @@ public class OpenCypherQueryExecutor {
 
     /**
      * OpenCypherQueryExecutor constructor.
-     * @param statement java.sql.Statement Object.
-     * @param uri Endpoint to execute queries against.
+     * @param properties properties to use for query executon.
      */
-    OpenCypherQueryExecutor(final java.sql.Statement statement, final String uri) {
-        this.uri = uri;
-        this.statement = statement;
+    OpenCypherQueryExecutor(final OpenCypherConnectionProperties properties) {
+        final String endpoint = properties.getEndpoint();
+        // TODO: Implement authentication.
+        // final String user = properties.getUser();
+        // final String password = properties.getPassword();
+        // AuthTokens.basic(this.user, this.password), this.config);
         this.config = Config.builder().build();
         this.sessionConfig = SessionConfig.builder().build();
-        // TODO: Add way of getting and setting connection properties here.
+        this.driver = GraphDatabase.driver(endpoint, this.config);
     }
 
     Config getConfig() {
@@ -88,14 +88,12 @@ public class OpenCypherQueryExecutor {
     /**
      * Function to execute query.
      * @param sql Query to execute.
+     * @param statement java.sql.Statement Object required for result set.
      * @return java.sql.ResultSet object returned from query execution.
      */
-    public java.sql.ResultSet executeQuery(final String sql) {
-        final Driver driver = GraphDatabase.driver(uri, config);
-        try (Session session = driver.session(sessionConfig)) {
-            final Result result = session.run(sql);
-            return new OpenCypherResultSet(statement, result);
-        }
+    public java.sql.ResultSet executeQuery(final String sql, final java.sql.Statement statement) {
+        final Session session = driver.session(sessionConfig);
+        return new OpenCypherResultSet(statement, session.run(sql), session);
         // TODO: Throw exception?
     }
 
