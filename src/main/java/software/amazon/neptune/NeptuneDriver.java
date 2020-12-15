@@ -67,7 +67,7 @@ public class NeptuneDriver extends Driver implements java.sql.Driver {
         if (propertyArray.length == 0) {
             return properties;
         } else if (!propertyArray[0].trim().isEmpty()) {
-            properties.setProperty("endpoint", propertyArray[0].trim());
+            properties.setProperty(NeptuneConstants.ENDPOINT, propertyArray[0].trim());
         }
         for (int i = 1; i < propertyArray.length; i++) {
             final Matcher matcher = PROP_PATTERN.matcher(propertyArray[i]);

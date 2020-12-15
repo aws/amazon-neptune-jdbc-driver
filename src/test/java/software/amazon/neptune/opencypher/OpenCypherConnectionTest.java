@@ -21,6 +21,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import software.amazon.neptune.NeptuneConstants;
 import software.amazon.neptune.opencypher.mock.MockOpenCypherDatabase;
 import java.io.IOException;
 import java.net.ServerSocket;
@@ -51,7 +52,7 @@ public class OpenCypherConnectionTest {
         } catch (final IOException ignored) {
         }
         database = new MockOpenCypherDatabase(HOSTNAME, port);
-        PROPERTIES.putIfAbsent("endpoint", String.format("bolt://%s:%d", HOSTNAME, port));
+        PROPERTIES.putIfAbsent(NeptuneConstants.ENDPOINT, String.format("bolt://%s:%d", HOSTNAME, port));
     }
 
 

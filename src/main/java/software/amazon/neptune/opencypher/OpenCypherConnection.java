@@ -17,6 +17,7 @@
 package software.amazon.neptune.opencypher;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
+import software.amazon.neptune.NeptuneConstants;
 import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
 import java.util.Properties;
@@ -36,7 +37,7 @@ public class OpenCypherConnection extends software.amazon.jdbc.Connection implem
     }
 
     private void validateProperties() throws SQLException {
-        if (!getConnectionProperties().containsKey("endpoint")) {
+        if (!getConnectionProperties().containsKey(NeptuneConstants.ENDPOINT)) {
             throw new SQLException("Connection property does not contain a valid endpoint.");
         }
         // If connection basic auth:
