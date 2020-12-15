@@ -16,7 +16,6 @@
 
 package software.amazon.neptune.opencypher;
 
-import java.sql.Connection;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 
@@ -27,18 +26,18 @@ public class OpenCypherPreparedStatement extends software.amazon.jdbc.PreparedSt
         implements java.sql.PreparedStatement {
     private final OpenCypherQueryExecutor openCypherQueryExecutor;
     private final String sql;
-    private java.sql.ResultSet resultSet;
+    private java.sql.ResultSet resultSet = null;
 
     /**
      * OpenCypherPreparedStatement constructor, creates OpenCypherQueryExecutor and initializes super class.
      * @param connection Connection Object.
      * @param sql Sql query.
+     * @param openCypherQueryExecutor Query executor.
      */
-    public OpenCypherPreparedStatement(final Connection connection, final String sql) {
+    public OpenCypherPreparedStatement(final java.sql.Connection connection, final String sql, final OpenCypherQueryExecutor openCypherQueryExecutor) {
         super(connection, sql);
+        this.openCypherQueryExecutor = openCypherQueryExecutor;
         this.sql = sql;
-        openCypherQueryExecutor = new OpenCypherQueryExecutor(this, "uri");
-        resultSet = null;
     }
 
 
@@ -57,7 +56,7 @@ public class OpenCypherPreparedStatement extends software.amazon.jdbc.PreparedSt
 
     @Override
     public java.sql.ResultSet executeQuery() throws SQLException {
-        resultSet = openCypherQueryExecutor.executeQuery(sql);
+        resultSet = openCypherQueryExecutor.executeQuery(sql, this);
         return resultSet;
     }
 
