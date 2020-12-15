@@ -16,8 +16,9 @@
 
 package software.amazon.neptune.opencypher;
 
-import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import software.amazon.neptune.opencypher.mock.MockOpenCypherDatabase;
@@ -31,35 +32,40 @@ import java.util.Properties;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class OpenCypherConnectionTest {
-    private boolean initializeRun = false;
     private static final String HOSTNAME = "localhost";
     private static final String QUERY =
             "MATCH (p1:Person)-[:KNOWS]->(p2:Person)-[:GIVES_PETS_TO]->(c:Cat) WHERE c.name = 'tootsie' RETURN p1, p2, c";
-    private int port;
-    private MockOpenCypherDatabase database = null;
-
-    private final Properties properties = new Properties();
+    private static MockOpenCypherDatabase database;
+    private static final Properties PROPERTIES = new Properties();
     private java.sql.Connection connection;
+
+    /**
+     * Function to get a random available port and initiaize database before testing.
+     */
+    @BeforeAll
+    public static void initializeDatabase() {
+        int port = 7687;
+        try {
+            // Get random unassigned port.
+            port = new ServerSocket(0).getLocalPort();
+        } catch (final IOException ignored) {
+        }
+        database = new MockOpenCypherDatabase(HOSTNAME, port);
+        PROPERTIES.putIfAbsent("endpoint", String.format("bolt://%s:%d", HOSTNAME, port));
+    }
+
+
+    /**
+     * Function to get a shutdown database after testing.
+     */
+    @AfterAll
+    public static void shutdownDatabase() {
+        database.shutdown();
+    }
 
     @BeforeEach
     void initialize() throws SQLException {
-        if (!initializeRun) {
-            initializeRun = true;
-            try {
-                // Get random unassigned port.
-                port = new ServerSocket(0).getLocalPort();
-            } catch (final IOException e) {
-                port = 7687;
-            }
-            database = new MockOpenCypherDatabase(HOSTNAME, port);
-        }
-        properties.putIfAbsent("endpoint", String.format("bolt://%s:%d", HOSTNAME, port));
-        connection = new OpenCypherConnection(properties);
-    }
-
-    @AfterEach
-    void shutdown() {
-        database.shutdown();
+        connection = new OpenCypherConnection(PROPERTIES);
     }
 
     @Test
