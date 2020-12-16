@@ -23,6 +23,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import software.amazon.neptune.NeptuneConstants;
 import software.amazon.neptune.opencypher.mock.MockOpenCypherDatabase;
+import software.amazon.neptune.opencypher.mock.MockOpenCypherNodes;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.sql.PreparedStatement;
@@ -35,9 +36,9 @@ import java.util.concurrent.atomic.AtomicReference;
 public class OpenCypherConnectionTest {
     private static final String HOSTNAME = "localhost";
     private static final String QUERY =
-            "MATCH (p1:Person)-[:KNOWS]->(p2:Person)-[:GIVES_PETS_TO]->(c:Cat) WHERE c.name = 'tootsie' RETURN p1, p2, c";
-    private static MockOpenCypherDatabase database;
+            "MATCH (p1:Person)-[:KNOWS]->(p2:Person)-[:GIVES_PETS_TO]->(k:Kitty) WHERE k.name = 'tootsie' RETURN p1, p2, k";
     private static final Properties PROPERTIES = new Properties();
+    private static MockOpenCypherDatabase database;
     private java.sql.Connection connection;
 
     /**
@@ -51,7 +52,17 @@ public class OpenCypherConnectionTest {
             port = new ServerSocket(0).getLocalPort();
         } catch (final IOException ignored) {
         }
-        database = new MockOpenCypherDatabase(HOSTNAME, port);
+        database = MockOpenCypherDatabase.builder(HOSTNAME, port)
+                .withNode(MockOpenCypherNodes.LYNDON)
+                .withNode(MockOpenCypherNodes.VALENTINA)
+                .withNode(MockOpenCypherNodes.VINNY)
+                .withNode(MockOpenCypherNodes.TOOTSIE)
+                .withRelationship(MockOpenCypherNodes.LYNDON, MockOpenCypherNodes.VALENTINA, "KNOWS", "KNOWS")
+                .withRelationship(MockOpenCypherNodes.LYNDON, MockOpenCypherNodes.VINNY, "GIVES_PETS_TO",
+                        "GETS_PETS_FROM")
+                .withRelationship(MockOpenCypherNodes.VALENTINA, MockOpenCypherNodes.TOOTSIE, "GIVES_PETS_TO",
+                        "GETS_PETS_FROM")
+                .build();
         PROPERTIES.putIfAbsent(NeptuneConstants.ENDPOINT, String.format("bolt://%s:%d", HOSTNAME, port));
     }
 
