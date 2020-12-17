@@ -20,6 +20,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import software.amazon.jdbc.utilities.SqlError;
 import software.amazon.jdbc.utilities.SqlState;
+
 import java.sql.SQLException;
 
 /**
@@ -30,7 +31,7 @@ public abstract class ResultSetMetaData implements java.sql.ResultSetMetaData {
 
     @Override
     public boolean isWrapperFor(final Class<?> iface) {
-        return (null != iface) && iface.isAssignableFrom(this.getClass());
+        return (iface != null) && iface.isAssignableFrom(this.getClass());
     }
 
     @Override
