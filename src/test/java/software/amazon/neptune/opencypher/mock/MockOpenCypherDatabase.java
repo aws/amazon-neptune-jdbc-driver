@@ -156,7 +156,6 @@ public final class MockOpenCypherDatabase {
             return this;
         }
 
-
         /**
          * Builder pattern relationship insert (a)-[rel1]->(b) and (b)-[rel2]->(a)
          * @param node1 Node (a) for relationship.

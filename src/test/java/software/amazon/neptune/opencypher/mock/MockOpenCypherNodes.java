@@ -91,48 +91,4 @@ public class MockOpenCypherNodes {
             return "Kitty (name)";
         }
     }
-
-    /*
-    @AllArgsConstructor
-    private static class AllTypeNode implements MockOpenCypherNode {
-        private final String aString;
-        private final Boolean aBoolean;
-        private final Long aLong;
-        private final Double aDouble;
-        private final List aList;
-        private final Map aMap;
-        /*
-        private final Node aNode;
-        private final RELATIONSHIP());
-        private final PATH());
-        private final POINT());
-        private final DATE()
-        private final TIME()
-        private final LOCAL_TIME()
-        private final DATE_TIME()
-        private final DURATION()
-        private final NULL()
-         */
-    /*
-        // https://s3.amazonaws.com/artifacts.opencypher.org/openCypher9.pdf
-        // Cannot test byte arrays through queries because only passthrough is supported.
-        private final Boolean aBoolean;
-        private final String annotation;
-
-        @Override
-        public String getInfo() {
-            return String.format("Kitty {name: '%s'}", name);
-        }
-
-        @Override
-        public String getAnnotation() {
-            return annotation;
-        }
-
-        @Override
-        public String getIndex() {
-            return "Kitty (name)";
-        }
-    }
-     */
 }
