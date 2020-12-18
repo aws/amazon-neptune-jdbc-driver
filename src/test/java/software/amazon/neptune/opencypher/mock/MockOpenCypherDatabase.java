@@ -43,6 +43,7 @@ public final class MockOpenCypherDatabase {
 
     /**
      * OpenCypherDatabase constructor.
+     *
      * @param host Host to initialize with.
      * @param port Port to initialize with.
      */
@@ -67,6 +68,7 @@ public final class MockOpenCypherDatabase {
 
     /**
      * Function to initiate builder for MockOpenCypherDatabase
+     *
      * @param host Host to use.
      * @param port Port to use.
      * @return Builder pattern for MockOpenCypherDatabase.
@@ -78,6 +80,7 @@ public final class MockOpenCypherDatabase {
 
     /**
      * Function to generate a create node query.
+     *
      * @param mockNode Node to create.
      * @return Create node query.
      */
@@ -87,8 +90,9 @@ public final class MockOpenCypherDatabase {
 
     /**
      * Function to generate a create relationship query from (a)-[rel]->(b).
-     * @param mockNode1 Node to create relationship from (a).
-     * @param mockNode2 Node to create relationship to (b).
+     *
+     * @param mockNode1    Node to create relationship from (a).
+     * @param mockNode2    Node to create relationship to (b).
      * @param relationship Relationship between notes [rel].
      * @return Create relationship query.
      */
@@ -101,6 +105,7 @@ public final class MockOpenCypherDatabase {
 
     /**
      * Function to create an index query.
+     *
      * @param mockNode Node to create index on.
      * @return Create index query.
      */
@@ -131,6 +136,7 @@ public final class MockOpenCypherDatabase {
 
         /**
          * Builder pattern node insert function.
+         *
          * @param node Node to insert.
          * @return Builder.
          */
@@ -144,8 +150,9 @@ public final class MockOpenCypherDatabase {
 
         /**
          * Builder pattern relationship insert (a)-[rel]->(b)
-         * @param node1 Node (a) to make relationship from.
-         * @param node2 Node (b) to make relationship to.
+         *
+         * @param node1        Node (a) to make relationship from.
+         * @param node2        Node (b) to make relationship to.
          * @param relationship Relationship [rel] from (a) to (b).
          * @return Builder.
          */
@@ -158,8 +165,9 @@ public final class MockOpenCypherDatabase {
 
         /**
          * Builder pattern relationship insert (a)-[rel1]->(b) and (b)-[rel2]->(a)
-         * @param node1 Node (a) for relationship.
-         * @param node2 Node (b) for relationship.
+         *
+         * @param node1         Node (a) for relationship.
+         * @param node2         Node (b) for relationship.
          * @param relationship1 Relationship [rel1] from (a) to (b).
          * @param relationship2 Relationship [rel2] from (b) to (b).
          * @return Builder.
@@ -174,6 +182,7 @@ public final class MockOpenCypherDatabase {
 
         /**
          * Function to build MockOpenCypherDatabase Object.
+         *
          * @return Constructed database.
          */
         public MockOpenCypherDatabase build() {

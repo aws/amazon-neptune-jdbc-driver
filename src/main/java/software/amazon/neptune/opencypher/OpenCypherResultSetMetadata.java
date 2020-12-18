@@ -25,7 +25,6 @@ import org.slf4j.LoggerFactory;
 import software.amazon.jdbc.ResultSetMetaData;
 import software.amazon.jdbc.utilities.SqlError;
 import software.amazon.jdbc.utilities.SqlState;
-
 import java.sql.SQLException;
 import java.sql.Types;
 import java.util.HashMap;

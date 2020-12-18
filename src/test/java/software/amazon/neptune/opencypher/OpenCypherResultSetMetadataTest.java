@@ -56,63 +56,64 @@ import static software.amazon.neptune.opencypher.mock.OpenCypherQueryLiterals.TR
 public class OpenCypherResultSetMetadataTest {
     private static final String HOSTNAME = "localhost";
     private static final Properties PROPERTIES = new Properties();
-    private static MockOpenCypherDatabase database;
-    private java.sql.Statement statement;
-
-    @AllArgsConstructor
-    @Getter
-    static
-    class MetadataTestHelper {
-        private final String query;
-        private final int displaySize;
-        private final int precision;
-        private final int scale;
-        private final boolean caseSensitive;
-        private final boolean signed;
-        private final int jdbcType;
-        private final String columnClassName;
-        private final String internalColumnClassName;
-    }
-
-
     private static final List<MetadataTestHelper> METADATA_TEST_HELPER = ImmutableList.of(
             new MetadataTestHelper(NULL,
-                    0, 0, 0, false, false, Types.NULL, Object.class.getTypeName(), InternalTypeSystem.TYPE_SYSTEM.NULL().name()),
+                    0, 0, 0, false, false, Types.NULL, Object.class.getTypeName(),
+                    InternalTypeSystem.TYPE_SYSTEM.NULL().name()),
             new MetadataTestHelper(POS_INTEGER,
-                    20, 19, 0, false, true, java.sql.Types.BIGINT, Long.class.getTypeName(), InternalTypeSystem.TYPE_SYSTEM.INTEGER().name()),
+                    20, 19, 0, false, true, java.sql.Types.BIGINT, Long.class.getTypeName(),
+                    InternalTypeSystem.TYPE_SYSTEM.INTEGER().name()),
             new MetadataTestHelper(NON_EMPTY_STRING,
-                    0, 256, 0, true, false, java.sql.Types.VARCHAR, String.class.getTypeName(), InternalTypeSystem.TYPE_SYSTEM.STRING().name()),
+                    0, 256, 0, true, false, java.sql.Types.VARCHAR, String.class.getTypeName(),
+                    InternalTypeSystem.TYPE_SYSTEM.STRING().name()),
             new MetadataTestHelper(TRUE,
-                    1, 1, 0, false, false, java.sql.Types.BIT, Boolean.class.getTypeName(), InternalTypeSystem.TYPE_SYSTEM.BOOLEAN().name()),
+                    1, 1, 0, false, false, java.sql.Types.BIT, Boolean.class.getTypeName(),
+                    InternalTypeSystem.TYPE_SYSTEM.BOOLEAN().name()),
             new MetadataTestHelper(POS_DOUBLE,
-                    25, 15, 15, false, true, java.sql.Types.DOUBLE, Double.class.getTypeName(), InternalTypeSystem.TYPE_SYSTEM.FLOAT().name()),
+                    25, 15, 15, false, true, java.sql.Types.DOUBLE, Double.class.getTypeName(),
+                    InternalTypeSystem.TYPE_SYSTEM.FLOAT().name()),
             new MetadataTestHelper(NON_EMPTY_MAP,
-                    0, 256, 0, true, false, java.sql.Types.VARCHAR, String.class.getTypeName(), InternalTypeSystem.TYPE_SYSTEM.MAP().name()),
+                    0, 256, 0, true, false, java.sql.Types.VARCHAR, String.class.getTypeName(),
+                    InternalTypeSystem.TYPE_SYSTEM.MAP().name()),
             new MetadataTestHelper(NON_EMPTY_LIST,
-                    0, 256, 0, true, false, java.sql.Types.VARCHAR, String.class.getTypeName(), InternalTypeSystem.TYPE_SYSTEM.LIST().name()),
+                    0, 256, 0, true, false, java.sql.Types.VARCHAR, String.class.getTypeName(),
+                    InternalTypeSystem.TYPE_SYSTEM.LIST().name()),
             new MetadataTestHelper(DATE,
-                    24, 24, 0, false, false, java.sql.Types.DATE, java.sql.Date.class.getTypeName(), InternalTypeSystem.TYPE_SYSTEM.DATE().name()),
+                    24, 24, 0, false, false, java.sql.Types.DATE, java.sql.Date.class.getTypeName(),
+                    InternalTypeSystem.TYPE_SYSTEM.DATE().name()),
             new MetadataTestHelper(TIME,
-                    24, 24, 0, false, false, java.sql.Types.TIME, java.sql.Time.class.getTypeName(), InternalTypeSystem.TYPE_SYSTEM.TIME().name()),
+                    24, 24, 0, false, false, java.sql.Types.TIME, java.sql.Time.class.getTypeName(),
+                    InternalTypeSystem.TYPE_SYSTEM.TIME().name()),
             new MetadataTestHelper(LOCAL_TIME,
-                    24, 24, 0, false, false, java.sql.Types.TIME, java.sql.Time.class.getTypeName(), InternalTypeSystem.TYPE_SYSTEM.LOCAL_TIME().name()),
+                    24, 24, 0, false, false, java.sql.Types.TIME, java.sql.Time.class.getTypeName(),
+                    InternalTypeSystem.TYPE_SYSTEM.LOCAL_TIME().name()),
             new MetadataTestHelper(DATE_TIME,
-                    24, 24, 0, false, false, java.sql.Types.TIMESTAMP, java.sql.Timestamp.class.getTypeName(), InternalTypeSystem.TYPE_SYSTEM.DATE_TIME().name()),
+                    24, 24, 0, false, false, java.sql.Types.TIMESTAMP, java.sql.Timestamp.class.getTypeName(),
+                    InternalTypeSystem.TYPE_SYSTEM.DATE_TIME().name()),
             new MetadataTestHelper(LOCAL_DATE_TIME,
-                    24, 24, 0, false, false, java.sql.Types.TIMESTAMP, java.sql.Timestamp.class.getTypeName(), InternalTypeSystem.TYPE_SYSTEM.LOCAL_DATE_TIME().name()),
+                    24, 24, 0, false, false, java.sql.Types.TIMESTAMP, java.sql.Timestamp.class.getTypeName(),
+                    InternalTypeSystem.TYPE_SYSTEM.LOCAL_DATE_TIME().name()),
             new MetadataTestHelper(DURATION,
-                    0, 256, 0, true, false, java.sql.Types.VARCHAR, String.class.getTypeName(), InternalTypeSystem.TYPE_SYSTEM.DURATION().name()),
+                    0, 256, 0, true, false, java.sql.Types.VARCHAR, String.class.getTypeName(),
+                    InternalTypeSystem.TYPE_SYSTEM.DURATION().name()),
             new MetadataTestHelper(NODE,
-                    0, 256, 0, true, false, java.sql.Types.VARCHAR, String.class.getTypeName(), InternalTypeSystem.TYPE_SYSTEM.NODE().name()),
+                    0, 256, 0, true, false, java.sql.Types.VARCHAR, String.class.getTypeName(),
+                    InternalTypeSystem.TYPE_SYSTEM.NODE().name()),
             new MetadataTestHelper(RELATIONSHIP,
-                    0, 256, 0, true, false, java.sql.Types.VARCHAR, String.class.getTypeName(), InternalTypeSystem.TYPE_SYSTEM.RELATIONSHIP().name()),
+                    0, 256, 0, true, false, java.sql.Types.VARCHAR, String.class.getTypeName(),
+                    InternalTypeSystem.TYPE_SYSTEM.RELATIONSHIP().name()),
             new MetadataTestHelper(PATH,
-                    0, 256, 0, true, false, java.sql.Types.VARCHAR, String.class.getTypeName(), InternalTypeSystem.TYPE_SYSTEM.PATH().name()),
+                    0, 256, 0, true, false, java.sql.Types.VARCHAR, String.class.getTypeName(),
+                    InternalTypeSystem.TYPE_SYSTEM.PATH().name()),
             new MetadataTestHelper(POINT_2D,
-                    0, 256, 0, true, false, java.sql.Types.VARCHAR, String.class.getTypeName(), InternalTypeSystem.TYPE_SYSTEM.POINT().name()),
+                    0, 256, 0, true, false, java.sql.Types.VARCHAR, String.class.getTypeName(),
+                    InternalTypeSystem.TYPE_SYSTEM.POINT().name()),
             new MetadataTestHelper(POINT_3D,
-                    0, 256, 0, true, false, java.sql.Types.VARCHAR, String.class.getTypeName(), InternalTypeSystem.TYPE_SYSTEM.POINT().name())
+                    0, 256, 0, true, false, java.sql.Types.VARCHAR, String.class.getTypeName(),
+                    InternalTypeSystem.TYPE_SYSTEM.POINT().name())
     );
+    private static MockOpenCypherDatabase database;
+    private java.sql.Statement statement;
 
     /**
      * Function to get a random available port and initiaize database before testing.
@@ -128,7 +129,6 @@ public class OpenCypherResultSetMetadataTest {
         database = MockOpenCypherDatabase.builder(HOSTNAME, port).build();
         PROPERTIES.putIfAbsent(NeptuneConstants.ENDPOINT, String.format("bolt://%s:%d", HOSTNAME, port));
     }
-
 
     /**
      * Function to get a shutdown database after testing.
@@ -159,21 +159,24 @@ public class OpenCypherResultSetMetadataTest {
     @Test
     void testGetColumnDisplaySize() throws SQLException {
         for (final MetadataTestHelper helper : METADATA_TEST_HELPER) {
-            Assertions.assertEquals(helper.getDisplaySize(), getResultSetMetaData(helper.getQuery()).getColumnDisplaySize(1), "For query: " + helper.getQuery());
+            Assertions.assertEquals(helper.getDisplaySize(),
+                    getResultSetMetaData(helper.getQuery()).getColumnDisplaySize(1), "For query: " + helper.getQuery());
         }
     }
 
     @Test
     void testGetPrecision() throws SQLException {
         for (final MetadataTestHelper helper : METADATA_TEST_HELPER) {
-            Assertions.assertEquals(helper.getPrecision(), getResultSetMetaData(helper.getQuery()).getPrecision(1), "For query: " + helper.getQuery());
+            Assertions.assertEquals(helper.getPrecision(), getResultSetMetaData(helper.getQuery()).getPrecision(1),
+                    "For query: " + helper.getQuery());
         }
     }
 
     @Test
     void testGetScale() throws SQLException {
         for (final MetadataTestHelper helper : METADATA_TEST_HELPER) {
-            Assertions.assertEquals(helper.getScale(), getResultSetMetaData(helper.getQuery()).getScale(1), "For query: " + helper.getQuery());
+            Assertions.assertEquals(helper.getScale(), getResultSetMetaData(helper.getQuery()).getScale(1),
+                    "For query: " + helper.getQuery());
         }
     }
 
@@ -202,15 +205,19 @@ public class OpenCypherResultSetMetadataTest {
 
     @Test
     void testIsNullable() throws SQLException {
-        Assertions.assertEquals(ResultSetMetaData.columnNullableUnknown, getResultSetMetaData("RETURN 'foo' as n").isNullable(1));
-        Assertions.assertEquals(ResultSetMetaData.columnNullableUnknown, getResultSetMetaData("RETURN 1 as n").isNullable(1));
-        Assertions.assertEquals(ResultSetMetaData.columnNullableUnknown, getResultSetMetaData("RETURN true as n").isNullable(1));
+        Assertions.assertEquals(ResultSetMetaData.columnNullableUnknown,
+                getResultSetMetaData("RETURN 'foo' as n").isNullable(1));
+        Assertions.assertEquals(ResultSetMetaData.columnNullableUnknown,
+                getResultSetMetaData("RETURN 1 as n").isNullable(1));
+        Assertions.assertEquals(ResultSetMetaData.columnNullableUnknown,
+                getResultSetMetaData("RETURN true as n").isNullable(1));
     }
 
     @Test
     void testIsSigned() throws SQLException {
         for (final MetadataTestHelper helper : METADATA_TEST_HELPER) {
-            Assertions.assertEquals(helper.isSigned(), getResultSetMetaData(helper.getQuery()).isSigned(1), "For query: " + helper.getQuery());
+            Assertions.assertEquals(helper.isSigned(), getResultSetMetaData(helper.getQuery()).isSigned(1),
+                    "For query: " + helper.getQuery());
         }
     }
 
@@ -227,21 +234,24 @@ public class OpenCypherResultSetMetadataTest {
     @Test
     void testGetColumnType() throws SQLException {
         for (final MetadataTestHelper helper : METADATA_TEST_HELPER) {
-            Assertions.assertEquals(helper.getJdbcType(), getResultSetMetaData(helper.getQuery()).getColumnType(1), "For query: " + helper.getQuery());
+            Assertions.assertEquals(helper.getJdbcType(), getResultSetMetaData(helper.getQuery()).getColumnType(1),
+                    "For query: " + helper.getQuery());
         }
     }
 
     @Test
     void testGetColumnTypeName() throws SQLException {
         for (final MetadataTestHelper helper : METADATA_TEST_HELPER) {
-            Assertions.assertEquals(helper.getInternalColumnClassName(), getResultSetMetaData(helper.getQuery()).getColumnTypeName(1), "For query: " + helper.getQuery());
+            Assertions.assertEquals(helper.getInternalColumnClassName(),
+                    getResultSetMetaData(helper.getQuery()).getColumnTypeName(1), "For query: " + helper.getQuery());
         }
     }
 
     @Test
     void testGetColumnClassName() throws SQLException {
         for (final MetadataTestHelper helper : METADATA_TEST_HELPER) {
-            Assertions.assertEquals(helper.getColumnClassName(), getResultSetMetaData(helper.getQuery()).getColumnClassName(1), "For query: " + helper.getQuery());
+            Assertions.assertEquals(helper.getColumnClassName(),
+                    getResultSetMetaData(helper.getQuery()).getColumnClassName(1), "For query: " + helper.getQuery());
         }
     }
 
@@ -273,5 +283,20 @@ public class OpenCypherResultSetMetadataTest {
     @Test
     void testGetCatalogName() throws SQLException {
         Assertions.assertEquals("", getResultSetMetaData("RETURN 'foo' as n").getCatalogName(1));
+    }
+
+    @AllArgsConstructor
+    @Getter
+    static
+    class MetadataTestHelper {
+        private final String query;
+        private final int displaySize;
+        private final int precision;
+        private final int scale;
+        private final boolean caseSensitive;
+        private final boolean signed;
+        private final int jdbcType;
+        private final String columnClassName;
+        private final String internalColumnClassName;
     }
 }
