@@ -27,8 +27,6 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.driver.internal.types.InternalTypeSystem;
 import software.amazon.neptune.NeptuneConstants;
 import software.amazon.neptune.opencypher.mock.MockOpenCypherDatabase;
-import java.io.IOException;
-import java.net.ServerSocket;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Types;
@@ -120,14 +118,8 @@ public class OpenCypherResultSetMetadataTest {
      */
     @BeforeAll
     public static void initializeDatabase() {
-        int port = 7687;
-        try {
-            // Get random unassigned port.
-            port = new ServerSocket(0).getLocalPort();
-        } catch (final IOException ignored) {
-        }
-        database = MockOpenCypherDatabase.builder(HOSTNAME, port).build();
-        PROPERTIES.putIfAbsent(NeptuneConstants.ENDPOINT, String.format("bolt://%s:%d", HOSTNAME, port));
+        database = MockOpenCypherDatabase.builder(HOSTNAME, OpenCypherResultSetMetadataTest.class.getName()).build();
+        PROPERTIES.putIfAbsent(NeptuneConstants.ENDPOINT, String.format("bolt://%s:%d", HOSTNAME, database.getPort()));
     }
 
     /**
