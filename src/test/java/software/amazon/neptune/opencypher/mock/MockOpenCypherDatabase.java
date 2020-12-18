@@ -24,6 +24,8 @@ import org.neo4j.harness.junit.Neo4jRule;
 import org.neo4j.kernel.configuration.BoltConnector;
 import org.neo4j.kernel.configuration.Settings;
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 import static org.neo4j.helpers.ListenSocketAddress.listenAddress;
 import static org.neo4j.kernel.configuration.BoltConnector.EncryptionLevel.DISABLED;
@@ -33,19 +35,18 @@ import static org.neo4j.kernel.configuration.Settings.STRING;
 import static org.neo4j.kernel.configuration.Settings.TRUE;
 
 // TODO: AN-354 Abstract logic of this to create a nice interface to easily spin up different datasets.
-public class MockOpenCypherDatabase {
+public final class MockOpenCypherDatabase {
     private static final File DB_PATH = new File("target/neo4j-test");
-    private final GraphDatabaseService graphDb;
-
     @ClassRule
     private static final Neo4jRule NEO4J_RULE = new Neo4jRule();
+    private final GraphDatabaseService graphDb;
 
     /**
      * OpenCypherDatabase constructor.
      * @param host Host to initialize with.
      * @param port Port to initialize with.
      */
-    public MockOpenCypherDatabase(final String host, final int port) {
+    private MockOpenCypherDatabase(final String host, final int port) {
         if (DB_PATH.exists()) {
             for (final String fileName : Objects.requireNonNull(DB_PATH.list())) {
                 final File file = new File(DB_PATH, fileName);
@@ -55,26 +56,60 @@ public class MockOpenCypherDatabase {
         final BoltConnector boltConnector = new BoltConnector("bolt");
         graphDb = new GraphDatabaseFactory()
                 .newEmbeddedDatabaseBuilder(DB_PATH)
-                .setConfig(Settings.setting("dbms.directories.import", STRING, "data"),"../../data")
+                .setConfig(Settings.setting("dbms.directories.import", STRING, "data"), "../../data")
                 .setConfig(boltConnector.type, BOLT.name())
                 .setConfig(boltConnector.enabled, TRUE)
                 .setConfig(boltConnector.listen_address, listenAddress(host, port))
                 .setConfig(boltConnector.encryption_level, DISABLED.name())
                 .setConfig(GraphDatabaseSettings.auth_enabled, FALSE)
                 .newGraphDatabase();
-        graphDb.execute("CREATE INDEX ON :Person(first_name, last_name)");
-        graphDb.execute("CREATE INDEX ON :Cat(name)");
-        graphDb.execute("CREATE CONSTRAINT ON (p:Person) ASSERT p.first_name IS UNIQUE");
-        graphDb.execute("CREATE (l:Person {first_name:'lyndon', last_name:'bauto'}) " +
-                "CREATE (v:Person {first_name:'valentina', last_name:'bozanovic'}) " +
-                "CREATE (c_l:Cat {name:'vinny'}) " +
-                "CREATE (c_v:Cat {name:'tootsie'}) " +
-                "CREATE (l)-[rlv:KNOWS]->(v)" +
-                "CREATE (v)-[rvl:KNOWS]->(l)" +
-                "CREATE (l)-[rlcl:GIVES_PETS_TO]->(c_l) " +
-                "CREATE (v)-[rvcv:GIVES_PETS_TO]->(c_v) " +
-                "CREATE (c_l)-[rcll:GETS_PETS_FROM]->(l) " +
-                "CREATE (c_v)-[rcvv:GETS_PETS_FROM]->(v)");
+    }
+
+    /**
+     * Function to initiate builder for MockOpenCypherDatabase
+     * @param host Host to use.
+     * @param port Port to use.
+     * @return Builder pattern for MockOpenCypherDatabase.
+     */
+    public static MockOpenCypherDatabaseBuilder builder(final String host, final int port) {
+        final MockOpenCypherDatabase db = new MockOpenCypherDatabase(host, port);
+        return new MockOpenCypherDatabaseBuilder(db);
+    }
+
+    /**
+     * Function to generate a create node query.
+     * @param mockNode Node to create.
+     * @return Create node query.
+     */
+    private static String createNode(final MockOpenCypherNode mockNode) {
+        return String.format("CREATE (%s:%s)", mockNode.getAnnotation(), mockNode.getInfo());
+    }
+
+    /**
+     * Function to generate a create relationship query from (a)-[rel]->(b).
+     * @param mockNode1 Node to create relationship from (a).
+     * @param mockNode2 Node to create relationship to (b).
+     * @param relationship Relationship between notes [rel].
+     * @return Create relationship query.
+     */
+    private static String createRelationship(final MockOpenCypherNode mockNode1, final MockOpenCypherNode mockNode2,
+                                             final String relationship) {
+        return String
+                .format("CREATE (%s)-[%s:%s]->(%s)", mockNode1.getAnnotation(), MockOpenCypherNodes.getNextAnnotation(),
+                        relationship, mockNode2.getAnnotation());
+    }
+
+    /**
+     * Function to create an index query.
+     * @param mockNode Node to create index on.
+     * @return Create index query.
+     */
+    private static String createIndex(final MockOpenCypherNode mockNode) {
+        return String.format("CREATE INDEX ON :%s", mockNode.getIndex());
+    }
+
+    void executeQuery(final String query) {
+        graphDb.execute(query);
     }
 
     /**
@@ -82,5 +117,70 @@ public class MockOpenCypherDatabase {
      */
     public void shutdown() {
         graphDb.shutdown();
+    }
+
+    public static class MockOpenCypherDatabaseBuilder {
+        private final MockOpenCypherDatabase db;
+        private final List<String> indexes = new ArrayList<>();
+        private final List<String> nodes = new ArrayList<>();
+        private final List<String> relationships = new ArrayList<>();
+
+        MockOpenCypherDatabaseBuilder(final MockOpenCypherDatabase db) {
+            this.db = db;
+        }
+
+        /**
+         * Builder pattern node insert function.
+         * @param node Node to insert.
+         * @return Builder.
+         */
+        public MockOpenCypherDatabaseBuilder withNode(final MockOpenCypherNode node) {
+            nodes.add(createNode(node));
+            if (!indexes.contains(createIndex(node))) {
+                indexes.add(createIndex(node));
+            }
+            return this;
+        }
+
+        /**
+         * Builder pattern relationship insert (a)-[rel]->(b)
+         * @param node1 Node (a) to make relationship from.
+         * @param node2 Node (b) to make relationship to.
+         * @param relationship Relationship [rel] from (a) to (b).
+         * @return Builder.
+         */
+        public MockOpenCypherDatabaseBuilder withRelationship(final MockOpenCypherNode node1,
+                                                              final MockOpenCypherNode node2,
+                                                              final String relationship) {
+            relationships.add(createRelationship(node1, node2, relationship));
+            return this;
+        }
+
+
+        /**
+         * Builder pattern relationship insert (a)-[rel1]->(b) and (b)-[rel2]->(a)
+         * @param node1 Node (a) for relationship.
+         * @param node2 Node (b) for relationship.
+         * @param relationship1 Relationship [rel1] from (a) to (b).
+         * @param relationship2 Relationship [rel2] from (b) to (b).
+         * @return Builder.
+         */
+        public MockOpenCypherDatabaseBuilder withRelationship(final MockOpenCypherNode node1,
+                                                              final MockOpenCypherNode node2,
+                                                              final String relationship1, final String relationship2) {
+            relationships.add(createRelationship(node1, node2, relationship1));
+            relationships.add(createRelationship(node2, node1, relationship2));
+            return this;
+        }
+
+        /**
+         * Function to build MockOpenCypherDatabase Object.
+         * @return Constructed database.
+         */
+        public MockOpenCypherDatabase build() {
+            indexes.forEach(x -> db.executeQuery(x));
+            db.executeQuery(String.join(" ", nodes) + " " + String.join(" ", relationships));
+            return db;
+        }
     }
 }

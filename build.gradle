@@ -166,6 +166,8 @@ ext {
     jupiterVersion = '5.4.0'
     neo4jDBVersion = '3.5.19'
     neo4jDriverVersion = '4.2.0'
+    puppyCrawlVersion = '8.8'
+    findBugsVersion = '3.0.1'
 }
 
 subprojects {
@@ -178,23 +180,27 @@ subprojects {
 dependencies {
     // Logging
     implementation group: 'org.slf4j', name: 'slf4j-log4j12', version: '1.7.29'
-    implementation group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.13.3'
-    implementation group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.13.3'
+    implementation group: 'org.apache.logging.log4j', name: 'log4j-api', version: log4jVersion
+    implementation group: 'org.apache.logging.log4j', name: 'log4j-core', version: log4jVersion
 
     // Utilities
     implementation group: 'com.google.guava', name: 'guava', version: '29.0-jre'
-    compileOnly 'org.projectlombok:lombok:1.18.16'
-    annotationProcessor 'org.projectlombok:lombok:1.18.16'
+    compileOnly group: 'org.projectlombok', name: 'lombok', version: lombokVersion
+    annotationProcessor group: 'org.projectlombok', name: 'lombok', version: lombokVersion
+
+    // Code analysis
+    implementation group: 'com.puppycrawl.tools', name: 'checkstyle', version: puppyCrawlVersion
+    compile group: 'com.google.code.findbugs', name: 'annotations', version: findBugsVersion
+    testImplementation group: 'com.puppycrawl.tools', name: 'checkstyle', version: puppyCrawlVersion
+    testCompile group: 'com.google.code.findbugs', name: 'annotations', version: findBugsVersion
 
     // Testing
     testImplementation  group: 'junit', name: 'junit', version: '4.12'
     testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-api', version: jupiterVersion
     testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-engine', version: jupiterVersion
     testImplementation group: 'org.mockito', name: 'mockito-core', version: '2.1.0'
-
-    // Code analysis
-    implementation group: 'com.puppycrawl.tools', name: 'checkstyle', version: '8.8'
-    compile group: 'com.google.code.findbugs', name: 'annotations', version: '3.0.1'
+    testCompileOnly group: 'org.projectlombok', name: 'lombok', version: lombokVersion
+    testAnnotationProcessor group: 'org.projectlombok', name: 'lombok', version: lombokVersion
 
     // OpenCypher related
     implementation group: 'org.neo4j.driver', name: 'neo4j-java-driver', version: neo4jDriverVersion
