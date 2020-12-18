@@ -40,7 +40,6 @@ public class MockOpenCypherNodes {
         return new Person(firstName, lastName, getNextAnnotation());
     }
 
-
     /**
      * Function to get a Kitty Node with the provided parameters.
      * @param name Name.
@@ -49,7 +48,6 @@ public class MockOpenCypherNodes {
     public static MockOpenCypherNode getKitty(final String name) {
         return new Kitty(name, getNextAnnotation());
     }
-
 
     @AllArgsConstructor
     private static class Person implements MockOpenCypherNode {
