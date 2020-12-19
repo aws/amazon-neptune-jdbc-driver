@@ -24,8 +24,6 @@ import org.junit.jupiter.api.Test;
 import software.amazon.neptune.NeptuneConstants;
 import software.amazon.neptune.opencypher.mock.MockOpenCypherDatabase;
 import software.amazon.neptune.opencypher.mock.MockOpenCypherNodes;
-import java.io.IOException;
-import java.net.ServerSocket;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -46,13 +44,7 @@ public class OpenCypherConnectionTest {
      */
     @BeforeAll
     public static void initializeDatabase() {
-        int port = 7687;
-        try {
-            // Get random unassigned port.
-            port = new ServerSocket(0).getLocalPort();
-        } catch (final IOException ignored) {
-        }
-        database = MockOpenCypherDatabase.builder(HOSTNAME, port)
+        database = MockOpenCypherDatabase.builder(HOSTNAME, OpenCypherConnectionTest.class.getName())
                 .withNode(MockOpenCypherNodes.LYNDON)
                 .withNode(MockOpenCypherNodes.VALENTINA)
                 .withNode(MockOpenCypherNodes.VINNY)
@@ -63,7 +55,7 @@ public class OpenCypherConnectionTest {
                 .withRelationship(MockOpenCypherNodes.VALENTINA, MockOpenCypherNodes.TOOTSIE, "GIVES_PETS_TO",
                         "GETS_PETS_FROM")
                 .build();
-        PROPERTIES.putIfAbsent(NeptuneConstants.ENDPOINT, String.format("bolt://%s:%d", HOSTNAME, port));
+        PROPERTIES.putIfAbsent(NeptuneConstants.ENDPOINT, String.format("bolt://%s:%d", HOSTNAME, database.getPort()));
     }
 
 

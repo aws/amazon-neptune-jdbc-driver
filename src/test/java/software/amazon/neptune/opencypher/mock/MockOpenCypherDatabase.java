@@ -16,6 +16,7 @@
 
 package software.amazon.neptune.opencypher.mock;
 
+import lombok.Getter;
 import org.junit.ClassRule;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.factory.GraphDatabaseFactory;
@@ -24,6 +25,8 @@ import org.neo4j.harness.junit.Neo4jRule;
 import org.neo4j.kernel.configuration.BoltConnector;
 import org.neo4j.kernel.configuration.Settings;
 import java.io.File;
+import java.io.IOException;
+import java.net.ServerSocket;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -36,26 +39,37 @@ import static org.neo4j.kernel.configuration.Settings.TRUE;
 
 // TODO: AN-354 Abstract logic of this to create a nice interface to easily spin up different datasets.
 public final class MockOpenCypherDatabase {
-    private static final File DB_PATH = new File("target/neo4j-test");
+    private static final String DB_PATH = "target/neo4j-test/";
     @ClassRule
     private static final Neo4jRule NEO4J_RULE = new Neo4jRule();
     private final GraphDatabaseService graphDb;
+    @Getter
+    private final String host;
+    @Getter
+    private final int port;
+
+    // Need lock to make sure we don't have port grab collisions (need to wait for binding).
+    private static final Object LOCK = new Object();
 
     /**
      * OpenCypherDatabase constructor.
+     *
      * @param host Host to initialize with.
      * @param port Port to initialize with.
      */
-    private MockOpenCypherDatabase(final String host, final int port) {
-        if (DB_PATH.exists()) {
-            for (final String fileName : Objects.requireNonNull(DB_PATH.list())) {
-                final File file = new File(DB_PATH, fileName);
+    private MockOpenCypherDatabase(final String host, final int port, final String path) {
+        this.host = host;
+        this.port = port;
+        final File dbPath = new File(DB_PATH + path);
+        if (dbPath.exists()) {
+            for (final String fileName : Objects.requireNonNull(dbPath.list())) {
+                final File file = new File(dbPath, fileName);
                 file.delete();
             }
         }
         final BoltConnector boltConnector = new BoltConnector("bolt");
         graphDb = new GraphDatabaseFactory()
-                .newEmbeddedDatabaseBuilder(DB_PATH)
+                .newEmbeddedDatabaseBuilder(dbPath)
                 .setConfig(Settings.setting("dbms.directories.import", STRING, "data"), "../../data")
                 .setConfig(boltConnector.type, BOLT.name())
                 .setConfig(boltConnector.enabled, TRUE)
@@ -67,17 +81,27 @@ public final class MockOpenCypherDatabase {
 
     /**
      * Function to initiate builder for MockOpenCypherDatabase
+     *
      * @param host Host to use.
-     * @param port Port to use.
+     * @param callingClass Class calling builder (used for unique path).
      * @return Builder pattern for MockOpenCypherDatabase.
      */
-    public static MockOpenCypherDatabaseBuilder builder(final String host, final int port) {
-        final MockOpenCypherDatabase db = new MockOpenCypherDatabase(host, port);
-        return new MockOpenCypherDatabaseBuilder(db);
+    public static MockOpenCypherDatabaseBuilder builder(final String host, final String callingClass) {
+        synchronized (LOCK) {
+            int port = 7687;
+            try {
+                // Get random unassigned port.
+                port = new ServerSocket(0).getLocalPort();
+            } catch (final IOException ignored) {
+            }
+            final MockOpenCypherDatabase db = new MockOpenCypherDatabase(host, port, callingClass);
+            return new MockOpenCypherDatabaseBuilder(db);
+        }
     }
 
     /**
      * Function to generate a create node query.
+     *
      * @param mockNode Node to create.
      * @return Create node query.
      */
@@ -87,8 +111,9 @@ public final class MockOpenCypherDatabase {
 
     /**
      * Function to generate a create relationship query from (a)-[rel]->(b).
-     * @param mockNode1 Node to create relationship from (a).
-     * @param mockNode2 Node to create relationship to (b).
+     *
+     * @param mockNode1    Node to create relationship from (a).
+     * @param mockNode2    Node to create relationship to (b).
      * @param relationship Relationship between notes [rel].
      * @return Create relationship query.
      */
@@ -101,6 +126,7 @@ public final class MockOpenCypherDatabase {
 
     /**
      * Function to create an index query.
+     *
      * @param mockNode Node to create index on.
      * @return Create index query.
      */
@@ -131,6 +157,7 @@ public final class MockOpenCypherDatabase {
 
         /**
          * Builder pattern node insert function.
+         *
          * @param node Node to insert.
          * @return Builder.
          */
@@ -144,8 +171,9 @@ public final class MockOpenCypherDatabase {
 
         /**
          * Builder pattern relationship insert (a)-[rel]->(b)
-         * @param node1 Node (a) to make relationship from.
-         * @param node2 Node (b) to make relationship to.
+         *
+         * @param node1        Node (a) to make relationship from.
+         * @param node2        Node (b) to make relationship to.
          * @param relationship Relationship [rel] from (a) to (b).
          * @return Builder.
          */
@@ -156,11 +184,11 @@ public final class MockOpenCypherDatabase {
             return this;
         }
 
-
         /**
          * Builder pattern relationship insert (a)-[rel1]->(b) and (b)-[rel2]->(a)
-         * @param node1 Node (a) for relationship.
-         * @param node2 Node (b) for relationship.
+         *
+         * @param node1         Node (a) for relationship.
+         * @param node2         Node (b) for relationship.
          * @param relationship1 Relationship [rel1] from (a) to (b).
          * @param relationship2 Relationship [rel2] from (b) to (b).
          * @return Builder.
@@ -175,11 +203,23 @@ public final class MockOpenCypherDatabase {
 
         /**
          * Function to build MockOpenCypherDatabase Object.
+         *
          * @return Constructed database.
          */
         public MockOpenCypherDatabase build() {
-            indexes.forEach(x -> db.executeQuery(x));
-            db.executeQuery(String.join(" ", nodes) + " " + String.join(" ", relationships));
+            if (!indexes.isEmpty()) {
+                indexes.forEach(db::executeQuery);
+            }
+            String query = "";
+            if (!nodes.isEmpty()) {
+                query = String.join(" ", nodes);
+                if (!relationships.isEmpty()) {
+                    query += " " + String.join(" ", relationships);
+                }
+            }
+            if (!query.isEmpty()) {
+                db.executeQuery(query);
+            }
             return db;
         }
     }

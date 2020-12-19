@@ -90,8 +90,7 @@ public class OpenCypherResultSet extends software.amazon.jdbc.ResultSet implemen
 
     @Override
     public ResultSetMetaData getMetaData() throws SQLException {
-        // TODO
-        return null;
+        return new OpenCypherResultSetMetadata(columns, rows);
     }
 
     @Override
