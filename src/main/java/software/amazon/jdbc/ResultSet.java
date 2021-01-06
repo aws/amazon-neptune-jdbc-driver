@@ -59,6 +59,7 @@ public abstract class ResultSet implements java.sql.ResultSet {
     protected abstract void setDriverFetchSize(int rows);
     protected abstract int getRowIndex();
     protected abstract int getRowCount();
+    protected abstract int getColumnCount();
 
     /**
      * Verify the result set is open.
@@ -1196,5 +1197,11 @@ public abstract class ResultSet implements java.sql.ResultSet {
     @Override
     public void updateTimestamp(final String columnLabel, final Timestamp x) throws SQLException {
         throw SqlError.createSQLFeatureNotSupportedException(LOGGER, SqlError.READ_ONLY);
+    }
+
+    protected void validateRowColumn(final int columnIndex) throws SQLException {
+        if ((getRowIndex() >= getRowCount()) || (columnIndex >= getColumnCount())) {
+            throw SqlError.createSQLFeatureNotSupportedException(LOGGER, SqlError.INVALID_INDEX);
+        }
     }
 }

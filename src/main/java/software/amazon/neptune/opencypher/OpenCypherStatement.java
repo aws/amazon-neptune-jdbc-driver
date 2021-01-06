@@ -27,7 +27,8 @@ public class OpenCypherStatement extends software.amazon.jdbc.Statement implemen
 
     /**
      * OpenCypherStatement constructor, creates OpenCypherQueryExecutor and initializes super class.
-     * @param connection Connection Object.
+     *
+     * @param connection              Connection Object.
      * @param openCypherQueryExecutor OpenCypherQueryExecutor Object.
      */
     public OpenCypherStatement(final Connection connection, final OpenCypherQueryExecutor openCypherQueryExecutor) {
