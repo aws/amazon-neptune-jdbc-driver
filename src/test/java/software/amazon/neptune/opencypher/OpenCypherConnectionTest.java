@@ -60,7 +60,7 @@ public class OpenCypherConnectionTest {
                     String.format("bolt://%s:%d", HOSTNAME, database.getPort()));
         } catch (final Exception e) {
             System.out.println("Exception: " + e);
-            throw e;
+            throw new RuntimeException("What the heck");
         }
     }
 
