@@ -91,11 +91,16 @@ public final class MockOpenCypherDatabase {
             int port = 7687;
             try {
                 // Get random unassigned port.
+                System.out.println("Getting port.");
                 port = new ServerSocket(0).getLocalPort();
+                System.out.println("Port obtained: " + port);
             } catch (final IOException ignored) {
             }
             final MockOpenCypherDatabase db = new MockOpenCypherDatabase(host, port, callingClass);
-            return new MockOpenCypherDatabaseBuilder(db);
+            System.out.println("Creating database.");
+            final MockOpenCypherDatabaseBuilder builder = new MockOpenCypherDatabaseBuilder(db);
+            System.out.println("Builder created and returning.");
+            return builder;
         }
     }
 
