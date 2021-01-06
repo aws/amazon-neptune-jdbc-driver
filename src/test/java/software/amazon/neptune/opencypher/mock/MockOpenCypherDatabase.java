@@ -98,7 +98,7 @@ public final class MockOpenCypherDatabase {
                 }
                 final MockOpenCypherDatabase db = new MockOpenCypherDatabase(host, port, callingClass);
                 return new MockOpenCypherDatabaseBuilder(db);
-            } catch (PortBindException e){
+            } catch (Exception e){
                 System.out.println("Exception: " + e);
                 System.out.println("Port: " + port);
                 throw e;
