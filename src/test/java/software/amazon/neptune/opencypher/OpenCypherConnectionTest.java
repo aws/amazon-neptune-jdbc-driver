@@ -44,18 +44,24 @@ public class OpenCypherConnectionTest {
      */
     @BeforeAll
     public static void initializeDatabase() {
-        database = MockOpenCypherDatabase.builder(HOSTNAME, OpenCypherConnectionTest.class.getName())
-                .withNode(MockOpenCypherNodes.LYNDON)
-                .withNode(MockOpenCypherNodes.VALENTINA)
-                .withNode(MockOpenCypherNodes.VINNY)
-                .withNode(MockOpenCypherNodes.TOOTSIE)
-                .withRelationship(MockOpenCypherNodes.LYNDON, MockOpenCypherNodes.VALENTINA, "KNOWS", "KNOWS")
-                .withRelationship(MockOpenCypherNodes.LYNDON, MockOpenCypherNodes.VINNY, "GIVES_PETS_TO",
-                        "GETS_PETS_FROM")
-                .withRelationship(MockOpenCypherNodes.VALENTINA, MockOpenCypherNodes.TOOTSIE, "GIVES_PETS_TO",
-                        "GETS_PETS_FROM")
-                .build();
-        PROPERTIES.putIfAbsent(NeptuneConstants.ENDPOINT, String.format("bolt://%s:%d", HOSTNAME, database.getPort()));
+        try {
+            database = MockOpenCypherDatabase.builder(HOSTNAME, OpenCypherConnectionTest.class.getName())
+                    .withNode(MockOpenCypherNodes.LYNDON)
+                    .withNode(MockOpenCypherNodes.VALENTINA)
+                    .withNode(MockOpenCypherNodes.VINNY)
+                    .withNode(MockOpenCypherNodes.TOOTSIE)
+                    .withRelationship(MockOpenCypherNodes.LYNDON, MockOpenCypherNodes.VALENTINA, "KNOWS", "KNOWS")
+                    .withRelationship(MockOpenCypherNodes.LYNDON, MockOpenCypherNodes.VINNY, "GIVES_PETS_TO",
+                            "GETS_PETS_FROM")
+                    .withRelationship(MockOpenCypherNodes.VALENTINA, MockOpenCypherNodes.TOOTSIE, "GIVES_PETS_TO",
+                            "GETS_PETS_FROM")
+                    .build();
+            PROPERTIES.putIfAbsent(NeptuneConstants.ENDPOINT,
+                    String.format("bolt://%s:%d", HOSTNAME, database.getPort()));
+        } catch (final Exception e) {
+            System.out.println("Exception: " + e);
+            throw e;
+        }
     }
 
 
