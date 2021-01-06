@@ -17,11 +17,13 @@
 package software.amazon.neptune.opencypher.mock;
 
 import lombok.Getter;
+import lombok.SneakyThrows;
 import org.junit.ClassRule;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.factory.GraphDatabaseFactory;
 import org.neo4j.graphdb.factory.GraphDatabaseSettings;
 import org.neo4j.harness.junit.Neo4jRule;
+import org.neo4j.helpers.PortBindException;
 import org.neo4j.kernel.configuration.BoltConnector;
 import org.neo4j.kernel.configuration.Settings;
 import java.io.File;
@@ -86,6 +88,7 @@ public final class MockOpenCypherDatabase {
      * @param callingClass Class calling builder (used for unique path).
      * @return Builder pattern for MockOpenCypherDatabase.
      */
+    @SneakyThrows
     public static MockOpenCypherDatabaseBuilder builder(final String host, final String callingClass) {
         synchronized (LOCK) {
             int port = 7687;
@@ -100,7 +103,7 @@ public final class MockOpenCypherDatabase {
             } catch (Exception e) {
                 System.out.println("Exception: " + e);
                 System.out.println("Port: " + port);
-                throw e;
+                throw new Exception(String.format("Port %d. Exception %s", port, e.getMessage()));
             }
         }
     }

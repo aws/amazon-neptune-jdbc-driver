@@ -58,9 +58,9 @@ public class OpenCypherConnectionTest {
                     .build();
             PROPERTIES.putIfAbsent(NeptuneConstants.ENDPOINT,
                     String.format("bolt://%s:%d", HOSTNAME, database.getPort()));
-        } catch (final Exception e) {
+        } catch (Exception e) {
             System.out.println("Exception: " + e);
-            throw new RuntimeException("What the heck");
+            throw e;
         }
     }
 
