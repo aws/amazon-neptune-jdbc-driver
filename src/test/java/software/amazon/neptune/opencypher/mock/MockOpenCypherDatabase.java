@@ -26,7 +26,6 @@ import org.neo4j.harness.junit.Neo4jRule;
 import org.neo4j.kernel.configuration.BoltConnector;
 import org.neo4j.kernel.configuration.Settings;
 import java.io.File;
-import java.io.IOException;
 import java.net.ServerSocket;
 import java.util.ArrayList;
 import java.util.List;
@@ -91,20 +90,20 @@ public final class MockOpenCypherDatabase {
     public static MockOpenCypherDatabaseBuilder builder(final String host, final String callingClass) {
         synchronized (LOCK) {
             int port = 7687;
+            int attempts = 0;
+            boolean portObtained = false;
+            while (!portObtained && (attempts < 10))
             try {
-                try {
-                    // Get random unassigned port.
-                    port = new ServerSocket(0).getLocalPort();
-                } catch (final IOException ignored) {
-                }
+                // Get random unassigned port.
+                attempts++;
+                port = new ServerSocket(0).getLocalPort();
                 final MockOpenCypherDatabase db = new MockOpenCypherDatabase(host, port, callingClass);
+                portObtained = true;
                 return new MockOpenCypherDatabaseBuilder(db);
-            } catch (Exception e) {
-                System.out.println("Exception: " + e);
-                System.out.println("Port: " + port);
-                throw new Exception(String.format("Port %d. Exception %s", port, e.getMessage()));
+            } catch (final Exception ignored) {
             }
         }
+        throw new Exception("Unable to find port.");
     }
 
     /**
