@@ -92,15 +92,16 @@ public final class MockOpenCypherDatabase {
             int port = 7687;
             int attempts = 0;
             boolean portObtained = false;
-            while (!portObtained && (attempts < 10))
-            try {
-                // Get random unassigned port.
-                attempts++;
-                port = new ServerSocket(0).getLocalPort();
-                final MockOpenCypherDatabase db = new MockOpenCypherDatabase(host, port, callingClass);
-                portObtained = true;
-                return new MockOpenCypherDatabaseBuilder(db);
-            } catch (final Exception ignored) {
+            while (!portObtained && (attempts < 10)) {
+                try {
+                    // Get random unassigned port.
+                    attempts++;
+                    port = new ServerSocket(0).getLocalPort();
+                    final MockOpenCypherDatabase db = new MockOpenCypherDatabase(host, port, callingClass);
+                    portObtained = true;
+                    return new MockOpenCypherDatabaseBuilder(db);
+                } catch (final Exception ignored) {
+                }
             }
         }
         throw new Exception("Unable to find port.");
