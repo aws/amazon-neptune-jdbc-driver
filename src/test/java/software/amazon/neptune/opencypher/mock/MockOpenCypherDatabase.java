@@ -97,12 +97,12 @@ public final class MockOpenCypherDatabase {
                 } catch (final IOException ignored) {
                 }
                 final MockOpenCypherDatabase db = new MockOpenCypherDatabase(host, port, callingClass);
+                return new MockOpenCypherDatabaseBuilder(db);
             } catch (PortBindException e){
                 System.out.println("Exception: " + e);
                 System.out.println("Port: " + port);
                 throw e;
             }
-            return new MockOpenCypherDatabaseBuilder(db);
         }
     }
 
