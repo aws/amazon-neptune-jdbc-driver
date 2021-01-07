@@ -89,22 +89,14 @@ public final class MockOpenCypherDatabase {
     @SneakyThrows
     public static MockOpenCypherDatabaseBuilder builder(final String host, final String callingClass) {
         synchronized (LOCK) {
-            int attempts = 0;
-            while (attempts < 10) {
-                try {
-                    // Get random unassigned port.
-                    attempts++;
-                    final ServerSocket socket = new ServerSocket(0);
-                    final int port = socket.getLocalPort();
-                    socket.setReuseAddress(true);
-                    socket.close();
-                    final MockOpenCypherDatabase db = new MockOpenCypherDatabase(host, port, callingClass);
-                    return new MockOpenCypherDatabaseBuilder(db);
-                } catch (final Exception ignored) {
-                }
-            }
+            // Get random unassigned port.
+            final ServerSocket socket = new ServerSocket(0);
+            final int port = socket.getLocalPort();
+            socket.setReuseAddress(true);
+            socket.close();
+            final MockOpenCypherDatabase db = new MockOpenCypherDatabase(host, port, callingClass);
+            return new MockOpenCypherDatabaseBuilder(db);
         }
-        throw new Exception("Unable to find port.");
     }
 
     /**

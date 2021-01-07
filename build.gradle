@@ -171,11 +171,10 @@ ext {
 }
 
 subprojects {
-    // There is currently an issue in parallel builds - once this is fixed we can uncomment this.
-    //tasks.withType(Test) {
+    tasks.withType(Test) {
         // Gradle documentation suggests using this number of cores.
-        // maxParallelForks = Runtime.runtime.availableProcessors().intdiv(2) ?: 1
-    //}
+        maxParallelForks = Runtime.runtime.availableProcessors().intdiv(2) ?: 1
+    }
 }
 
 dependencies {
