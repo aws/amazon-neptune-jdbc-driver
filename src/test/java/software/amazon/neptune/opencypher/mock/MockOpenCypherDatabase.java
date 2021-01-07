@@ -89,16 +89,16 @@ public final class MockOpenCypherDatabase {
     @SneakyThrows
     public static MockOpenCypherDatabaseBuilder builder(final String host, final String callingClass) {
         synchronized (LOCK) {
-            int port = 7687;
             int attempts = 0;
-            boolean portObtained = false;
-            while (!portObtained && (attempts < 10)) {
+            while (attempts < 10) {
                 try {
                     // Get random unassigned port.
                     attempts++;
-                    port = new ServerSocket(0).getLocalPort();
+                    final ServerSocket socket = new ServerSocket(0);
+                    final int port = socket.getLocalPort();
+                    socket.setReuseAddress(true);
+                    socket.close();
                     final MockOpenCypherDatabase db = new MockOpenCypherDatabase(host, port, callingClass);
-                    portObtained = true;
                     return new MockOpenCypherDatabaseBuilder(db);
                 } catch (final Exception ignored) {
                 }
