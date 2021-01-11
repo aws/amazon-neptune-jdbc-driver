@@ -27,6 +27,7 @@ import java.sql.Statement;
 public class MockResultSet extends ResultSet implements java.sql.ResultSet {
     private int rowIndex = 0;
     private static final int ROW_COUNT = 10;
+    private static final int COL_COUNT = 10;
 
     /**
      * Constructor for MockResultSet.
@@ -57,6 +58,11 @@ public class MockResultSet extends ResultSet implements java.sql.ResultSet {
     @Override
     protected int getRowCount() {
         return ROW_COUNT;
+    }
+
+    @Override
+    protected int getColumnCount() {
+        return COL_COUNT;
     }
 
     @Override

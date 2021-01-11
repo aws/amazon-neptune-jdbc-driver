@@ -17,6 +17,7 @@
 package software.amazon.neptune.opencypher.mock;
 
 import lombok.Getter;
+import lombok.SneakyThrows;
 import org.junit.ClassRule;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.factory.GraphDatabaseFactory;
@@ -25,7 +26,6 @@ import org.neo4j.harness.junit.Neo4jRule;
 import org.neo4j.kernel.configuration.BoltConnector;
 import org.neo4j.kernel.configuration.Settings;
 import java.io.File;
-import java.io.IOException;
 import java.net.ServerSocket;
 import java.util.ArrayList;
 import java.util.List;
@@ -86,14 +86,14 @@ public final class MockOpenCypherDatabase {
      * @param callingClass Class calling builder (used for unique path).
      * @return Builder pattern for MockOpenCypherDatabase.
      */
+    @SneakyThrows
     public static MockOpenCypherDatabaseBuilder builder(final String host, final String callingClass) {
         synchronized (LOCK) {
-            int port = 7687;
-            try {
-                // Get random unassigned port.
-                port = new ServerSocket(0).getLocalPort();
-            } catch (final IOException ignored) {
-            }
+            // Get random unassigned port.
+            final ServerSocket socket = new ServerSocket(0);
+            final int port = socket.getLocalPort();
+            socket.setReuseAddress(true);
+            socket.close();
             final MockOpenCypherDatabase db = new MockOpenCypherDatabase(host, port, callingClass);
             return new MockOpenCypherDatabaseBuilder(db);
         }

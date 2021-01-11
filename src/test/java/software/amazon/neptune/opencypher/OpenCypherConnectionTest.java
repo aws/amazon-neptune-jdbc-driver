@@ -55,7 +55,8 @@ public class OpenCypherConnectionTest {
                 .withRelationship(MockOpenCypherNodes.VALENTINA, MockOpenCypherNodes.TOOTSIE, "GIVES_PETS_TO",
                         "GETS_PETS_FROM")
                 .build();
-        PROPERTIES.putIfAbsent(NeptuneConstants.ENDPOINT, String.format("bolt://%s:%d", HOSTNAME, database.getPort()));
+        PROPERTIES.putIfAbsent(NeptuneConstants.ENDPOINT,
+                String.format("bolt://%s:%d", HOSTNAME, database.getPort()));
     }
 
 
