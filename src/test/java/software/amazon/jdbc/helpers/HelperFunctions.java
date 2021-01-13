@@ -17,10 +17,13 @@
 package software.amazon.jdbc.helpers;
 
 import org.junit.jupiter.api.Assertions;
+import software.amazon.jdbc.utilities.SqlError;
 import software.amazon.jdbc.utilities.Warning;
 import java.sql.SQLException;
 import java.sql.SQLWarning;
 import java.util.concurrent.atomic.AtomicReference;
+
+import static software.amazon.jdbc.utilities.SqlError.lookup;
 
 public class HelperFunctions {
     public static final String TEST_WARNING_REASON_1 = "warning_1";
@@ -60,6 +63,25 @@ public class HelperFunctions {
      */
     public static void expectFunctionThrows(final VerifyThrowInterface f) {
         Assertions.assertThrows(SQLException.class, f::function);
+    }
+
+    /**
+     * Function to verify that function passed in throws an exception with specified error message.
+     * @param error specific error message.
+     * @param f function to check.
+     */
+    public static void expectFunctionThrows(final String error, final VerifyThrowInterface f) {
+        final Exception exception =  Assertions.assertThrows(SQLException.class, f::function);
+        Assertions.assertEquals(error, exception.getMessage());
+    }
+
+    /**
+     * Function to verify that function passed in throws an exception with specified error key. Error arguments are not supported.
+     * @param key specific error code.
+     * @param f function to check.
+     */
+    public static void expectFunctionThrows(final SqlError key, final VerifyThrowInterface f) {
+        expectFunctionThrows(lookup(key),f);
     }
 
     /**
