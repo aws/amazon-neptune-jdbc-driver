@@ -47,7 +47,6 @@ public class PreparedStatementTest {
         HelperFunctions.expectFunctionThrows(() -> preparedStatement.execute(""));
         HelperFunctions.expectFunctionThrows(() -> preparedStatement.executeQuery(""));
         HelperFunctions.expectFunctionThrows(() -> preparedStatement.executeUpdate());
-
     }
 
     @Test

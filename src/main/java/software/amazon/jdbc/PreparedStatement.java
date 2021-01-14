@@ -60,7 +60,7 @@ public abstract class PreparedStatement extends software.amazon.jdbc.Statement i
     @Override
     public void addBatch() throws SQLException {
         verifyOpen();
-        throw new SQLFeatureNotSupportedException();
+        throw new SQLFeatureNotSupportedException(SqlError.lookup(SqlError.PARAMETERS_NOT_SUPPORTED));
     }
 
     @Override
@@ -90,7 +90,7 @@ public abstract class PreparedStatement extends software.amazon.jdbc.Statement i
     @Override
     public int executeUpdate() throws SQLException {
         verifyOpen();
-        throw new SQLFeatureNotSupportedException(SqlError.lookup(SqlError.READ_ONLY));
+        throw new SQLFeatureNotSupportedException(SqlError.lookup(SqlError.PARAMETERS_NOT_SUPPORTED));
     }
 
     @Override
@@ -154,23 +154,21 @@ public abstract class PreparedStatement extends software.amazon.jdbc.Statement i
     @Override
     public void setBlob(final int parameterIndex, final Blob x) throws SQLException {
         verifyOpen();
-        throw new SQLFeatureNotSupportedException(
-                SqlError.lookup(SqlError.UNSUPPORTED_TYPE, Blob.class.toString()));
+        throw new SQLFeatureNotSupportedException(SqlError.lookup(SqlError.PARAMETERS_NOT_SUPPORTED));
     }
 
     @Override
     public void setBlob(final int parameterIndex, final InputStream inputStream, final long length)
             throws SQLException {
         verifyOpen();
-        throw new SQLFeatureNotSupportedException(
-                SqlError.lookup(SqlError.UNSUPPORTED_TYPE, Blob.class.toString()));
+        throw new SQLFeatureNotSupportedException(SqlError.lookup(SqlError.PARAMETERS_NOT_SUPPORTED));
+
     }
 
     @Override
     public void setBlob(final int parameterIndex, final InputStream inputStream) throws SQLException {
         verifyOpen();
-        throw new SQLFeatureNotSupportedException(
-                SqlError.lookup(SqlError.UNSUPPORTED_TYPE, Blob.class.toString()));
+        throw new SQLFeatureNotSupportedException(SqlError.lookup(SqlError.PARAMETERS_NOT_SUPPORTED));
     }
 
     @Override
@@ -215,23 +213,20 @@ public abstract class PreparedStatement extends software.amazon.jdbc.Statement i
     @Override
     public void setClob(final int parameterIndex, final Clob x) throws SQLException {
         verifyOpen();
-        throw new SQLFeatureNotSupportedException(
-                SqlError.lookup(SqlError.UNSUPPORTED_TYPE, Clob.class.toString()));
+        throw new SQLFeatureNotSupportedException(SqlError.lookup(SqlError.PARAMETERS_NOT_SUPPORTED));
     }
 
     @Override
     public void setClob(final int parameterIndex, final Reader reader, final long length)
             throws SQLException {
         verifyOpen();
-        throw new SQLFeatureNotSupportedException(
-                SqlError.lookup(SqlError.UNSUPPORTED_TYPE, Clob.class.toString()));
+        throw new SQLFeatureNotSupportedException(SqlError.lookup(SqlError.PARAMETERS_NOT_SUPPORTED));
     }
 
     @Override
     public void setClob(final int parameterIndex, final Reader reader) throws SQLException {
         verifyOpen();
-        throw new SQLFeatureNotSupportedException(
-                SqlError.lookup(SqlError.UNSUPPORTED_TYPE, Clob.class.toString()));
+        throw new SQLFeatureNotSupportedException(SqlError.lookup(SqlError.PARAMETERS_NOT_SUPPORTED));
     }
 
     @Override
@@ -288,23 +283,20 @@ public abstract class PreparedStatement extends software.amazon.jdbc.Statement i
     @Override
     public void setNClob(final int parameterIndex, final NClob value) throws SQLException {
         verifyOpen();
-        throw new SQLFeatureNotSupportedException(
-                SqlError.lookup(SqlError.UNSUPPORTED_TYPE, NClob.class.toString()));
+        throw new SQLFeatureNotSupportedException(SqlError.lookup(SqlError.PARAMETERS_NOT_SUPPORTED));
     }
 
     @Override
     public void setNClob(final int parameterIndex, final Reader reader, final long length)
             throws SQLException {
         verifyOpen();
-        throw new SQLFeatureNotSupportedException(
-                SqlError.lookup(SqlError.UNSUPPORTED_TYPE, NClob.class.toString()));
+        throw new SQLFeatureNotSupportedException(SqlError.lookup(SqlError.PARAMETERS_NOT_SUPPORTED));
     }
 
     @Override
     public void setNClob(final int parameterIndex, final Reader reader) throws SQLException {
         verifyOpen();
-        throw new SQLFeatureNotSupportedException(
-                SqlError.lookup(SqlError.UNSUPPORTED_TYPE, NClob.class.toString()));
+        throw new SQLFeatureNotSupportedException(SqlError.lookup(SqlError.PARAMETERS_NOT_SUPPORTED));
     }
 
     @Override
@@ -350,8 +342,7 @@ public abstract class PreparedStatement extends software.amazon.jdbc.Statement i
     @Override
     public void setRef(final int parameterIndex, final Ref x) throws SQLException {
         verifyOpen();
-        throw new SQLFeatureNotSupportedException(
-                SqlError.lookup(SqlError.UNSUPPORTED_TYPE, Ref.class.toString()));
+        throw new SQLFeatureNotSupportedException(SqlError.lookup(SqlError.PARAMETERS_NOT_SUPPORTED));
     }
 
     @Override
@@ -363,8 +354,7 @@ public abstract class PreparedStatement extends software.amazon.jdbc.Statement i
     @Override
     public void setSQLXML(final int parameterIndex, final SQLXML xmlObject) throws SQLException {
         verifyOpen();
-        throw new SQLFeatureNotSupportedException(
-                SqlError.lookup(SqlError.UNSUPPORTED_TYPE, SQLXML.class.toString()));
+        throw new SQLFeatureNotSupportedException(SqlError.lookup(SqlError.PARAMETERS_NOT_SUPPORTED));
     }
 
     @Override
