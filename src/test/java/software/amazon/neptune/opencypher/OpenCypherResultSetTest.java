@@ -24,6 +24,9 @@ import org.junit.jupiter.api.Test;
 import software.amazon.neptune.NeptuneConstants;
 import software.amazon.neptune.opencypher.mock.MockOpenCypherDatabase;
 import java.sql.SQLException;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.Properties;
 
 public class OpenCypherResultSetTest {
@@ -76,6 +79,12 @@ public class OpenCypherResultSetTest {
         Assertions.assertTrue(resultSet.wasNull());
         Assertions.assertNull(resultSet.getString(0));
         Assertions.assertTrue(resultSet.wasNull());
+        Assertions.assertNull(resultSet.getDate(0));
+        Assertions.assertTrue(resultSet.wasNull());
+        Assertions.assertNull(resultSet.getTime(0));
+        Assertions.assertTrue(resultSet.wasNull());
+        Assertions.assertNull(resultSet.getTimestamp(0));
+        Assertions.assertTrue(resultSet.wasNull());
     }
 
     @Test
@@ -88,6 +97,9 @@ public class OpenCypherResultSetTest {
         Assertions.assertThrows(SQLException.class, () -> resultSet.getShort(0));
         Assertions.assertThrows(SQLException.class, () -> resultSet.getInt(0));
         Assertions.assertThrows(SQLException.class, () -> resultSet.getLong(0));
+        Assertions.assertThrows(SQLException.class, () -> resultSet.getDate(0));
+        Assertions.assertThrows(SQLException.class, () -> resultSet.getTime(0));
+        Assertions.assertThrows(SQLException.class, () -> resultSet.getTimestamp(0));
     }
 
     @Test
@@ -100,6 +112,9 @@ public class OpenCypherResultSetTest {
         Assertions.assertEquals((byte) 1, resultSet.getByte(0));
         Assertions.assertEquals(((Integer) 1).toString(), resultSet.getString(0));
         Assertions.assertTrue(resultSet.getBoolean(0));
+        Assertions.assertEquals(new java.sql.Date(1L), resultSet.getDate(0));
+        Assertions.assertEquals(new java.sql.Time(1L).toLocalTime(), resultSet.getTime(0).toLocalTime());
+        Assertions.assertEquals(new java.sql.Timestamp(1L), resultSet.getTimestamp(0));
     }
 
     @Test
@@ -112,6 +127,9 @@ public class OpenCypherResultSetTest {
         Assertions.assertEquals((byte) 4147483647L, resultSet.getByte(0));
         Assertions.assertEquals(((Long) 4147483647L).toString(), resultSet.getString(0));
         Assertions.assertTrue(resultSet.getBoolean(0));
+        Assertions.assertEquals(new java.sql.Date(4147483647L), resultSet.getDate(0));
+        Assertions.assertEquals(new java.sql.Time(4147483647L).toLocalTime(), resultSet.getTime(0).toLocalTime());
+        Assertions.assertEquals(new java.sql.Timestamp(4147483647L), resultSet.getTimestamp(0));
     }
 
     @Test
@@ -126,6 +144,9 @@ public class OpenCypherResultSetTest {
         Assertions.assertEquals((long) 1.0, resultSet.getLong(0));
         Assertions.assertEquals(((Double) 1.0).toString(), resultSet.getString(0));
         Assertions.assertThrows(SQLException.class, () -> resultSet.getBoolean(0));
+        Assertions.assertThrows(SQLException.class, () -> resultSet.getDate(0));
+        Assertions.assertThrows(SQLException.class, () -> resultSet.getTime(0));
+        Assertions.assertThrows(SQLException.class, () -> resultSet.getTimestamp(0));
     }
 
     @Test
@@ -140,6 +161,9 @@ public class OpenCypherResultSetTest {
         Assertions.assertThrows(SQLException.class, () -> resultSet.getLong(0));
         Assertions.assertThrows(SQLException.class, () -> resultSet.getFloat(0));
         Assertions.assertThrows(SQLException.class, () -> resultSet.getDouble(0));
+        Assertions.assertThrows(SQLException.class, () -> resultSet.getDate(0));
+        Assertions.assertThrows(SQLException.class, () -> resultSet.getTime(0));
+        Assertions.assertThrows(SQLException.class, () -> resultSet.getTimestamp(0));
     }
 
     @Test
@@ -155,6 +179,9 @@ public class OpenCypherResultSetTest {
         Assertions.assertThrows(SQLException.class, () -> resultSet.getInt(0));
         Assertions.assertThrows(SQLException.class, () -> resultSet.getLong(0));
         Assertions.assertThrows(SQLException.class, () -> resultSet.getBoolean(0));
+        Assertions.assertThrows(SQLException.class, () -> resultSet.getDate(0));
+        Assertions.assertThrows(SQLException.class, () -> resultSet.getTime(0));
+        Assertions.assertThrows(SQLException.class, () -> resultSet.getTimestamp(0));
     }
 
     // Composite types
@@ -170,6 +197,9 @@ public class OpenCypherResultSetTest {
         Assertions.assertThrows(SQLException.class, () -> resultSet.getLong(0));
         Assertions.assertThrows(SQLException.class, () -> resultSet.getFloat(0));
         Assertions.assertThrows(SQLException.class, () -> resultSet.getDouble(0));
+        Assertions.assertThrows(SQLException.class, () -> resultSet.getDate(0));
+        Assertions.assertThrows(SQLException.class, () -> resultSet.getTime(0));
+        Assertions.assertThrows(SQLException.class, () -> resultSet.getTimestamp(0));
     }
 
     @Test
@@ -184,7 +214,241 @@ public class OpenCypherResultSetTest {
         Assertions.assertThrows(SQLException.class, () -> resultSet.getLong(0));
         Assertions.assertThrows(SQLException.class, () -> resultSet.getFloat(0));
         Assertions.assertThrows(SQLException.class, () -> resultSet.getDouble(0));
+        Assertions.assertThrows(SQLException.class, () -> resultSet.getDate(0));
+        Assertions.assertThrows(SQLException.class, () -> resultSet.getTime(0));
+        Assertions.assertThrows(SQLException.class, () -> resultSet.getTimestamp(0));
     }
 
-    // TODO: Date and Time types / Graph types.
+    @Test
+    void testNodeType() throws SQLException {
+        final java.sql.ResultSet resultSet = statement.executeQuery("CREATE (node:Foo {hello:'world'}) RETURN node");
+        Assertions.assertTrue(resultSet.next());
+        Assertions.assertEquals(String.format("(%s : %s)", "[Foo]", "{hello=world}"), resultSet.getString(0));
+        Assertions.assertThrows(SQLException.class, () -> resultSet.getDate(0));
+        Assertions.assertThrows(SQLException.class, () -> resultSet.getTime(0));
+        Assertions.assertThrows(SQLException.class, () -> resultSet.getTimestamp(0));
+        Assertions.assertThrows(SQLException.class, () -> resultSet.getBoolean(0));
+        Assertions.assertThrows(SQLException.class, () -> resultSet.getByte(0));
+        Assertions.assertThrows(SQLException.class, () -> resultSet.getShort(0));
+        Assertions.assertThrows(SQLException.class, () -> resultSet.getInt(0));
+        Assertions.assertThrows(SQLException.class, () -> resultSet.getLong(0));
+        Assertions.assertThrows(SQLException.class, () -> resultSet.getFloat(0));
+        Assertions.assertThrows(SQLException.class, () -> resultSet.getDouble(0));
+    }
+
+    @Test
+    void testRelationshipType() throws SQLException {
+        final java.sql.ResultSet resultSet =
+                statement.executeQuery("CREATE (node1:Foo)-[rel:Rel {hello:'world'}]->(node2:Bar) RETURN rel");
+        Assertions.assertTrue(resultSet.next());
+        Assertions.assertEquals(String.format("[%s : %s]", "Rel", "{hello=world}"), resultSet.getString(0));
+        Assertions.assertThrows(SQLException.class, () -> resultSet.getDate(0));
+        Assertions.assertThrows(SQLException.class, () -> resultSet.getTime(0));
+        Assertions.assertThrows(SQLException.class, () -> resultSet.getTimestamp(0));
+        Assertions.assertThrows(SQLException.class, () -> resultSet.getBoolean(0));
+        Assertions.assertThrows(SQLException.class, () -> resultSet.getByte(0));
+        Assertions.assertThrows(SQLException.class, () -> resultSet.getShort(0));
+        Assertions.assertThrows(SQLException.class, () -> resultSet.getInt(0));
+        Assertions.assertThrows(SQLException.class, () -> resultSet.getLong(0));
+        Assertions.assertThrows(SQLException.class, () -> resultSet.getFloat(0));
+        Assertions.assertThrows(SQLException.class, () -> resultSet.getDouble(0));
+    }
+
+
+    @Test
+    void testBiDirectionalPathType() throws SQLException {
+        final java.sql.ResultSet resultSet = statement.executeQuery(
+                "CREATE p=(lyn:Person { name:'Lyndon'})-[:WORKS {position:'developer'}]->(bqt:Company {product:'software'})<-[:WORKS {position:'developer'}]-(val:Person { name:'Valentina'}) RETURN p");
+        Assertions.assertTrue(resultSet.next());
+        // System.out.println("Resultset: " + )
+        Assertions.assertEquals(String.format("(%s)-[%s]->(%s)<-[%s]-(%s)",
+                "[Person] : {name=Lyndon}", "WORKS : {position=developer}",
+                "[Company] : {product=software}", "WORKS : {position=developer}", "[Person] : {name=Valentina}"),
+                resultSet.getString(0));
+        Assertions.assertThrows(SQLException.class, () -> resultSet.getDate(0));
+        Assertions.assertThrows(SQLException.class, () -> resultSet.getTime(0));
+        Assertions.assertThrows(SQLException.class, () -> resultSet.getTimestamp(0));
+        Assertions.assertThrows(SQLException.class, () -> resultSet.getBoolean(0));
+        Assertions.assertThrows(SQLException.class, () -> resultSet.getByte(0));
+        Assertions.assertThrows(SQLException.class, () -> resultSet.getShort(0));
+        Assertions.assertThrows(SQLException.class, () -> resultSet.getInt(0));
+        Assertions.assertThrows(SQLException.class, () -> resultSet.getLong(0));
+        Assertions.assertThrows(SQLException.class, () -> resultSet.getFloat(0));
+        Assertions.assertThrows(SQLException.class, () -> resultSet.getDouble(0));
+    }
+
+
+    @Test
+    void testReverseDirectionalPathType() throws SQLException {
+        final java.sql.ResultSet resultSet = statement.executeQuery(
+                "CREATE p=(node1:Foo)<-[rel:Rel]-(node2:Bar) RETURN p");
+        Assertions.assertTrue(resultSet.next());
+        Assertions.assertEquals(String.format("(%s)<-[%s]-(%s)", "[Foo] : {}", "Rel : {}", "[Bar] : {}"),
+                resultSet.getString(0));
+        Assertions.assertThrows(SQLException.class, () -> resultSet.getDate(0));
+        Assertions.assertThrows(SQLException.class, () -> resultSet.getTime(0));
+        Assertions.assertThrows(SQLException.class, () -> resultSet.getTimestamp(0));
+        Assertions.assertThrows(SQLException.class, () -> resultSet.getBoolean(0));
+        Assertions.assertThrows(SQLException.class, () -> resultSet.getByte(0));
+        Assertions.assertThrows(SQLException.class, () -> resultSet.getShort(0));
+        Assertions.assertThrows(SQLException.class, () -> resultSet.getInt(0));
+        Assertions.assertThrows(SQLException.class, () -> resultSet.getLong(0));
+        Assertions.assertThrows(SQLException.class, () -> resultSet.getFloat(0));
+        Assertions.assertThrows(SQLException.class, () -> resultSet.getDouble(0));
+    }
+
+
+    @Test
+    void testForwardDirectionalPathType() throws SQLException {
+        final java.sql.ResultSet resultSet = statement.executeQuery(
+                "CREATE p=(node1:Foo)-[rel:Rel]->(node2:Bar) RETURN p");
+        Assertions.assertTrue(resultSet.next());
+        Assertions.assertEquals(String.format("(%s)-[%s]->(%s)", "[Foo] : {}", "Rel : {}", "[Bar] : {}"),
+                resultSet.getString(0));
+        Assertions.assertThrows(SQLException.class, () -> resultSet.getDate(0));
+        Assertions.assertThrows(SQLException.class, () -> resultSet.getTime(0));
+        Assertions.assertThrows(SQLException.class, () -> resultSet.getTimestamp(0));
+        Assertions.assertThrows(SQLException.class, () -> resultSet.getBoolean(0));
+        Assertions.assertThrows(SQLException.class, () -> resultSet.getByte(0));
+        Assertions.assertThrows(SQLException.class, () -> resultSet.getShort(0));
+        Assertions.assertThrows(SQLException.class, () -> resultSet.getInt(0));
+        Assertions.assertThrows(SQLException.class, () -> resultSet.getLong(0));
+        Assertions.assertThrows(SQLException.class, () -> resultSet.getFloat(0));
+        Assertions.assertThrows(SQLException.class, () -> resultSet.getDouble(0));
+    }
+
+    @Test
+    void test2DPointType() throws SQLException {
+        final java.sql.ResultSet resultSet = statement.executeQuery("RETURN point({ x:0, y:1 }) AS n");
+        Assertions.assertTrue(resultSet.next());
+        Assertions.assertEquals(String.format("(%f, %f)", 0f, 1f), resultSet.getString(0));
+        Assertions.assertThrows(SQLException.class, () -> resultSet.getDate(0));
+        Assertions.assertThrows(SQLException.class, () -> resultSet.getTime(0));
+        Assertions.assertThrows(SQLException.class, () -> resultSet.getTimestamp(0));
+        Assertions.assertThrows(SQLException.class, () -> resultSet.getBoolean(0));
+        Assertions.assertThrows(SQLException.class, () -> resultSet.getByte(0));
+        Assertions.assertThrows(SQLException.class, () -> resultSet.getShort(0));
+        Assertions.assertThrows(SQLException.class, () -> resultSet.getInt(0));
+        Assertions.assertThrows(SQLException.class, () -> resultSet.getLong(0));
+        Assertions.assertThrows(SQLException.class, () -> resultSet.getFloat(0));
+        Assertions.assertThrows(SQLException.class, () -> resultSet.getDouble(0));
+    }
+
+    @Test
+    void test3DPointType() throws SQLException {
+        final java.sql.ResultSet resultSet = statement.executeQuery("RETURN point({ x:0, y:1, z:2 }) AS n");
+        Assertions.assertTrue(resultSet.next());
+        Assertions.assertEquals(String.format("(%f, %f, %f)", 0f, 1f, 2f), resultSet.getString(0));
+        Assertions.assertThrows(SQLException.class, () -> resultSet.getDate(0));
+        Assertions.assertThrows(SQLException.class, () -> resultSet.getTime(0));
+        Assertions.assertThrows(SQLException.class, () -> resultSet.getTimestamp(0));
+        Assertions.assertThrows(SQLException.class, () -> resultSet.getBoolean(0));
+        Assertions.assertThrows(SQLException.class, () -> resultSet.getByte(0));
+        Assertions.assertThrows(SQLException.class, () -> resultSet.getShort(0));
+        Assertions.assertThrows(SQLException.class, () -> resultSet.getInt(0));
+        Assertions.assertThrows(SQLException.class, () -> resultSet.getLong(0));
+        Assertions.assertThrows(SQLException.class, () -> resultSet.getFloat(0));
+        Assertions.assertThrows(SQLException.class, () -> resultSet.getDouble(0));
+    }
+
+    @Test
+    void testDateType() throws SQLException {
+        final java.sql.ResultSet resultSet = statement.executeQuery("RETURN date(\"1993-03-30\") AS n");
+        Assertions.assertTrue(resultSet.next());
+        Assertions.assertEquals("1993-03-30", resultSet.getString(0));
+        Assertions.assertEquals(java.sql.Date.valueOf("1993-03-30"), resultSet.getDate(0));
+        Assertions.assertEquals(java.sql.Timestamp.valueOf(LocalDateTime.of(1993, 3, 30, 0, 0)),
+                resultSet.getTimestamp(0));
+        Assertions.assertThrows(SQLException.class, () -> resultSet.getTime(0));
+        Assertions.assertThrows(SQLException.class, () -> resultSet.getBoolean(0));
+        Assertions.assertThrows(SQLException.class, () -> resultSet.getByte(0));
+        Assertions.assertThrows(SQLException.class, () -> resultSet.getShort(0));
+        Assertions.assertThrows(SQLException.class, () -> resultSet.getInt(0));
+        Assertions.assertThrows(SQLException.class, () -> resultSet.getLong(0));
+        Assertions.assertThrows(SQLException.class, () -> resultSet.getFloat(0));
+        Assertions.assertThrows(SQLException.class, () -> resultSet.getDouble(0));
+    }
+
+    @Test
+    void testTimeType() throws SQLException {
+        final java.sql.ResultSet resultSet = statement.executeQuery("RETURN time(\"12:10:10.000000225+0100\") AS n");
+        Assertions.assertTrue(resultSet.next());
+        Assertions.assertEquals("12:10:10.000000225+01:00", resultSet.getString(0));
+        Assertions.assertEquals(java.sql.Timestamp.valueOf(
+                LocalTime.of(12, 10, 10, 225).atDate(LocalDate.ofEpochDay(0))),
+                resultSet.getTimestamp(0));
+        Assertions.assertEquals(java.sql.Time.valueOf("12:10:10"), resultSet.getTime(0));
+        Assertions.assertThrows(SQLException.class, () -> resultSet.getDate(0));
+        Assertions.assertThrows(SQLException.class, () -> resultSet.getBoolean(0));
+        Assertions.assertThrows(SQLException.class, () -> resultSet.getByte(0));
+        Assertions.assertThrows(SQLException.class, () -> resultSet.getShort(0));
+        Assertions.assertThrows(SQLException.class, () -> resultSet.getInt(0));
+        Assertions.assertThrows(SQLException.class, () -> resultSet.getLong(0));
+        Assertions.assertThrows(SQLException.class, () -> resultSet.getFloat(0));
+        Assertions.assertThrows(SQLException.class, () -> resultSet.getDouble(0));
+    }
+
+    @Test
+    void testLocalTimeType() throws SQLException {
+        final java.sql.ResultSet resultSet = statement.executeQuery("RETURN localtime(\"12:10:10.000000225\") AS n");
+        Assertions.assertTrue(resultSet.next());
+        Assertions.assertEquals("12:10:10.000000225", resultSet.getString(0));
+        Assertions.assertEquals(java.sql.Timestamp.valueOf(
+                LocalTime.of(12, 10, 10, 225).atDate(LocalDate.ofEpochDay(0))),
+                resultSet.getTimestamp(0));
+        Assertions.assertEquals(java.sql.Time.valueOf("12:10:10"), resultSet.getTime(0));
+        Assertions.assertThrows(SQLException.class, () -> resultSet.getDate(0));
+        Assertions.assertThrows(SQLException.class, () -> resultSet.getBoolean(0));
+        Assertions.assertThrows(SQLException.class, () -> resultSet.getByte(0));
+        Assertions.assertThrows(SQLException.class, () -> resultSet.getShort(0));
+        Assertions.assertThrows(SQLException.class, () -> resultSet.getInt(0));
+        Assertions.assertThrows(SQLException.class, () -> resultSet.getLong(0));
+        Assertions.assertThrows(SQLException.class, () -> resultSet.getFloat(0));
+        Assertions.assertThrows(SQLException.class, () -> resultSet.getDouble(0));
+    }
+
+    @Test
+    void testDatetimeType() throws SQLException {
+        final java.sql.ResultSet resultSet =
+                statement.executeQuery("RETURN datetime(\"1993-03-30T12:10:10.000000225+0100\") AS n");
+        Assertions.assertTrue(resultSet.next());
+        Assertions.assertEquals("1993-03-30T12:10:10.000000225+01:00", resultSet.getString(0));
+        Assertions.assertEquals(java.sql.Date.valueOf("1993-03-30"), resultSet.getDate(0));
+        Assertions.assertEquals(java.sql.Time.valueOf("12:10:10"), resultSet.getTime(0));
+        Assertions.assertEquals(java.sql.Timestamp.valueOf(LocalDateTime.of(1993, 3, 30, 12, 10, 10, 225)),
+                resultSet.getTimestamp(0));
+        Assertions.assertThrows(SQLException.class, () -> resultSet.getBoolean(0));
+        Assertions.assertThrows(SQLException.class, () -> resultSet.getByte(0));
+        Assertions.assertThrows(SQLException.class, () -> resultSet.getShort(0));
+        Assertions.assertThrows(SQLException.class, () -> resultSet.getInt(0));
+        Assertions.assertThrows(SQLException.class, () -> resultSet.getLong(0));
+        Assertions.assertThrows(SQLException.class, () -> resultSet.getFloat(0));
+        Assertions.assertThrows(SQLException.class, () -> resultSet.getDouble(0));
+    }
+
+    @Test
+    void testLocalDatetimeType() throws SQLException {
+        final java.sql.ResultSet resultSet =
+                statement.executeQuery("RETURN localdatetime(\"1993-03-30T12:10:10.000000225\") AS n");
+        Assertions.assertTrue(resultSet.next());
+        Assertions.assertEquals("1993-03-30T12:10:10.000000225", resultSet.getString(0));
+        Assertions.assertEquals(java.sql.Date.valueOf("1993-03-30"), resultSet.getDate(0));
+        Assertions.assertEquals(java.sql.Time.valueOf("12:10:10"), resultSet.getTime(0));
+        Assertions.assertEquals(java.sql.Timestamp.valueOf(LocalDateTime.of(1993, 3, 30, 12, 10, 10, 225)),
+                resultSet.getTimestamp(0));
+        Assertions.assertThrows(SQLException.class, () -> resultSet.getBoolean(0));
+        Assertions.assertThrows(SQLException.class, () -> resultSet.getByte(0));
+        Assertions.assertThrows(SQLException.class, () -> resultSet.getShort(0));
+        Assertions.assertThrows(SQLException.class, () -> resultSet.getInt(0));
+        Assertions.assertThrows(SQLException.class, () -> resultSet.getLong(0));
+        Assertions.assertThrows(SQLException.class, () -> resultSet.getFloat(0));
+        Assertions.assertThrows(SQLException.class, () -> resultSet.getDouble(0));
+    }
+
+    @Test
+    void testDurationType() throws SQLException {
+        final java.sql.ResultSet resultSet = statement.executeQuery("RETURN duration(\"P5M1.5D\") as n");
+        Assertions.assertTrue(resultSet.next());
+
+    }
 }

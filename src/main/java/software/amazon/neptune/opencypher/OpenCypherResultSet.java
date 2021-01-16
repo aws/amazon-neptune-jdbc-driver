@@ -23,8 +23,6 @@ import org.neo4j.driver.Value;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import software.amazon.jdbc.utilities.JavaToJdbcTypeConverter;
-import java.math.BigDecimal;
-import java.sql.Array;
 import java.sql.Date;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
@@ -51,6 +49,7 @@ public class OpenCypherResultSet extends software.amazon.jdbc.ResultSet implemen
      *
      * @param statement Statement Object.
      * @param result    Result Object.
+     * @param session   Session Object.
      */
     OpenCypherResultSet(final java.sql.Statement statement, final Result result, final Session session) {
         super(statement);
@@ -175,75 +174,83 @@ public class OpenCypherResultSet extends software.amazon.jdbc.ResultSet implemen
         return JavaToJdbcTypeConverter.toString(converter.convert(value));
     }
 
-    // TODO: Fill in functions below.
-    @Override
-    public BigDecimal getBigDecimal(final int columnIndex) throws SQLException {
-        return null;
-    }
-
-    @Override
-    public BigDecimal getBigDecimal(final int columnIndex, final int scale) throws SQLException {
-        return null;
-    }
-
     @Override
     public byte[] getBytes(final int columnIndex) throws SQLException {
-        return null;
+        LOGGER.trace("Getting column {} as a byte array.", columnIndex);
+        final Value value = getValue(columnIndex);
+        final OpenCypherTypeMapping.Converter<?> converter = getConverter(value);
+        return JavaToJdbcTypeConverter.toByteArray(converter.convert(value));
     }
 
     @Override
     public Date getDate(final int columnIndex) throws SQLException {
-        return null;
+        LOGGER.trace("Getting column {} as a String.", columnIndex);
+        final Value value = getValue(columnIndex);
+        final OpenCypherTypeMapping.Converter<?> converter = getConverter(value);
+        return JavaToJdbcTypeConverter.toDate(converter.convert(value));
     }
 
     @Override
     public Time getTime(final int columnIndex) throws SQLException {
-        return null;
+        LOGGER.trace("Getting column {} as a String.", columnIndex);
+        final Value value = getValue(columnIndex);
+        final OpenCypherTypeMapping.Converter<?> converter = getConverter(value);
+        return JavaToJdbcTypeConverter.toTime(converter.convert(value));
     }
 
     @Override
     public Timestamp getTimestamp(final int columnIndex) throws SQLException {
-        return null;
-    }
-
-    @Override
-    public Object getObject(final int columnIndex, final Map<String, Class<?>> map) throws SQLException {
-        return null;
-    }
-
-    @Override
-    public Object getObject(final int columnIndex) throws SQLException {
-        return null;
-    }
-
-    @Override
-    public Array getArray(final int columnIndex) throws SQLException {
-        return null;
+        LOGGER.trace("Getting column {} as a String.", columnIndex);
+        final Value value = getValue(columnIndex);
+        final OpenCypherTypeMapping.Converter<?> converter = getConverter(value);
+        return JavaToJdbcTypeConverter.toTimestamp(converter.convert(value));
     }
 
     @Override
     public Timestamp getTimestamp(final int columnIndex, final Calendar cal) throws SQLException {
-        return null;
-    }
-
-    @Override
-    public String getNString(final int columnIndex) throws SQLException {
-        return null;
+        LOGGER.trace("Getting column {} as a String.", columnIndex);
+        final Value value = getValue(columnIndex);
+        final OpenCypherTypeMapping.Converter<?> converter = getConverter(value);
+        return JavaToJdbcTypeConverter.toTimestamp(converter.convert(value), cal);
     }
 
     @Override
     public Date getDate(final int columnIndex, final Calendar cal) throws SQLException {
-        return null;
+        LOGGER.trace("Getting column {} as a String.", columnIndex);
+        final Value value = getValue(columnIndex);
+        final OpenCypherTypeMapping.Converter<?> converter = getConverter(value);
+        return JavaToJdbcTypeConverter.toDate(converter.convert(value), cal);
     }
 
     @Override
     public Time getTime(final int columnIndex, final Calendar cal) throws SQLException {
-        return null;
+        LOGGER.trace("Getting column {} as a String.", columnIndex);
+        final Value value = getValue(columnIndex);
+        final OpenCypherTypeMapping.Converter<?> converter = getConverter(value);
+        return JavaToJdbcTypeConverter.toTime(converter.convert(value), cal);
+    }
+
+    @Override
+    public Object getObject(final int columnIndex, final Map<String, Class<?>> map) throws SQLException {
+        LOGGER.trace("Getting column {} as an Object using provided Map.", columnIndex);
+        final Value value = getValue(columnIndex);
+        return getObject(columnIndex, map.get(OpenCypherTypeMapping.BOLT_TO_JDBC_TYPE_MAP.get(value.type()).name()));
+    }
+
+    @Override
+    public Object getObject(final int columnIndex) throws SQLException {
+        LOGGER.trace("Getting column {} as an Object.", columnIndex);
+        final Value value = getValue(columnIndex);
+        final OpenCypherTypeMapping.Converter<?> converter = getConverter(value);
+        return converter.convert(value);
     }
 
     @Override
     public <T> T getObject(final int columnIndex, final Class<T> type) throws SQLException {
-        return null;
+        LOGGER.trace("Getting column {} as an Object using provided Type.", columnIndex);
+        final Value value = getValue(columnIndex);
+        final OpenCypherTypeMapping.Converter<?> converter = getConverter(value);
+        return (T) JavaToJdbcTypeConverter.CLASS_CONVERTER_MAP.get(type).function(converter.convert(value));
     }
 
     protected int getColumnCount() {

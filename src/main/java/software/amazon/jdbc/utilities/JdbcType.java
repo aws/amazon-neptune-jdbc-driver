@@ -15,6 +15,9 @@
 
 package software.amazon.jdbc.utilities;
 
+import java.sql.JDBCType;
+import java.sql.Types;
+
 /**
  * Copy of the java.sql.Types constants but as an enum, for use in lookups.
  */
@@ -50,7 +53,8 @@ public enum JdbcType {
     LONGNVARCHAR(-16),
     NCLOB(2011),
     SQLXML(2009),
-    REF_CURSOR(2012);
+    REF_CURSOR(2012),
+    NULL(0);
 
     /**
      * The java.sql.Types JDBC type.
@@ -59,10 +63,15 @@ public enum JdbcType {
 
     /**
      * JdbcType constructor.
+     *
      * @param jdbcCode The java.sql.Types JDBC type associated with this value.
      */
     JdbcType(final int jdbcCode) {
         this.jdbcCode = jdbcCode;
+    }
+
+    public int getJdbcCode() {
+        return jdbcCode;
     }
 }
 

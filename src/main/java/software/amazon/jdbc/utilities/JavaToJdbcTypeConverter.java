@@ -17,15 +17,45 @@ package software.amazon.jdbc.utilities;
 
 import com.google.common.collect.ImmutableMap;
 import org.slf4j.LoggerFactory;
+import java.sql.Date;
 import java.sql.SQLException;
+import java.sql.Time;
+import java.sql.Timestamp;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.OffsetTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.util.Calendar;
+import java.util.GregorianCalendar;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 public class JavaToJdbcTypeConverter {
+    public static final Map<Class<?>, ClassConverter<?>> CLASS_CONVERTER_MAP = new HashMap<>();
     private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(JavaToJdbcTypeConverter.class);
     private static final Map<String, Boolean> BOOLEAN_STRINGS = ImmutableMap.of(
             "1", true, "true", true,
             "0", false, "false", false);
+    private static final Calendar DEFAULT_CALENDAR = new GregorianCalendar();
+
+    static {
+        CLASS_CONVERTER_MAP.put(Boolean.class, JavaToJdbcTypeConverter::toBoolean);
+        CLASS_CONVERTER_MAP.put(Byte.class, JavaToJdbcTypeConverter::toByte);
+        CLASS_CONVERTER_MAP.put(Short.class, JavaToJdbcTypeConverter::toShort);
+        CLASS_CONVERTER_MAP.put(Integer.class, JavaToJdbcTypeConverter::toInteger);
+        CLASS_CONVERTER_MAP.put(Long.class, JavaToJdbcTypeConverter::toLong);
+        CLASS_CONVERTER_MAP.put(Float.class, JavaToJdbcTypeConverter::toFloat);
+        CLASS_CONVERTER_MAP.put(Double.class, JavaToJdbcTypeConverter::toDouble);
+        CLASS_CONVERTER_MAP.put(byte[].class, JavaToJdbcTypeConverter::toByteArray);
+        CLASS_CONVERTER_MAP.put(String.class, JavaToJdbcTypeConverter::toString);
+        CLASS_CONVERTER_MAP.put(Date.class, JavaToJdbcTypeConverter::toDate);
+        CLASS_CONVERTER_MAP.put(Time.class, JavaToJdbcTypeConverter::toTime);
+        CLASS_CONVERTER_MAP.put(Timestamp.class, JavaToJdbcTypeConverter::toTimestamp);
+    }
 
     /**
      * Function that takes in a Java Object and attempts to convert it to a Boolean.
@@ -164,7 +194,15 @@ public class JavaToJdbcTypeConverter {
                 input instanceof Float ||
                 input instanceof Double ||
                 input instanceof List ||
-                input instanceof Map) {
+                input instanceof Map ||
+                input instanceof java.sql.Date ||
+                input instanceof java.sql.Time ||
+                input instanceof java.sql.Timestamp ||
+                input instanceof LocalDate ||
+                input instanceof LocalTime ||
+                input instanceof LocalDateTime ||
+                input instanceof OffsetTime ||
+                input instanceof ZonedDateTime) {
             return input.toString();
         }
         throw createConversionException(input.getClass(), String.class);
@@ -220,6 +258,177 @@ public class JavaToJdbcTypeConverter {
         throw createConversionException(input.getClass(), Double.class);
     }
 
+    /**
+     * Function that takes in a Java Object and attempts to convert it to a byte array.
+     *
+     * @param input Input Object.
+     * @return byte array.
+     * @throws SQLException if conversion cannot be performed.
+     */
+    public static byte[] toByteArray(final Object input) throws SQLException {
+        if (input == null) {
+            return null;
+        }
+        if (input instanceof String) {
+            return ((String) input).getBytes();
+        } else if (input instanceof byte[]) {
+            return (byte[]) input;
+        } else if (input instanceof Byte) {
+            return new byte[] {(Byte) input};
+        }
+        throw createConversionException(input.getClass(), Double.class);
+    }
+
+    /**
+     * Function that takes in a Java Object and attempts to convert it to a Date.
+     *
+     * @param input Input Object.
+     * @param calendar Calendar to use.
+     * @return Date.
+     * @throws SQLException if conversion cannot be performed.
+     */
+    public static java.sql.Date toDate(final Object input, final Calendar calendar) throws SQLException {
+        if (input == null) {
+            return null; // TODO: Check
+        }
+
+        if (input instanceof Long) {
+            return new Date((Long) input);
+        } else if (input instanceof String) {
+            try {
+                return Date.valueOf((String) input);
+            } catch (final IllegalArgumentException ignored) {
+            }
+        } else if (input instanceof LocalDate) {
+            return getCalendarDate(Date.valueOf((LocalDate) input), calendar);
+        } else if (input instanceof LocalDateTime) {
+            return getCalendarDate(Date.valueOf(((LocalDateTime) input).toLocalDate()), calendar);
+        } else if (input instanceof ZonedDateTime) {
+            return getCalendarDate(Date.valueOf(((ZonedDateTime) input).toLocalDate()), calendar);
+        }
+        throw createConversionException(input.getClass(), java.sql.Date.class);
+    }
+
+    /**
+     * Function that takes in a Java Object and attempts to convert it to a Time.
+     *
+     * @param input Input Object.
+     * @param calendar Calendar to use.
+     * @return Time.
+     * @throws SQLException if conversion cannot be performed.
+     */
+    public static java.sql.Time toTime(final Object input, final Calendar calendar) throws SQLException {
+        if (input == null) {
+            return null; // TODO: Check
+        }
+
+        try {
+            if (input instanceof Long) {
+                return getCalendarTime(new Time((Long) input), calendar);
+            } else if (input instanceof String) {
+                return getCalendarTime(Time.valueOf((String) input), calendar);
+            } else if (input instanceof LocalTime) {
+                return getCalendarTime(Time.valueOf((LocalTime) input), calendar);
+            } else if (input instanceof LocalDateTime) {
+                return getCalendarTime(Time.valueOf(((LocalDateTime) input).toLocalTime()), calendar);
+            } else if (input instanceof ZonedDateTime) {
+                return getCalendarTime(Time.valueOf(((ZonedDateTime) input).toLocalTime()), calendar);
+            } else if (input instanceof OffsetTime) {
+                return getCalendarTime(Time.valueOf(((OffsetTime) input).toLocalTime()), calendar);
+            }
+        } catch (final Exception ignored) {
+        }
+        throw createConversionException(input.getClass(), java.sql.Date.class);
+    }
+
+    /**
+     * Function that takes in a Java Object and attempts to convert it to a Timestamp.
+     *
+     * @param input Input Object.
+     * @param calendar Calendar to use.
+     * @return Timestamp.
+     * @throws SQLException if conversion cannot be performed.
+     */
+    public static java.sql.Timestamp toTimestamp(final Object input, final Calendar calendar) throws SQLException {
+        if (input == null) {
+            return null; // TODO: Check
+        }
+
+        try {
+            if (input instanceof Long) {
+                return getCalendarTimestamp(new Timestamp((Long) input), calendar);
+            } else if (input instanceof String) {
+                return getCalendarTimestamp(Timestamp.valueOf((String) input), calendar);
+            } else if (input instanceof LocalDateTime) {
+                return getCalendarTimestamp(Timestamp.valueOf((LocalDateTime) input), calendar);
+            } else if (input instanceof LocalDate) {
+                return getCalendarTimestamp(Timestamp.valueOf(((LocalDate) input).atStartOfDay()), calendar);
+            } else if (input instanceof LocalTime) {
+                return getCalendarTimestamp(Timestamp.valueOf(((LocalTime) input).atDate(LocalDate.ofEpochDay(0))),
+                        calendar);
+            } else if (input instanceof ZonedDateTime) {
+                return getCalendarTimestamp(Timestamp.valueOf(((ZonedDateTime) input).toLocalDateTime()), calendar);
+            } else if (input instanceof OffsetTime) {
+                return getCalendarTimestamp(
+                        Timestamp.valueOf(((OffsetTime) input).toLocalTime().atDate(LocalDate.ofEpochDay(0))),
+                        calendar);
+            }
+        } catch (final Exception ignored) {
+        }
+        throw createConversionException(input.getClass(), java.sql.Date.class);
+    }
+
+    /**
+     * Function that takes in a Java Object and attempts to convert it to a Time.
+     *
+     * @param input Input Object.
+     * @return Time.
+     * @throws SQLException if conversion cannot be performed.
+     */
+    public static java.sql.Time toTime(final Object input) throws SQLException {
+        return toTime(input, DEFAULT_CALENDAR);
+    }
+
+    /**
+     * Function that takes in a Java Object and attempts to convert it to a Date.
+     *
+     * @param input Input Object.
+     * @return Date.
+     * @throws SQLException if conversion cannot be performed.
+     */
+    public static java.sql.Date toDate(final Object input) throws SQLException {
+        return toDate(input, DEFAULT_CALENDAR);
+    }
+
+    /**
+     * Function that takes in a Java Object and attempts to convert it to a Timestamp.
+     *
+     * @param input Input Object.
+     * @return Timestamp.
+     * @throws SQLException if conversion cannot be performed.
+     */
+    public static java.sql.Timestamp toTimestamp(final Object input) throws SQLException {
+        return toTimestamp(input, DEFAULT_CALENDAR);
+    }
+
+    private static Date getCalendarDate(final Date date, final Calendar calendar) {
+        final Instant zdtInstant = date.toLocalDate().atStartOfDay(calendar.getTimeZone().toZoneId()).toInstant();
+        return new Date(zdtInstant.toEpochMilli());
+    }
+
+    private static Time getCalendarTime(final Time time, final Calendar calendar) {
+        final LocalDateTime localDateTime = time.toLocalTime().atDate(LocalDate.of(1970, 1, 1));
+        final ZoneId zonedDateTime = ZoneId.from(localDateTime.atZone(calendar.getTimeZone().toZoneId()));
+        return new Time(localDateTime.atZone(zonedDateTime).toInstant().toEpochMilli());
+    }
+
+    private static Timestamp getCalendarTimestamp(final Timestamp timestamp, final Calendar calendar) {
+        final Instant instant = timestamp.toLocalDateTime().atZone(calendar.getTimeZone().toZoneId()).toInstant();
+        final Timestamp timestampAdjusted = new Timestamp(instant.toEpochMilli());
+        timestampAdjusted.setNanos(instant.getNano());
+        return timestampAdjusted;
+    }
+
     private static SQLException createConversionException(final Class source, final Class target) {
         return SqlError.createSQLException(
                 LOGGER,
@@ -227,5 +436,21 @@ public class JavaToJdbcTypeConverter {
                 SqlError.UNSUPPORTED_CONVERSION,
                 source.getTypeName(),
                 target.getTypeName());
+    }
+
+    /**
+     * Lambda function interface to convert Object to template type.
+     *
+     * @param <T> Template type to convert to.
+     */
+    public interface ClassConverter<T> {
+        /**
+         * Lambda function to perform conversion.
+         *
+         * @param input Input Object.
+         * @return Template type to convert to.
+         * @throws SQLException If error is encountered during conversion.
+         */
+        T function(final Object input) throws SQLException;
     }
 }

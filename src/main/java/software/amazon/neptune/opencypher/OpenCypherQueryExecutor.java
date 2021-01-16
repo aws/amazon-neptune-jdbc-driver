@@ -27,8 +27,8 @@ import java.sql.SQLException;
  * OpenCypher implementation of QueryExecution.
  */
 public class OpenCypherQueryExecutor {
-    private final Driver driver;
     private static final int MAX_FETCH_SIZE = Integer.MAX_VALUE;
+    private final Driver driver;
     private final int fetchSize = -1;
     private boolean isConfigChange = false;
     private boolean isSessionConfigChange = false;
@@ -38,6 +38,7 @@ public class OpenCypherQueryExecutor {
 
     /**
      * OpenCypherQueryExecutor constructor.
+     *
      * @param properties properties to use for query executon.
      */
     OpenCypherQueryExecutor(final OpenCypherConnectionProperties properties) {
@@ -87,7 +88,8 @@ public class OpenCypherQueryExecutor {
 
     /**
      * Function to execute query.
-     * @param sql Query to execute.
+     *
+     * @param sql       Query to execute.
      * @param statement java.sql.Statement Object required for result set.
      * @return java.sql.ResultSet object returned from query execution.
      */
@@ -99,6 +101,7 @@ public class OpenCypherQueryExecutor {
 
     /**
      * Get query execution timeout in seconds.
+     *
      * @return Query execution timeout in seconds.
      */
     public int getQueryTimeout() {
@@ -107,6 +110,7 @@ public class OpenCypherQueryExecutor {
 
     /**
      * Set query execution timeout to the timeout in seconds.
+     *
      * @param seconds Time in seconds to set query timeout to.
      */
     public void setQueryTimeout(final int seconds) {
