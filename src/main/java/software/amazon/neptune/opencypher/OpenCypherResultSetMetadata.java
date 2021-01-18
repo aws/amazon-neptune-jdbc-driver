@@ -81,7 +81,7 @@ public class OpenCypherResultSetMetadata extends ResultSetMetaData implements ja
             return 1;
         } else if (type == Types.VARCHAR) {
             return 0;
-        } else if (type == Types.DOUBLE) {
+        } else if (type == Types.DOUBLE || type == Types.REAL) {
             return 25;
         } else if (type == Types.DATE) {
             return 24;
@@ -89,7 +89,7 @@ public class OpenCypherResultSetMetadata extends ResultSetMetaData implements ja
             return 24;
         } else if (type == Types.TIMESTAMP) {
             return 24;
-        } else if (type == Types.BIGINT) {
+        } else if (type == Types.BIGINT || type == Types.INTEGER || type == Types.SMALLINT || type == Types.TINYINT) {
             return 20;
         } else if (type == Types.NULL) {
             return 0;
@@ -108,7 +108,7 @@ public class OpenCypherResultSetMetadata extends ResultSetMetaData implements ja
             return 1;
         } else if (type == Types.VARCHAR) {
             return 256;
-        } else if (type == Types.DOUBLE) {
+        } else if (type == Types.DOUBLE || type == Types.REAL) {
             return 15;
         } else if (type == Types.DATE) {
             return 24;
@@ -116,7 +116,7 @@ public class OpenCypherResultSetMetadata extends ResultSetMetaData implements ja
             return 24;
         } else if (type == Types.TIMESTAMP) {
             return 24;
-        } else if (type == Types.BIGINT) {
+        } else if (type == Types.BIGINT || type == Types.INTEGER || type == Types.SMALLINT || type == Types.TINYINT) {
             return 19;
         } else if (type == Types.NULL) {
             return 0;
@@ -130,8 +130,15 @@ public class OpenCypherResultSetMetadata extends ResultSetMetaData implements ja
     public int getScale(final int column) throws SQLException {
         verifyColumnIndex(column);
 
-        // 15.9 significant digits after decimal, truncate to 15.
-        return (getColumnType(column) == Types.DOUBLE) ? 15 : 0;
+        final int columnType = getColumnType(column);
+        if ((columnType == Types.DOUBLE) || (columnType == Types.REAL)) {
+            // 15 significant digits after decimal.
+            return 15;
+        } else if (columnType == Types.FLOAT) {
+            // 6 Sig significant digits after decimal.
+            return 6;
+        }
+        return 0;
     }
 
     @Override
@@ -175,7 +182,14 @@ public class OpenCypherResultSetMetadata extends ResultSetMetaData implements ja
         verifyColumnIndex(column);
 
         final int type = getColumnType(column);
-        return ((type == Types.BIGINT) || (type == Types.DOUBLE));
+        return ((type == Types.INTEGER) ||
+                (type == Types.BIGINT) ||
+                (type == Types.DOUBLE) ||
+                (type == Types.FLOAT) ||
+                (type == Types.REAL) ||
+                (type == Types.SMALLINT) ||
+                (type == Types.TINYINT) ||
+                (type == Types.DECIMAL));
     }
 
     @Override
@@ -195,7 +209,7 @@ public class OpenCypherResultSetMetadata extends ResultSetMetaData implements ja
     @Override
     public int getColumnType(final int column) throws SQLException {
         verifyColumnIndex(column);
-        return OpenCypherTypeMapping.BOLT_TO_JDBC_TYPE_MAP.get(getColumnBoltType(column));
+        return OpenCypherTypeMapping.BOLT_TO_JDBC_TYPE_MAP.get(getColumnBoltType(column)).getJdbcCode();
     }
 
     @Override
