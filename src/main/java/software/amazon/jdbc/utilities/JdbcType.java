@@ -15,9 +15,6 @@
 
 package software.amazon.jdbc.utilities;
 
-import java.sql.JDBCType;
-import java.sql.Types;
-
 /**
  * Copy of the java.sql.Types constants but as an enum, for use in lookups.
  */
