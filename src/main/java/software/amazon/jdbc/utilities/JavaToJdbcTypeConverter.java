@@ -289,14 +289,14 @@ public class JavaToJdbcTypeConverter {
      */
     public static java.sql.Date toDate(final Object input, final Calendar calendar) throws SQLException {
         if (input == null) {
-            return null; // TODO: Check
+            return null;
         }
 
         if (input instanceof Long) {
             return new Date((Long) input);
         } else if (input instanceof String) {
             try {
-                return Date.valueOf((String) input);
+                getCalendarDate(Date.valueOf((String) input), calendar);
             } catch (final IllegalArgumentException ignored) {
             }
         } else if (input instanceof LocalDate) {
@@ -319,14 +319,17 @@ public class JavaToJdbcTypeConverter {
      */
     public static java.sql.Time toTime(final Object input, final Calendar calendar) throws SQLException {
         if (input == null) {
-            return null; // TODO: Check
+            return null;
         }
 
         try {
             if (input instanceof Long) {
                 return getCalendarTime(new Time((Long) input), calendar);
             } else if (input instanceof String) {
-                return getCalendarTime(Time.valueOf((String) input), calendar);
+                try {
+                    return getCalendarTime(Time.valueOf((String) input), calendar);
+                } catch (final IllegalArgumentException ignored) {
+                }
             } else if (input instanceof LocalTime) {
                 return getCalendarTime(Time.valueOf((LocalTime) input), calendar);
             } else if (input instanceof LocalDateTime) {
@@ -351,14 +354,17 @@ public class JavaToJdbcTypeConverter {
      */
     public static java.sql.Timestamp toTimestamp(final Object input, final Calendar calendar) throws SQLException {
         if (input == null) {
-            return null; // TODO: Check
+            return null;
         }
 
         try {
             if (input instanceof Long) {
                 return getCalendarTimestamp(new Timestamp((Long) input), calendar);
             } else if (input instanceof String) {
-                return getCalendarTimestamp(Timestamp.valueOf((String) input), calendar);
+                try {
+                    return getCalendarTimestamp(Timestamp.valueOf((String) input), calendar);
+                } catch (final IllegalArgumentException ignored) {
+                }
             } else if (input instanceof LocalDateTime) {
                 return getCalendarTimestamp(Timestamp.valueOf((LocalDateTime) input), calendar);
             } else if (input instanceof LocalDate) {
