@@ -45,7 +45,7 @@ public class OpenCypherQueryExecutor {
     private Config config;
     private SessionConfig sessionConfig;
     private Session session;
-    private Object lock = new Object();
+    private final Object lock = new Object();
     private boolean queryExecuted = false;
     private boolean queryCancelled = false;
 
