@@ -73,7 +73,7 @@ public class OpenCypherStatementTest extends OpenCypherStatementTestBase {
     void testCancelQueryTwice() {
         // Wait 1 second before attempting to cancel.
         launchCancelThread(1000, statement);
-        HelperFunctions.expectFunctionThrows(() -> statement.execute(getLongQuery()));
+        HelperFunctions.expectFunctionThrows(SqlError.QUERY_CANCELED, () -> statement.execute(getLongQuery()));
         waitCancelToComplete();
         launchCancelThread(0, statement);
         waitCancelToComplete();
