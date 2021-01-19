@@ -32,11 +32,12 @@ public class OpenCypherPreparedStatement extends software.amazon.jdbc.PreparedSt
      * OpenCypherPreparedStatement constructor, creates OpenCypherQueryExecutor and initializes super class.
      * @param connection Connection Object.
      * @param sql Sql query.
-     * @param openCypherQueryExecutor Query executor.
      */
-    public OpenCypherPreparedStatement(final java.sql.Connection connection, final String sql, final OpenCypherQueryExecutor openCypherQueryExecutor) {
+    public OpenCypherPreparedStatement(final java.sql.Connection connection, final String sql) throws SQLException {
         super(connection, sql);
-        this.openCypherQueryExecutor = openCypherQueryExecutor;
+        this.openCypherQueryExecutor = new OpenCypherQueryExecutor(
+                new OpenCypherConnectionProperties(connection.getClientInfo())
+        );
         this.sql = sql;
     }
 
@@ -45,7 +46,6 @@ public class OpenCypherPreparedStatement extends software.amazon.jdbc.PreparedSt
     protected void cancelQuery() throws SQLException {
         verifyOpen();
         openCypherQueryExecutor.cancelQuery();
-        // TODO: Async query execution and cancellation.
     }
 
     @Override

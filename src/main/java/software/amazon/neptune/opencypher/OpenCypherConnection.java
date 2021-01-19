@@ -77,18 +77,14 @@ public class OpenCypherConnection extends software.amazon.jdbc.Connection implem
         // TODO.
     }
 
-    private OpenCypherQueryExecutor getQueryExecutor() {
-        return new OpenCypherQueryExecutor(new OpenCypherConnectionProperties(getConnectionProperties()));
-    }
-
     @Override
     public java.sql.Statement createStatement(final int resultSetType, final int resultSetConcurrency)
             throws SQLException {
-        return new OpenCypherStatement(this, getQueryExecutor());
+        return new OpenCypherStatement(this);
     }
 
     @Override
     public java.sql.PreparedStatement prepareStatement(final String sql) throws SQLException {
-        return new OpenCypherPreparedStatement(this, sql, getQueryExecutor());
+        return new OpenCypherPreparedStatement(this, sql);
     }
 }
