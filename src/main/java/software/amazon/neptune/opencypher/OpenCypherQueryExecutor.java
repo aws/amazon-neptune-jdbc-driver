@@ -19,22 +19,35 @@ package software.amazon.neptune.opencypher;
 import org.neo4j.driver.Config;
 import org.neo4j.driver.Driver;
 import org.neo4j.driver.GraphDatabase;
+import org.neo4j.driver.Record;
+import org.neo4j.driver.Result;
 import org.neo4j.driver.Session;
 import org.neo4j.driver.SessionConfig;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import software.amazon.jdbc.utilities.SqlError;
+import software.amazon.jdbc.utilities.SqlState;
+
 import java.sql.SQLException;
+import java.util.List;
 
 /**
  * OpenCypher implementation of QueryExecution.
  */
 public class OpenCypherQueryExecutor {
-    private static final int MAX_FETCH_SIZE = Integer.MAX_VALUE;
+    private static final Logger LOGGER = LoggerFactory.getLogger(OpenCypherQueryExecutor.class);
     private final Driver driver;
+    private static final int MAX_FETCH_SIZE = Integer.MAX_VALUE;
     private final int fetchSize = -1;
     private boolean isConfigChange = false;
     private boolean isSessionConfigChange = false;
     private int queryTimeout = -1;
     private Config config;
     private SessionConfig sessionConfig;
+    private Session session;
+    private Object lock = new Object();
+    private boolean queryExecuted = false;
+    private boolean queryCancelled = false;
 
     /**
      * OpenCypherQueryExecutor constructor.
@@ -77,11 +90,6 @@ public class OpenCypherQueryExecutor {
         return sessionConfig;
     }
 
-
-    protected void cancelQuery() throws SQLException {
-        // TODO: Cancel logic.
-    }
-
     protected int getMaxFetchSize() throws SQLException {
         return MAX_FETCH_SIZE;
     }
@@ -92,11 +100,91 @@ public class OpenCypherQueryExecutor {
      * @param sql       Query to execute.
      * @param statement java.sql.Statement Object required for result set.
      * @return java.sql.ResultSet object returned from query execution.
+     * @throws SQLException if query execution fails, or it was cancelled.
      */
-    public java.sql.ResultSet executeQuery(final String sql, final java.sql.Statement statement) {
-        final Session session = driver.session(sessionConfig);
-        return new OpenCypherResultSet(statement, session.run(sql), session);
-        // TODO: Throw exception?
+    public java.sql.ResultSet executeQuery(final String sql, final java.sql.Statement statement) throws SQLException {
+        synchronized (lock) {
+            queryCancelled = false;
+            queryExecuted = false;
+        }
+
+        try {
+            session = driver.session(sessionConfig);
+            final Result result = session.run(sql);
+            final List<Record> rows = result.list();
+            final List<String> columns = result.keys();
+            synchronized (lock) {
+                if (queryCancelled) {
+                    LOGGER.error("Execute query failed - flag indicates query was cancelled.");
+                    throw SqlError.createSQLException(
+                            LOGGER,
+                            SqlState.OPERATION_CANCELED,
+                            SqlError.QUERY_CANCELED);
+                }
+                queryExecuted = true;
+            }
+            LOGGER.debug("Execute query succeeded.");
+            return new OpenCypherResultSet(
+                    statement, session, result, rows, columns);
+
+        } catch (RuntimeException e) {
+            synchronized (lock) {
+                if (queryCancelled) {
+                    LOGGER.error("Execute query failed - query was cancelled.");
+                    throw SqlError.createSQLException(
+                            LOGGER,
+                            SqlState.OPERATION_CANCELED,
+                            SqlError.QUERY_CANCELED);
+                } else {
+                    LOGGER.error("Execute query failed - query failed with error {}.", e.getMessage());
+                    throw SqlError.createSQLException(
+                            LOGGER,
+                            SqlState.OPERATION_CANCELED,
+                            SqlError.QUERY_FAILED, e.getMessage());
+                }
+            }
+        }
+    }
+
+    /**
+     * Function to cancel running query.
+     * This has to be run in the different thread from the one running the query.
+     * @throws SQLException if query cancellation fails.
+     */
+    protected void cancelQuery() throws SQLException {
+        System.out.println("cancelQuery(), queryCancelled = " +  queryCancelled);
+        System.out.println("cancelQuery(), queryExecuted = " + queryExecuted);
+
+        synchronized (lock) {
+            if (session == null) {
+                LOGGER.error("Cancel query failed - query has not started yet.");
+                throw SqlError.createSQLException(
+                        LOGGER,
+                        SqlState.OPERATION_CANCELED,
+                        SqlError.QUERY_NOT_STARTED);
+            }
+
+            if (queryCancelled) {
+                LOGGER.error("Cancel query failed - query was cancelled.");
+                throw SqlError.createSQLException(
+                        LOGGER,
+                        SqlState.OPERATION_CANCELED,
+                        SqlError.QUERY_CANCELED);
+            }
+
+            if (!queryExecuted) {
+                LOGGER.debug("Cancel query succeeded.");
+                //noinspection deprecation
+                session.reset();
+                queryCancelled = true;
+            } else {
+                LOGGER.error("Cancel query failed - query was already executed, it cannot be cancelled.");
+                throw SqlError.createSQLException(
+                        LOGGER,
+                        SqlState.OPERATION_CANCELED,
+                        SqlError.QUERY_CANNOT_BE_CANCELLED);
+            }
+        }
     }
 
     /**

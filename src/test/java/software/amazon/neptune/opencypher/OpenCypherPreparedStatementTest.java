@@ -16,32 +16,71 @@
 
 package software.amazon.neptune.opencypher;
 
-import lombok.SneakyThrows;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import software.amazon.jdbc.helpers.HelperFunctions;
 import software.amazon.jdbc.utilities.SqlError;
-import software.amazon.neptune.NeptuneConstants;
 
 import java.io.InputStream;
 import java.io.Reader;
 import java.sql.Blob;
 import java.sql.Clob;
 import java.sql.NClob;
-import java.util.Properties;
+import java.sql.SQLException;
 
-public class OpenCypherPreparedStatementTest {
-    private static final String HOSTNAME = "localhost";
-    private static final Properties PROPERTIES = new Properties();
+public class OpenCypherPreparedStatementTest extends OpenCypherStatementTestBase {
+//    private static final String HOSTNAME = "localhost";
+//    private static final Properties PROPERTIES = new Properties();
     private java.sql.PreparedStatement openCypherPreparedStatement;
 
-    @SneakyThrows
+//    @SneakyThrows
+//    @BeforeEach
+//    void initialize() {
+//        PROPERTIES.putIfAbsent(NeptuneConstants.ENDPOINT, String.format("bolt://%s:%d", HOSTNAME, 999));
+//        final java.sql.Connection connection = new OpenCypherConnection(PROPERTIES);
+//        openCypherPreparedStatement = connection.prepareStatement("");
+//    }
+
     @BeforeEach
-    void initialize() {
-        PROPERTIES.putIfAbsent(NeptuneConstants.ENDPOINT, String.format("bolt://%s:%d", HOSTNAME, 999));
+    void initialize() throws SQLException {
         final java.sql.Connection connection = new OpenCypherConnection(PROPERTIES);
         openCypherPreparedStatement = connection.prepareStatement("");
+        statement = openCypherPreparedStatement;
     }
+
+//    @Test
+//    void testCancelQueryWithoutExecute() {
+//        launchCancelThread(0);
+//        waitCancelToComplete();
+//        HelperFunctions.expectFunctionThrows(SqlError.QUERY_NOT_STARTED, () -> cancel.getException());
+//    }
+//
+//    @Test
+//    void testCancelQueryWhileExecuteInProgress() {
+//        // Wait 1 second before attempting to cancel.
+//        launchCancelThread(1000);
+//        HelperFunctions.expectFunctionThrows(SqlError.QUERY_CANCELED, () -> statement.execute(LONG_QUERY));
+//        waitCancelToComplete();
+//    }
+//
+//    @Test
+//    void testCancelQueryTwice() {
+//        // Wait 1 second before attempting to cancel.
+//        launchCancelThread(1000);
+//        HelperFunctions.expectFunctionThrows(SqlError.QUERY_CANCELED, () -> statement.execute(LONG_QUERY));
+//        waitCancelToComplete();
+//        launchCancelThread(0);
+//        waitCancelToComplete();
+//        HelperFunctions.expectFunctionThrows(SqlError.QUERY_CANCELED, () -> cancel.getException());
+//    }
+//
+//    @Test
+//    void testCancelQueryAfterExecuteComplete() {
+//        Assertions.assertDoesNotThrow(() -> statement.execute(QUICK_QUERY));
+//        launchCancelThread(0);
+//        waitCancelToComplete();
+//        HelperFunctions.expectFunctionThrows(SqlError.QUERY_CANNOT_BE_CANCELLED, () -> cancel.getException());
+//    }
 
     @Test
     void testExecuteUpdate() {

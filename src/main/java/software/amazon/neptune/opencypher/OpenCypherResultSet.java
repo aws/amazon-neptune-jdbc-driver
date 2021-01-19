@@ -51,12 +51,16 @@ public class OpenCypherResultSet extends software.amazon.jdbc.ResultSet implemen
      * @param result    Result Object.
      * @param session   Session Object.
      */
-    OpenCypherResultSet(final java.sql.Statement statement, final Result result, final Session session) {
+    OpenCypherResultSet(final java.sql.Statement statement,
+                        final Session session,
+                        final Result result,
+                        final List<Record> rows,
+                        final List<String> columns) {
         super(statement);
         this.session = session;
         this.result = result;
-        this.rows = result.list();
-        this.columns = result.keys();
+        this.rows = rows;
+        this.columns = columns;
     }
 
     @Override
