@@ -16,8 +16,6 @@
 
 package software.amazon.neptune.opencypher;
 
-import com.google.common.util.concurrent.ThreadFactoryBuilder;
-import lombok.SneakyThrows;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
@@ -27,40 +25,11 @@ import software.amazon.jdbc.helpers.HelperFunctions;
 import software.amazon.jdbc.utilities.SqlError;
 import software.amazon.neptune.NeptuneConstants;
 import software.amazon.neptune.opencypher.mock.MockOpenCypherDatabase;
-
 import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.Properties;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
 
-public class OpenCypherStatementTest {
-    private static final String HOSTNAME = "localhost";
-    private static final Properties PROPERTIES = new Properties();
-    private static final String LONG_QUERY;
-    private static final String QUICK_QUERY;
-    private static final int LONG_QUERY_NODE_COUNT = 1000;
+public class OpenCypherStatementTest extends OpenCypherStatementTestBase {
     private static MockOpenCypherDatabase database;
-    static {
-        final StringBuilder stringBuilder = new StringBuilder();
-        for (int i = 0; i < LONG_QUERY_NODE_COUNT; i++ ) {
-            stringBuilder.append(String.format("CREATE (node%d:Foo) ", i));
-        }
-        stringBuilder.append("RETURN ");
-        for (int i = 0; i < LONG_QUERY_NODE_COUNT; i++ ) {
-            if (i != 0) {
-                stringBuilder.append(", ");
-            }
-            stringBuilder.append(String.format("node%d", i));
-        }
-        LONG_QUERY = stringBuilder.toString();
-        QUICK_QUERY = "CREATE (quick:Foo) RETURN quick";
-    }
     private java.sql.Statement statement;
-    private final ExecutorService cancelThread = Executors.newSingleThreadExecutor(
-            new ThreadFactoryBuilder().setNameFormat("cancelThread").setDaemon(true).build());
-    private Cancel cancel = null;
 
     /**
      * Function to get a random available port and initialize database before testing.
@@ -87,80 +56,35 @@ public class OpenCypherStatementTest {
 
     @Test
     void testCancelQueryWithoutExecute() {
-        launchCancelThread(0);
+        launchCancelThread(0, statement);
         waitCancelToComplete();
-        HelperFunctions.expectFunctionThrows(SqlError.QUERY_NOT_STARTED, () -> cancel.getException());
+        HelperFunctions.expectFunctionThrows(SqlError.QUERY_NOT_STARTED, this::getCancelException);
     }
 
     @Test
     void testCancelQueryWhileExecuteInProgress() {
         // Wait 1 second before attempting to cancel.
-        launchCancelThread(1000);
-        HelperFunctions.expectFunctionThrows(SqlError.QUERY_CANCELED, () -> statement.execute(LONG_QUERY));
+        launchCancelThread(1000, statement);
+        HelperFunctions.expectFunctionThrows(SqlError.QUERY_CANCELED, () -> statement.execute(getLongQuery()));
         waitCancelToComplete();
     }
 
     @Test
     void testCancelQueryTwice() {
         // Wait 1 second before attempting to cancel.
-        launchCancelThread(1000);
-        HelperFunctions.expectFunctionThrows(SqlError.QUERY_CANCELED, () -> statement.execute(LONG_QUERY));
+        launchCancelThread(1000, statement);
+        HelperFunctions.expectFunctionThrows(() -> statement.execute(getLongQuery()));
         waitCancelToComplete();
-        launchCancelThread(0);
+        launchCancelThread(0, statement);
         waitCancelToComplete();
-        HelperFunctions.expectFunctionThrows(SqlError.QUERY_CANCELED, () -> cancel.getException());
+        HelperFunctions.expectFunctionThrows(SqlError.QUERY_CANCELED, this::getCancelException);
     }
 
     @Test
     void testCancelQueryAfterExecuteComplete() {
         Assertions.assertDoesNotThrow(() -> statement.execute(QUICK_QUERY));
-        launchCancelThread(0);
+        launchCancelThread(0, statement);
         waitCancelToComplete();
-        HelperFunctions.expectFunctionThrows(SqlError.QUERY_CANNOT_BE_CANCELLED, () -> cancel.getException());
-    }
-
-    void launchCancelThread(final int waitTime) {
-        cancel = new Cancel(statement, waitTime);
-        cancelThread.execute(cancel);
-    }
-
-    @SneakyThrows
-    void waitCancelToComplete() {
-        cancelThread.awaitTermination(1000, TimeUnit.MILLISECONDS);
-    }
-
-    /**
-     * Class to cancel query in a separate thread.
-     */
-    public static class Cancel implements Runnable {
-        private final Statement statement;
-        private final int waitTime;
-        private SQLException exception;
-
-        Cancel(final Statement statement, final int waitTime) {
-            this.statement = statement;
-            this.waitTime = waitTime;
-        }
-
-        @SneakyThrows
-        @Override
-        public void run() {
-            try {
-                Thread.sleep(waitTime);
-                statement.cancel();
-            } catch (final SQLException e) {
-                exception = e;
-            }
-        }
-
-        /**
-         * Function to get exception if the run call generated one.
-         * @throws SQLException Exception caught by run.
-         */
-        void getException() throws SQLException {
-            if (exception != null) {
-                throw exception;
-            }
-        }
+        HelperFunctions.expectFunctionThrows(SqlError.QUERY_CANNOT_BE_CANCELLED, this::getCancelException);
     }
 }

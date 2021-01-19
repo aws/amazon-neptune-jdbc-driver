@@ -152,9 +152,7 @@ public class OpenCypherQueryExecutor {
      * @throws SQLException if query cancellation fails.
      */
     protected void cancelQuery() throws SQLException {
-        System.out.println("cancelQuery(), queryCancelled = " +  queryCancelled);
-        System.out.println("cancelQuery(), queryExecuted = " + queryExecuted);
-
+        LOGGER.info("Cancel query failed - query has not started yet.");
         synchronized (lock) {
             if (session == null) {
                 LOGGER.error("Cancel query failed - query has not started yet.");
@@ -165,7 +163,7 @@ public class OpenCypherQueryExecutor {
             }
 
             if (queryCancelled) {
-                LOGGER.error("Cancel query failed - query was cancelled.");
+                LOGGER.error("Cancel query failed - query was already cancelled.");
                 throw SqlError.createSQLException(
                         LOGGER,
                         SqlState.OPERATION_CANCELED,
