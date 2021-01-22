@@ -17,10 +17,13 @@
 package software.amazon.neptune;
 
 import com.google.common.collect.ImmutableList;
+import org.apache.log4j.LogManager;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import software.amazon.jdbc.utilities.LoggingLevel;
 import software.amazon.neptune.opencypher.OpenCypherConnection;
+
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Properties;
@@ -39,7 +42,7 @@ public class NeptuneDriverTest {
     private final List<String> properties = ImmutableList.of("user=username", "user=username;password=password");
     private java.sql.Driver driver;
 
-    String createValidUrl(final String language, final String endpoint, final String properties,
+    private String createValidUrl(final String language, final String endpoint, final String properties,
                           final boolean trailingSemicolon) {
         String url = String.format("jdbc:neptune:%s://%s", language, endpoint);
         if (!properties.isEmpty()) {
@@ -49,6 +52,17 @@ public class NeptuneDriverTest {
             url += ";";
         }
         return url;
+    }
+
+    private String appendProperty(final String url, final String property, final boolean trailingSemicolon) {
+        String returnUrl = url;
+        if (!property.isEmpty()) {
+            returnUrl += String.format(";%s", property);
+        }
+        if (trailingSemicolon) {
+            returnUrl += ";";
+        }
+        return returnUrl;
     }
 
     @BeforeEach
@@ -89,5 +103,33 @@ public class NeptuneDriverTest {
         }
     }
 
-    // TODO: Look into NeptuneDriver property string handling.
+    @Test
+    void testLogLevelSetting() throws SQLException {
+        final List<String> validLogLevels = ImmutableList.of(
+                "", "logLevel=FATAL;", "LogLevel=error;", "LOGleVel=InFo;", "LOGLEVEL=dEbug;", "logLEVEL=TRACE;");
+        final List<String> invalidLogLevels = ImmutableList.of(
+                "logLevel=something;", "LogLevel=5;", "logLevel=;");
+        for (final String language : languages) {
+            for (final String endpoint : endpoints) {
+                for (final String property : properties) {
+                    for (final String logLevel : validLogLevels) {
+                        String url = createValidUrl(language, endpoint, property, false);
+                        url = appendProperty(url, logLevel, false);
+                        Assertions.assertTrue(driver.connect(url, new Properties()) instanceof OpenCypherConnection);
+                    }
+                    for (final String invalidLogLevel : invalidLogLevels) {
+                        String url = createValidUrl(language, endpoint, property, false);
+                        url = appendProperty(url, invalidLogLevel, false);
+                        // TODO: AN-402 Handle invalid connection string properties
+                        //Assertions.assertNull(driver.connect(url, new Properties()) instanceof OpenCypherConnection);
+                        Assertions.assertTrue(driver.connect(url, new Properties()) instanceof OpenCypherConnection);
+                    }
+                }
+            }
+        }
+        // Reset logging so that it doesn't affect other tests.
+        LogManager.getRootLogger().setLevel(LoggingLevel.DEFAULT_LEVEL);
+    }
+
+    // TODO: Look into Driver/NeptuneDriver property string handling.
 }
