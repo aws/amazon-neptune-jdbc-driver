@@ -21,7 +21,7 @@ import org.apache.log4j.LogManager;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import software.amazon.jdbc.utilities.LoggingLevel;
+import software.amazon.jdbc.utilities.Logging;
 import software.amazon.neptune.opencypher.OpenCypherConnection;
 
 import java.sql.SQLException;
@@ -105,8 +105,10 @@ public class NeptuneDriverTest {
 
     @Test
     void testLogLevelSetting() throws SQLException {
+        Assertions.assertEquals(Logging.DEFAULT_LEVEL, LogManager.getRootLogger().getLevel());
+
         final List<String> validLogLevels = ImmutableList.of(
-                "", "logLevel=FATAL;", "LogLevel=error;", "LOGleVel=InFo;", "LOGLEVEL=dEbug;", "logLEVEL=TRACE;");
+                "", "logLevel=FATAL;", "LogLevel=error", "LOGleVel=InFo;", "LOGLEVEL=dEbug", "logLEVEL=TRACE;");
         final List<String> invalidLogLevels = ImmutableList.of(
                 "logLevel=something;", "LogLevel=5;", "logLevel=;");
         for (final String language : languages) {
@@ -128,7 +130,7 @@ public class NeptuneDriverTest {
             }
         }
         // Reset logging so that it doesn't affect other tests.
-        LogManager.getRootLogger().setLevel(LoggingLevel.DEFAULT_LEVEL);
+        LogManager.getRootLogger().setLevel(Logging.DEFAULT_LEVEL);
     }
 
     // TODO: Look into Driver/NeptuneDriver property string handling.

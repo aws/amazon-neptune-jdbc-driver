@@ -15,23 +15,29 @@
 
 package software.amazon.jdbc.utilities;
 
+import com.google.common.collect.ImmutableMap;
 import org.apache.log4j.Level;
+import org.apache.log4j.LogManager;
+
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
  * Utility that converts log level coming as a connection string parameter into log4j.Level.
  */
-public class LoggingLevel {
+public class Logging {
     public static final Level DEFAULT_LEVEL = Level.INFO;
     private static final Pattern KEY_PATTERN = Pattern.compile("logLevel", Pattern.CASE_INSENSITIVE);
     private static final Pattern ANY_VALUE_PATTERN = Pattern.compile("FATAL|ERROR|WARNINFO|DEBUG|TRACE", Pattern.CASE_INSENSITIVE);
-    private static final Pattern FATAL_PATTERN = Pattern.compile("FATAL", Pattern.CASE_INSENSITIVE);
-    private static final Pattern ERROR_PATTERN = Pattern.compile("ERROR", Pattern.CASE_INSENSITIVE);
-    private static final Pattern WARN_PATTERN = Pattern.compile("WARN", Pattern.CASE_INSENSITIVE);
-    private static final Pattern INFO_PATTERN = Pattern.compile("INFO", Pattern.CASE_INSENSITIVE);
-    private static final Pattern DEBUG_PATTERN = Pattern.compile("DEBUG", Pattern.CASE_INSENSITIVE);
-    private static final Pattern TRACE_PATTERN = Pattern.compile("TRACE", Pattern.CASE_INSENSITIVE);
+    private static final Map<Pattern, Level> LOGGING_LEVELS = ImmutableMap.<Pattern, Level>builder()
+        .put(Pattern.compile("FATAL", Pattern.CASE_INSENSITIVE), Level.FATAL)
+        .put(Pattern.compile("ERROR", Pattern.CASE_INSENSITIVE), Level.ERROR)
+        .put(Pattern.compile("WARN", Pattern.CASE_INSENSITIVE), Level.WARN)
+        .put(Pattern.compile("INFO", Pattern.CASE_INSENSITIVE), Level.INFO)
+        .put(Pattern.compile("DEBUG", Pattern.CASE_INSENSITIVE), Level.DEBUG)
+        .put(Pattern.compile("TRACE", Pattern.CASE_INSENSITIVE), Level.TRACE)
+        .build();
 
     /**
      * Matches key/value property to check whether it represents Log Level settings.
@@ -46,36 +52,26 @@ public class LoggingLevel {
     }
 
     /**
-     * Converts log level from a string to log4j.Level.
-     * @param value Log level value as a case-insensitive string.
-     * @return Log level as log4j.Level enum value.
+     * Converts Logging level from a string to the log4j.Level.
+     * @param value Logging level as a case-insensitive string.
+     * @return Logging level as a log4j.Level enum value.
      */
-    public static Level getLevel(final String value) {
-        Matcher matcher = FATAL_PATTERN.matcher(value);
-        if (matcher.matches()) {
-            return Level.FATAL;
-        }
-        matcher = ERROR_PATTERN.matcher(value);
-        if (matcher.matches()) {
-            return Level.ERROR;
-        }
-        matcher = WARN_PATTERN.matcher(value);
-        if (matcher.matches()) {
-            return Level.WARN;
-        }
-        matcher = INFO_PATTERN.matcher(value);
-        if (matcher.matches()) {
-            return Level.INFO;
-        }
-        matcher = DEBUG_PATTERN.matcher(value);
-        if (matcher.matches()) {
-            return Level.DEBUG;
-        }
-        matcher = TRACE_PATTERN.matcher(value);
-        if (matcher.matches()) {
-            return Level.TRACE;
+    public static Level convertToLevel(final String value) {
+        for (Map.Entry<Pattern, Level> entry : LOGGING_LEVELS.entrySet()) {
+            final Matcher matcher = (entry.getKey()).matcher(value);
+            if (matcher.matches()) {
+                return entry.getValue();
+            }
         }
         return DEFAULT_LEVEL;
+    }
+
+    /**
+     * Set logging level.
+     * @param level Logging level as a log4j.Level enum value.
+     */
+    public static void setLevel(final Level level) {
+        LogManager.getRootLogger().setLevel(level);
     }
 }
 

@@ -17,12 +17,11 @@
 package software.amazon.jdbc;
 
 import org.apache.log4j.Level;
-import org.apache.log4j.LogManager;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import software.amazon.jdbc.utilities.ConnectionProperty;
-import software.amazon.jdbc.utilities.LoggingLevel;
+import software.amazon.jdbc.utilities.Logging;
 import software.amazon.jdbc.utilities.SqlError;
 import software.amazon.jdbc.utilities.SqlState;
 import software.amazon.jdbc.utilities.Warning;
@@ -40,11 +39,12 @@ import java.sql.SQLXML;
 import java.sql.Savepoint;
 import java.sql.Struct;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicBoolean;
+
+import static software.amazon.jdbc.utilities.ConnectionProperty.LOGGING_LEVEL;
 
 /**
  * Abstract implementation of Connection for JDBC Driver.
@@ -66,22 +66,22 @@ public abstract class Connection implements java.sql.Connection {
     }
 
     private void setLoggingLevel() {
-        final Iterator it = this.connectionProperties.entrySet().iterator();
-        while (it.hasNext()) {
-            final Map.Entry pair = (Map.Entry)it.next();
-            final String key = pair.getKey().toString();
-            final String value  = pair.getValue().toString();
-            if (LoggingLevel.matches(key, value)) {
-                // Set the log level.
-                final Level logLevel = LoggingLevel.getLevel(value);
-                LogManager.getRootLogger().setLevel(logLevel);
-                // TODO - consider using:
-                //LogManager.getLogger("com.my.company").setLevel(logLevel);
-                // Remove property
-                it.remove();
-                break;
+        for (Map.Entry<Object, Object> entry : this.connectionProperties.entrySet()) {
+            final String key = entry.getKey().toString();
+            final String value  = entry.getValue().toString();
+            if (Logging.matches(key, value)) {
+                final Level loggingLevel = Logging.convertToLevel(value);
+                // Set log level.
+                Logging.setLevel(loggingLevel);
+                // Remove original key/value property.
+                this.connectionProperties.remove(entry);
+                // Insert standardized logging level property.
+                this.connectionProperties.put(LOGGING_LEVEL.getConnectionProperty(), loggingLevel);
+                return;
             }
         }
+        // If it does not exist, insert default logging level into connection properties.
+        this.connectionProperties.put(LOGGING_LEVEL.getConnectionProperty(), Logging.DEFAULT_LEVEL);
     }
 
     /*
