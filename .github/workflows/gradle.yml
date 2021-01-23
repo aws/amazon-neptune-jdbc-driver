@@ -39,8 +39,12 @@ jobs:
       uses: actions/setup-java@v1
       with:
         java-version: 1.8
-    - name: Build gremlin client
+    - name: Build Gremlin Client jar
       run: mvn -B verify --file ./amazon-neptune-tools/neptune-gremlin-client/gremlin-client/pom.xml
+    - name: Build Neptune Export jar
+      run: mvn -B verify --file ./amazon-neptune-tools/neptune-export/pom.xml
+    - name: Grant Execute Permission for gradlew
+      run: chmod +x gradlew
     - name: Build with Gradle
       run: ./gradlew build
     - name: Copy Build
