@@ -1,0 +1,3 @@
+[submodule "amazon-neptune-tools"]
+	path = amazon-neptune-tools
+	url = https://github.com/awslabs/amazon-neptune-tools
