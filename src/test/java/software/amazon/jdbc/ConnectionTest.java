@@ -23,6 +23,8 @@ import software.amazon.jdbc.helpers.HelperFunctions;
 import software.amazon.jdbc.mock.MockConnection;
 import software.amazon.jdbc.mock.MockStatement;
 import software.amazon.jdbc.utilities.ConnectionProperty;
+import software.amazon.jdbc.utilities.Logging;
+
 import java.sql.ResultSet;
 import java.sql.SQLWarning;
 import java.util.HashMap;
@@ -44,15 +46,18 @@ public class ConnectionTest {
     private static final String TEST_PROP_VAL = Driver.APPLICATION_NAME;
     private static final Properties TEST_PROP = new Properties();
     private static final Properties TEST_PROP_EMPTY = new Properties();
+    private static final Properties TEST_INITIAL_PROP = new Properties();
     private static final Map<String, Class<?>> TEST_TYPE_MAP =
             new ImmutableMap.Builder<String, Class<?>>().put("String", String.class).build();
 
     @BeforeEach
     void initialize() {
         connection = new MockConnection(new Properties());
-        TEST_PROP.setProperty(TEST_PROP_KEY, TEST_PROP_VAL);
-        TEST_PROP.setProperty(ConnectionProperty.APPLICATION_NAME.getConnectionProperty(), Driver.APPLICATION_NAME);
-        TEST_PROP_EMPTY.setProperty(ConnectionProperty.APPLICATION_NAME.getConnectionProperty(), Driver.APPLICATION_NAME);
+        TEST_PROP.put(TEST_PROP_KEY, TEST_PROP_VAL);
+        TEST_PROP.put(ConnectionProperty.APPLICATION_NAME.getConnectionProperty(), Driver.APPLICATION_NAME);
+        TEST_PROP_EMPTY.put(ConnectionProperty.APPLICATION_NAME.getConnectionProperty(), Driver.APPLICATION_NAME);
+        TEST_INITIAL_PROP.putAll(TEST_PROP_EMPTY);
+        TEST_INITIAL_PROP.put(ConnectionProperty.LOGGING_LEVEL.getConnectionProperty(), Logging.DEFAULT_LEVEL);
     }
 
     @Test
@@ -110,7 +115,7 @@ public class ConnectionTest {
 
     @Test
     void testClientInfo() {
-        HelperFunctions.expectFunctionDoesntThrow(() -> connection.getClientInfo(), TEST_PROP_EMPTY);
+        HelperFunctions.expectFunctionDoesntThrow(() -> connection.getClientInfo(), TEST_INITIAL_PROP);
         HelperFunctions.expectFunctionDoesntThrow(() -> connection.getClientInfo(null), null);
         HelperFunctions.expectFunctionDoesntThrow(() -> connection.setClientInfo(TEST_PROP_KEY, TEST_PROP_VAL));
         HelperFunctions.expectFunctionDoesntThrow(() -> connection.getClientInfo(TEST_PROP_KEY), TEST_PROP_VAL);

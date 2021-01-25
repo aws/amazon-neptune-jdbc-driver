@@ -115,7 +115,6 @@ public class OpenCypherQueryExecutor {
             final List<String> columns = result.keys();
             synchronized (lock) {
                 if (queryCancelled) {
-                    LOGGER.error("Execute query failed - flag indicates query was cancelled.");
                     throw SqlError.createSQLException(
                             LOGGER,
                             SqlState.OPERATION_CANCELED,
@@ -123,20 +122,17 @@ public class OpenCypherQueryExecutor {
                 }
                 queryExecuted = true;
             }
-            LOGGER.debug("Execute query succeeded.");
             return new OpenCypherResultSet(
                     statement, session, result, rows, columns);
 
         } catch (RuntimeException e) {
             synchronized (lock) {
                 if (queryCancelled) {
-                    LOGGER.error("Execute query failed - query was cancelled.");
                     throw SqlError.createSQLException(
                             LOGGER,
                             SqlState.OPERATION_CANCELED,
                             SqlError.QUERY_CANCELED);
                 } else {
-                    LOGGER.error("Execute query failed - query failed with error {}.", e.getMessage());
                     throw SqlError.createSQLException(
                             LOGGER,
                             SqlState.OPERATION_CANCELED,
@@ -152,10 +148,9 @@ public class OpenCypherQueryExecutor {
      * @throws SQLException if query cancellation fails.
      */
     protected void cancelQuery() throws SQLException {
-        LOGGER.info("Cancel query failed - query has not started yet.");
+        LOGGER.info("Cancel query invoked.");
         synchronized (lock) {
             if (session == null) {
-                LOGGER.error("Cancel query failed - query has not started yet.");
                 throw SqlError.createSQLException(
                         LOGGER,
                         SqlState.OPERATION_CANCELED,
@@ -163,7 +158,6 @@ public class OpenCypherQueryExecutor {
             }
 
             if (queryCancelled) {
-                LOGGER.error("Cancel query failed - query was already cancelled.");
                 throw SqlError.createSQLException(
                         LOGGER,
                         SqlState.OPERATION_CANCELED,
@@ -171,12 +165,11 @@ public class OpenCypherQueryExecutor {
             }
 
             if (!queryExecuted) {
-                LOGGER.debug("Cancel query succeeded.");
                 //noinspection deprecation
                 session.reset();
+                LOGGER.debug("Cancel query succeeded.");
                 queryCancelled = true;
             } else {
-                LOGGER.error("Cancel query failed - query was already executed, it cannot be cancelled.");
                 throw SqlError.createSQLException(
                         LOGGER,
                         SqlState.OPERATION_CANCELED,

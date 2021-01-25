@@ -25,6 +25,8 @@ import java.sql.SQLException;
 import java.sql.SQLFeatureNotSupportedException;
 import java.util.Properties;
 import java.util.logging.Logger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Abstract implementation of Driver for JDBC Driver.
@@ -35,6 +37,7 @@ public abstract class Driver implements java.sql.Driver {
     static final String DRIVER_VERSION;
     static final String APP_NAME_SUFFIX;
     static final String APPLICATION_NAME;
+    private static final Pattern KEY_VALUE_PATTERN = Pattern.compile("(\\w+)=(\\w+)");
     private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(Driver.class);
 
     static {
@@ -116,5 +119,44 @@ public abstract class Driver implements java.sql.Driver {
     @Override
     public Logger getParentLogger() throws SQLFeatureNotSupportedException {
         return null;
+    }
+
+    protected String getLanguage(final String url, final Pattern jdbcPattern) throws SQLException {
+        final Matcher matcher = jdbcPattern.matcher(url);
+        if (matcher.matches()) {
+            return matcher.group(1);
+        }
+        // TODO proper exception.
+        throw new SQLException("Unsupported url " + url);
+    }
+
+    protected String getPropertyString(final String url, final Pattern jdbcPattern) throws SQLException {
+        final Matcher matcher = jdbcPattern.matcher(url);
+        if (matcher.matches()) {
+            return matcher.group(2);
+        }
+        // TODO proper exception.
+        throw new SQLException("Unsupported property string.");
+    }
+
+    protected Properties parsePropertyString(final String propertyString, final String endpoint) {
+        final Properties properties = new Properties();
+        if (propertyString.isEmpty()) {
+            return properties;
+        }
+
+        final String[] propertyArray = propertyString.split(";");
+        if (propertyArray.length == 0) {
+            return properties;
+        } else if (!propertyArray[0].trim().isEmpty()) {
+            properties.setProperty(endpoint, propertyArray[0].trim());
+        }
+        for (int i = 1; i < propertyArray.length; i++) {
+            final Matcher propMatcher = KEY_VALUE_PATTERN.matcher(propertyArray[i]);
+            if (propMatcher.matches()) {
+                properties.setProperty(propMatcher.group(1), propMatcher.group(2));
+            }
+        }
+        return properties;
     }
 }

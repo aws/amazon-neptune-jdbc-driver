@@ -16,13 +16,16 @@
 
 package software.amazon.jdbc;
 
+import org.apache.log4j.Level;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import software.amazon.jdbc.utilities.ConnectionProperty;
+import software.amazon.jdbc.utilities.Logging;
 import software.amazon.jdbc.utilities.SqlError;
 import software.amazon.jdbc.utilities.SqlState;
 import software.amazon.jdbc.utilities.Warning;
+
 import java.sql.Array;
 import java.sql.Blob;
 import java.sql.ClientInfoStatus;
@@ -41,6 +44,8 @@ import java.util.Properties;
 import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import static software.amazon.jdbc.utilities.ConnectionProperty.LOGGING_LEVEL;
+
 /**
  * Abstract implementation of Connection for JDBC Driver.
  */
@@ -53,10 +58,30 @@ public abstract class Connection implements java.sql.Connection {
 
     protected Connection(@NonNull final Properties connectionProperties) {
         this.connectionProperties = connectionProperties;
+        setLoggingLevel();
     }
 
     protected Properties getConnectionProperties() {
         return connectionProperties;
+    }
+
+    private void setLoggingLevel() {
+        for (Map.Entry<Object, Object> entry : this.connectionProperties.entrySet()) {
+            final String key = entry.getKey().toString();
+            final String value  = entry.getValue().toString();
+            if (Logging.matches(key, value)) {
+                final Level loggingLevel = Logging.convertToLevel(value);
+                // Set log level.
+                Logging.setLevel(loggingLevel);
+                // Remove original key/value property.
+                this.connectionProperties.remove(entry);
+                // Insert standardized logging level property.
+                this.connectionProperties.put(LOGGING_LEVEL.getConnectionProperty(), loggingLevel);
+                return;
+            }
+        }
+        // If it does not exist, insert default logging level into connection properties.
+        this.connectionProperties.put(LOGGING_LEVEL.getConnectionProperty(), Logging.DEFAULT_LEVEL);
     }
 
     /*
