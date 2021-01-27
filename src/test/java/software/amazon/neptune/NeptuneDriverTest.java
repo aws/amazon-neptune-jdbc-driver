@@ -17,16 +17,18 @@
 package software.amazon.neptune;
 
 import com.google.common.collect.ImmutableList;
+import org.apache.log4j.Level;
 import org.apache.log4j.LogManager;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import software.amazon.jdbc.utilities.LogLevel;
 import software.amazon.neptune.opencypher.OpenCypherConnection;
 
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Properties;
+
+import static software.amazon.jdbc.utilities.ConnectionProperty.LOG_LEVEL;
 
 /**
  * Test for NeptuneDriver Object.
@@ -105,7 +107,7 @@ public class NeptuneDriverTest {
 
     @Test
     void testLogLevelSetting() throws SQLException {
-        Assertions.assertEquals(LogLevel.DEFAULT_LEVEL, LogManager.getRootLogger().getLevel());
+        Assertions.assertEquals(LOG_LEVEL.getDefaultValue(), LogManager.getRootLogger().getLevel());
 
         final List<String> validLogLevels = ImmutableList.of(
                 "", "logLevel=FATAL;", "LogLevel=error", "LOGleVel=InFo;", "LOGLEVEL=dEbug", "logLEVEL=TRACE;");
@@ -130,7 +132,7 @@ public class NeptuneDriverTest {
             }
         }
         // Reset logging so that it doesn't affect other tests.
-        LogManager.getRootLogger().setLevel(LogLevel.DEFAULT_LEVEL);
+        LogManager.getRootLogger().setLevel((Level)LOG_LEVEL.getDefaultValue());
     }
 
     // TODO: Look into Driver/NeptuneDriver property string handling.

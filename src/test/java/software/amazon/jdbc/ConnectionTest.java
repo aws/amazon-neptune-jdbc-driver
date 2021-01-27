@@ -22,14 +22,15 @@ import org.junit.jupiter.api.Test;
 import software.amazon.jdbc.helpers.HelperFunctions;
 import software.amazon.jdbc.mock.MockConnection;
 import software.amazon.jdbc.mock.MockStatement;
-import software.amazon.jdbc.utilities.ConnectionProperty;
-import software.amazon.jdbc.utilities.LogLevel;
 
 import java.sql.ResultSet;
 import java.sql.SQLWarning;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
+
+import static software.amazon.jdbc.utilities.ConnectionProperty.APPLICATION_NAME;
+import static software.amazon.jdbc.utilities.ConnectionProperty.LOG_LEVEL;
 
 /**
  * Test for abstract Connection Object.
@@ -42,7 +43,7 @@ public class ConnectionTest {
     private static final String TEST_NATIVE_SQL = "native sql";
     private static final String TEST_PROP_KEY_UNSUPPORTED = "unsupported";
     private static final String TEST_PROP_VAL_UNSUPPORTED = "unsupported";
-    private static final String TEST_PROP_KEY = ConnectionProperty.APPLICATION_NAME.getConnectionProperty();
+    private static final String TEST_PROP_KEY = APPLICATION_NAME.getConnectionProperty();
     private static final String TEST_PROP_VAL = Driver.APPLICATION_NAME;
     private static final Properties TEST_PROP = new Properties();
     private static final Properties TEST_PROP_EMPTY = new Properties();
@@ -54,10 +55,10 @@ public class ConnectionTest {
     void initialize() {
         connection = new MockConnection(new Properties());
         TEST_PROP.put(TEST_PROP_KEY, TEST_PROP_VAL);
-        TEST_PROP.put(ConnectionProperty.APPLICATION_NAME.getConnectionProperty(), Driver.APPLICATION_NAME);
-        TEST_PROP_EMPTY.put(ConnectionProperty.APPLICATION_NAME.getConnectionProperty(), Driver.APPLICATION_NAME);
+        TEST_PROP.put(APPLICATION_NAME.getConnectionProperty(), Driver.APPLICATION_NAME);
+        TEST_PROP_EMPTY.put(APPLICATION_NAME.getConnectionProperty(), Driver.APPLICATION_NAME);
         TEST_INITIAL_PROP.putAll(TEST_PROP_EMPTY);
-        TEST_INITIAL_PROP.put(ConnectionProperty.LOG_LEVEL.getConnectionProperty(), LogLevel.DEFAULT_LEVEL);
+        TEST_INITIAL_PROP.put(LOG_LEVEL.getConnectionProperty(), LOG_LEVEL.getDefaultValue());
     }
 
     @Test

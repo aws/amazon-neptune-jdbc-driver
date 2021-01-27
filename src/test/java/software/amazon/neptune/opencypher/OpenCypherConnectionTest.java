@@ -23,7 +23,6 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import software.amazon.jdbc.utilities.LogLevel;
 import software.amazon.neptune.NeptuneConstants;
 import software.amazon.neptune.opencypher.mock.MockOpenCypherDatabase;
 import software.amazon.neptune.opencypher.mock.MockOpenCypherNodes;
@@ -35,6 +34,8 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Properties;
 import java.util.concurrent.atomic.AtomicReference;
+
+import static software.amazon.jdbc.utilities.ConnectionProperty.LOG_LEVEL;
 
 public class OpenCypherConnectionTest {
     private static final String HOSTNAME = "localhost";
@@ -102,7 +103,7 @@ public class OpenCypherConnectionTest {
 
     @Test
     void testLogLevelChanged() throws SQLException {
-        Assertions.assertEquals(LogLevel.DEFAULT_LEVEL, LogManager.getRootLogger().getLevel());
+        Assertions.assertEquals(LOG_LEVEL.getDefaultValue(), LogManager.getRootLogger().getLevel());
 
         final Properties properties = new Properties();
         properties.putAll(PROPERTIES);
@@ -111,6 +112,6 @@ public class OpenCypherConnectionTest {
         Assertions.assertEquals(Level.ERROR, LogManager.getRootLogger().getLevel());
 
         // Reset logging so that it doesn't affect other tests.
-        LogManager.getRootLogger().setLevel(LogLevel.DEFAULT_LEVEL);
+        LogManager.getRootLogger().setLevel((Level)LOG_LEVEL.getDefaultValue());
     }
 }

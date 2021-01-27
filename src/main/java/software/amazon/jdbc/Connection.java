@@ -16,12 +16,12 @@
 
 package software.amazon.jdbc;
 
-import org.apache.log4j.Level;
+import org.apache.log4j.LogManager;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import software.amazon.jdbc.utilities.ConnectionProperties;
 import software.amazon.jdbc.utilities.ConnectionProperty;
-import software.amazon.jdbc.utilities.LogLevel;
 import software.amazon.jdbc.utilities.SqlError;
 import software.amazon.jdbc.utilities.SqlState;
 import software.amazon.jdbc.utilities.Warning;
@@ -44,44 +44,27 @@ import java.util.Properties;
 import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import static software.amazon.jdbc.utilities.ConnectionProperty.LOG_LEVEL;
-
 /**
  * Abstract implementation of Connection for JDBC Driver.
  */
 public abstract class Connection implements java.sql.Connection {
     private static final Logger LOGGER = LoggerFactory.getLogger(Connection.class);
-    private final Properties connectionProperties;
+    private final ConnectionProperties connectionProperties;
     private final AtomicBoolean isClosed = new AtomicBoolean(false);
     private Map<String, Class<?>> typeMap = new HashMap<>();
     private SQLWarning warnings = null;
 
     protected Connection(@NonNull final Properties connectionProperties) {
-        this.connectionProperties = connectionProperties;
+        this.connectionProperties = new ConnectionProperties(connectionProperties);
         setLogLevel();
     }
 
     protected Properties getConnectionProperties() {
-        return connectionProperties;
+        return this.connectionProperties.getAll();
     }
 
     private void setLogLevel() {
-        for (Map.Entry<Object, Object> entry : this.connectionProperties.entrySet()) {
-            final String key = entry.getKey().toString();
-            final String value  = entry.getValue().toString();
-            if (LogLevel.matches(key, value)) {
-                final Level logLevel = LogLevel.getLevel(value);
-                // Set log level.
-                LogLevel.setLevel(logLevel);
-                // Remove original key/value property.
-                this.connectionProperties.remove(entry);
-                // Insert standardized logging level property.
-                this.connectionProperties.put(LOG_LEVEL.getConnectionProperty(), logLevel);
-                return;
-            }
-        }
-        // If it does not exist, insert default logging level into connection properties.
-        this.connectionProperties.put(LOG_LEVEL.getConnectionProperty(), LogLevel.DEFAULT_LEVEL);
+        LogManager.getRootLogger().setLevel(connectionProperties.getLogLevel());
     }
 
     /*
@@ -91,7 +74,7 @@ public abstract class Connection implements java.sql.Connection {
     public Properties getClientInfo() throws SQLException {
         verifyOpen();
         final Properties clientInfo = new Properties();
-        clientInfo.putAll(connectionProperties);
+        clientInfo.putAll(connectionProperties.getAll());
         clientInfo.putIfAbsent(
                 ConnectionProperty.APPLICATION_NAME.getConnectionProperty(),
                 Driver.APPLICATION_NAME);
@@ -115,7 +98,7 @@ public abstract class Connection implements java.sql.Connection {
                 if (ConnectionProperty.isSupportedProperty(name)) {
                     final String value = properties.getProperty(name);
                     connectionProperties.put(name, value);
-                    LOGGER.debug("Successfully set client info with name {{}} and value {{}}", name, value);
+                    LOGGER.debug("Successfully set property with name {{}} and value {{}}", name, value);
                 } else {
                     addWarning(new SQLWarning(Warning.lookup(Warning.UNSUPPORTED_PROPERTY, name)));
                 }
@@ -131,7 +114,7 @@ public abstract class Connection implements java.sql.Connection {
             LOGGER.debug("Null value is passed as name, falling back to get client info with null.");
             return null;
         }
-        return connectionProperties.getProperty(name);
+        return connectionProperties.get(name);
     }
 
     @Override
