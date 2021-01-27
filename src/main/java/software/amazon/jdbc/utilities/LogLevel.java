@@ -26,11 +26,11 @@ import java.util.regex.Pattern;
 /**
  * Utility that converts log level coming as a connection string parameter into log4j.Level.
  */
-public class Logging {
+public class LogLevel {
     public static final Level DEFAULT_LEVEL = Level.INFO;
     private static final Pattern KEY_PATTERN = Pattern.compile("logLevel", Pattern.CASE_INSENSITIVE);
     private static final Pattern ANY_VALUE_PATTERN = Pattern.compile("FATAL|ERROR|WARNINFO|DEBUG|TRACE", Pattern.CASE_INSENSITIVE);
-    private static final Map<Pattern, Level> LOGGING_LEVELS = ImmutableMap.<Pattern, Level>builder()
+    private static final Map<Pattern, Level> LOG_LEVEL = ImmutableMap.<Pattern, Level>builder()
         .put(Pattern.compile("FATAL", Pattern.CASE_INSENSITIVE), Level.FATAL)
         .put(Pattern.compile("ERROR", Pattern.CASE_INSENSITIVE), Level.ERROR)
         .put(Pattern.compile("WARN", Pattern.CASE_INSENSITIVE), Level.WARN)
@@ -56,8 +56,8 @@ public class Logging {
      * @param value Logging level as a case-insensitive string.
      * @return Logging level as a log4j.Level enum value.
      */
-    public static Level convertToLevel(final String value) {
-        for (Map.Entry<Pattern, Level> entry : LOGGING_LEVELS.entrySet()) {
+    public static Level getLevel(final String value) {
+        for (Map.Entry<Pattern, Level> entry : LOG_LEVEL.entrySet()) {
             final Matcher matcher = (entry.getKey()).matcher(value);
             if (matcher.matches()) {
                 return entry.getValue();

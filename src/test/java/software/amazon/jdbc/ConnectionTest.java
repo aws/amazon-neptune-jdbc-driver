@@ -23,7 +23,7 @@ import software.amazon.jdbc.helpers.HelperFunctions;
 import software.amazon.jdbc.mock.MockConnection;
 import software.amazon.jdbc.mock.MockStatement;
 import software.amazon.jdbc.utilities.ConnectionProperty;
-import software.amazon.jdbc.utilities.Logging;
+import software.amazon.jdbc.utilities.LogLevel;
 
 import java.sql.ResultSet;
 import java.sql.SQLWarning;
@@ -57,7 +57,7 @@ public class ConnectionTest {
         TEST_PROP.put(ConnectionProperty.APPLICATION_NAME.getConnectionProperty(), Driver.APPLICATION_NAME);
         TEST_PROP_EMPTY.put(ConnectionProperty.APPLICATION_NAME.getConnectionProperty(), Driver.APPLICATION_NAME);
         TEST_INITIAL_PROP.putAll(TEST_PROP_EMPTY);
-        TEST_INITIAL_PROP.put(ConnectionProperty.LOGGING_LEVEL.getConnectionProperty(), Logging.DEFAULT_LEVEL);
+        TEST_INITIAL_PROP.put(ConnectionProperty.LOG_LEVEL.getConnectionProperty(), LogLevel.DEFAULT_LEVEL);
     }
 
     @Test

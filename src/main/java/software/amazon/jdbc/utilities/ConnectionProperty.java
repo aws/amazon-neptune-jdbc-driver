@@ -31,7 +31,7 @@ public enum ConnectionProperty {
     ACCESS_KEY_ID("AccessKeyId", "", "The AWS user access key id."),
     SECRET_ACCESS_KEY("SecretAccessKey", "", "The AWS user secret access key."),
     SESSION_TOKEN("SessionToken", "", "The database's region."),
-    LOGGING_LEVEL("LoggingLevel", "INFO", "Logging level.");
+    LOG_LEVEL("LogLevel", "INFO", "Log level.");
 
     static final EnumSet<ConnectionProperty> SENSITIVE_PROPERTIES = EnumSet
             .of(ACCESS_KEY_ID, SECRET_ACCESS_KEY, SESSION_TOKEN);
