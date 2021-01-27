@@ -25,6 +25,7 @@ import java.util.regex.Pattern;
 
 import static software.amazon.jdbc.utilities.ConnectionProperty.CONNECTION_RETRY_COUNT;
 import static software.amazon.jdbc.utilities.ConnectionProperty.CONNECTION_TIMEOUT;
+import static software.amazon.jdbc.utilities.ConnectionProperty.ENDPOINT;
 import static software.amazon.jdbc.utilities.ConnectionProperty.LOG_LEVEL;
 
 /**
@@ -52,20 +53,17 @@ public class ConnectionPropertiesUtility {
     public static Properties extractValidProperties(final Properties connectionProperties) {
         final Properties properties = new Properties();
         properties.putAll(getDefaultProperties());
-        for (Map.Entry<Object, Object> entry : connectionProperties.entrySet()) {
+        for (final Map.Entry<Object, Object> entry : connectionProperties.entrySet()) {
             final String key = entry.getKey().toString();
             final String value  = entry.getValue().toString();
-            try {
-                if (LogLevel.matches(key, value)) {
-                    properties.put(LOG_LEVEL.getConnectionProperty(), LogLevel.getValue(value));
-                } else if (ConnectionTimeout.matches(key, value)) {
-                    properties.put(CONNECTION_TIMEOUT.getConnectionProperty(), ConnectionTimeout.getValue(value));
-                } else if (ConnectionTimeout.matches(key, value)) {
-                    properties.put(CONNECTION_RETRY_COUNT.getConnectionProperty(), ConnectionRetryCount.getValue(value));
-                }
-            } catch (ExceptionInInitializerError e) {
-                // TODO - for testing purposes only - remove try/catch
-                System.out.println(e.getMessage());
+            if (LogLevel.matches(key, value)) {
+                properties.put(LOG_LEVEL.getConnectionProperty(), LogLevel.getValue(value));
+            } else if (ConnectionTimeout.matches(key, value)) {
+                properties.put(CONNECTION_TIMEOUT.getConnectionProperty(), ConnectionTimeout.getValue(value));
+            } else if (ConnectionRetryCount.matches(key, value)) {
+                properties.put(CONNECTION_RETRY_COUNT.getConnectionProperty(), ConnectionRetryCount.getValue(value));
+            }  else if (((String)key).equals("endpoint")) {
+                properties.put(ENDPOINT.getConnectionProperty(), value);
             }
         }
         return properties;

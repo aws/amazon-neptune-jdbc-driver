@@ -30,6 +30,8 @@ import java.util.Map;
 import java.util.Properties;
 
 import static software.amazon.jdbc.utilities.ConnectionProperty.APPLICATION_NAME;
+import static software.amazon.jdbc.utilities.ConnectionProperty.CONNECTION_RETRY_COUNT;
+import static software.amazon.jdbc.utilities.ConnectionProperty.CONNECTION_TIMEOUT;
 import static software.amazon.jdbc.utilities.ConnectionProperty.LOG_LEVEL;
 
 /**
@@ -59,6 +61,8 @@ public class ConnectionTest {
         TEST_PROP_EMPTY.put(APPLICATION_NAME.getConnectionProperty(), Driver.APPLICATION_NAME);
         TEST_INITIAL_PROP.putAll(TEST_PROP_EMPTY);
         TEST_INITIAL_PROP.put(LOG_LEVEL.getConnectionProperty(), LOG_LEVEL.getDefaultValue());
+        TEST_INITIAL_PROP.put(CONNECTION_TIMEOUT.getConnectionProperty(), CONNECTION_TIMEOUT.getDefaultValue());
+        TEST_INITIAL_PROP.put(CONNECTION_RETRY_COUNT.getConnectionProperty(), CONNECTION_RETRY_COUNT.getDefaultValue());
     }
 
     @Test

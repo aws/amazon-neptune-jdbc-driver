@@ -15,9 +15,9 @@
 
 package software.amazon.jdbc.utilities;
 
+import org.apache.log4j.Level;
 import java.util.Arrays;
 import java.util.EnumSet;
-import java.util.logging.Level;
 import java.util.regex.Pattern;
 
 /**
@@ -36,6 +36,10 @@ public enum ConnectionProperty {
     ACCESS_KEY_ID("AccessKeyId",
             "The AWS user access key id.",
             ""),
+    ENDPOINT("endpoint",
+            "Endpoint to connect to.",
+            "",
+            Pattern.compile("Endpoint", Pattern.CASE_INSENSITIVE)),
     SECRET_ACCESS_KEY("SecretAccessKey",
             "The AWS user secret access key.",
             ""),
