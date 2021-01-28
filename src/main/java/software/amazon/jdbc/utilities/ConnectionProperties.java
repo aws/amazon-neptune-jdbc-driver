@@ -17,6 +17,7 @@ package software.amazon.jdbc.utilities;
 
 import com.google.common.collect.ImmutableMap;
 import org.apache.log4j.Level;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -31,23 +32,23 @@ import static software.amazon.jdbc.utilities.ConnectionProperty.LOG_LEVEL;
  * Class that manages connection properties.
  */
 public class ConnectionProperties {
-    private final Properties connectionProperties;
+    private Properties connectionProperties;
 
     private static final Map<String, PropertyConverter<?>> PROPERTIES_MAP = new HashMap<>();
     static {
-        PROPERTIES_MAP.put(LOG_LEVEL.getConnectionProperty(), new LogLevel());
-        PROPERTIES_MAP.put(CONNECTION_TIMEOUT.getConnectionProperty(), new ConnectionTimeout());
-        PROPERTIES_MAP.put(CONNECTION_RETRY_COUNT.getConnectionProperty(), new ConnectionRetryCount());
+        PROPERTIES_MAP.put(LOG_LEVEL.getConnectionProperty(), LOG_LEVEL.getPropertyConverter());
+        PROPERTIES_MAP.put(CONNECTION_TIMEOUT.getConnectionProperty(), CONNECTION_TIMEOUT.getPropertyConverter());
+        PROPERTIES_MAP.put(CONNECTION_RETRY_COUNT.getConnectionProperty(), CONNECTION_RETRY_COUNT.getPropertyConverter());
     }
 
     /**
      * ConnectionProperties constructor.
      * @param properties initial set of connection properties coming from the connection string.
      */
-    public ConnectionProperties(final Properties properties) {
-        connectionProperties = new Properties();
-        for (String key : PROPERTIES_MAP.keySet()) {
-            connectionProperties.put(key, PropertyConverter.convert(properties,  PROPERTIES_MAP.get(key)));
+    public ConnectionProperties(@NonNull final Properties properties) {
+        this.connectionProperties = new Properties();
+        for (Map.Entry<String, PropertyConverter<?>> entry : PROPERTIES_MAP.entrySet()) {
+            connectionProperties.put(entry.getKey(), entry.getValue().convert(properties));
         }
 
         // If any invalid properties are left, raise an error
@@ -61,6 +62,7 @@ public class ConnectionProperties {
             }
         }
     }
+
 
     /**
      * Gets all connection properties.
@@ -122,10 +124,9 @@ public class ConnectionProperties {
 
     /**
      * Converter class that converts string property to its proper type.
-     *
      * @param <T> Type to convert to.
      */
-    private abstract static class PropertyConverter<T> {
+    public abstract static class PropertyConverter<T> {
 
         /**
          * Function to perform matching connection string key/value property.
@@ -153,27 +154,26 @@ public class ConnectionProperties {
          * Function to find matching property and perform conversion.
          *
          * @param connectionProperties Map containing connection properties came from the connection string.
-         * @param converter An instance of the Converter class for the specific T type.
          * @return Converted value, or default value if no matching property found in connection properties map.
          */
-        public static <T> T convert(final Properties connectionProperties, final PropertyConverter<T> converter) {
+        public T convert(final Properties connectionProperties) {
             for (Map.Entry<Object, Object> entry : connectionProperties.entrySet()) {
                 final String key = entry.getKey().toString();
                 final String value = entry.getValue().toString();
-                if (converter.matches(key, value)) {
+                if (matches(key, value)) {
                     // remove property that is matched
                     connectionProperties.remove(key);
-                    return (T) converter.getValue(value);
+                    return (T) getValue(value);
                 }
             }
-            return (T) converter.getDefaultValue();
+            return (T) getDefaultValue();
         }
     }
 
     /**
      * Utility class that handles LogLevel property.
      */
-    private static class LogLevel extends PropertyConverter<Level> {
+    public static class LogLevelConverter extends PropertyConverter<Level> {
         private static final Pattern KEY_PATTERN = Pattern.compile("logLevel", Pattern.CASE_INSENSITIVE);
         private static final Pattern VALUE_PATTERN = Pattern.compile("FATAL|ERROR|WARN|INFO|DEBUG|TRACE", Pattern.CASE_INSENSITIVE);
         private static final Map<String, Level> LOG_LEVEL_MAP = ImmutableMap.<String, Level>builder()
@@ -205,7 +205,7 @@ public class ConnectionProperties {
     /**
      * Utility class that handles ConnectionTimeout property.
      */
-    private static class ConnectionTimeout extends PropertyConverter<Integer> {
+    public static class ConnectionTimeoutConverter extends PropertyConverter<Integer> {
         private static final Pattern KEY_PATTERN = Pattern.compile("connectionTimeout", Pattern.CASE_INSENSITIVE);
 
         @Override
@@ -228,7 +228,7 @@ public class ConnectionProperties {
     /**
      * Utility class that handles ConnectionRetryCount property.
      */
-    private static class ConnectionRetryCount extends PropertyConverter<Integer> {
+    public static class ConnectionRetryCountConverter extends PropertyConverter<Integer> {
         private static final Pattern KEY_PATTERN = Pattern.compile("connectionRetryCount", Pattern.CASE_INSENSITIVE);
 
         @Override
