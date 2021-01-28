@@ -16,8 +16,10 @@
 
 package software.amazon.jdbc;
 
+import lombok.Getter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import software.amazon.jdbc.utilities.JavaToJdbcTypeConverter;
 import software.amazon.jdbc.utilities.SqlError;
 import software.amazon.jdbc.utilities.SqlState;
 import java.io.InputStream;
@@ -38,6 +40,7 @@ import java.sql.Statement;
 import java.sql.Time;
 import java.sql.Timestamp;
 import java.util.Calendar;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -47,19 +50,27 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public abstract class ResultSet implements java.sql.ResultSet {
     private static final Logger LOGGER = LoggerFactory.getLogger(ResultSet.class);
     private final AtomicBoolean isClosed = new AtomicBoolean(false);
+    private final List<String> columns;
+    private final int rowCount;
     private final java.sql.Statement statement;
+    @Getter
+    private int rowIndex;
     private SQLWarning warnings = null;
 
-    protected ResultSet(final java.sql.Statement statement) {
+    protected ResultSet(final java.sql.Statement statement, final List<String> columns, final int rowCount) {
         this.statement = statement;
+        this.columns = columns;
+        this.rowCount = rowCount;
+        this.rowIndex = -1;
     }
 
     protected abstract void doClose() throws SQLException;
+
     protected abstract int getDriverFetchSize() throws SQLException;
+
     protected abstract void setDriverFetchSize(int rows);
-    protected abstract int getRowIndex();
-    protected abstract int getRowCount();
-    protected abstract int getColumnCount();
+
+    protected abstract Object getConvertedValue(int columnIndex) throws SQLException;
 
     /**
      * Verify the result set is open.
@@ -88,6 +99,14 @@ public abstract class ResultSet implements java.sql.ResultSet {
         doClose();
     }
 
+    @Override
+    public boolean next() throws SQLException {
+        // Increment row index, if it exceeds capacity, set it to 1 after the last element.
+        if (++this.rowIndex >= rowCount) {
+            this.rowIndex = rowCount;
+        }
+        return (this.rowIndex < rowCount);
+    }
 
     // Warning implementation.
     @Override
@@ -147,7 +166,7 @@ public abstract class ResultSet implements java.sql.ResultSet {
 
     @Override
     public boolean isAfterLast() throws SQLException {
-        return (getRowIndex() >= getRowCount());
+        return (getRowIndex() >= rowCount);
     }
 
     @Override
@@ -173,7 +192,7 @@ public abstract class ResultSet implements java.sql.ResultSet {
     @Override
     public boolean isLast() throws SQLException {
         verifyOpen();
-        return (getRowIndex() == (getRowCount() - 1));
+        return (getRowIndex() == (rowCount - 1));
     }
 
     @Override
@@ -231,6 +250,124 @@ public abstract class ResultSet implements java.sql.ResultSet {
     }
 
     @Override
+    public int findColumn(final String columnLabel) throws SQLException {
+        return columns.indexOf(columnLabel);
+    }
+
+    @Override
+    public boolean getBoolean(final int columnIndex) throws SQLException {
+        LOGGER.trace("Getting column {} as a Boolean.", columnIndex);
+        return JavaToJdbcTypeConverter.toBoolean(getConvertedValue(columnIndex));
+    }
+
+    @Override
+    public byte getByte(final int columnIndex) throws SQLException {
+        LOGGER.trace("Getting column {} as a Byte.", columnIndex);
+        return JavaToJdbcTypeConverter.toByte(getConvertedValue(columnIndex));
+    }
+
+    @Override
+    public short getShort(final int columnIndex) throws SQLException {
+        LOGGER.trace("Getting column {} as a Short.", columnIndex);
+        return JavaToJdbcTypeConverter.toShort(getConvertedValue(columnIndex));
+    }
+
+    @Override
+    public int getInt(final int columnIndex) throws SQLException {
+        LOGGER.trace("Getting column {} as a Integer.", columnIndex);
+        return JavaToJdbcTypeConverter.toInteger(getConvertedValue(columnIndex));
+    }
+
+    @Override
+    public long getLong(final int columnIndex) throws SQLException {
+        LOGGER.trace("Getting column {} as a Long.", columnIndex);
+        return JavaToJdbcTypeConverter.toLong(getConvertedValue(columnIndex));
+    }
+
+    @Override
+    public float getFloat(final int columnIndex) throws SQLException {
+        LOGGER.trace("Getting column {} as a Float.", columnIndex);
+        return JavaToJdbcTypeConverter.toFloat(getConvertedValue(columnIndex));
+    }
+
+    @Override
+    public double getDouble(final int columnIndex) throws SQLException {
+        LOGGER.trace("Getting column {} as a Double.", columnIndex);
+        return JavaToJdbcTypeConverter.toDouble(getConvertedValue(columnIndex));
+    }
+
+    @Override
+    public String getString(final int columnIndex) throws SQLException {
+        LOGGER.trace("Getting column {} as a String.", columnIndex);
+        return JavaToJdbcTypeConverter.toString(getConvertedValue(columnIndex));
+    }
+
+    @Override
+    public byte[] getBytes(final int columnIndex) throws SQLException {
+        LOGGER.trace("Getting column {} as a byte array.", columnIndex);
+        return JavaToJdbcTypeConverter.toByteArray(getConvertedValue(columnIndex));
+    }
+
+    @Override
+    public Date getDate(final int columnIndex) throws SQLException {
+        LOGGER.trace("Getting column {} as a Date.", columnIndex);
+        return JavaToJdbcTypeConverter.toDate(getConvertedValue(columnIndex));
+    }
+
+    @Override
+    public Time getTime(final int columnIndex) throws SQLException {
+        LOGGER.trace("Getting column {} as a Time.", columnIndex);
+        return JavaToJdbcTypeConverter.toTime(getConvertedValue(columnIndex));
+    }
+
+    @Override
+    public Timestamp getTimestamp(final int columnIndex) throws SQLException {
+        LOGGER.trace("Getting column {} as a String.", columnIndex);
+        return JavaToJdbcTypeConverter.toTimestamp(getConvertedValue(columnIndex));
+    }
+
+    @Override
+    public Timestamp getTimestamp(final int columnIndex, final Calendar cal) throws SQLException {
+        LOGGER.trace("Getting column {} as a Tiemstamp.", columnIndex);
+        return JavaToJdbcTypeConverter.toTimestamp(getConvertedValue(columnIndex), cal);
+    }
+
+    @Override
+    public Date getDate(final int columnIndex, final Calendar cal) throws SQLException {
+        LOGGER.trace("Getting column {} as a Date with Calendar.", columnIndex);
+        return JavaToJdbcTypeConverter.toDate(getConvertedValue(columnIndex), cal);
+    }
+
+    @Override
+    public Time getTime(final int columnIndex, final Calendar cal) throws SQLException {
+        LOGGER.trace("Getting column {} as a Time with Calendar.", columnIndex);
+        return JavaToJdbcTypeConverter.toTime(getConvertedValue(columnIndex), cal);
+    }
+
+    @Override
+    public Object getObject(final int columnIndex) throws SQLException {
+        LOGGER.trace("Getting column {} as an Object.", columnIndex);
+        return getConvertedValue(columnIndex);
+    }
+
+    @Override
+    public <T> T getObject(final int columnIndex, final Class<T> type) throws SQLException {
+        LOGGER.trace("Getting column {} as an Object using provided Type.", columnIndex);
+        if (type == null) {
+            throw new SQLException("Type provided to getObject is null.");
+        }
+        return (T) JavaToJdbcTypeConverter.CLASS_CONVERTER_MAP.get(type).function(getConvertedValue(columnIndex));
+    }
+
+    @Override
+    public Object getObject(final int columnIndex, final Map<String, Class<?>> map) throws SQLException {
+        throw SqlError.createSQLFeatureNotSupportedException(
+                LOGGER,
+                SqlError.UNSUPPORTED_TYPE,
+                Object.class.toString());
+    }
+
+    @Override
     public int getType() throws SQLException {
         return java.sql.ResultSet.TYPE_FORWARD_ONLY;
     }
@@ -247,70 +384,6 @@ public abstract class ResultSet implements java.sql.ResultSet {
 
     // Add default not supported for all types.
     @Override
-    public String getString(final int columnIndex) throws SQLException {
-        throw SqlError.createSQLFeatureNotSupportedException(
-                LOGGER,
-                SqlError.UNSUPPORTED_TYPE,
-                String.class.toString());
-    }
-
-    @Override
-    public boolean getBoolean(final int columnIndex) throws SQLException {
-        throw SqlError.createSQLFeatureNotSupportedException(
-                LOGGER,
-                SqlError.UNSUPPORTED_TYPE,
-                Boolean.class.toString());
-    }
-
-    @Override
-    public byte getByte(final int columnIndex) throws SQLException {
-        throw SqlError.createSQLFeatureNotSupportedException(
-                LOGGER,
-                SqlError.UNSUPPORTED_TYPE,
-                Byte.class.toString());
-    }
-
-    @Override
-    public short getShort(final int columnIndex) throws SQLException {
-        throw SqlError.createSQLFeatureNotSupportedException(
-                LOGGER,
-                SqlError.UNSUPPORTED_TYPE,
-                Short.class.toString());
-    }
-
-    @Override
-    public int getInt(final int columnIndex) throws SQLException {
-        throw SqlError.createSQLFeatureNotSupportedException(
-                LOGGER,
-                SqlError.UNSUPPORTED_TYPE,
-                Integer.class.toString());
-    }
-
-    @Override
-    public long getLong(final int columnIndex) throws SQLException {
-        throw SqlError.createSQLFeatureNotSupportedException(
-                LOGGER,
-                SqlError.UNSUPPORTED_TYPE,
-                Long.class.toString());
-    }
-
-    @Override
-    public float getFloat(final int columnIndex) throws SQLException {
-        throw SqlError.createSQLFeatureNotSupportedException(
-                LOGGER,
-                SqlError.UNSUPPORTED_TYPE,
-                Float.class.toString());
-    }
-
-    @Override
-    public double getDouble(final int columnIndex) throws SQLException {
-        throw SqlError.createSQLFeatureNotSupportedException(
-                LOGGER,
-                SqlError.UNSUPPORTED_TYPE,
-                BigDecimal.class.toString());
-    }
-
-    @Override
     public BigDecimal getBigDecimal(final int columnIndex) throws SQLException {
         throw SqlError.createSQLFeatureNotSupportedException(
                 LOGGER,
@@ -324,38 +397,6 @@ public abstract class ResultSet implements java.sql.ResultSet {
                 LOGGER,
                 SqlError.UNSUPPORTED_TYPE,
                 BigDecimal.class.toString());
-    }
-
-    @Override
-    public byte[] getBytes(final int columnIndex) throws SQLException {
-        throw SqlError.createSQLFeatureNotSupportedException(
-                LOGGER,
-                SqlError.UNSUPPORTED_TYPE,
-                Byte.class.toString());
-    }
-
-    @Override
-    public Date getDate(final int columnIndex) throws SQLException {
-        throw SqlError.createSQLFeatureNotSupportedException(
-                LOGGER,
-                SqlError.UNSUPPORTED_TYPE,
-                Date.class.toString());
-    }
-
-    @Override
-    public Time getTime(final int columnIndex) throws SQLException {
-        throw SqlError.createSQLFeatureNotSupportedException(
-                LOGGER,
-                SqlError.UNSUPPORTED_TYPE,
-                Time.class.toString());
-    }
-
-    @Override
-    public Timestamp getTimestamp(final int columnIndex) throws SQLException {
-        throw SqlError.createSQLFeatureNotSupportedException(
-                LOGGER,
-                SqlError.UNSUPPORTED_TYPE,
-                Timestamp.class.toString());
     }
 
     @Override
@@ -380,22 +421,6 @@ public abstract class ResultSet implements java.sql.ResultSet {
                 LOGGER,
                 SqlError.UNSUPPORTED_TYPE,
                 InputStream.class.toString());
-    }
-
-    @Override
-    public Object getObject(final int columnIndex, final Map<String, Class<?>> map) throws SQLException {
-        throw SqlError.createSQLFeatureNotSupportedException(
-                LOGGER,
-                SqlError.UNSUPPORTED_TYPE,
-                Object.class.toString());
-    }
-
-    @Override
-    public Object getObject(final int columnIndex) throws SQLException {
-        throw SqlError.createSQLFeatureNotSupportedException(
-                LOGGER,
-                SqlError.UNSUPPORTED_TYPE,
-                String.class.toString());
     }
 
     @Override
@@ -428,14 +453,6 @@ public abstract class ResultSet implements java.sql.ResultSet {
                 LOGGER,
                 SqlError.UNSUPPORTED_TYPE,
                 Array.class.toString());
-    }
-
-    @Override
-    public Timestamp getTimestamp(final int columnIndex, final Calendar cal) throws SQLException {
-        throw SqlError.createSQLFeatureNotSupportedException(
-                LOGGER,
-                SqlError.UNSUPPORTED_TYPE,
-                Timestamp.class.toString());
     }
 
     @Override
@@ -479,35 +496,11 @@ public abstract class ResultSet implements java.sql.ResultSet {
     }
 
     @Override
-    public Date getDate(final int columnIndex, final Calendar cal) throws SQLException {
-        throw SqlError.createSQLFeatureNotSupportedException(
-                LOGGER,
-                SqlError.UNSUPPORTED_TYPE,
-                Date.class.toString());
-    }
-
-    @Override
-    public Time getTime(final int columnIndex, final Calendar cal) throws SQLException {
-        throw SqlError.createSQLFeatureNotSupportedException(
-                LOGGER,
-                SqlError.UNSUPPORTED_TYPE,
-                Time.class.toString());
-    }
-
-    @Override
     public Reader getNCharacterStream(final int columnIndex) throws SQLException {
         throw SqlError.createSQLFeatureNotSupportedException(
                 LOGGER,
                 SqlError.UNSUPPORTED_TYPE,
                 Reader.class.toString());
-    }
-
-    @Override
-    public <T> T getObject(final int columnIndex, final Class<T> type) throws SQLException {
-        throw SqlError.createSQLFeatureNotSupportedException(
-                LOGGER,
-                SqlError.UNSUPPORTED_TYPE,
-                Object.class.toString());
     }
 
     @Override
@@ -1200,7 +1193,7 @@ public abstract class ResultSet implements java.sql.ResultSet {
     }
 
     protected void validateRowColumn(final int columnIndex) throws SQLException {
-        if ((getRowIndex() >= getRowCount()) || (columnIndex >= getColumnCount())) {
+        if ((getRowIndex() >= rowCount) || (columnIndex >= columns.size())) {
             throw SqlError.createSQLFeatureNotSupportedException(LOGGER, SqlError.INVALID_INDEX);
         }
     }

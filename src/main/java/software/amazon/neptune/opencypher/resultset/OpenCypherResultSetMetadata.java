@@ -14,7 +14,7 @@
  *
  */
 
-package software.amazon.neptune.opencypher;
+package software.amazon.neptune.opencypher.resultset;
 
 import lombok.AllArgsConstructor;
 import org.neo4j.driver.Record;
@@ -24,6 +24,7 @@ import org.slf4j.LoggerFactory;
 import software.amazon.jdbc.ResultSetMetaData;
 import software.amazon.jdbc.utilities.SqlError;
 import software.amazon.jdbc.utilities.SqlState;
+import software.amazon.neptune.opencypher.OpenCypherTypeMapping;
 import java.sql.SQLException;
 import java.sql.Types;
 import java.util.List;
@@ -62,7 +63,7 @@ public class OpenCypherResultSetMetadata extends ResultSetMetaData implements ja
      * @param column the 1-based column index.
      * @return Bolt Type Object for column.
      */
-    private Type getColumnBoltType(final int column) {
+    protected Type getColumnBoltType(final int column) {
         // TODO: Loop rows to find common type and cache it.
         return rows.get(0).values().get(column - 1).type();
     }

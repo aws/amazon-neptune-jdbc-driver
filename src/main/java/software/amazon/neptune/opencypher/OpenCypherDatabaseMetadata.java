@@ -16,6 +16,8 @@
 
 package software.amazon.neptune.opencypher;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import software.amazon.jdbc.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -24,6 +26,7 @@ import java.sql.SQLException;
  * OpenCypher implementation of DatabaseMetaData.
  */
 public class OpenCypherDatabaseMetadata extends DatabaseMetaData implements java.sql.DatabaseMetaData {
+    private static final Logger LOGGER = LoggerFactory.getLogger(OpenCypherDatabaseMetadata.class);
 
     /**
      * OpenCypherDatabaseMetadata constructor, initializes super class.
@@ -119,22 +122,41 @@ public class OpenCypherDatabaseMetadata extends DatabaseMetaData implements java
     public ResultSet getTables(final String catalog, final String schemaPattern, final String tableNamePattern,
                                final String[] types)
             throws SQLException {
-        return null;
+        // Only tableNamePattern is supported as an exact node label semicolon delimited String.
+        LOGGER.info("Getting database tables.");
+        final OpenCypherQueryExecutor openCypherQueryExecutor = new OpenCypherQueryExecutor(
+                new OpenCypherConnectionProperties(getConnection().getClientInfo()));
+        return openCypherQueryExecutor.executeGetTables(getConnection().createStatement(), tableNamePattern);
+    }
+
+    @Override
+    public ResultSet getSchemas(final String catalog, final String schemaPattern) throws SQLException {
+        // No support for getSchemas other than empty result set so we can just invoke getSchema().
+        return getSchemas();
     }
 
     @Override
     public ResultSet getSchemas() throws SQLException {
-        return null;
+        LOGGER.info("Getting database schemas.");
+        final OpenCypherQueryExecutor openCypherQueryExecutor = new OpenCypherQueryExecutor(
+                new OpenCypherConnectionProperties(getConnection().getClientInfo()));
+        return openCypherQueryExecutor.executeGetSchemas(getConnection().createStatement());
     }
 
     @Override
     public ResultSet getCatalogs() throws SQLException {
-        return null;
+        LOGGER.info("Getting database catalogs.");
+        final OpenCypherQueryExecutor openCypherQueryExecutor = new OpenCypherQueryExecutor(
+                new OpenCypherConnectionProperties(getConnection().getClientInfo()));
+        return openCypherQueryExecutor.executeGetCatalogs(getConnection().createStatement());
     }
 
     @Override
     public ResultSet getTableTypes() throws SQLException {
-        return null;
+        LOGGER.info("Getting database table types.");
+        final OpenCypherQueryExecutor openCypherQueryExecutor = new OpenCypherQueryExecutor(
+                new OpenCypherConnectionProperties(getConnection().getClientInfo()));
+        return openCypherQueryExecutor.executeGetTableTypes(getConnection().createStatement());
     }
 
     @Override
@@ -205,11 +227,6 @@ public class OpenCypherDatabaseMetadata extends DatabaseMetaData implements java
     @Override
     public int getJDBCMinorVersion() throws SQLException {
         return 0;
-    }
-
-    @Override
-    public ResultSet getSchemas(final String catalog, final String schemaPattern) throws SQLException {
-        return null;
     }
 
     @Override

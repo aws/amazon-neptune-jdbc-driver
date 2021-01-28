@@ -62,8 +62,7 @@ public class OpenCypherConnection extends software.amazon.jdbc.Connection implem
 
     @Override
     public DatabaseMetaData getMetaData() {
-        // TODO.
-        return null;
+        return new OpenCypherDatabaseMetadata(this);
     }
 
     @Override

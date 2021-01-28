@@ -16,6 +16,7 @@
 
 package software.amazon.neptune.opencypher;
 
+import lombok.SneakyThrows;
 import org.neo4j.driver.Config;
 import org.neo4j.driver.Driver;
 import org.neo4j.driver.GraphDatabase;
@@ -27,7 +28,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import software.amazon.jdbc.utilities.SqlError;
 import software.amazon.jdbc.utilities.SqlState;
-
+import software.amazon.neptune.opencypher.resultset.OpenCypherResultSet;
+import software.amazon.neptune.opencypher.resultset.OpenCypherResultSetGetCatalogs;
+import software.amazon.neptune.opencypher.resultset.OpenCypherResultSetGetSchemas;
+import software.amazon.neptune.opencypher.resultset.OpenCypherResultSetGetTableTypes;
+import software.amazon.neptune.opencypher.resultset.OpenCypherResultSetGetTables;
+import java.lang.reflect.Constructor;
 import java.sql.SQLException;
 import java.util.List;
 
@@ -36,16 +42,16 @@ import java.util.List;
  */
 public class OpenCypherQueryExecutor {
     private static final Logger LOGGER = LoggerFactory.getLogger(OpenCypherQueryExecutor.class);
-    private final Driver driver;
     private static final int MAX_FETCH_SIZE = Integer.MAX_VALUE;
+    private final Driver driver;
     private final int fetchSize = -1;
+    private final Object lock = new Object();
     private boolean isConfigChange = false;
     private boolean isSessionConfigChange = false;
     private int queryTimeout = -1;
     private Config config;
     private SessionConfig sessionConfig;
     private Session session;
-    private final Object lock = new Object();
     private boolean queryExecuted = false;
     private boolean queryCancelled = false;
 
@@ -102,7 +108,76 @@ public class OpenCypherQueryExecutor {
      * @return java.sql.ResultSet object returned from query execution.
      * @throws SQLException if query execution fails, or it was cancelled.
      */
+    @SneakyThrows
     public java.sql.ResultSet executeQuery(final String sql, final java.sql.Statement statement) throws SQLException {
+        final Constructor<?> constructor =
+                OpenCypherResultSet.class.getConstructor(java.sql.Statement.class, Session.class,
+                        Result.class,
+                        List.class, List.class);
+        return runQuery(constructor, statement, sql);
+    }
+
+    /**
+     * Function to get tables.
+     *
+     * @param statement java.sql.Statement Object required for result set.
+     * @return java.sql.ResultSet object returned from query execution.
+     * @throws SQLException if query execution fails, or it was cancelled.
+     */
+    @SneakyThrows
+    public java.sql.ResultSet executeGetTables(final java.sql.Statement statement, final String tableName)
+            throws SQLException {
+        final Constructor<?> constructor =
+                OpenCypherResultSetGetTables.class.getConstructor(java.sql.Statement.class, Session.class,
+                        Result.class,
+                        List.class, List.class);
+        final String query = tableName == null ? "MATCH (n) RETURN DISTINCT LABELS(n)" :
+                String.format("MATCH (n:%s) RETURN DISTINCT LABELS(n)", tableName);
+        return runQuery(constructor, statement, query);
+    }
+
+    /**
+     * Function to get schema.
+     *
+     * @param statement java.sql.Statement Object required for result set.
+     * @return java.sql.ResulSet Object containing schemas.
+     * @throws SQLException if query execution fails, or it was cancelled.
+     */
+    @SneakyThrows
+    public java.sql.ResultSet executeGetSchemas(final java.sql.Statement statement)
+            throws SQLException {
+        return new OpenCypherResultSetGetSchemas(statement);
+    }
+
+    /**
+     * Function to get catalogs.
+     *
+     * @param statement java.sql.Statement Object required for result set.
+     * @return java.sql.ResulSet Object containing catalogs.
+     * @throws SQLException if query execution fails, or it was cancelled.
+     */
+    @SneakyThrows
+    public java.sql.ResultSet executeGetCatalogs(final java.sql.Statement statement)
+            throws SQLException {
+        return new OpenCypherResultSetGetCatalogs(statement);
+    }
+
+    /**
+     * Function to get table types.
+     *
+     * @param statement java.sql.Statement Object required for result set.
+     * @return java.sql.ResulSet Object containing table types.
+     * @throws SQLException if query execution fails, or it was cancelled.
+     */
+    @SneakyThrows
+    public java.sql.ResultSet executeGetTableTypes(final java.sql.Statement statement)
+            throws SQLException {
+        return new OpenCypherResultSetGetTableTypes(statement);
+    }
+
+    @SneakyThrows
+    private java.sql.ResultSet runQuery(final Constructor<?> constructor, final java.sql.Statement statement,
+                                        final String query) throws SQLException {
         synchronized (lock) {
             queryCancelled = false;
             queryExecuted = false;
@@ -110,7 +185,7 @@ public class OpenCypherQueryExecutor {
 
         try {
             session = driver.session(sessionConfig);
-            final Result result = session.run(sql);
+            final Result result = session.run(query);
             final List<Record> rows = result.list();
             final List<String> columns = result.keys();
             synchronized (lock) {
@@ -122,10 +197,10 @@ public class OpenCypherQueryExecutor {
                 }
                 queryExecuted = true;
             }
-            return new OpenCypherResultSet(
+            return (java.sql.ResultSet) constructor.newInstance(
                     statement, session, result, rows, columns);
 
-        } catch (RuntimeException e) {
+        } catch (final RuntimeException e) {
             synchronized (lock) {
                 if (queryCancelled) {
                     throw SqlError.createSQLException(
@@ -145,6 +220,7 @@ public class OpenCypherQueryExecutor {
     /**
      * Function to cancel running query.
      * This has to be run in the different thread from the one running the query.
+     *
      * @throws SQLException if query cancellation fails.
      */
     protected void cancelQuery() throws SQLException {
