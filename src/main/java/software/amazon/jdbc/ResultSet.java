@@ -65,11 +65,8 @@ public abstract class ResultSet implements java.sql.ResultSet {
     }
 
     protected abstract void doClose() throws SQLException;
-
     protected abstract int getDriverFetchSize() throws SQLException;
-
     protected abstract void setDriverFetchSize(int rows);
-
     protected abstract Object getConvertedValue(int columnIndex) throws SQLException;
 
     /**
