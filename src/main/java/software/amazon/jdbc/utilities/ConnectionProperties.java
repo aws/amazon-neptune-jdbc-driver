@@ -47,12 +47,7 @@ public class ConnectionProperties {
     public ConnectionProperties(final Properties properties) {
         connectionProperties = new Properties();
         for (String key : PROPERTIES_MAP.keySet()) {
-            final PropertyConverter<?> propertyConverter = PROPERTIES_MAP.get(key);
-            try {
-                connectionProperties.put(key, propertyConverter.convert(properties));
-            } catch (RuntimeException e) {
-                System.out.println(e.getMessage());
-            }
+            connectionProperties.put(key, PropertyConverter.convert(properties,  PROPERTIES_MAP.get(key)));
         }
 
         // If any invalid properties are left, raise an error
@@ -75,11 +70,11 @@ public class ConnectionProperties {
         return connectionProperties;
     }
 
+    // TODO: AN-405 - Redo Connection getClientInfo() and setClientInfo()
+    // This method should be removed.
     /**
      * Clear content of the connectionProperties map.
      */
-    // TODO: AN-405 - Redo Connection getClientInfo() and setClientInfo()
-    // This method should be removed.
     public void clear() {
         connectionProperties.clear();
     }
@@ -126,25 +121,59 @@ public class ConnectionProperties {
     }
 
     /**
-     * Converter interface to convert a string property value to its proper type.
+     * Converter class that converts string property to its proper type.
      *
      * @param <T> Type to convert to.
      */
-    private interface PropertyConverter<T> {
+    private abstract static class PropertyConverter<T> {
+
+        /**
+         * Function to perform matching connection string key/value property.
+         *
+         * @param value String value to convert.
+         * @return Converted value.
+         */
+        abstract boolean matches(String key, String value);
 
         /**
          * Function to perform conversion.
          *
-         * @param properties Input properties that contain property value to convert.
+         * @param value String value to convert to T type.
          * @return Converted value.
          */
-        T convert(Properties properties);
+        abstract T getValue(String value);
+
+        /**
+         * Function that returns default value.
+         * @return Default value.
+         */
+        abstract T getDefaultValue();
+
+        /**
+         * Function to find matching property and perform conversion.
+         *
+         * @param connectionProperties Map containing connection properties came from the connection string.
+         * @param converter An instance of the Converter class for the specific T type.
+         * @return Converted value, or default value if no matching property found in connection properties map.
+         */
+        public static <T> T convert(final Properties connectionProperties, final PropertyConverter<T> converter) {
+            for (Map.Entry<Object, Object> entry : connectionProperties.entrySet()) {
+                final String key = entry.getKey().toString();
+                final String value = entry.getValue().toString();
+                if (converter.matches(key, value)) {
+                    // remove property that is matched
+                    connectionProperties.remove(key);
+                    return (T) converter.getValue(value);
+                }
+            }
+            return (T) converter.getDefaultValue();
+        }
     }
 
     /**
-     * Utility class that handles Log Level property.
+     * Utility class that handles LogLevel property.
      */
-    private static class LogLevel implements PropertyConverter<Level> {
+    private static class LogLevel extends PropertyConverter<Level> {
         private static final Pattern KEY_PATTERN = Pattern.compile("logLevel", Pattern.CASE_INSENSITIVE);
         private static final Pattern VALUE_PATTERN = Pattern.compile("FATAL|ERROR|WARN|INFO|DEBUG|TRACE", Pattern.CASE_INSENSITIVE);
         private static final Map<String, Level> LOG_LEVEL_MAP = ImmutableMap.<String, Level>builder()
@@ -157,59 +186,65 @@ public class ConnectionProperties {
                 .build();
 
         @Override
-        public Level convert(final Properties connectionProperties) {
-            for (Map.Entry<Object, Object> entry : connectionProperties.entrySet()) {
-                final String key = entry.getKey().toString();
-                final String value = entry.getValue().toString();
-                if (KEY_PATTERN.matcher(key).matches() && VALUE_PATTERN.matcher(value).matches()) {
-                    // remove property that is being matched
-                    connectionProperties.remove(key);
-                    return LOG_LEVEL_MAP.get(value);
-                }
-            }
+        public boolean matches(final String key, final String value) {
+            return KEY_PATTERN.matcher(key).matches()
+                    && VALUE_PATTERN.matcher(value).matches();
+        }
+
+        @Override
+        public Level getValue(final String value) {
+            return LOG_LEVEL_MAP.get(value.toUpperCase());
+        }
+
+        @Override
+        public Level getDefaultValue() {
             return (Level)LOG_LEVEL.getDefaultValue();
         }
     }
 
     /**
-     * Utility class that handles Connection Timeout property.
+     * Utility class that handles ConnectionTimeout property.
      */
-    private static class ConnectionTimeout implements PropertyConverter<Integer> {
+    private static class ConnectionTimeout extends PropertyConverter<Integer> {
         private static final Pattern KEY_PATTERN = Pattern.compile("connectionTimeout", Pattern.CASE_INSENSITIVE);
 
         @Override
-        public Integer convert(final Properties connectionProperties) {
-            for (Map.Entry<Object, Object> entry : connectionProperties.entrySet()) {
-                final String key = entry.getKey().toString();
-                final String value = entry.getValue().toString();
-                if (KEY_PATTERN.matcher(key).matches() && isUnsignedInteger(value)) {
-                    // remove property that is being matched
-                    connectionProperties.remove(key);
-                    return toUnsignedInteger(value);
-                }
-            }
-            return (int)CONNECTION_TIMEOUT.getDefaultValue();
+        public boolean matches(final String key, final String value) {
+            return KEY_PATTERN.matcher(key).matches()
+                    && isUnsignedInteger(value);
+        }
+
+        @Override
+        public Integer getValue(final String value) {
+            return toUnsignedInteger(value);
+        }
+
+        @Override
+        public Integer getDefaultValue() {
+            return (Integer)CONNECTION_TIMEOUT.getDefaultValue();
         }
     }
 
     /**
-     * Utility class that handles Connection Retry Count property.
+     * Utility class that handles ConnectionRetryCount property.
      */
-    private static class ConnectionRetryCount implements PropertyConverter<Integer> {
+    private static class ConnectionRetryCount extends PropertyConverter<Integer> {
         private static final Pattern KEY_PATTERN = Pattern.compile("connectionRetryCount", Pattern.CASE_INSENSITIVE);
 
         @Override
-        public Integer convert(final Properties connectionProperties) {
-            for (Map.Entry<Object, Object> entry : connectionProperties.entrySet()) {
-                final String key = entry.getKey().toString();
-                final String value = entry.getValue().toString();
-                if (KEY_PATTERN.matcher(key).matches() && isUnsignedInteger(value)) {
-                    // remove property that is being matched
-                    connectionProperties.remove(key);
-                    return toUnsignedInteger(value);
-                }
-            }
-            return (int)CONNECTION_RETRY_COUNT.getDefaultValue();
+        public boolean matches(final String key, final String value) {
+            return KEY_PATTERN.matcher(key).matches()
+                    && isUnsignedInteger(value);
+        }
+
+        @Override
+        public Integer getValue(final String value) {
+            return toUnsignedInteger(value);
+        }
+
+        @Override
+        public Integer getDefaultValue() {
+            return (Integer)CONNECTION_RETRY_COUNT.getDefaultValue();
         }
     }
 
