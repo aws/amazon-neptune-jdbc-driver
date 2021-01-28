@@ -71,6 +71,7 @@ public abstract class Connection implements java.sql.Connection {
         Functions that have their implementation in this Connection class.
      */
     @Override
+    // TODO: AN-405 - Redo Connection getClientInfo() and setClientInfo()
     public Properties getClientInfo() throws SQLException {
         verifyOpen();
         final Properties clientInfo = new Properties();
@@ -82,6 +83,7 @@ public abstract class Connection implements java.sql.Connection {
     }
 
     @Override
+    // TODO: AN-405 - Redo Connection getClientInfo() and setClientInfo()
     public void setClientInfo(final Properties properties) throws SQLClientInfoException {
         if (isClosed.get()) {
             final Map<String, ClientInfoStatus> failures = new HashMap<>();
