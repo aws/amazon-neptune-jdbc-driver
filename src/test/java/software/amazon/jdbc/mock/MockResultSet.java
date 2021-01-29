@@ -20,6 +20,7 @@ import software.amazon.jdbc.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
 
 /**
  * Mock implementation for ResultSet object so it can be instantiated and tested.
@@ -34,7 +35,7 @@ public class MockResultSet extends ResultSet implements java.sql.ResultSet {
      * @param statement Statement Object.
      */
     public MockResultSet(final Statement statement) {
-        super(statement);
+        super(statement, new ArrayList<>(10), ROW_COUNT);
     }
 
     @Override
@@ -51,31 +52,8 @@ public class MockResultSet extends ResultSet implements java.sql.ResultSet {
     }
 
     @Override
-    protected int getRowIndex() {
-        return rowIndex;
-    }
-
-    @Override
-    protected int getRowCount() {
-        return ROW_COUNT;
-    }
-
-    @Override
-    protected int getColumnCount() {
-        return COL_COUNT;
-    }
-
-    @Override
-    public boolean next() throws SQLException {
-        if (++rowIndex >= ROW_COUNT) {
-            rowIndex = ROW_COUNT;
-        }
-        return (rowIndex < ROW_COUNT);
-    }
-
-    @Override
-    public boolean wasNull() throws SQLException {
-        return false;
+    protected Object getConvertedValue(final int columnIndex) throws SQLException {
+        return null;
     }
 
     @Override
@@ -84,8 +62,8 @@ public class MockResultSet extends ResultSet implements java.sql.ResultSet {
     }
 
     @Override
-    public int findColumn(final String columnLabel) throws SQLException {
-        return 0;
+    public boolean wasNull() throws SQLException {
+        return false;
     }
 
     public void setRowIdx(final int idx) {

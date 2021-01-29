@@ -27,6 +27,7 @@ import software.amazon.jdbc.utilities.Logging;
 import software.amazon.neptune.NeptuneConstants;
 import software.amazon.neptune.opencypher.mock.MockOpenCypherDatabase;
 import software.amazon.neptune.opencypher.mock.MockOpenCypherNodes;
+import software.amazon.neptune.opencypher.resultset.OpenCypherResultSet;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;

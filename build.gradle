@@ -183,7 +183,7 @@ subprojects {
 dependencies {
     // Local neptune-export library
     implementation('com.amazonaws:neptune-export:1.0-SNAPSHOT')
-    compile(':neptune-export')
+    compile(':neptune-export:1.0-SNAPSHOT')
 
     // Logging
     implementation group: 'org.slf4j', name: 'slf4j-log4j12', version: '1.7.29'
