@@ -26,6 +26,7 @@ import java.io.Reader;
 import java.sql.Blob;
 import java.sql.Clob;
 import java.sql.NClob;
+import java.sql.SQLException;
 import java.util.Properties;
 
 /**
@@ -36,7 +37,7 @@ public class PreparedStatementTest {
     private java.sql.PreparedStatement preparedStatement;
 
     @BeforeEach
-    void initialize() {
+    void initialize() throws SQLException {
         connection = new MockConnection(new Properties());
         preparedStatement = new MockPreparedStatement(connection, "");
     }

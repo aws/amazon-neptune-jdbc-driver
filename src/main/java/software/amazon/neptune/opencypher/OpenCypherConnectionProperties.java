@@ -17,17 +17,16 @@
 package software.amazon.neptune.opencypher;
 
 import com.google.common.collect.ImmutableList;
-import software.amazon.neptune.NeptuneConstants;
+import software.amazon.jdbc.utilities.ConnectionProperties;
 import java.util.List;
 import java.util.Properties;
-
 
 /**
  * OpenCypher connection properties class.
  */
 public class OpenCypherConnectionProperties {
     private final Properties properties = new Properties();
-    private final List<String> keys = ImmutableList.of(NeptuneConstants.ENDPOINT); //, "user", "password");
+    private final List<String> keys = ImmutableList.of(ConnectionProperties.ENDPOINT_KEY); //, "user", "password");
 
     /**
      * Constructor for OpenCypherConnectionProperties.
@@ -38,7 +37,7 @@ public class OpenCypherConnectionProperties {
     }
 
     String getEndpoint() {
-        return (String) properties.get(NeptuneConstants.ENDPOINT);
+        return (String) properties.get(ConnectionProperties.ENDPOINT_KEY);
     }
 
     String getUser() {

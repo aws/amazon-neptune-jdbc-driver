@@ -21,7 +21,6 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import software.amazon.jdbc.utilities.ConnectionProperties;
-import software.amazon.jdbc.utilities.ConnectionProperty;
 import software.amazon.jdbc.utilities.SqlError;
 import software.amazon.jdbc.utilities.SqlState;
 import software.amazon.jdbc.utilities.Warning;
@@ -54,7 +53,7 @@ public abstract class Connection implements java.sql.Connection {
     private Map<String, Class<?>> typeMap = new HashMap<>();
     private SQLWarning warnings = null;
 
-    protected Connection(@NonNull final Properties connectionProperties) {
+    protected Connection(@NonNull final Properties connectionProperties) throws SQLException {
         this.connectionProperties = new ConnectionProperties(connectionProperties);
         setLogLevel();
     }
@@ -77,7 +76,7 @@ public abstract class Connection implements java.sql.Connection {
         final Properties clientInfo = new Properties();
         clientInfo.putAll(connectionProperties.getAll());
         clientInfo.putIfAbsent(
-                ConnectionProperty.APPLICATION_NAME.getConnectionProperty(),
+                ConnectionProperties.APPLICATION_NAME_KEY,
                 Driver.APPLICATION_NAME);
         return clientInfo;
     }
@@ -97,7 +96,7 @@ public abstract class Connection implements java.sql.Connection {
         connectionProperties.clear();
         if (properties != null) {
             for (final String name : properties.stringPropertyNames()) {
-                if (ConnectionProperty.isSupportedProperty(name)) {
+                if (ConnectionProperties.isSupportedProperty(name)) {
                     final String value = properties.getProperty(name);
                     connectionProperties.put(name, value);
                     LOGGER.debug("Successfully set property with name {{}} and value {{}}", name, value);

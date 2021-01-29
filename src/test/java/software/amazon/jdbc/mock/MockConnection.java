@@ -34,7 +34,7 @@ public class MockConnection extends Connection implements java.sql.Connection {
      * @param connectionProperties Properties to pass to Connection.
      */
     public MockConnection(
-            final @NonNull Properties connectionProperties) {
+            final @NonNull Properties connectionProperties) throws SQLException {
         super(connectionProperties);
     }
 

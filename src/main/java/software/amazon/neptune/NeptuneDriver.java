@@ -30,7 +30,7 @@ public class NeptuneDriver extends Driver implements java.sql.Driver {
                 return null;
             }
             final String propertyString = getPropertyString(url, JDBC_PATTERN);
-            final Properties properties = parsePropertyString(propertyString, NeptuneConstants.ENDPOINT);
+            final Properties properties = parsePropertyString(propertyString);
             properties.putAll(info);
             return (java.sql.Connection)connectionMap.get(language).getConstructor(Properties.class).newInstance(properties);
         } catch (final Exception e) {

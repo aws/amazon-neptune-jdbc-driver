@@ -23,6 +23,7 @@ import software.amazon.jdbc.mock.MockConnection;
 import software.amazon.jdbc.mock.MockResultSet;
 import software.amazon.jdbc.mock.MockStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.sql.SQLWarning;
 import java.util.Properties;
 
@@ -34,7 +35,7 @@ public class StatementTest {
     private java.sql.Connection connection;
 
     @BeforeEach
-    void initialize() {
+    void initialize() throws SQLException {
         connection = new MockConnection(new Properties());
         statement = new MockStatement(connection);
     }
