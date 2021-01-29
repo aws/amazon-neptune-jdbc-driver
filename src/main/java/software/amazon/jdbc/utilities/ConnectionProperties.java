@@ -31,8 +31,6 @@ import java.util.Properties;
  * Class that manages connection properties.
  */
 public class ConnectionProperties {
-    private final Properties connectionProperties;
-
     public static final String APPLICATION_NAME_KEY = "ApplicationName";
     public static final String AWS_CREDENTIALS_PROVIDER_CLASS_KEY = "AwsCredentialsProviderClass";
     public static final String CUSTOM_CREDENTIALS_FILE_PATH_KEY = "CustomCredentialsFilePath";
@@ -60,13 +58,6 @@ public class ConnectionProperties {
         T convert(String key, String value) throws SQLException;
     }
 
-    private static final Map<String, Object> DEFAULT_PROPERTIES_MAP = new HashMap<>();
-    static {
-        DEFAULT_PROPERTIES_MAP.put(ENDPOINT_KEY, "");
-        DEFAULT_PROPERTIES_MAP.put(LOG_LEVEL_KEY, DEFAULT_LOG_LEVEL);
-        DEFAULT_PROPERTIES_MAP.put(CONNECTION_TIMEOUT_KEY, DEFAULT_CONNECTION_TIMEOUT);
-        DEFAULT_PROPERTIES_MAP.put(CONNECTION_RETRY_COUNT_KEY, DEFAULT_CONNECTION_RETRY_COUNT);
-    }
     private static final Map<String, PropertyConverter<?>> PROPERTIES_MAP = new HashMap<>();
     static {
         PROPERTIES_MAP.put(APPLICATION_NAME_KEY, (key, value) -> value);
@@ -117,6 +108,16 @@ public class ConnectionProperties {
         });
     }
 
+    private static final Map<String, Object> DEFAULT_PROPERTIES_MAP = new HashMap<>();
+    static {
+        DEFAULT_PROPERTIES_MAP.put(ENDPOINT_KEY, "");
+        DEFAULT_PROPERTIES_MAP.put(LOG_LEVEL_KEY, DEFAULT_LOG_LEVEL);
+        DEFAULT_PROPERTIES_MAP.put(CONNECTION_TIMEOUT_KEY, DEFAULT_CONNECTION_TIMEOUT);
+        DEFAULT_PROPERTIES_MAP.put(CONNECTION_RETRY_COUNT_KEY, DEFAULT_CONNECTION_RETRY_COUNT);
+    }
+
+    private final Properties connectionProperties;
+
     /**
      * ConnectionProperties constructor.
      * @param properties initial set of connection properties coming from the connection string.
@@ -133,45 +134,34 @@ public class ConnectionProperties {
      */
     private Properties resolveProperties(final Properties inputProperties) throws SQLException {
         final Properties outputProperties = new Properties();
-        final List<Object> inputPropertiesKeySet = new ArrayList<>(inputProperties.keySet());
+
+        // List of input properties keys used to keep track of unresolved properties.
+        final List<Object> inputPropertiesKeys = new ArrayList<>(inputProperties.keySet());
 
         for (String mapKey : PROPERTIES_MAP.keySet()) {
-            final PropertyConverter<?> propertyConverter = PROPERTIES_MAP.get(mapKey);
-
             for (Map.Entry<Object, Object> entry : inputProperties.entrySet()) {
                 final String key = entry.getKey().toString();
                 final String value = entry.getValue().toString();
-
+                // Find matching property by comparing keys (case-insensitive)
                 if (key.toUpperCase().equals(mapKey.toUpperCase())) {
-                    // Throw error if there is a duplicate property.
-                    if (outputProperties.containsKey(mapKey)) {
-                        throw SqlError.createSQLException(
-                                LOGGER,
-                                SqlState.CONNECTION_EXCEPTION,
-                                SqlError.DUPLICATE_CONNECTION_PROPERTY, key, value);
-                    }
                     // Insert resolved property into the map.
-                    outputProperties.put(mapKey, propertyConverter.convert(key, value));
-
-                    // Remove key of the resolved property.
-                    inputPropertiesKeySet.remove(key);
+                    outputProperties.put(mapKey, PROPERTIES_MAP.get(mapKey).convert(key, value));
+                    // Remove key for the resolved property.
+                    inputPropertiesKeys.remove(key);
                     break;
                 }
             }
-
-            // If property was not resolved, insert default value.
-            if (!outputProperties.containsKey(mapKey)) {
-                // If there is no default value, property is not mandatory.
-                if (DEFAULT_PROPERTIES_MAP.containsKey(mapKey)) {
-                    outputProperties.put(mapKey, DEFAULT_PROPERTIES_MAP.get(mapKey));
-                }
+            // If property was not resolved, insert default value, if it exists.
+            if (!outputProperties.containsKey(mapKey)
+                    && DEFAULT_PROPERTIES_MAP.containsKey(mapKey)) {
+                outputProperties.put(mapKey, DEFAULT_PROPERTIES_MAP.get(mapKey));
             }
         }
 
         // If there are any unresolved properties left, raise an error.
-        if (!inputPropertiesKeySet.isEmpty()) {
-            // Grab first invalid property for error message.
-            final Object key = inputPropertiesKeySet.get(0);
+        if (!inputPropertiesKeys.isEmpty()) {
+            // Take the first invalid property to display in the error message.
+            final Object key = inputPropertiesKeys.get(0);
             final Object value = inputProperties.get(key);
             throw SqlError.createSQLException(
                     LOGGER,
