@@ -27,6 +27,7 @@ import java.io.Reader;
 import java.sql.Blob;
 import java.sql.Clob;
 import java.sql.NClob;
+import java.sql.SQLException;
 import java.sql.SQLWarning;
 import java.util.Map;
 import java.util.Properties;
@@ -39,7 +40,7 @@ public class ResultSetTest {
     private java.sql.Statement statement;
 
     @BeforeEach
-    void initialize() {
+    void initialize() throws SQLException {
         statement = new MockStatement(new MockConnection(new Properties()));
         resultSet = new MockResultSet(statement);
     }

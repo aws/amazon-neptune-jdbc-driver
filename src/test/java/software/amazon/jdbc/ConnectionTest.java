@@ -22,14 +22,22 @@ import org.junit.jupiter.api.Test;
 import software.amazon.jdbc.helpers.HelperFunctions;
 import software.amazon.jdbc.mock.MockConnection;
 import software.amazon.jdbc.mock.MockStatement;
-import software.amazon.jdbc.utilities.ConnectionProperty;
-import software.amazon.jdbc.utilities.Logging;
 
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.sql.SQLWarning;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
+
+import static software.amazon.jdbc.utilities.ConnectionProperties.APPLICATION_NAME_KEY;
+import static software.amazon.jdbc.utilities.ConnectionProperties.CONNECTION_RETRY_COUNT_KEY;
+import static software.amazon.jdbc.utilities.ConnectionProperties.CONNECTION_TIMEOUT_KEY;
+import static software.amazon.jdbc.utilities.ConnectionProperties.DEFAULT_CONNECTION_RETRY_COUNT;
+import static software.amazon.jdbc.utilities.ConnectionProperties.DEFAULT_CONNECTION_TIMEOUT;
+import static software.amazon.jdbc.utilities.ConnectionProperties.DEFAULT_LOG_LEVEL;
+import static software.amazon.jdbc.utilities.ConnectionProperties.ENDPOINT_KEY;
+import static software.amazon.jdbc.utilities.ConnectionProperties.LOG_LEVEL_KEY;
 
 /**
  * Test for abstract Connection Object.
@@ -42,7 +50,7 @@ public class ConnectionTest {
     private static final String TEST_NATIVE_SQL = "native sql";
     private static final String TEST_PROP_KEY_UNSUPPORTED = "unsupported";
     private static final String TEST_PROP_VAL_UNSUPPORTED = "unsupported";
-    private static final String TEST_PROP_KEY = ConnectionProperty.APPLICATION_NAME.getConnectionProperty();
+    private static final String TEST_PROP_KEY = APPLICATION_NAME_KEY;
     private static final String TEST_PROP_VAL = Driver.APPLICATION_NAME;
     private static final Properties TEST_PROP = new Properties();
     private static final Properties TEST_PROP_EMPTY = new Properties();
@@ -51,13 +59,16 @@ public class ConnectionTest {
             new ImmutableMap.Builder<String, Class<?>>().put("String", String.class).build();
 
     @BeforeEach
-    void initialize() {
+    void initialize() throws SQLException {
         connection = new MockConnection(new Properties());
         TEST_PROP.put(TEST_PROP_KEY, TEST_PROP_VAL);
-        TEST_PROP.put(ConnectionProperty.APPLICATION_NAME.getConnectionProperty(), Driver.APPLICATION_NAME);
-        TEST_PROP_EMPTY.put(ConnectionProperty.APPLICATION_NAME.getConnectionProperty(), Driver.APPLICATION_NAME);
+        TEST_PROP.put(APPLICATION_NAME_KEY, Driver.APPLICATION_NAME);
+        TEST_PROP_EMPTY.put(APPLICATION_NAME_KEY, Driver.APPLICATION_NAME);
         TEST_INITIAL_PROP.putAll(TEST_PROP_EMPTY);
-        TEST_INITIAL_PROP.put(ConnectionProperty.LOGGING_LEVEL.getConnectionProperty(), Logging.DEFAULT_LEVEL);
+        TEST_INITIAL_PROP.put(ENDPOINT_KEY, "");
+        TEST_INITIAL_PROP.put(LOG_LEVEL_KEY, DEFAULT_LOG_LEVEL);
+        TEST_INITIAL_PROP.put(CONNECTION_TIMEOUT_KEY, DEFAULT_CONNECTION_TIMEOUT);
+        TEST_INITIAL_PROP.put(CONNECTION_RETRY_COUNT_KEY, DEFAULT_CONNECTION_RETRY_COUNT);
     }
 
     @Test

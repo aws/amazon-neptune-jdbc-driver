@@ -17,6 +17,8 @@
 package software.amazon.jdbc;
 
 import org.slf4j.LoggerFactory;
+import software.amazon.jdbc.utilities.ConnectionProperties;
+
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.lang.management.ManagementFactory;
@@ -139,7 +141,7 @@ public abstract class Driver implements java.sql.Driver {
         throw new SQLException("Unsupported property string.");
     }
 
-    protected Properties parsePropertyString(final String propertyString, final String endpoint) {
+    protected Properties parsePropertyString(final String propertyString) {
         final Properties properties = new Properties();
         if (propertyString.isEmpty()) {
             return properties;
@@ -149,7 +151,7 @@ public abstract class Driver implements java.sql.Driver {
         if (propertyArray.length == 0) {
             return properties;
         } else if (!propertyArray[0].trim().isEmpty()) {
-            properties.setProperty(endpoint, propertyArray[0].trim());
+            properties.setProperty(ConnectionProperties.ENDPOINT_KEY, propertyArray[0].trim());
         }
         for (int i = 1; i < propertyArray.length; i++) {
             final Matcher propMatcher = KEY_VALUE_PATTERN.matcher(propertyArray[i]);

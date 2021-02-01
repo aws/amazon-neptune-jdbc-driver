@@ -21,7 +21,7 @@ import org.apache.log4j.LogManager;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import software.amazon.jdbc.utilities.Logging;
+import software.amazon.jdbc.utilities.ConnectionProperties;
 import software.amazon.neptune.opencypher.OpenCypherConnection;
 
 import java.sql.SQLException;
@@ -105,32 +105,28 @@ public class NeptuneDriverTest {
 
     @Test
     void testLogLevelSetting() throws SQLException {
-        Assertions.assertEquals(Logging.DEFAULT_LEVEL, LogManager.getRootLogger().getLevel());
-
+        Assertions.assertEquals(ConnectionProperties.DEFAULT_LOG_LEVEL, LogManager.getRootLogger().getLevel());
         final List<String> validLogLevels = ImmutableList.of(
-                "", "logLevel=FATAL;", "LogLevel=error", "LOGleVel=InFo;", "LOGLEVEL=dEbug", "logLEVEL=TRACE;");
+                "", "logLevel=;", "logLevel=FATAL;", "LogLevel= error", "LOGleVel = InFo ;", "LOGLEVEL=dEbug", "logLEVEL=TRACE;");
         final List<String> invalidLogLevels = ImmutableList.of(
-                "logLevel=something;", "LogLevel=5;", "logLevel=;");
+                "logLevel=something;", "LogLevel=5;");
         for (final String language : languages) {
             for (final String endpoint : endpoints) {
                 for (final String property : properties) {
+                    final String url = createValidUrl(language, endpoint, property, false);
                     for (final String logLevel : validLogLevels) {
-                        String url = createValidUrl(language, endpoint, property, false);
-                        url = appendProperty(url, logLevel, false);
-                        Assertions.assertTrue(driver.connect(url, new Properties()) instanceof OpenCypherConnection);
+                        final String validUrl = appendProperty(url, logLevel, false);
+                        Assertions.assertTrue(driver.connect(validUrl, new Properties()) instanceof OpenCypherConnection);
                     }
                     for (final String invalidLogLevel : invalidLogLevels) {
-                        String url = createValidUrl(language, endpoint, property, false);
-                        url = appendProperty(url, invalidLogLevel, false);
-                        // TODO: AN-402 Handle invalid connection string properties
-                        //Assertions.assertNull(driver.connect(url, new Properties()) instanceof OpenCypherConnection);
-                        Assertions.assertTrue(driver.connect(url, new Properties()) instanceof OpenCypherConnection);
+                        final String invalidUrl = appendProperty(url, invalidLogLevel, false);
+                        Assertions.assertNull(driver.connect(invalidUrl, new Properties()));
                     }
                 }
             }
         }
         // Reset logging so that it doesn't affect other tests.
-        LogManager.getRootLogger().setLevel(Logging.DEFAULT_LEVEL);
+        LogManager.getRootLogger().setLevel(ConnectionProperties.DEFAULT_LOG_LEVEL);
     }
 
     // TODO: Look into Driver/NeptuneDriver property string handling.
