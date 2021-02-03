@@ -22,6 +22,7 @@ import software.amazon.jdbc.helpers.HelperFunctions;
 import software.amazon.jdbc.mock.MockConnection;
 import software.amazon.jdbc.mock.MockResultSet;
 import software.amazon.jdbc.mock.MockStatement;
+import software.amazon.jdbc.utilities.ConnectionProperties;
 import java.io.InputStream;
 import java.io.Reader;
 import java.sql.Blob;
@@ -41,7 +42,7 @@ public class ResultSetTest {
 
     @BeforeEach
     void initialize() throws SQLException {
-        statement = new MockStatement(new MockConnection(new Properties()));
+        statement = new MockStatement(new MockConnection(new ConnectionProperties(new Properties())));
         resultSet = new MockResultSet(statement);
     }
 

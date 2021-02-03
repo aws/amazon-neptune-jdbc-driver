@@ -74,7 +74,7 @@ public class OpenCypherConnectionTest {
 
     @BeforeEach
     void initialize() throws SQLException {
-        connection = new OpenCypherConnection(PROPERTIES);
+        connection = new OpenCypherConnection(new ConnectionProperties(PROPERTIES));
     }
 
     @Test
@@ -106,7 +106,7 @@ public class OpenCypherConnectionTest {
         final Properties properties = new Properties();
         properties.putAll(PROPERTIES);
         properties.put("logLevel", "ERROR");
-        connection = new OpenCypherConnection(properties);
+        connection = new OpenCypherConnection(new ConnectionProperties(properties));
         Assertions.assertEquals(Level.ERROR, LogManager.getRootLogger().getLevel());
 
         // Reset logging so that it doesn't affect other tests.

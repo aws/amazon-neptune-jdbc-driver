@@ -36,6 +36,7 @@ import software.amazon.neptune.opencypher.resultset.OpenCypherResultSetGetTables
 import java.lang.reflect.Constructor;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 /**
  * OpenCypher implementation of QueryExecution.
@@ -43,13 +44,11 @@ import java.util.List;
 public class OpenCypherQueryExecutor {
     private static final Logger LOGGER = LoggerFactory.getLogger(OpenCypherQueryExecutor.class);
     private static final int MAX_FETCH_SIZE = Integer.MAX_VALUE;
-    private final Driver driver;
-    private final int fetchSize = -1;
-    private final Object lock = new Object();
-    private boolean isConfigChange = false;
-    private boolean isSessionConfigChange = false;
+    //private final int fetchSize = -1;
     private int queryTimeout = -1;
-    private Config config;
+    private final Object lock = new Object();
+    private final Config config;
+    private final Driver driver;
     private SessionConfig sessionConfig;
     private Session session;
     private boolean queryExecuted = false;
@@ -61,39 +60,58 @@ public class OpenCypherQueryExecutor {
      * @param properties properties to use for query executon.
      */
     OpenCypherQueryExecutor(final OpenCypherConnectionProperties properties) {
-        final String endpoint = properties.getEndpoint();
         // TODO: Implement authentication.
         // final String user = properties.getUser();
         // final String password = properties.getPassword();
         // AuthTokens.basic(this.user, this.password), this.config);
-        this.config = Config.builder().build();
+
+        // Driver config properties.
+        this.config = Config.builder()
+                .withConnectionTimeout(properties.getConnectionTimeout(), TimeUnit.MILLISECONDS)
+                //.withFetchSize(properties.geFetchSize())
+                .build();
+        this.driver = GraphDatabase.driver(properties.getEndpoint(), this.config);
+
+        // Session config properties.
         this.sessionConfig = SessionConfig.builder().build();
-        this.driver = GraphDatabase.driver(endpoint, this.config);
+    }
+
+    /**
+     * Verify that connection to database is functional.
+     * @param endpoint Connection endpoint.
+     * @param timeout Time in milliseconds to wait for the database operation used to validate the connection to complete.
+     * @return true if the connection is valid, otherwise false.
+     */
+    public static boolean isValid(final String endpoint, final int timeout) {
+        try {
+            final Config tempConfig = Config.builder()
+                    .withConnectionTimeout(timeout, TimeUnit.MILLISECONDS)
+                    .build();
+            final Driver tempDriver = GraphDatabase.driver(endpoint, tempConfig);
+            tempDriver.verifyConnectivity();
+            return true;
+        } catch (Exception e) {
+            LOGGER.error("Connection to database returned an error:", e);
+            return false;
+        }
     }
 
     Config getConfig() {
-        if (isConfigChange) {
-            final Config.ConfigBuilder builder = Config.builder();
-            if (fetchSize != -1) {
-                builder.withFetchSize(fetchSize);
-            }
-            // TODO: More Configs.
-            config = builder.build();
-        }
         return config;
     }
 
     SessionConfig getSessionConfig() {
-        if (isSessionConfigChange) {
-            final SessionConfig.Builder builder = SessionConfig.builder();
-            if (fetchSize != -1) {
-                // TODO: This is duplicated with Config, look into this.
-                builder.withFetchSize(fetchSize);
-            }
-            // TODO: More SessionConfigs.
-            sessionConfig = builder.build();
-        }
         return sessionConfig;
+    }
+
+    /**
+     * This value overrides the default fetch size set in driver's config properties.
+     * @param fetchSize Number of records to return by query.
+     */
+    protected void setFetchSize(final int fetchSize) {
+        this.sessionConfig = SessionConfig.builder()
+                .withFetchSize(fetchSize)
+                .build();
     }
 
     protected int getMaxFetchSize() throws SQLException {
@@ -269,8 +287,6 @@ public class OpenCypherQueryExecutor {
      * @param seconds Time in seconds to set query timeout to.
      */
     public void setQueryTimeout(final int seconds) {
-        isConfigChange = true;
-        isSessionConfigChange = true;
         queryTimeout = seconds;
     }
 }

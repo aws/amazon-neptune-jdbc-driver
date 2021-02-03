@@ -22,6 +22,7 @@ import org.junit.jupiter.api.Test;
 import software.amazon.jdbc.helpers.HelperFunctions;
 import software.amazon.jdbc.mock.MockConnection;
 import software.amazon.jdbc.mock.MockStatement;
+import software.amazon.jdbc.utilities.ConnectionProperties;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -60,7 +61,7 @@ public class ConnectionTest {
 
     @BeforeEach
     void initialize() throws SQLException {
-        connection = new MockConnection(new Properties());
+        connection = new MockConnection(new ConnectionProperties(new Properties()));
         TEST_PROP.put(TEST_PROP_KEY, TEST_PROP_VAL);
         TEST_PROP.put(APPLICATION_NAME_KEY, Driver.APPLICATION_NAME);
         TEST_PROP_EMPTY.put(APPLICATION_NAME_KEY, Driver.APPLICATION_NAME);

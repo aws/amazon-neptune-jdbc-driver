@@ -54,7 +54,7 @@ public class OpenCypherResultSetTest {
 
     @BeforeEach
     void initialize() throws SQLException {
-        final java.sql.Connection connection = new OpenCypherConnection(PROPERTIES);
+        final java.sql.Connection connection = new OpenCypherConnection(new ConnectionProperties(PROPERTIES));
         statement = connection.createStatement();
     }
 

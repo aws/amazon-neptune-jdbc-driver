@@ -18,10 +18,10 @@ package software.amazon.jdbc.mock;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
 import software.amazon.jdbc.Connection;
+import software.amazon.jdbc.utilities.ConnectionProperties;
 import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.Properties;
 import java.util.concurrent.Executor;
 
 /**
@@ -34,7 +34,7 @@ public class MockConnection extends Connection implements java.sql.Connection {
      * @param connectionProperties Properties to pass to Connection.
      */
     public MockConnection(
-            final @NonNull Properties connectionProperties) throws SQLException {
+            final @NonNull ConnectionProperties connectionProperties) throws SQLException {
         super(connectionProperties);
     }
 
