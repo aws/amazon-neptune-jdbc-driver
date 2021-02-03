@@ -17,15 +17,20 @@
 package software.amazon.neptune;
 
 import com.google.common.collect.ImmutableMap;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import software.amazon.jdbc.Driver;
 import software.amazon.jdbc.utilities.ConnectionProperties;
 import software.amazon.neptune.opencypher.OpenCypherConnection;
+import software.amazon.neptune.opencypher.OpenCypherQueryExecutor;
+
 import java.sql.SQLException;
 import java.util.Map;
 import java.util.Properties;
 import java.util.regex.Pattern;
 
 public class NeptuneDriver extends Driver implements java.sql.Driver {
+    private static final Logger LOGGER = LoggerFactory.getLogger(OpenCypherQueryExecutor.class);
     private static final Pattern JDBC_PATTERN = Pattern.compile("jdbc:neptune:(\\w+)://(.*)");
 
     private final Map<String, Class<?>> connectionMap = ImmutableMap.of("opencypher", OpenCypherConnection.class);
@@ -41,38 +46,33 @@ public class NeptuneDriver extends Driver implements java.sql.Driver {
 
     @Override
     public java.sql.Connection connect(final String url, final Properties info) throws SQLException {
-        final String language;
+        final java.sql.Connection connection;
         final ConnectionProperties connectionProperties;
         try {
-            language = getLanguage(url, JDBC_PATTERN);
+            final String language = getLanguage(url, JDBC_PATTERN);
             if (!connectionMap.containsKey(language)) {
+                LOGGER.error("Language property missing from url: {}.", url);
                 return null;
             }
             final String propertyString = getPropertyString(url, JDBC_PATTERN);
             final Properties properties = parsePropertyString(propertyString);
             properties.putAll(info);
             connectionProperties = new ConnectionProperties(properties);
+            connection = (java.sql.Connection) connectionMap.get(language)
+                    .getConstructor(ConnectionProperties.class)
+                    .newInstance(connectionProperties);
         } catch (final Exception e) {
+            LOGGER.error("Unexpected error while creating connection:", e);
             return null;
         }
 
-        java.sql.Connection connection = null;
-        final int timeout = connectionProperties.getConnectionTimeout();
         final int retryCount = connectionProperties.getConnectionRetryCount();
-        int count = 0;
-        while (connection == null && count++ <= retryCount) { // retryCount could be zero
-            try {
-                connection = (java.sql.Connection) connectionMap
-                    .get(language)
-                    .getConstructor(ConnectionProperties.class)
-                    .newInstance(connectionProperties);
-                if (!connection.isValid(timeout)) {
-                    connection = null;
-                }
-            } catch (final Exception ignore) {
+        for (int i = 0; i <= retryCount; i++) {
+            if (connection.isValid(connectionProperties.getConnectionTimeout())) {
+                return connection;
             }
         }
-
-        return connection;
+        LOGGER.error("Failed to create connection after {} attempts.", retryCount);
+        return null;
     }
 }
