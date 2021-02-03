@@ -62,7 +62,7 @@ public class OpenCypherPreparedStatementTest extends OpenCypherStatementTestBase
     @BeforeEach
     void initialize() {
         PROPERTIES.putIfAbsent(ConnectionProperties.ENDPOINT_KEY, String.format("bolt://%s:%d", HOSTNAME, 999));
-        final java.sql.Connection connection = new OpenCypherConnection(PROPERTIES);
+        final java.sql.Connection connection = new OpenCypherConnection(new ConnectionProperties(PROPERTIES));
         openCypherPreparedStatement = connection.prepareStatement("");
         openCypherPreparedStatementLongQuery = connection.prepareStatement(getLongQuery());
         openCypherPreparedStatementQuickQuery = connection.prepareStatement(QUICK_QUERY);

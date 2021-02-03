@@ -20,7 +20,6 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 import software.amazon.jdbc.utilities.ConnectionProperties;
 import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
-import java.util.Properties;
 import java.util.concurrent.Executor;
 
 /**
@@ -29,30 +28,16 @@ import java.util.concurrent.Executor;
 public class OpenCypherConnection extends software.amazon.jdbc.Connection implements java.sql.Connection {
     /**
      * OpenCypherConnection constructor, initializes super class.
-     * @param connectionProperties Properties Object.
+     * @param connectionProperties ConnectionProperties Object.
      */
-    public OpenCypherConnection(@NonNull final Properties connectionProperties) throws SQLException {
+    public OpenCypherConnection(@NonNull final ConnectionProperties connectionProperties) throws SQLException {
         super(connectionProperties);
-        validateProperties();
-    }
-
-    private void validateProperties() throws SQLException {
-        if (!getConnectionProperties().containsKey(ConnectionProperties.ENDPOINT_KEY)) {
-            throw new SQLException("Connection property does not contain a valid endpoint.");
-        }
-        // If connection basic auth:
-        /*if (!connectionProperties.containsKey("user")) {
-            throw new SQLException("Connection property does not contain a valid endpoint.");
-        }
-        if (!connectionProperties.containsKey("password")) {
-            throw new SQLException("Connection property does not contain a valid endpoint.");
-        }*/
     }
 
     @Override
     public boolean isValid(final int timeout) throws SQLException {
-        // TODO.
-        return false;
+        final String endpoint = getConnectionProperties().getEndpoint();
+        return OpenCypherQueryExecutor.isValid(endpoint, timeout);
     }
 
     @Override

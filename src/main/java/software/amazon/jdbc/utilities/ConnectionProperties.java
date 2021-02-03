@@ -210,8 +210,8 @@ public class ConnectionProperties {
      * Retrieves Endpoint connection property value.
      * @return Endpoint connection property value.
      */
-    public Level getEndpoint() {
-        return (Level)connectionProperties.get(ENDPOINT_KEY);
+    public String getEndpoint() {
+        return (String)connectionProperties.get(ENDPOINT_KEY);
     }
     /**
      * Retrieves LogLevel connection property value.

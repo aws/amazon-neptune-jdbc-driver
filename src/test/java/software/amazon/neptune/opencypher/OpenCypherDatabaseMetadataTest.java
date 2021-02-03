@@ -63,7 +63,8 @@ public class OpenCypherDatabaseMetadataTest {
     @SneakyThrows
     @BeforeEach
     void initialize() {
-        PROPERTIES.putIfAbsent(ConnectionProperties.ENDPOINT_KEY, String.format("bolt://%s:%d", HOSTNAME, database.getPort()));        final java.sql.Connection connection = new OpenCypherConnection(PROPERTIES);
+        PROPERTIES.putIfAbsent(ConnectionProperties.ENDPOINT_KEY, String.format("bolt://%s:%d", HOSTNAME, database.getPort()));
+        final java.sql.Connection connection = new OpenCypherConnection(new ConnectionProperties(PROPERTIES));
         final java.sql.Statement statement = connection.createStatement();
         statement.execute(CREATE_NODES);
         databaseMetaData = connection.getMetaData();

@@ -16,6 +16,7 @@
 
 package software.amazon.neptune.opencypher;
 
+import software.amazon.jdbc.utilities.ConnectionProperties;
 import javax.sql.PooledConnection;
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -26,6 +27,7 @@ import java.util.Properties;
  * OpenCypher implementation of DataSource.
  */
 public class OpenCypherDataSource extends software.amazon.jdbc.DataSource implements javax.sql.DataSource, javax.sql.ConnectionPoolDataSource {
+    // TODO: perhaps this should be a ConnectionProperties object
     private final Properties properties;
 
     /**
@@ -39,7 +41,7 @@ public class OpenCypherDataSource extends software.amazon.jdbc.DataSource implem
 
     @Override
     public java.sql.Connection getConnection() throws SQLException {
-        return new OpenCypherConnection(properties);
+        return new OpenCypherConnection(new ConnectionProperties(properties));
     }
 
     @Override

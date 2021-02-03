@@ -21,6 +21,7 @@ import org.junit.jupiter.api.Test;
 import software.amazon.jdbc.helpers.HelperFunctions;
 import software.amazon.jdbc.mock.MockConnection;
 import software.amazon.jdbc.mock.MockPreparedStatement;
+import software.amazon.jdbc.utilities.ConnectionProperties;
 import java.io.InputStream;
 import java.io.Reader;
 import java.sql.Blob;
@@ -38,7 +39,7 @@ public class PreparedStatementTest {
 
     @BeforeEach
     void initialize() throws SQLException {
-        connection = new MockConnection(new Properties());
+        connection = new MockConnection(new ConnectionProperties(new Properties()));
         preparedStatement = new MockPreparedStatement(connection, "");
     }
 

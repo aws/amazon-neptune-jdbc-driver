@@ -53,13 +53,13 @@ public abstract class Connection implements java.sql.Connection {
     private Map<String, Class<?>> typeMap = new HashMap<>();
     private SQLWarning warnings = null;
 
-    protected Connection(@NonNull final Properties connectionProperties) throws SQLException {
-        this.connectionProperties = new ConnectionProperties(connectionProperties);
+    protected Connection(@NonNull final ConnectionProperties connectionProperties) throws SQLException {
+        this.connectionProperties = connectionProperties;
         setLogLevel();
     }
 
-    protected Properties getConnectionProperties() {
-        return this.connectionProperties.getAll();
+    protected ConnectionProperties getConnectionProperties() {
+        return this.connectionProperties;
     }
 
     private void setLogLevel() {
