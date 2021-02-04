@@ -27,6 +27,7 @@ import software.amazon.jdbc.utilities.ConnectionProperties;
 import software.amazon.neptune.opencypher.OpenCypherConnection;
 import software.amazon.neptune.opencypher.mock.MockOpenCypherDatabase;
 
+import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Properties;
@@ -109,14 +110,19 @@ public class NeptuneDriverTest {
         for (final String language : languages) {
             for (final String property : properties) {
                 for (final Boolean semicolon : semicolons) {
-                    final String url = createValidUrl(language, property, semicolon);
-                    Assertions.assertTrue(driver.connect(url, new Properties()) instanceof OpenCypherConnection);
+                    final String validUrl = createValidUrl(language, property, semicolon);
+                    Assertions.assertTrue(driver.connect(validUrl, new Properties()) instanceof OpenCypherConnection);
                 }
             }
         }
-        for (final String url : invalidUrls) {
-            Assertions.assertNull(driver.connect(url, new Properties()));
+        final String validUrl = createValidUrl("opencypher", "", false);
+        Assertions.assertNull(driver.connect(validUrl, null));
+
+        for (final String invalidUrl : invalidUrls) {
+             Assertions.assertNull(driver.connect(invalidUrl, new Properties()));
         }
+        Assertions.assertNull(driver.connect(null, new Properties()));
+
     }
 
     @Test
@@ -163,6 +169,38 @@ public class NeptuneDriverTest {
                 }
             }
         }
+    }
+
+    @Test
+    void testDriverManagerGetConnection() throws SQLException {
+        for (final String language : languages) {
+            for (final String property : properties) {
+                for (final Boolean semicolon : semicolons) {
+                    final String url = createValidUrl(language, property, semicolon);
+                    Assertions.assertTrue(DriverManager.getConnection(url) instanceof OpenCypherConnection);
+                }
+            }
+        }
+        for (final String url : invalidUrls) {
+            Assertions.assertThrows(java.sql.SQLException.class, () -> DriverManager.getConnection(url));
+        }
+        Assertions.assertThrows(java.sql.SQLException.class, () -> DriverManager.getConnection(null));
+    }
+
+    @Test
+    void testDriverManagerGetDriver() throws SQLException {
+        for (final String language : languages) {
+            for (final String property : properties) {
+                for (final Boolean semicolon : semicolons) {
+                    final String url = createValidUrl(language, property, semicolon);
+                    Assertions.assertTrue(DriverManager.getDriver(url) instanceof NeptuneDriver);
+                }
+            }
+        }
+        for (final String url : invalidUrls) {
+            Assertions.assertThrows(java.sql.SQLException.class, () -> DriverManager.getDriver(url));
+        }
+        Assertions.assertThrows(java.sql.SQLException.class, () -> DriverManager.getDriver(null));
     }
 
     // TODO: Look into Driver/NeptuneDriver property string handling.

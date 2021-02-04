@@ -24,6 +24,8 @@ import software.amazon.jdbc.utilities.ConnectionProperties;
 import software.amazon.neptune.opencypher.OpenCypherConnection;
 import software.amazon.neptune.opencypher.OpenCypherQueryExecutor;
 
+import javax.annotation.Nullable;
+import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.Map;
 import java.util.Properties;
@@ -31,30 +33,41 @@ import java.util.regex.Pattern;
 
 public class NeptuneDriver extends Driver implements java.sql.Driver {
     private static final Logger LOGGER = LoggerFactory.getLogger(OpenCypherQueryExecutor.class);
-    private static final Pattern JDBC_PATTERN = Pattern.compile("jdbc:neptune:(\\w+)://(.*)");
+    private static final String CONN_STRING_PREFIX = "jdbc:neptune:";
+    private static final Pattern CONN_STRING_PATTERN = Pattern.compile(CONN_STRING_PREFIX + "(\\w+)://(.*)");
+
+    static {
+        try {
+            DriverManager.registerDriver(new NeptuneDriver());
+        } catch (SQLException e) {
+            LOGGER.error("Error registering driver: " + e.getMessage());
+        }
+    }
 
     private final Map<String, Class<?>> connectionMap = ImmutableMap.of("opencypher", OpenCypherConnection.class);
 
     @Override
-    public boolean acceptsURL(final String url) throws SQLException {
+    public boolean acceptsURL(final @Nullable String url) throws SQLException {
         try {
-            return connectionMap.containsKey(getLanguage(url, JDBC_PATTERN));
+            return url != null
+                    && url.startsWith(CONN_STRING_PREFIX)
+                    && connectionMap.containsKey(getLanguage(url, CONN_STRING_PATTERN));
         } catch (final SQLException ignored) {
         }
         return false;
     }
 
     @Override
-    public java.sql.Connection connect(final String url, final Properties info) throws SQLException {
+    public java.sql.Connection connect(final @Nullable String url, final Properties info) throws SQLException {
+        if (!acceptsURL(url)) {
+            LOGGER.error("Invalid url: {}.", url);
+            return null;
+        }
         final java.sql.Connection connection;
         final ConnectionProperties connectionProperties;
         try {
-            final String language = getLanguage(url, JDBC_PATTERN);
-            if (!connectionMap.containsKey(language)) {
-                LOGGER.error("Language property missing from url: {}.", url);
-                return null;
-            }
-            final String propertyString = getPropertyString(url, JDBC_PATTERN);
+            final String language = getLanguage(url, CONN_STRING_PATTERN);
+            final String propertyString = getPropertyString(url, CONN_STRING_PATTERN);
             final Properties properties = parsePropertyString(propertyString);
             properties.putAll(info);
             connectionProperties = new ConnectionProperties(properties);
