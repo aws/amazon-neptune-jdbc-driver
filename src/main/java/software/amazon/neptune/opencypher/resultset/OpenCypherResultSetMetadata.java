@@ -17,7 +17,6 @@
 package software.amazon.neptune.opencypher.resultset;
 
 import lombok.AllArgsConstructor;
-import org.neo4j.driver.Record;
 import org.neo4j.driver.types.Type;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,7 +37,7 @@ import java.util.List;
 public class OpenCypherResultSetMetadata extends ResultSetMetaData implements java.sql.ResultSetMetaData {
     private static final Logger LOGGER = LoggerFactory.getLogger(OpenCypherResultSetMetadata.class);
     private final List<String> columns;
-    private final List<Record> rows;
+    private final List<Type> columnTypes;
 
     /**
      * Verify if the given column index is valid.
@@ -65,7 +64,7 @@ public class OpenCypherResultSetMetadata extends ResultSetMetaData implements ja
      */
     protected Type getColumnBoltType(final int column) {
         // TODO: Loop rows to find common type and cache it.
-        return rows.get(0).values().get(column - 1).type();
+        return columnTypes.get(column - 1);
     }
 
     @Override

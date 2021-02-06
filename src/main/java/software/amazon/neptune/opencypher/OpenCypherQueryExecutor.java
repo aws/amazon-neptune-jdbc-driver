@@ -30,12 +30,14 @@ import software.amazon.jdbc.utilities.SqlError;
 import software.amazon.jdbc.utilities.SqlState;
 import software.amazon.neptune.opencypher.resultset.OpenCypherResultSet;
 import software.amazon.neptune.opencypher.resultset.OpenCypherResultSetGetCatalogs;
+import software.amazon.neptune.opencypher.resultset.OpenCypherResultSetGetColumns;
 import software.amazon.neptune.opencypher.resultset.OpenCypherResultSetGetSchemas;
 import software.amazon.neptune.opencypher.resultset.OpenCypherResultSetGetTableTypes;
 import software.amazon.neptune.opencypher.resultset.OpenCypherResultSetGetTables;
 import java.lang.reflect.Constructor;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 /**
  * OpenCypher implementation of QueryExecution.
@@ -46,7 +48,6 @@ public class OpenCypherQueryExecutor {
     private final Driver driver;
     private final int fetchSize = -1;
     private final Object lock = new Object();
-    private boolean isConfigChange = false;
     private boolean isSessionConfigChange = false;
     private int queryTimeout = -1;
     private Config config;
@@ -54,6 +55,7 @@ public class OpenCypherQueryExecutor {
     private Session session;
     private boolean queryExecuted = false;
     private boolean queryCancelled = false;
+    private final String endpoint;
 
     /**
      * OpenCypherQueryExecutor constructor.
@@ -61,25 +63,29 @@ public class OpenCypherQueryExecutor {
      * @param properties properties to use for query executon.
      */
     OpenCypherQueryExecutor(final OpenCypherConnectionProperties properties) {
-        final String endpoint = properties.getEndpoint();
+        this.endpoint = properties.getEndpoint();
         // TODO: Implement authentication.
         // final String user = properties.getUser();
         // final String password = properties.getPassword();
         // AuthTokens.basic(this.user, this.password), this.config);
         this.config = Config.builder().build();
         this.sessionConfig = SessionConfig.builder().build();
-        this.driver = GraphDatabase.driver(endpoint, this.config);
+        this.driver = GraphDatabase.driver(this.endpoint, getConfig());
     }
 
     Config getConfig() {
-        if (isConfigChange) {
-            final Config.ConfigBuilder builder = Config.builder();
-            if (fetchSize != -1) {
-                builder.withFetchSize(fetchSize);
-            }
-            // TODO: More Configs.
-            config = builder.build();
+        final Config.ConfigBuilder builder = Config.builder();
+        if (fetchSize != -1) {
+            builder.withFetchSize(fetchSize);
         }
+        builder.withConnectionTimeout(3, TimeUnit.SECONDS)
+                .withMaxConnectionPoolSize(1000)
+                .withEncryption()
+                .withTrustStrategy(Config.TrustStrategy.trustAllCertificates())
+                .build();
+
+        // TODO: More Configs.
+        config = builder.build();
         return config;
     }
 
@@ -173,6 +179,19 @@ public class OpenCypherQueryExecutor {
     public java.sql.ResultSet executeGetTableTypes(final java.sql.Statement statement)
             throws SQLException {
         return new OpenCypherResultSetGetTableTypes(statement);
+    }
+
+    /**
+     * Function to get table types.
+     *
+     * @param statement java.sql.Statement Object required for result set.
+     * @return java.sql.ResulSet Object containing table types.
+     * @throws SQLException if query execution fails, or it was cancelled.
+     */
+    @SneakyThrows
+    public java.sql.ResultSet executeGetColumns(final java.sql.Statement statement, final String nodes)
+            throws SQLException {
+        return new OpenCypherResultSetGetColumns(statement, OpenCypherSchemaHelper.getGraphSchema(endpoint, nodes));
     }
 
     @SneakyThrows
@@ -269,7 +288,6 @@ public class OpenCypherQueryExecutor {
      * @param seconds Time in seconds to set query timeout to.
      */
     public void setQueryTimeout(final int seconds) {
-        isConfigChange = true;
         isSessionConfigChange = true;
         queryTimeout = seconds;
     }

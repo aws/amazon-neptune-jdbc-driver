@@ -20,11 +20,14 @@ import org.neo4j.driver.Record;
 import org.neo4j.driver.Result;
 import org.neo4j.driver.Session;
 import org.neo4j.driver.Value;
+import org.neo4j.driver.internal.types.InternalTypeSystem;
+import org.neo4j.driver.types.Type;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import software.amazon.neptune.opencypher.OpenCypherTypeMapping;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -55,6 +58,26 @@ public class OpenCypherResultSet extends software.amazon.jdbc.ResultSet implemen
         this.result = result;
         this.columns = columns;
         this.rows = rows;
+    }
+
+    /**
+     * OpenCypherResultSet constructor, initializes super class.
+     *
+     * @param statement Statement Object.
+     * @param result    Result Object.
+     * @param session   Session Object.
+     * @param columns   List of Columns.
+     */
+    public OpenCypherResultSet(final java.sql.Statement statement,
+                               final Session session,
+                               final Result result,
+                               final int rowCount,
+                               final List<String> columns) {
+        super(statement, columns, rowCount);
+        this.session = session;
+        this.result = result;
+        this.columns = columns;
+        this.rows = null;
     }
 
     @Override
@@ -89,7 +112,19 @@ public class OpenCypherResultSet extends software.amazon.jdbc.ResultSet implemen
     }
 
     protected ResultSetMetaData getOpenCypherMetadata() throws SQLException {
-        return new OpenCypherResultSetMetadata(columns, rows);
+        final List<Type> rowTypes = new ArrayList<>();
+        if (rows == null) {
+            for (int i = 0; i < columns.size(); i++) {
+                rowTypes.add(InternalTypeSystem.TYPE_SYSTEM.STRING());
+            }
+        } else {
+            // TODO: Loop through records and do some sort of type promotion.
+            final Record record = rows.get(0);
+            for (int i = 0; i < columns.size(); i++) {
+                rowTypes.add(record.get(i).type());
+            }
+        }
+        return new OpenCypherResultSetMetadata(columns, rowTypes);
     }
 
     protected Object getConvertedValue(final int columnIndex) throws SQLException {
@@ -98,8 +133,12 @@ public class OpenCypherResultSet extends software.amazon.jdbc.ResultSet implemen
         return converter.convert(value);
     }
 
-    protected Value getValue(final int columnIndex) throws SQLException {
+    private Value getValue(final int columnIndex) throws SQLException {
         verifyOpen();
+        if (rows == null) {
+            // TODO: Proper exception
+            throw new SQLException("This resultset type should not be used for this.");
+        }
         validateRowColumn(columnIndex);
         final Value value = rows.get(getRowIndex()).get(columnIndex);
         wasNull = value.isNull();

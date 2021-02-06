@@ -16,7 +16,6 @@
 
 package software.amazon.neptune.opencypher.resultset;
 
-import org.neo4j.driver.Record;
 import org.neo4j.driver.internal.types.InternalTypeSystem;
 import org.neo4j.driver.types.Type;
 import java.util.List;
@@ -30,7 +29,7 @@ public class OpenCypherResultSetMetadataStringTypes extends OpenCypherResultSetM
      * @param rows    List of rows.
      */
     public OpenCypherResultSetMetadataStringTypes(final List<String> columns,
-                                                  final List<Record> rows) {
+                                                  final List<Type> rows) {
         super(columns, rows);
     }
 

@@ -248,7 +248,7 @@ public abstract class ResultSet implements java.sql.ResultSet {
 
     @Override
     public int findColumn(final String columnLabel) throws SQLException {
-        return columns.indexOf(columnLabel);
+        return columns.indexOf(columnLabel) + 1;
     }
 
     @Override

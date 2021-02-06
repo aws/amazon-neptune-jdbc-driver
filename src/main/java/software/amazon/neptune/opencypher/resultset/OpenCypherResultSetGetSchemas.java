@@ -43,6 +43,6 @@ public class OpenCypherResultSetGetSchemas extends OpenCypherResultSetGetString 
      * @param statement Statement Object.
      */
     public OpenCypherResultSetGetSchemas(final Statement statement) {
-        super(statement, ROWS, COLUMNS, CONVERSION_MAP);
+        super(statement, 0, COLUMNS, ImmutableList.of(CONVERSION_MAP));
     }
 }

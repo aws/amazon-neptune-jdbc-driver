@@ -17,9 +17,7 @@
 package software.amazon.neptune.opencypher.resultset;
 
 import com.google.common.collect.ImmutableList;
-import org.neo4j.driver.Record;
 import java.sql.Statement;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -29,7 +27,6 @@ public class OpenCypherResultSetGetCatalogs extends OpenCypherResultSetGetString
      * TABLE_CAT String => catalog name
      */
     private static final List<String> COLUMNS = ImmutableList.of("TABLE_CAT");
-    private static final List<Record> ROWS = new ArrayList<>(0);
     private static final Map<String, String> CONVERSION_MAP = new HashMap<>();
 
     static {
@@ -42,6 +39,6 @@ public class OpenCypherResultSetGetCatalogs extends OpenCypherResultSetGetString
      * @param statement Statement Object.
      */
     public OpenCypherResultSetGetCatalogs(final Statement statement) {
-        super(statement, ROWS, COLUMNS, CONVERSION_MAP);
+        super(statement, 0, COLUMNS, ImmutableList.of(CONVERSION_MAP));
     }
 }
