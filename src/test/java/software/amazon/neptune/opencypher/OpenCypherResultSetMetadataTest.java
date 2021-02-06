@@ -25,7 +25,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.driver.internal.types.InternalTypeSystem;
-import software.amazon.neptune.NeptuneConstants;
+import software.amazon.jdbc.utilities.ConnectionProperties;
 import software.amazon.neptune.opencypher.mock.MockOpenCypherDatabase;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
@@ -119,7 +119,7 @@ public class OpenCypherResultSetMetadataTest {
     @BeforeAll
     public static void initializeDatabase() {
         database = MockOpenCypherDatabase.builder(HOSTNAME, OpenCypherResultSetMetadataTest.class.getName()).build();
-        PROPERTIES.putIfAbsent(NeptuneConstants.ENDPOINT, String.format("bolt://%s:%d", HOSTNAME, database.getPort()));
+        PROPERTIES.putIfAbsent(ConnectionProperties.ENDPOINT_KEY, String.format("bolt://%s:%d", HOSTNAME, database.getPort()));
     }
 
     /**
@@ -132,7 +132,7 @@ public class OpenCypherResultSetMetadataTest {
 
     @BeforeEach
     void initialize() throws SQLException {
-        final java.sql.Connection connection = new OpenCypherConnection(PROPERTIES);
+        final java.sql.Connection connection = new OpenCypherConnection(new ConnectionProperties(PROPERTIES));
         statement = connection.createStatement();
     }
 

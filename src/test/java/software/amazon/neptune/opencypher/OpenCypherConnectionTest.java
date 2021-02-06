@@ -23,8 +23,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import software.amazon.jdbc.utilities.Logging;
-import software.amazon.neptune.NeptuneConstants;
+import software.amazon.jdbc.utilities.ConnectionProperties;
 import software.amazon.neptune.opencypher.mock.MockOpenCypherDatabase;
 import software.amazon.neptune.opencypher.mock.MockOpenCypherNodes;
 import software.amazon.neptune.opencypher.resultset.OpenCypherResultSet;
@@ -60,7 +59,7 @@ public class OpenCypherConnectionTest {
                 .withRelationship(MockOpenCypherNodes.VALENTINA, MockOpenCypherNodes.TOOTSIE, "GIVES_PETS_TO",
                         "GETS_PETS_FROM")
                 .build();
-        PROPERTIES.putIfAbsent(NeptuneConstants.ENDPOINT,
+        PROPERTIES.putIfAbsent(ConnectionProperties.ENDPOINT_KEY,
                 String.format("bolt://%s:%d", HOSTNAME, database.getPort()));
     }
 
@@ -75,7 +74,7 @@ public class OpenCypherConnectionTest {
 
     @BeforeEach
     void initialize() throws SQLException {
-        connection = new OpenCypherConnection(PROPERTIES);
+        connection = new OpenCypherConnection(new ConnectionProperties(PROPERTIES));
     }
 
     @Test
@@ -102,15 +101,15 @@ public class OpenCypherConnectionTest {
 
     @Test
     void testLogLevelChanged() throws SQLException {
-        Assertions.assertEquals(Logging.DEFAULT_LEVEL, LogManager.getRootLogger().getLevel());
+        Assertions.assertEquals(ConnectionProperties.DEFAULT_LOG_LEVEL, LogManager.getRootLogger().getLevel());
 
         final Properties properties = new Properties();
         properties.putAll(PROPERTIES);
         properties.put("logLevel", "ERROR");
-        connection = new OpenCypherConnection(properties);
+        connection = new OpenCypherConnection(new ConnectionProperties(properties));
         Assertions.assertEquals(Level.ERROR, LogManager.getRootLogger().getLevel());
 
         // Reset logging so that it doesn't affect other tests.
-        LogManager.getRootLogger().setLevel(Logging.DEFAULT_LEVEL);
+        LogManager.getRootLogger().setLevel(ConnectionProperties.DEFAULT_LOG_LEVEL);
     }
 }

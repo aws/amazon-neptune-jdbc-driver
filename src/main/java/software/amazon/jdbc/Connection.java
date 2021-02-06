@@ -16,12 +16,11 @@
 
 package software.amazon.jdbc;
 
-import org.apache.log4j.Level;
+import org.apache.log4j.LogManager;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import software.amazon.jdbc.utilities.ConnectionProperty;
-import software.amazon.jdbc.utilities.Logging;
+import software.amazon.jdbc.utilities.ConnectionProperties;
 import software.amazon.jdbc.utilities.SqlError;
 import software.amazon.jdbc.utilities.SqlState;
 import software.amazon.jdbc.utilities.Warning;
@@ -44,61 +43,46 @@ import java.util.Properties;
 import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import static software.amazon.jdbc.utilities.ConnectionProperty.LOGGING_LEVEL;
-
 /**
  * Abstract implementation of Connection for JDBC Driver.
  */
 public abstract class Connection implements java.sql.Connection {
     private static final Logger LOGGER = LoggerFactory.getLogger(Connection.class);
-    private final Properties connectionProperties;
+    private final ConnectionProperties connectionProperties;
     private final AtomicBoolean isClosed = new AtomicBoolean(false);
     private Map<String, Class<?>> typeMap = new HashMap<>();
     private SQLWarning warnings = null;
 
-    protected Connection(@NonNull final Properties connectionProperties) {
+    protected Connection(@NonNull final ConnectionProperties connectionProperties) throws SQLException {
         this.connectionProperties = connectionProperties;
-        setLoggingLevel();
+        setLogLevel();
     }
 
-    protected Properties getConnectionProperties() {
-        return connectionProperties;
+    protected ConnectionProperties getConnectionProperties() {
+        return this.connectionProperties;
     }
 
-    private void setLoggingLevel() {
-        for (Map.Entry<Object, Object> entry : this.connectionProperties.entrySet()) {
-            final String key = entry.getKey().toString();
-            final String value  = entry.getValue().toString();
-            if (Logging.matches(key, value)) {
-                final Level loggingLevel = Logging.convertToLevel(value);
-                // Set log level.
-                Logging.setLevel(loggingLevel);
-                // Remove original key/value property.
-                this.connectionProperties.remove(entry);
-                // Insert standardized logging level property.
-                this.connectionProperties.put(LOGGING_LEVEL.getConnectionProperty(), loggingLevel);
-                return;
-            }
-        }
-        // If it does not exist, insert default logging level into connection properties.
-        this.connectionProperties.put(LOGGING_LEVEL.getConnectionProperty(), Logging.DEFAULT_LEVEL);
+    private void setLogLevel() {
+        LogManager.getRootLogger().setLevel(connectionProperties.getLogLevel());
     }
 
     /*
         Functions that have their implementation in this Connection class.
      */
     @Override
+    // TODO: AN-405 - Redo Connection getClientInfo() and setClientInfo()
     public Properties getClientInfo() throws SQLException {
         verifyOpen();
         final Properties clientInfo = new Properties();
-        clientInfo.putAll(connectionProperties);
+        clientInfo.putAll(connectionProperties.getAll());
         clientInfo.putIfAbsent(
-                ConnectionProperty.APPLICATION_NAME.getConnectionProperty(),
+                ConnectionProperties.APPLICATION_NAME_KEY,
                 Driver.APPLICATION_NAME);
         return clientInfo;
     }
 
     @Override
+    // TODO: AN-405 - Redo Connection getClientInfo() and setClientInfo()
     public void setClientInfo(final Properties properties) throws SQLClientInfoException {
         if (isClosed.get()) {
             final Map<String, ClientInfoStatus> failures = new HashMap<>();
@@ -112,10 +96,10 @@ public abstract class Connection implements java.sql.Connection {
         connectionProperties.clear();
         if (properties != null) {
             for (final String name : properties.stringPropertyNames()) {
-                if (ConnectionProperty.isSupportedProperty(name)) {
+                if (ConnectionProperties.isSupportedProperty(name)) {
                     final String value = properties.getProperty(name);
                     connectionProperties.put(name, value);
-                    LOGGER.debug("Successfully set client info with name {{}} and value {{}}", name, value);
+                    LOGGER.debug("Successfully set property with name {{}} and value {{}}", name, value);
                 } else {
                     addWarning(new SQLWarning(Warning.lookup(Warning.UNSUPPORTED_PROPERTY, name)));
                 }
@@ -131,7 +115,7 @@ public abstract class Connection implements java.sql.Connection {
             LOGGER.debug("Null value is passed as name, falling back to get client info with null.");
             return null;
         }
-        return connectionProperties.getProperty(name);
+        return connectionProperties.get(name);
     }
 
     @Override

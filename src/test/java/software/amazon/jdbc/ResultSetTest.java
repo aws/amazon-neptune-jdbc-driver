@@ -22,11 +22,13 @@ import software.amazon.jdbc.helpers.HelperFunctions;
 import software.amazon.jdbc.mock.MockConnection;
 import software.amazon.jdbc.mock.MockResultSet;
 import software.amazon.jdbc.mock.MockStatement;
+import software.amazon.jdbc.utilities.ConnectionProperties;
 import java.io.InputStream;
 import java.io.Reader;
 import java.sql.Blob;
 import java.sql.Clob;
 import java.sql.NClob;
+import java.sql.SQLException;
 import java.sql.SQLWarning;
 import java.util.Map;
 import java.util.Properties;
@@ -39,8 +41,8 @@ public class ResultSetTest {
     private java.sql.Statement statement;
 
     @BeforeEach
-    void initialize() {
-        statement = new MockStatement(new MockConnection(new Properties()));
+    void initialize() throws SQLException {
+        statement = new MockStatement(new MockConnection(new ConnectionProperties(new Properties())));
         resultSet = new MockResultSet(statement);
     }
 

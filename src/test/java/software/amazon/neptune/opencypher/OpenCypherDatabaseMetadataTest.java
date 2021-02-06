@@ -23,7 +23,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import software.amazon.neptune.NeptuneConstants;
+import software.amazon.jdbc.utilities.ConnectionProperties;
 import software.amazon.neptune.opencypher.mock.MockOpenCypherDatabase;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
@@ -65,7 +65,7 @@ public class OpenCypherDatabaseMetadataTest {
     @BeforeAll
     public static void initializeDatabase() {
         database = MockOpenCypherDatabase.builder(HOSTNAME, OpenCypherResultSetMetadataTest.class.getName()).build();
-        PROPERTIES.putIfAbsent(NeptuneConstants.ENDPOINT, String.format("bolt://%s:%d", HOSTNAME, database.getPort()));
+        PROPERTIES.putIfAbsent(ConnectionProperties.ENDPOINT_KEY, String.format("bolt://%s:%d", HOSTNAME, database.getPort()));
     }
 
     /**
@@ -79,7 +79,7 @@ public class OpenCypherDatabaseMetadataTest {
     @SneakyThrows
     @BeforeEach
     void initialize() {
-        PROPERTIES.putIfAbsent(NeptuneConstants.ENDPOINT, String.format("bolt://%s:%d", HOSTNAME, database.getPort()));        final java.sql.Connection connection = new OpenCypherConnection(PROPERTIES);
+        final java.sql.Connection connection = new OpenCypherConnection(new ConnectionProperties(PROPERTIES));
         final java.sql.Statement statement = connection.createStatement();
         statement.execute(CREATE_NODES);
         databaseMetaData = connection.getMetaData();

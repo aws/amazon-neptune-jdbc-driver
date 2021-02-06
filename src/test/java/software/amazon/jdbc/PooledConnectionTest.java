@@ -22,8 +22,10 @@ import org.junit.jupiter.api.Test;
 import software.amazon.jdbc.helpers.HelperFunctions;
 import software.amazon.jdbc.mock.MockConnection;
 import software.amazon.jdbc.mock.MockPooledConnection;
+import software.amazon.jdbc.utilities.ConnectionProperties;
 import javax.sql.ConnectionEvent;
 import javax.sql.ConnectionEventListener;
+import java.sql.SQLException;
 import java.util.Properties;
 
 /**
@@ -47,8 +49,8 @@ public class PooledConnectionTest {
     };
 
     @BeforeEach
-    void initialize() {
-        pooledConnection = new MockPooledConnection(new MockConnection(new Properties()));
+    void initialize() throws SQLException {
+        pooledConnection = new MockPooledConnection(new MockConnection(new ConnectionProperties(new Properties())));
         isClosed = false;
         isError = false;
     }

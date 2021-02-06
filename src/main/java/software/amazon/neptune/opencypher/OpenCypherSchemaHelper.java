@@ -38,12 +38,10 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 public class OpenCypherSchemaHelper {
     private static final Logger LOGGER = LoggerFactory.getLogger(OpenCypherSchemaHelper.class);
-    private static final Pattern ENDPOINT_PATTERN = Pattern.compile("(\\w+):\\/\\/(\\w+):(\\w+)");
 
     /**
      * Function to get graph schema and return list of NodeColumnInfo describing it.
@@ -56,7 +54,6 @@ public class OpenCypherSchemaHelper {
     public static List<OpenCypherResultSetGetColumns.NodeColumnInfo> getGraphSchema(final String endpoint,
                                                                                     final String nodes)
             throws Exception {
-        System.out.println("Endpoint in getGraphSchema: " + endpoint);
         // Create unique directory if doesn't exist
         // If does exist, delete current contents
         final String directory = createUniqueDirectoryForThread();

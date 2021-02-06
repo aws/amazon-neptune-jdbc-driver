@@ -22,7 +22,9 @@ import software.amazon.jdbc.helpers.HelperFunctions;
 import software.amazon.jdbc.mock.MockConnection;
 import software.amazon.jdbc.mock.MockDatabaseMetadata;
 import software.amazon.jdbc.mock.MockStatement;
+import software.amazon.jdbc.utilities.ConnectionProperties;
 import java.sql.RowIdLifetime;
+import java.sql.SQLException;
 import java.util.Properties;
 
 /**
@@ -33,8 +35,8 @@ public class DatabaseMetaDataTest {
     private java.sql.Connection connection;
 
     @BeforeEach
-    void initialize() {
-        connection = new MockConnection(new Properties());
+    void initialize() throws SQLException {
+        connection = new MockConnection(new ConnectionProperties(new Properties()));
         databaseMetaData = new MockDatabaseMetadata(connection);
     }
 

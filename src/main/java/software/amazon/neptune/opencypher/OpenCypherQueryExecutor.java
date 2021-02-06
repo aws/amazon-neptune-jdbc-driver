@@ -50,7 +50,7 @@ public class OpenCypherQueryExecutor {
     private final Object lock = new Object();
     private boolean isSessionConfigChange = false;
     private int queryTimeout = -1;
-    private Config config;
+    private final Config config;
     private SessionConfig sessionConfig;
     private Session session;
     private boolean queryExecuted = false;
@@ -68,38 +68,56 @@ public class OpenCypherQueryExecutor {
         // final String user = properties.getUser();
         // final String password = properties.getPassword();
         // AuthTokens.basic(this.user, this.password), this.config);
-        this.config = Config.builder().build();
+
+        // Driver config properties.
+        this.config = Config.builder()
+                .withConnectionTimeout(properties.getConnectionTimeout(), TimeUnit.MILLISECONDS)
+                // .withEncryption() // Required for Neptune manual test
+                // .withTrustStrategy(Config.TrustStrategy.trustAllCertificates()) // Required for Neptune manual test
+                // .withFetchSize(properties.getFetchSize())
+                .build();
+
+        // Session config properties.
         this.sessionConfig = SessionConfig.builder().build();
         this.driver = GraphDatabase.driver(this.endpoint, getConfig());
     }
 
-    Config getConfig() {
-        final Config.ConfigBuilder builder = Config.builder();
-        if (fetchSize != -1) {
-            builder.withFetchSize(fetchSize);
+    /**
+     * Verify that connection to database is functional.
+     * @param endpoint Connection endpoint.
+     * @param timeout Time in milliseconds to wait for the database operation used to validate the connection to complete.
+     * @return true if the connection is valid, otherwise false.
+     */
+    public static boolean isValid(final String endpoint, final int timeout) {
+        try {
+            final Config tempConfig = Config.builder()
+                    .withConnectionTimeout(timeout, TimeUnit.MILLISECONDS)
+                    .build();
+            final Driver tempDriver = GraphDatabase.driver(endpoint, tempConfig);
+            tempDriver.verifyConnectivity();
+            return true;
+        } catch (Exception e) {
+            LOGGER.error("Connection to database returned an error:", e);
+            return false;
         }
-        builder.withConnectionTimeout(3, TimeUnit.SECONDS)
-                .withMaxConnectionPoolSize(1000)
-                .withEncryption()
-                .withTrustStrategy(Config.TrustStrategy.trustAllCertificates())
-                .build();
+    }
 
-        // TODO: More Configs.
-        config = builder.build();
+    Config getConfig() {
         return config;
     }
 
     SessionConfig getSessionConfig() {
-        if (isSessionConfigChange) {
-            final SessionConfig.Builder builder = SessionConfig.builder();
-            if (fetchSize != -1) {
-                // TODO: This is duplicated with Config, look into this.
-                builder.withFetchSize(fetchSize);
-            }
-            // TODO: More SessionConfigs.
-            sessionConfig = builder.build();
-        }
         return sessionConfig;
+    }
+
+    /**
+     * This value overrides the default fetch size set in driver's config properties.
+     * @param fetchSize Number of records to return by query.
+     */
+    protected void setFetchSize(final int fetchSize) {
+        this.sessionConfig = SessionConfig.builder()
+                .withFetchSize(fetchSize)
+                .build();
     }
 
     protected int getMaxFetchSize() throws SQLException {

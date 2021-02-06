@@ -3,7 +3,6 @@ package software.amazon.neptune.opencypher.utilities;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import org.junit.jupiter.api.Assertions;
-import org.neo4j.driver.types.Type;
 import software.amazon.neptune.opencypher.resultset.OpenCypherResultSetGetColumns;
 import java.io.File;
 import java.io.FileWriter;
@@ -13,9 +12,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 public class OpenCypherGetColumnUtilities {
     public static final List<String> COLUMN_NAMES = new ArrayList<>();
