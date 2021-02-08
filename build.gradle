@@ -168,7 +168,7 @@ ext {
     lombokVersion = '1.18.16'
     jupiterVersion = '5.4.0'
     neo4jDBVersion = '3.5.19'
-    neo4jDriverVersion = '4.0.0'
+    neo4jDriverVersion = '4.2.0'
     puppyCrawlVersion = '8.8'
     findBugsVersion = '3.0.1'
     awsSdkVersion = '1.11.932'
