@@ -33,7 +33,7 @@ import java.util.Properties;
 
 import static software.amazon.jdbc.utilities.ConnectionProperties.APPLICATION_NAME_KEY;
 import static software.amazon.jdbc.utilities.ConnectionProperties.CONNECTION_RETRY_COUNT_KEY;
-import static software.amazon.jdbc.utilities.ConnectionProperties.CONNECTION_TIMEOUT_KEY;
+import static software.amazon.jdbc.utilities.ConnectionProperties.CONNECTION_TIMEOUT_MILLIS_KEY;
 import static software.amazon.jdbc.utilities.ConnectionProperties.DEFAULT_CONNECTION_RETRY_COUNT;
 import static software.amazon.jdbc.utilities.ConnectionProperties.DEFAULT_CONNECTION_TIMEOUT;
 import static software.amazon.jdbc.utilities.ConnectionProperties.DEFAULT_LOG_LEVEL;
@@ -68,7 +68,7 @@ public class ConnectionTest {
         TEST_INITIAL_PROP.putAll(TEST_PROP_EMPTY);
         TEST_INITIAL_PROP.put(ENDPOINT_KEY, "");
         TEST_INITIAL_PROP.put(LOG_LEVEL_KEY, DEFAULT_LOG_LEVEL);
-        TEST_INITIAL_PROP.put(CONNECTION_TIMEOUT_KEY, DEFAULT_CONNECTION_TIMEOUT);
+        TEST_INITIAL_PROP.put(CONNECTION_TIMEOUT_MILLIS_KEY, DEFAULT_CONNECTION_TIMEOUT);
         TEST_INITIAL_PROP.put(CONNECTION_RETRY_COUNT_KEY, DEFAULT_CONNECTION_RETRY_COUNT);
     }
 
