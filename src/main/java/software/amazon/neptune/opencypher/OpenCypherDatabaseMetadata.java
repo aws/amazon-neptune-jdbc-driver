@@ -166,10 +166,10 @@ public class OpenCypherDatabaseMetadata extends DatabaseMetaData implements java
         if (catalog != null) {
             LOGGER.warn("Catalog in getColumns is not supported, ignoring.");
         }
-        if (schemaPattern != null) {
+        if (columnNamePattern != null) {
             LOGGER.warn("ColumnNamePattern in getColumns is not supported, ignoring.");
         }
-        if (columnNamePattern != null) {
+        if (schemaPattern != null) {
             LOGGER.warn("SchemaPattern in getColumns is not supported, ignoring.");
         }
         final OpenCypherQueryExecutor openCypherQueryExecutor = new OpenCypherQueryExecutor(

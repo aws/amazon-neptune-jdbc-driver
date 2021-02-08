@@ -48,14 +48,14 @@ public class OpenCypherQueryExecutor {
     private final Driver driver;
     private final int fetchSize = -1;
     private final Object lock = new Object();
-    private boolean isSessionConfigChange = false;
-    private int queryTimeout = -1;
     private final Config config;
+    private final String endpoint;
+    private final boolean isSessionConfigChange = false;
+    private int queryTimeout = -1;
     private SessionConfig sessionConfig;
     private Session session;
     private boolean queryExecuted = false;
     private boolean queryCancelled = false;
-    private final String endpoint;
 
     /**
      * OpenCypherQueryExecutor constructor.
@@ -84,8 +84,9 @@ public class OpenCypherQueryExecutor {
 
     /**
      * Verify that connection to database is functional.
+     *
      * @param endpoint Connection endpoint.
-     * @param timeout Time in milliseconds to wait for the database operation used to validate the connection to complete.
+     * @param timeout  Time in milliseconds to wait for the database operation used to validate the connection to complete.
      * @return true if the connection is valid, otherwise false.
      */
     public static boolean isValid(final String endpoint, final int timeout) {
@@ -96,7 +97,7 @@ public class OpenCypherQueryExecutor {
             final Driver tempDriver = GraphDatabase.driver(endpoint, tempConfig);
             tempDriver.verifyConnectivity();
             return true;
-        } catch (Exception e) {
+        } catch (final Exception e) {
             LOGGER.error("Connection to database returned an error:", e);
             return false;
         }
@@ -112,6 +113,7 @@ public class OpenCypherQueryExecutor {
 
     /**
      * This value overrides the default fetch size set in driver's config properties.
+     *
      * @param fetchSize Number of records to return by query.
      */
     protected void setFetchSize(final int fetchSize) {
@@ -203,7 +205,8 @@ public class OpenCypherQueryExecutor {
      * Function to get table types.
      *
      * @param statement java.sql.Statement Object required for result set.
-     * @return java.sql.ResulSet Object containing table types.
+     * @param nodes     String containing nodes to get schema for.
+     * @return java.sql.ResulSet Object containing columns.
      * @throws SQLException if query execution fails, or it was cancelled.
      */
     @SneakyThrows
