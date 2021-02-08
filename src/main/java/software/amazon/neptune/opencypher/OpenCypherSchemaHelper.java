@@ -202,7 +202,4 @@ public class OpenCypherSchemaHelper {
         }
         return (T) obj;
     }
-
-    static class MapList extends HashMap<String, ArrayList<HashMap<String, Object>>> {
-    }
 }

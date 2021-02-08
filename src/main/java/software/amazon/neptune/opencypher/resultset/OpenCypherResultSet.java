@@ -64,8 +64,9 @@ public class OpenCypherResultSet extends software.amazon.jdbc.ResultSet implemen
      * OpenCypherResultSet constructor, initializes super class.
      *
      * @param statement Statement Object.
-     * @param result    Result Object.
      * @param session   Session Object.
+     * @param result    Result Object.
+     * @param rowCount  Number of rows in result.
      * @param columns   List of Columns.
      */
     public OpenCypherResultSet(final java.sql.Statement statement,
@@ -136,8 +137,7 @@ public class OpenCypherResultSet extends software.amazon.jdbc.ResultSet implemen
     private Value getValue(final int columnIndex) throws SQLException {
         verifyOpen();
         if (rows == null) {
-            // TODO: Proper exception
-            throw new SQLException("This resultset type should not be used for this.");
+            throw new SQLException("Error, invalid ResultSet type for this functionality.");
         }
         validateRowColumn(columnIndex);
         final Value value = rows.get(getRowIndex()).get(columnIndex);

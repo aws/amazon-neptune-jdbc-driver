@@ -306,7 +306,6 @@ public class OpenCypherQueryExecutor {
      * @param seconds Time in seconds to set query timeout to.
      */
     public void setQueryTimeout(final int seconds) {
-        isSessionConfigChange = true;
         queryTimeout = seconds;
     }
 }

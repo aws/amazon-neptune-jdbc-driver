@@ -97,12 +97,6 @@ public class OpenCypherManualNeptuneVerificationTest {
     @Test
     void testGetColumnsHumanDeveloper() throws SQLException {
         final java.sql.ResultSet resultSet = databaseMetaData.getColumns(null, null, "Human:Developer", null);
-        Assertions.assertTrue(resultSet.next());
-        do {
-            for (final String columnName : OpenCypherGetColumnUtilities.COLUMN_NAMES) {
-                System.out.println(columnName + " - " + resultSet.getString(columnName));
-            }
-
-        } while (resultSet.next());
+        Assertions.assertFalse(resultSet.next());
     }
 }

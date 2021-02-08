@@ -152,7 +152,8 @@ public class OpenCypherResultSetGetColumns extends OpenCypherResultSet {
     /**
      * OpenCypherResultSetGetCatalogs constructor, initializes super class.
      *
-     * @param statement Statement Object.
+     * @param statement       Statement Object.
+     * @param nodeColumnInfos List of NodeColumnInfo Objects.
      */
     public OpenCypherResultSetGetColumns(final Statement statement, final List<NodeColumnInfo> nodeColumnInfos)
             throws Exception {
@@ -181,7 +182,8 @@ public class OpenCypherResultSetGetColumns extends OpenCypherResultSet {
                     map.put("NULLABLE", DatabaseMetaData.columnNullableUnknown);
                     map.put("IS_NULLABLE", "");
                 } else {
-                    map.put("NULLABLE", (Boolean) nullable ? DatabaseMetaData.columnNullable : DatabaseMetaData.columnNoNulls);
+                    map.put("NULLABLE",
+                            (Boolean) nullable ? DatabaseMetaData.columnNullable : DatabaseMetaData.columnNoNulls);
                     map.put("IS_NULLABLE", (Boolean) nullable ? "YES" : "NO");
                 }
 
@@ -190,7 +192,6 @@ public class OpenCypherResultSetGetColumns extends OpenCypherResultSet {
                 map.put("NUM_PREC_RADIX", 10);
                 map.put("ORDINAL_POSITION", i++);
                 map.put("COLUMN_SIZE", null);
-
             }
             if (!map.keySet().equals(new HashSet<>(ORDERED_COLUMNS))) {
                 throw new SQLException(
@@ -201,10 +202,10 @@ public class OpenCypherResultSetGetColumns extends OpenCypherResultSet {
     }
 
     @Override
-    protected ResultSetMetaData getOpenCypherMetadata() throws SQLException {
+    protected ResultSetMetaData getOpenCypherMetadata() {
         final List<Type> rowTypes = new ArrayList<>();
-        for (int i = 0; i < ORDERED_COLUMNS.size(); i++) {
-            rowTypes.add(InternalTypeSystem.TYPE_SYSTEM.STRING());
+        for (final String column : ORDERED_COLUMNS) {
+            rowTypes.add(COLUMN_TYPE_MAP.get(column));
         }
         return new OpenCypherResultSetMetadata(ORDERED_COLUMNS, rowTypes);
     }
