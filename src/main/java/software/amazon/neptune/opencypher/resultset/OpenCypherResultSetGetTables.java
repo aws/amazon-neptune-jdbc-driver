@@ -22,10 +22,12 @@ import org.neo4j.driver.Result;
 import org.neo4j.driver.Session;
 import org.neo4j.driver.Value;
 import org.neo4j.driver.internal.types.InternalTypeSystem;
+import org.neo4j.driver.types.Type;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import software.amazon.jdbc.utilities.SqlError;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -91,7 +93,12 @@ public class OpenCypherResultSetGetTables extends OpenCypherResultSet implements
 
     @Override
     protected java.sql.ResultSetMetaData getOpenCypherMetadata() throws SQLException {
-        return new OpenCypherResultSetMetadata(KEYS, rows);
+        // All are string types.
+        final List<Type> rowTypes = new ArrayList<>();
+        for (int i = 0; i < MAPPED_KEYS.size(); i++) {
+            rowTypes.add(InternalTypeSystem.TYPE_SYSTEM.STRING());
+        }
+        return new OpenCypherResultSetMetadata(KEYS, rowTypes);
     }
 
     @Override
@@ -110,11 +117,26 @@ public class OpenCypherResultSetGetTables extends OpenCypherResultSet implements
                 if (objectLabels.stream().anyMatch(o -> !(o instanceof String))) {
                     throw new SQLException("Unexpected datatype encountered while getting schema..");
                 }
-                return String.join(":", (List<String>) objectLabels);
+                return nodeListToString((List<String>)objectLabels);
             }
         }
         throw SqlError
                 .createSQLFeatureNotSupportedException(LOGGER, SqlError.INVALID_COLUMN_INDEX, columnIndex,
                         KEYS.size());
+    }
+
+    /**
+     * Function to sort nodes so that node sorting is consistent so that table names which are concatenated node labels
+     * are also sorted.
+     *
+     * @param nodes List of nodes to sort and Stringify.
+     * @return Return String joined list after sorting.
+     */
+    public static String nodeListToString(final List<String> nodes) {
+        // Don't overly care how it is sorted as long as it is consistent.
+        // Need to copy list in case it is an ImmutableList underneath.
+        final List<String> sortedNodes = new ArrayList<>(nodes);
+        java.util.Collections.sort(sortedNodes);
+        return String.join(":", sortedNodes);
     }
 }

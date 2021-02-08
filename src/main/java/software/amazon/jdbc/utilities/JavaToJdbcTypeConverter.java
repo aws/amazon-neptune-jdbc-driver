@@ -36,6 +36,7 @@ import java.util.Map;
 
 public class JavaToJdbcTypeConverter {
     public static final Map<Class<?>, ClassConverter<?>> CLASS_CONVERTER_MAP = new HashMap<>();
+    public static final Map<Class<?>, Integer> CLASS_TO_JDBC_ORDINAL = new HashMap<>();
     private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(JavaToJdbcTypeConverter.class);
     private static final Map<String, Boolean> BOOLEAN_STRINGS = ImmutableMap.of(
             "1", true, "true", true,
@@ -55,6 +56,17 @@ public class JavaToJdbcTypeConverter {
         CLASS_CONVERTER_MAP.put(Date.class, JavaToJdbcTypeConverter::toDate);
         CLASS_CONVERTER_MAP.put(Time.class, JavaToJdbcTypeConverter::toTime);
         CLASS_CONVERTER_MAP.put(Timestamp.class, JavaToJdbcTypeConverter::toTimestamp);
+
+        CLASS_TO_JDBC_ORDINAL.put(Boolean.class, JdbcType.BIT.getJdbcCode());
+        CLASS_TO_JDBC_ORDINAL.put(Byte.class, JdbcType.TINYINT.getJdbcCode());
+        CLASS_TO_JDBC_ORDINAL.put(Short.class, JdbcType.SMALLINT.getJdbcCode());
+        CLASS_TO_JDBC_ORDINAL.put(Integer.class, JdbcType.INTEGER.getJdbcCode());
+        CLASS_TO_JDBC_ORDINAL.put(Long.class, JdbcType.BIGINT.getJdbcCode());
+        CLASS_TO_JDBC_ORDINAL.put(Float.class, JdbcType.REAL.getJdbcCode());
+        CLASS_TO_JDBC_ORDINAL.put(Double.class, JdbcType.DOUBLE.getJdbcCode());
+        CLASS_TO_JDBC_ORDINAL.put(Date.class, JdbcType.DATE.getJdbcCode());
+        CLASS_TO_JDBC_ORDINAL.put(Time.class, JdbcType.TIME.getJdbcCode());
+        CLASS_TO_JDBC_ORDINAL.put(String.class, JdbcType.VARCHAR.getJdbcCode());
     }
 
     /**
@@ -282,7 +294,7 @@ public class JavaToJdbcTypeConverter {
     /**
      * Function that takes in a Java Object and attempts to convert it to a Date.
      *
-     * @param input Input Object.
+     * @param input    Input Object.
      * @param calendar Calendar to use.
      * @return Date.
      * @throws SQLException if conversion cannot be performed.
@@ -312,7 +324,7 @@ public class JavaToJdbcTypeConverter {
     /**
      * Function that takes in a Java Object and attempts to convert it to a Time.
      *
-     * @param input Input Object.
+     * @param input    Input Object.
      * @param calendar Calendar to use.
      * @return Time.
      * @throws SQLException if conversion cannot be performed.
@@ -347,7 +359,7 @@ public class JavaToJdbcTypeConverter {
     /**
      * Function that takes in a Java Object and attempts to convert it to a Timestamp.
      *
-     * @param input Input Object.
+     * @param input    Input Object.
      * @param calendar Calendar to use.
      * @return Timestamp.
      * @throws SQLException if conversion cannot be performed.

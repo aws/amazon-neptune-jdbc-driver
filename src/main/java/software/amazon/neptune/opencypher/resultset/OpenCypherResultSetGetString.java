@@ -16,13 +16,15 @@
 
 package software.amazon.neptune.opencypher.resultset;
 
-import org.neo4j.driver.Record;
+import org.neo4j.driver.internal.types.InternalTypeSystem;
+import org.neo4j.driver.types.Type;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import software.amazon.jdbc.utilities.SqlError;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -31,41 +33,54 @@ public class OpenCypherResultSetGetString extends OpenCypherResultSet {
     /**
      * TABLE_TYPE String => table type. Typical types are "TABLE", "VIEW", "SYSTEM TABLE", "GLOBAL TEMPORARY", "LOCAL TEMPORARY", "ALIAS", "SYNONYM".
      */
-    private final List<Record> rows;
+    private final int rowCount;
     private final List<String> columns;
-    private final Map<String, String> constantReturns;
+    private final List<Map<String, String>> constantReturns;
 
     /**
      * OpenCypherResultSetGetString constructor, initializes super class.
      *
      * @param statement       Statement Object.
-     * @param rows            List of ordered rows.
+     * @param rowCount        Number of rows.
      * @param columns         List of ordered columns.
      * @param constantReturns Map of return values for given keys.
      */
-    public OpenCypherResultSetGetString(final Statement statement, final List<Record> rows, final List<String> columns,
-                                        final Map<String, String> constantReturns) {
-        super(statement, null, null, rows, columns);
-        this.rows = rows;
+    public OpenCypherResultSetGetString(final Statement statement, final int rowCount, final List<String> columns,
+                                        final List<Map<String, String>> constantReturns) {
+        super(statement, null, null, rowCount, columns);
+        this.rowCount = rowCount;
         this.columns = columns;
         this.constantReturns = constantReturns;
     }
 
     @Override
     protected ResultSetMetaData getOpenCypherMetadata() throws SQLException {
-        return new OpenCypherResultSetMetadataStringTypes(columns, rows);
+        final List<Type> rowTypes = new ArrayList<>();
+        for (int i = 0; i < columns.size(); i++) {
+            rowTypes.add(InternalTypeSystem.TYPE_SYSTEM.STRING());
+        }
+        return new OpenCypherResultSetMetadata(columns, rowTypes);
     }
 
     @Override
     protected Object getConvertedValue(final int columnIndex) throws SQLException {
         verifyOpen();
-        if (columnIndex <= columns.size() && columnIndex > 0) {
-            final String key = columns.get(columnIndex - 1);
-            if (constantReturns.containsKey(key)) {
-                return constantReturns.get(key);
-            }
+        final int index = getRowIndex();
+        if ((index >= constantReturns.size()) || (index < 0)) {
+            throw SqlError
+                    .createSQLFeatureNotSupportedException(LOGGER, SqlError.INVALID_INDEX, index + 1,
+                            constantReturns.size());
+        } else if ((columnIndex > columns.size()) || (columnIndex <= 0)) {
+            throw SqlError
+                    .createSQLFeatureNotSupportedException(LOGGER, SqlError.INVALID_COLUMN_INDEX, columnIndex,
+                            columns.size());
         }
-        throw SqlError
-                .createSQLFeatureNotSupportedException(LOGGER, SqlError.INVALID_COLUMN_INDEX, columnIndex, columns.size());
+        final String key = columns.get(columnIndex - 1);
+        if (constantReturns.get(index).containsKey(key)) {
+            return constantReturns.get(index).get(key);
+        } else {
+            throw SqlError
+                    .createSQLFeatureNotSupportedException(LOGGER, SqlError.INVALID_COLUMN_LABEL, key);
+        }
     }
 }

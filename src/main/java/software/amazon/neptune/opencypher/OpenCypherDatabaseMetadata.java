@@ -163,7 +163,18 @@ public class OpenCypherDatabaseMetadata extends DatabaseMetaData implements java
     public ResultSet getColumns(final String catalog, final String schemaPattern, final String tableNamePattern,
                                 final String columnNamePattern)
             throws SQLException {
-        return null;
+        if (catalog != null) {
+            LOGGER.warn("Catalog in getColumns is not supported, ignoring.");
+        }
+        if (columnNamePattern != null) {
+            LOGGER.warn("ColumnNamePattern in getColumns is not supported, ignoring.");
+        }
+        if (schemaPattern != null) {
+            LOGGER.warn("SchemaPattern in getColumns is not supported, ignoring.");
+        }
+        final OpenCypherQueryExecutor openCypherQueryExecutor = new OpenCypherQueryExecutor(
+                new OpenCypherConnectionProperties(getConnection().getClientInfo()));
+        return openCypherQueryExecutor.executeGetColumns(getConnection().createStatement(), tableNamePattern);
     }
 
     @Override

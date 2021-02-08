@@ -30,6 +30,7 @@ import software.amazon.jdbc.utilities.SqlError;
 import software.amazon.jdbc.utilities.SqlState;
 import software.amazon.neptune.opencypher.resultset.OpenCypherResultSet;
 import software.amazon.neptune.opencypher.resultset.OpenCypherResultSetGetCatalogs;
+import software.amazon.neptune.opencypher.resultset.OpenCypherResultSetGetColumns;
 import software.amazon.neptune.opencypher.resultset.OpenCypherResultSetGetSchemas;
 import software.amazon.neptune.opencypher.resultset.OpenCypherResultSetGetTableTypes;
 import software.amazon.neptune.opencypher.resultset.OpenCypherResultSetGetTables;
@@ -44,11 +45,13 @@ import java.util.concurrent.TimeUnit;
 public class OpenCypherQueryExecutor {
     private static final Logger LOGGER = LoggerFactory.getLogger(OpenCypherQueryExecutor.class);
     private static final int MAX_FETCH_SIZE = Integer.MAX_VALUE;
-    //private final int fetchSize = -1;
-    private int queryTimeout = -1;
+    private final Driver driver;
+    private final int fetchSize = -1;
     private final Object lock = new Object();
     private final Config config;
-    private final Driver driver;
+    private final String endpoint;
+    private final boolean isSessionConfigChange = false;
+    private int queryTimeout = -1;
     private SessionConfig sessionConfig;
     private Session session;
     private boolean queryExecuted = false;
@@ -60,6 +63,7 @@ public class OpenCypherQueryExecutor {
      * @param properties properties to use for query executon.
      */
     OpenCypherQueryExecutor(final OpenCypherConnectionProperties properties) {
+        this.endpoint = properties.getEndpoint();
         // TODO: Implement authentication.
         // final String user = properties.getUser();
         // final String password = properties.getPassword();
@@ -68,18 +72,21 @@ public class OpenCypherQueryExecutor {
         // Driver config properties.
         this.config = Config.builder()
                 .withConnectionTimeout(properties.getConnectionTimeout(), TimeUnit.MILLISECONDS)
-                //.withFetchSize(properties.geFetchSize())
+                // .withEncryption() // Required for Neptune manual test
+                // .withTrustStrategy(Config.TrustStrategy.trustAllCertificates()) // Required for Neptune manual test
+                // .withFetchSize(properties.getFetchSize())
                 .build();
-        this.driver = GraphDatabase.driver(properties.getEndpoint(), this.config);
 
         // Session config properties.
         this.sessionConfig = SessionConfig.builder().build();
+        this.driver = GraphDatabase.driver(this.endpoint, getConfig());
     }
 
     /**
      * Verify that connection to database is functional.
+     *
      * @param endpoint Connection endpoint.
-     * @param timeout Time in milliseconds to wait for the database operation used to validate the connection to complete.
+     * @param timeout  Time in milliseconds to wait for the database operation used to validate the connection to complete.
      * @return true if the connection is valid, otherwise false.
      */
     public static boolean isValid(final String endpoint, final int timeout) {
@@ -90,7 +97,7 @@ public class OpenCypherQueryExecutor {
             final Driver tempDriver = GraphDatabase.driver(endpoint, tempConfig);
             tempDriver.verifyConnectivity();
             return true;
-        } catch (Exception e) {
+        } catch (final Exception e) {
             LOGGER.error("Connection to database returned an error:", e);
             return false;
         }
@@ -106,6 +113,7 @@ public class OpenCypherQueryExecutor {
 
     /**
      * This value overrides the default fetch size set in driver's config properties.
+     *
      * @param fetchSize Number of records to return by query.
      */
     protected void setFetchSize(final int fetchSize) {
@@ -191,6 +199,20 @@ public class OpenCypherQueryExecutor {
     public java.sql.ResultSet executeGetTableTypes(final java.sql.Statement statement)
             throws SQLException {
         return new OpenCypherResultSetGetTableTypes(statement);
+    }
+
+    /**
+     * Function to get table types.
+     *
+     * @param statement java.sql.Statement Object required for result set.
+     * @param nodes     String containing nodes to get schema for.
+     * @return java.sql.ResulSet Object containing columns.
+     * @throws SQLException if query execution fails, or it was cancelled.
+     */
+    @SneakyThrows
+    public java.sql.ResultSet executeGetColumns(final java.sql.Statement statement, final String nodes)
+            throws SQLException {
+        return new OpenCypherResultSetGetColumns(statement, OpenCypherSchemaHelper.getGraphSchema(endpoint, nodes));
     }
 
     @SneakyThrows

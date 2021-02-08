@@ -40,7 +40,7 @@ public class OpenCypherResultSetTest {
      */
     @BeforeAll
     public static void initializeDatabase() {
-        database = MockOpenCypherDatabase.builder(HOSTNAME, OpenCypherResultSetMetadataTest.class.getName()).build();
+        database = MockOpenCypherDatabase.builder(HOSTNAME, OpenCypherResultSetTest.class.getName()).build();
         PROPERTIES.putIfAbsent(ConnectionProperties.ENDPOINT_KEY, String.format("bolt://%s:%d", HOSTNAME, database.getPort()));
     }
 

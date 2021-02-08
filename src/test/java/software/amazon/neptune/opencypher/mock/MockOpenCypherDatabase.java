@@ -26,10 +26,13 @@ import org.neo4j.harness.junit.Neo4jRule;
 import org.neo4j.kernel.configuration.BoltConnector;
 import org.neo4j.kernel.configuration.Settings;
 import java.io.File;
+import java.io.IOException;
 import java.net.ServerSocket;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
-import java.util.Objects;
 import static org.neo4j.helpers.ListenSocketAddress.listenAddress;
 import static org.neo4j.kernel.configuration.BoltConnector.EncryptionLevel.DISABLED;
 import static org.neo4j.kernel.configuration.Connector.ConnectorType.BOLT;
@@ -37,7 +40,6 @@ import static org.neo4j.kernel.configuration.Settings.FALSE;
 import static org.neo4j.kernel.configuration.Settings.STRING;
 import static org.neo4j.kernel.configuration.Settings.TRUE;
 
-// TODO: AN-354 Abstract logic of this to create a nice interface to easily spin up different datasets.
 public final class MockOpenCypherDatabase {
     private static final String DB_PATH = "target/neo4j-test/";
     @ClassRule
@@ -57,15 +59,15 @@ public final class MockOpenCypherDatabase {
      * @param host Host to initialize with.
      * @param port Port to initialize with.
      */
-    private MockOpenCypherDatabase(final String host, final int port, final String path) {
+    private MockOpenCypherDatabase(final String host, final int port, final String path) throws IOException {
         this.host = host;
         this.port = port;
         final File dbPath = new File(DB_PATH + path);
-        if (dbPath.exists()) {
-            for (final String fileName : Objects.requireNonNull(dbPath.list())) {
-                final File file = new File(dbPath, fileName);
-                file.delete();
-            }
+        if (dbPath.isDirectory()) {
+            Files.walk(dbPath.toPath())
+                    .sorted(Comparator.reverseOrder())
+                    .map(Path::toFile)
+                    .forEach(File::delete);
         }
         final BoltConnector boltConnector = new BoltConnector("bolt");
         graphDb = new GraphDatabaseFactory()

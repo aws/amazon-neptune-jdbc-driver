@@ -171,6 +171,13 @@ ext {
     neo4jDriverVersion = '4.2.0'
     puppyCrawlVersion = '8.8'
     findBugsVersion = '3.0.1'
+    awsSdkVersion = '1.11.932'
+    gremlinVersion = '3.4.8'
+    slf4jVersion = '1.8.0-beta2'
+    rdf4jVersion = '3.5.0'
+    amazonSigv4SignerVersion = '2.1.1'
+    nettyVersion = '4.1.52.Final'
+    kinesisProducerVersion = '0.14.0'
 }
 
 subprojects {
@@ -184,6 +191,32 @@ dependencies {
     // Local neptune-export library
     implementation('com.amazonaws:neptune-export:1.0-SNAPSHOT')
     compile(':neptune-export:1.0-SNAPSHOT')
+
+    // neptune-export dependencies
+    compile group: 'com.github.rvesse', name: 'airline', version: '2.8.0'
+    compile group: 'org.apache.tinkerpop', name: 'gremlin-driver', version: gremlinVersion
+    compile group: 'org.eclipse.rdf4j', name: 'rdf4j-repository-sparql', version: rdf4jVersion
+    compile group: 'org.eclipse.rdf4j', name: 'rdf4j-rio-turtle', version: rdf4jVersion
+    compile group: 'org.eclipse.rdf4j', name: 'rdf4j-rio-nquads', version: rdf4jVersion
+    compile group: 'com.amazonaws', name: 'aws-java-sdk-kinesis', version: awsSdkVersion
+    compile group: 'com.amazonaws', name: 'amazon-kinesis-producer', version: kinesisProducerVersion
+    compile group: 'com.amazonaws', name: 'aws-java-sdk-neptune', version: awsSdkVersion
+    compile group: 'com.amazonaws', name: 'aws-java-sdk-s3', version: awsSdkVersion
+    compile group: 'com.amazonaws', name: 'aws-java-sdk-core', version: awsSdkVersion
+    compile group: 'org.apache.tinkerpop', name: 'gremlin-groovy', version: gremlinVersion
+    compile group: 'com.amazonaws', name: 'amazon-neptune-sparql-java-sigv4', version: amazonSigv4SignerVersion
+    compile group: 'com.amazonaws', name: 'amazon-neptune-sigv4-signer', version: amazonSigv4SignerVersion
+    compile group: 'com.amazonaws', name: 'amazon-neptune-gremlin-java-sigv4', version: amazonSigv4SignerVersion
+    compile group: 'io.netty', name: 'netty-all', version: nettyVersion
+    compile group: 'org.slf4j', name: 'slf4j-simple', version: slf4jVersion
+    compile group: 'org.slf4j', name: 'jcl-over-slf4j', version: slf4jVersion
+    compile group: 'org.slf4j', name: 'slf4j-api', version: slf4jVersion
+    compile group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.10.5'
+    compile group: 'com.github.rvesse', name: 'airline', version: '2.8.0'
+    compile group: 'com.amazonaws', name: 'aws-lambda-java-core', version: '1.2.1'
+    compile group: 'org.apache.commons', name: 'commons-csv', version: '1.6'
+    compile group: 'org.codehaus.plexus', name: 'plexus-utils', version: '3.2.0'
+    compile group: 'com.fasterxml.jackson.dataformat', name: 'jackson-dataformat-cbor', version: '2.10.5'
 
     // Logging
     implementation group: 'org.slf4j', name: 'slf4j-log4j12', version: '1.7.29'

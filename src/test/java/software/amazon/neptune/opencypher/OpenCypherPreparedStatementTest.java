@@ -46,7 +46,7 @@ public class OpenCypherPreparedStatementTest extends OpenCypherStatementTestBase
      */
     @BeforeAll
     public static void initializeDatabase() {
-        database = MockOpenCypherDatabase.builder(HOSTNAME, OpenCypherResultSetMetadataTest.class.getName()).build();
+        database = MockOpenCypherDatabase.builder(HOSTNAME, OpenCypherPreparedStatementTest.class.getName()).build();
         PROPERTIES.putIfAbsent(ConnectionProperties.ENDPOINT_KEY, String.format("bolt://%s:%d", HOSTNAME, database.getPort()));
     }
 
@@ -61,7 +61,6 @@ public class OpenCypherPreparedStatementTest extends OpenCypherStatementTestBase
     @SneakyThrows
     @BeforeEach
     void initialize() {
-        PROPERTIES.putIfAbsent(ConnectionProperties.ENDPOINT_KEY, String.format("bolt://%s:%d", HOSTNAME, 999));
         final java.sql.Connection connection = new OpenCypherConnection(new ConnectionProperties(PROPERTIES));
         openCypherPreparedStatement = connection.prepareStatement("");
         openCypherPreparedStatementLongQuery = connection.prepareStatement(getLongQuery());
