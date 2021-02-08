@@ -33,7 +33,7 @@ import java.util.regex.Pattern;
 
 public class NeptuneDriver extends Driver implements java.sql.Driver {
     private static final Logger LOGGER = LoggerFactory.getLogger(OpenCypherQueryExecutor.class);
-    private static final String CONN_STRING_PREFIX = "jdbc:neptune:";
+    public static final String CONN_STRING_PREFIX = "jdbc:neptune:";
     private static final Pattern CONN_STRING_PATTERN = Pattern.compile(CONN_STRING_PREFIX + "(\\w+)://(.*)");
 
     static {
@@ -81,7 +81,7 @@ public class NeptuneDriver extends Driver implements java.sql.Driver {
 
         final int retryCount = connectionProperties.getConnectionRetryCount();
         for (int i = 0; i <= retryCount; i++) {
-            if (connection.isValid(connectionProperties.getConnectionTimeout())) {
+            if (connection.isValid(connectionProperties.getConnectionTimeoutMillis())) {
                 return connection;
             }
         }
