@@ -28,7 +28,7 @@ public class OpenCypherConnectionProperties {
     private final Properties properties = new Properties();
     private final List<String> keys = ImmutableList.of(
             ConnectionProperties.ENDPOINT_KEY,              // "user", "password"
-            ConnectionProperties.CONNECTION_TIMEOUT_KEY,
+            ConnectionProperties.CONNECTION_TIMEOUT_MILLIS_KEY,
             ConnectionProperties.CONNECTION_RETRY_COUNT_KEY);
 
     /**
@@ -44,15 +44,15 @@ public class OpenCypherConnectionProperties {
     }
 
     protected String getUser() {
-        return (String) properties.get("user");
+        return (String) properties.get(ConnectionProperties.USER_ID_KEY);
     }
 
     protected String getPassword() {
-        return (String) properties.get("password");
+        return (String) properties.get(ConnectionProperties.PASSWORD_KEY);
     }
 
     protected int getConnectionTimeout() {
-        return (int) properties.get(ConnectionProperties.CONNECTION_TIMEOUT_KEY);
+        return (int) properties.get(ConnectionProperties.CONNECTION_TIMEOUT_MILLIS_KEY);
     }
 
     protected int getConnectionRetryCount() {

@@ -74,7 +74,7 @@ public abstract class Connection implements java.sql.Connection {
     public Properties getClientInfo() throws SQLException {
         verifyOpen();
         final Properties clientInfo = new Properties();
-        clientInfo.putAll(connectionProperties.getAll());
+        clientInfo.putAll(connectionProperties);
         clientInfo.putIfAbsent(
                 ConnectionProperties.APPLICATION_NAME_KEY,
                 Driver.APPLICATION_NAME);
@@ -115,7 +115,7 @@ public abstract class Connection implements java.sql.Connection {
             LOGGER.debug("Null value is passed as name, falling back to get client info with null.");
             return null;
         }
-        return connectionProperties.get(name);
+        return connectionProperties.getProperty(name);
     }
 
     @Override
