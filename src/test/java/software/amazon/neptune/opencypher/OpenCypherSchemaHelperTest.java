@@ -21,12 +21,14 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import software.amazon.neptune.opencypher.resultset.OpenCypherResultSetGetColumns;
 import software.amazon.neptune.opencypher.utilities.OpenCypherGetColumnUtilities;
+
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class OpenCypherSchemaHelperTest {
 
@@ -65,7 +67,9 @@ public class OpenCypherSchemaHelperTest {
         OpenCypherGetColumnUtilities.createFiles(extendedRoot, testFiles);
 
         final List<String> outputFiles = OpenCypherSchemaHelper.getOutputFiles(root.toAbsolutePath().toString());
-        Assertions.assertEquals(new HashSet<>(testFilesFullPath), new HashSet<>(outputFiles));
+        Assertions.assertEquals(new HashSet<>(testFilesFullPath.stream().map(p -> p.replace("/", "\\")).collect(
+                Collectors.toSet())), new HashSet<>(outputFiles.stream().map(p -> p.replace("/", "\\")).collect(
+                Collectors.toSet())));
     }
 
     @Test
