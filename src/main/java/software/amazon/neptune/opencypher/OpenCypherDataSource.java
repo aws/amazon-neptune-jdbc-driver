@@ -284,4 +284,21 @@ public class OpenCypherDataSource extends software.amazon.jdbc.DataSource implem
     public int getConnectionRetryCount() {
         return connectionProperties.getConnectionRetryCount();
     }
+
+    /**
+     * Sets the authentication scheme.
+     * @param authScheme The authentication scheme.
+     * @throws SQLException if value is invalid.
+     */
+    public void setAuthScheme(final String authScheme) throws SQLException {
+        connectionProperties.setAuthScheme(authScheme);
+    }
+
+    /**
+     * Gets the authentication scheme.
+     * @return The authentication scheme.
+     */
+    public String getAuthScheme() {
+        return connectionProperties.getAuthScheme();
+    }
 }
