@@ -26,6 +26,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.regex.Pattern;
 
 /**
  * Class that manages connection properties.
@@ -45,20 +46,27 @@ public class ConnectionProperties extends Properties {
     public static final String CONNECTION_RETRY_COUNT_KEY = "ConnectionRetryCount";
     public static final String LOGIN_TIMEOUT_SEC_KEY = "LoginTimeoutSec";
     public static final String AUTH_SCHEME_KEY = "AuthScheme";
+    public static final String USE_ENCRYPTION_KEY = "UseEncryption";
 
     public static final Level DEFAULT_LOG_LEVEL = Level.INFO;
-    public static final int DEFAULT_CONNECTION_TIMEOUT = 5000;
+    public static final int DEFAULT_CONNECTION_TIMEOUT_MILLIS = 5000;
     public static final int DEFAULT_CONNECTION_RETRY_COUNT = 3;
+    public static final int DEFAULT_LOGIN_TIMEOUT_SEC = 0;
     public static final AuthScheme DEFAULT_AUTH_SCHEME = AuthScheme.None;
+    public static final boolean DEFAULT_USE_ENCRYPTION = true;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ConnectionProperties.class);
+
+    private static boolean isWhitespace(@NonNull final String value) {
+        return Pattern.matches("^\\s*$", value);
+    }
 
     /**
      * Property converter interface.
      * @param <T> Type to convert string property to.
      */
     interface PropertyConverter <T> {
-        T convert(String key, String value) throws SQLException;
+        T convert(@NonNull String key, @NonNull String value) throws SQLException;
     }
 
     private static final Map<String, PropertyConverter<?>> PROPERTIES_MAP = new HashMap<>();
@@ -73,6 +81,9 @@ public class ConnectionProperties extends Properties {
         PROPERTIES_MAP.put(SECRET_ACCESS_KEY_KEY, (key, value) -> value);
         PROPERTIES_MAP.put(SESSION_TOKEN_KEY, (key, value) -> value);
         PROPERTIES_MAP.put(LOG_LEVEL_KEY, (key, value) -> {
+            if (isWhitespace(value)) {
+                return DEFAULT_LOG_LEVEL;
+            }
             final Map<String, Level> logLevelsMap = ImmutableMap.<String, Level>builder()
                     .put("OFF", Level.OFF)
                     .put("FATAL", Level.FATAL)
@@ -89,6 +100,9 @@ public class ConnectionProperties extends Properties {
             return logLevelsMap.get(value.toUpperCase());
         });
         PROPERTIES_MAP.put(CONNECTION_TIMEOUT_MILLIS_KEY, (key, value) ->  {
+            if (isWhitespace(value)) {
+                return DEFAULT_CONNECTION_TIMEOUT_MILLIS;
+            }
             try {
                 return Integer.parseUnsignedInt(value);
             } catch (NumberFormatException e) {
@@ -96,6 +110,9 @@ public class ConnectionProperties extends Properties {
             }
         });
         PROPERTIES_MAP.put(CONNECTION_RETRY_COUNT_KEY, (key, value) ->  {
+            if (isWhitespace(value)) {
+                return DEFAULT_CONNECTION_RETRY_COUNT;
+            }
             try {
                 return Integer.parseUnsignedInt(value);
             } catch (NumberFormatException e) {
@@ -103,6 +120,9 @@ public class ConnectionProperties extends Properties {
             }
         });
         PROPERTIES_MAP.put(LOGIN_TIMEOUT_SEC_KEY, (key, value) -> {
+            if (isWhitespace(value)) {
+                return DEFAULT_LOGIN_TIMEOUT_SEC;
+            }
             try {
                 return Integer.parseUnsignedInt(value);
             } catch (NumberFormatException e) {
@@ -110,20 +130,37 @@ public class ConnectionProperties extends Properties {
             }
         });
         PROPERTIES_MAP.put(AUTH_SCHEME_KEY, (key, value) -> {
+            if (isWhitespace(value)) {
+                return DEFAULT_AUTH_SCHEME;
+            }
             if (AuthScheme.fromString(value) == null) {
                 throw invalidConnectionPropertyError(key, value);
             }
             return AuthScheme.fromString(value);
         });
+        PROPERTIES_MAP.put(USE_ENCRYPTION_KEY, (key, value) -> {
+            if (isWhitespace(value)) {
+                return DEFAULT_USE_ENCRYPTION;
+            }
+            final Map<String, Boolean> stringBooleanMap = ImmutableMap.of(
+                    "1", true, "true", true,
+                    "0", false, "false", false);
+            if (!stringBooleanMap.containsKey(value.toLowerCase())) {
+                throw invalidConnectionPropertyError(key, value);
+            }
+            return stringBooleanMap.get(value.toLowerCase());
+        });
     }
 
-    private static final Map<String, Object> DEFAULT_PROPERTIES_MAP = new HashMap<>();
+    public static final Map<String, Object> DEFAULT_PROPERTIES_MAP = new HashMap<>();
     static {
         DEFAULT_PROPERTIES_MAP.put(ENDPOINT_KEY, "");
         DEFAULT_PROPERTIES_MAP.put(LOG_LEVEL_KEY, DEFAULT_LOG_LEVEL);
-        DEFAULT_PROPERTIES_MAP.put(CONNECTION_TIMEOUT_MILLIS_KEY, DEFAULT_CONNECTION_TIMEOUT);
+        DEFAULT_PROPERTIES_MAP.put(CONNECTION_TIMEOUT_MILLIS_KEY, DEFAULT_CONNECTION_TIMEOUT_MILLIS);
         DEFAULT_PROPERTIES_MAP.put(CONNECTION_RETRY_COUNT_KEY, DEFAULT_CONNECTION_RETRY_COUNT);
+        DEFAULT_PROPERTIES_MAP.put(LOGIN_TIMEOUT_SEC_KEY, DEFAULT_LOGIN_TIMEOUT_SEC);
         DEFAULT_PROPERTIES_MAP.put(AUTH_SCHEME_KEY, DEFAULT_AUTH_SCHEME);
+        DEFAULT_PROPERTIES_MAP.put(USE_ENCRYPTION_KEY, DEFAULT_USE_ENCRYPTION);
     }
 
     /**
@@ -449,6 +486,22 @@ public class ConnectionProperties extends Properties {
      */
     public AuthScheme getAuthScheme() {
         return (AuthScheme)get(AUTH_SCHEME_KEY);
+    }
+
+    /**
+     * Sets the use encryption.
+     * @param useEncryption The use encryption.
+     */
+    public void setUseEncryption(final boolean useEncryption) {
+        put(USE_ENCRYPTION_KEY, useEncryption);
+    }
+
+    /**
+     * Gets the use encryption.
+     * @return The use encryption.
+     */
+    public boolean getUseEncryption() {
+        return (boolean)get(USE_ENCRYPTION_KEY);
     }
 
     /**

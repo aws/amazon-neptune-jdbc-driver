@@ -302,4 +302,20 @@ public class OpenCypherDataSource extends software.amazon.jdbc.DataSource implem
     public AuthScheme getAuthScheme() {
         return connectionProperties.getAuthScheme();
     }
+
+    /**
+     * Sets the use encryption.
+     * @param useEncryption The use encryption.
+     */
+    public void setUseEncryption(final boolean useEncryption) {
+        connectionProperties.setUseEncryption(useEncryption);
+    }
+
+    /**
+     * Gets the use encryption.
+     * @return The use encryption.
+     */
+    public boolean getUseEncryption() {
+        return (connectionProperties.getUseEncryption());
+    }
 }
