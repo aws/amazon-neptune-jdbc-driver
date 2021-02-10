@@ -17,6 +17,7 @@
 package software.amazon.neptune.opencypher;
 
 import org.apache.log4j.Level;
+import software.amazon.jdbc.utilities.AuthScheme;
 import software.amazon.jdbc.utilities.ConnectionProperties;
 import software.amazon.neptune.NeptuneDriver;
 import javax.sql.PooledConnection;
@@ -290,7 +291,7 @@ public class OpenCypherDataSource extends software.amazon.jdbc.DataSource implem
      * @param authScheme The authentication scheme.
      * @throws SQLException if value is invalid.
      */
-    public void setAuthScheme(final String authScheme) throws SQLException {
+    public void setAuthScheme(final AuthScheme authScheme) throws SQLException {
         connectionProperties.setAuthScheme(authScheme);
     }
 
@@ -298,7 +299,7 @@ public class OpenCypherDataSource extends software.amazon.jdbc.DataSource implem
      * Gets the authentication scheme.
      * @return The authentication scheme.
      */
-    public String getAuthScheme() {
+    public AuthScheme getAuthScheme() {
         return connectionProperties.getAuthScheme();
     }
 }

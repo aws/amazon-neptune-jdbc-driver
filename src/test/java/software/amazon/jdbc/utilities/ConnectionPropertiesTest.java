@@ -35,7 +35,7 @@ class ConnectionPropertiesTest {
     @Test
     void testAuthScheme() throws SQLException {
         final List<String> validAuthSchemes = ImmutableList.of(
-                "none", "IAMSigV4", "iamSIGV4", "IAMRole", "IaMRoLe");
+                "NONE", "none", "IAMSigV4", "iamSIGV4", "IAMRole", "IaMRoLe");
         final List<String> invalidAuthSchemes = ImmutableList.of(
                 "-1;", "100;", "46hj7;", "foo;");
 
@@ -49,29 +49,35 @@ class ConnectionPropertiesTest {
 
         // Verify valid property value is set.
         for (final String validAuthScheme : validAuthSchemes) {
+            // Convert string to enum.
+            Assertions.assertNotNull(
+                    AuthScheme.fromString(validAuthScheme)
+            );
             // Set properties through constructor.
-            properties.setProperty("AuthScheme", validAuthScheme);
+            properties.put(ConnectionProperties.AUTH_SCHEME_KEY, validAuthScheme);
             Assertions.assertDoesNotThrow(() -> {
                 connectionProperties = new ConnectionProperties(properties);
             });
-            Assertions.assertEquals(validAuthScheme.toUpperCase(), connectionProperties.getAuthScheme().toUpperCase());
+            Assertions.assertEquals(AuthScheme.fromString(validAuthScheme), connectionProperties.getAuthScheme());
             // Set property directly.
             connectionProperties = new ConnectionProperties();
-            connectionProperties.setAuthScheme(validAuthScheme);
-            Assertions.assertEquals(validAuthScheme.toUpperCase(), connectionProperties.getAuthScheme().toUpperCase());
+            connectionProperties.setAuthScheme(AuthScheme.fromString(validAuthScheme));
+            Assertions.assertEquals(AuthScheme.fromString(validAuthScheme), connectionProperties.getAuthScheme());
         }
 
         // Verify invalid property value throws error.
         for (final String invalidAuthScheme : invalidAuthSchemes) {
+            // Convert string to enum.
+            Assertions.assertNull(
+                AuthScheme.fromString(invalidAuthScheme)
+            );
             // Set properties through constructor.
-            properties.setProperty("AuthScheme", invalidAuthScheme);
-            Assertions.assertThrows(SQLException.class, () -> {
-                connectionProperties = new ConnectionProperties(properties);
-            });
+            properties.setProperty(ConnectionProperties.AUTH_SCHEME_KEY, invalidAuthScheme);
+            Assertions.assertThrows(SQLException.class,
+                    () -> connectionProperties = new ConnectionProperties(properties));
             // Set property directly.
-            Assertions.assertThrows(SQLException.class, () -> {
-                connectionProperties.setAuthScheme(invalidAuthScheme);
-            });
+            Assertions.assertThrows(SQLException.class,
+                    () -> connectionProperties.setAuthScheme(AuthScheme.fromString(invalidAuthScheme)));
         }
     }
 }

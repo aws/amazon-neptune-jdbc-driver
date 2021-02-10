@@ -49,7 +49,7 @@ public class ConnectionProperties extends Properties {
     public static final Level DEFAULT_LOG_LEVEL = Level.INFO;
     public static final int DEFAULT_CONNECTION_TIMEOUT = 5000;
     public static final int DEFAULT_CONNECTION_RETRY_COUNT = 3;
-    public static final String DEFAULT_AUTH_SCHEME = "none";
+    public static final AuthScheme DEFAULT_AUTH_SCHEME = AuthScheme.None;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ConnectionProperties.class);
 
@@ -110,15 +110,10 @@ public class ConnectionProperties extends Properties {
             }
         });
         PROPERTIES_MAP.put(AUTH_SCHEME_KEY, (key, value) -> {
-            final Map<String, String> authSchemeMap = ImmutableMap.of(
-                    "NONE", "none",
-                    "IAMSIGV4", "IAMSigV4",
-                    "IAMROLE", "IAMRole"
-            );
-            if (!authSchemeMap.containsKey(value.toUpperCase())) {
+            if (AuthScheme.fromString(value) == null) {
                 throw invalidConnectionPropertyError(key, value);
             }
-            return authSchemeMap.get(value.toUpperCase());
+            return AuthScheme.fromString(value);
         });
     }
 
@@ -362,6 +357,9 @@ public class ConnectionProperties extends Properties {
      * @throws SQLException if value is invalid.
      */
     public void setLogLevel(final Level logLevel) throws SQLException {
+        if (logLevel == null) {
+            throw invalidConnectionPropertyError(LOG_LEVEL_KEY, logLevel);
+        }
         put(LOG_LEVEL_KEY, logLevel);
     }
 
@@ -438,17 +436,19 @@ public class ConnectionProperties extends Properties {
      * @param authScheme The authentication scheme.
      * @throws SQLException if value is invalid.
      */
-    public void setAuthScheme(final String authScheme) throws SQLException {
-        setProperty(AUTH_SCHEME_KEY,
-                (String)PROPERTIES_MAP.get(AUTH_SCHEME_KEY).convert(AUTH_SCHEME_KEY, authScheme));
+    public void setAuthScheme(final AuthScheme authScheme) throws SQLException {
+        if (authScheme == null) {
+            throw invalidConnectionPropertyError(AUTH_SCHEME_KEY, authScheme);
+        }
+        put(AUTH_SCHEME_KEY, authScheme);
     }
 
     /**
      * Gets the authentication scheme.
      * @return The authentication scheme.
      */
-    public String getAuthScheme() {
-        return getProperty(AUTH_SCHEME_KEY);
+    public AuthScheme getAuthScheme() {
+        return (AuthScheme)get(AUTH_SCHEME_KEY);
     }
 
     /**
