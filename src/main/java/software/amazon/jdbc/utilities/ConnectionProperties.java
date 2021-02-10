@@ -44,10 +44,12 @@ public class ConnectionProperties extends Properties {
     public static final String CONNECTION_TIMEOUT_MILLIS_KEY = "ConnectionTimeout";
     public static final String CONNECTION_RETRY_COUNT_KEY = "ConnectionRetryCount";
     public static final String LOGIN_TIMEOUT_SEC_KEY = "LoginTimeoutSec";
+    public static final String AUTH_SCHEME_KEY = "AuthScheme";
 
     public static final Level DEFAULT_LOG_LEVEL = Level.INFO;
     public static final int DEFAULT_CONNECTION_TIMEOUT = 5000;
     public static final int DEFAULT_CONNECTION_RETRY_COUNT = 3;
+    public static final AuthScheme DEFAULT_AUTH_SCHEME = AuthScheme.None;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ConnectionProperties.class);
 
@@ -81,7 +83,7 @@ public class ConnectionProperties extends Properties {
                     .put("TRACE", Level.TRACE)
                     .put("ALL", Level.ALL)
                     .build();
-            if (!logLevelsMap.containsKey(value.toUpperCase()) ) {
+            if (!logLevelsMap.containsKey(value.toUpperCase())) {
                 throw invalidConnectionPropertyError(key, value);
             }
             return logLevelsMap.get(value.toUpperCase());
@@ -107,6 +109,12 @@ public class ConnectionProperties extends Properties {
                 throw invalidConnectionPropertyError(key, value);
             }
         });
+        PROPERTIES_MAP.put(AUTH_SCHEME_KEY, (key, value) -> {
+            if (AuthScheme.fromString(value) == null) {
+                throw invalidConnectionPropertyError(key, value);
+            }
+            return AuthScheme.fromString(value);
+        });
     }
 
     private static final Map<String, Object> DEFAULT_PROPERTIES_MAP = new HashMap<>();
@@ -115,6 +123,7 @@ public class ConnectionProperties extends Properties {
         DEFAULT_PROPERTIES_MAP.put(LOG_LEVEL_KEY, DEFAULT_LOG_LEVEL);
         DEFAULT_PROPERTIES_MAP.put(CONNECTION_TIMEOUT_MILLIS_KEY, DEFAULT_CONNECTION_TIMEOUT);
         DEFAULT_PROPERTIES_MAP.put(CONNECTION_RETRY_COUNT_KEY, DEFAULT_CONNECTION_RETRY_COUNT);
+        DEFAULT_PROPERTIES_MAP.put(AUTH_SCHEME_KEY, DEFAULT_AUTH_SCHEME);
     }
 
     /**
@@ -348,6 +357,9 @@ public class ConnectionProperties extends Properties {
      * @throws SQLException if value is invalid.
      */
     public void setLogLevel(final Level logLevel) throws SQLException {
+        if (logLevel == null) {
+            throw invalidConnectionPropertyError(LOG_LEVEL_KEY, logLevel);
+        }
         put(LOG_LEVEL_KEY, logLevel);
     }
 
@@ -417,6 +429,26 @@ public class ConnectionProperties extends Properties {
      */
     public int getLoginTimeout() {
         return (int) get(LOGIN_TIMEOUT_SEC_KEY);
+    }
+
+    /**
+     * Sets the authentication scheme.
+     * @param authScheme The authentication scheme.
+     * @throws SQLException if value is invalid.
+     */
+    public void setAuthScheme(final AuthScheme authScheme) throws SQLException {
+        if (authScheme == null) {
+            throw invalidConnectionPropertyError(AUTH_SCHEME_KEY, authScheme);
+        }
+        put(AUTH_SCHEME_KEY, authScheme);
+    }
+
+    /**
+     * Gets the authentication scheme.
+     * @return The authentication scheme.
+     */
+    public AuthScheme getAuthScheme() {
+        return (AuthScheme)get(AUTH_SCHEME_KEY);
     }
 
     /**

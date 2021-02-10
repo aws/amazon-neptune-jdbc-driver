@@ -29,7 +29,8 @@ public class OpenCypherConnectionProperties {
     private final List<String> keys = ImmutableList.of(
             ConnectionProperties.ENDPOINT_KEY,              // "user", "password"
             ConnectionProperties.CONNECTION_TIMEOUT_MILLIS_KEY,
-            ConnectionProperties.CONNECTION_RETRY_COUNT_KEY);
+            ConnectionProperties.CONNECTION_RETRY_COUNT_KEY,
+            ConnectionProperties.AUTH_SCHEME_KEY);
 
     /**
      * Constructor for OpenCypherConnectionProperties.

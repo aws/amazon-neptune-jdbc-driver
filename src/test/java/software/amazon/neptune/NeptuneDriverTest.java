@@ -129,7 +129,7 @@ public class NeptuneDriverTest {
     void testLogLevelSetting() throws SQLException {
         Assertions.assertEquals(ConnectionProperties.DEFAULT_LOG_LEVEL, LogManager.getRootLogger().getLevel());
         final List<String> validLogLevels = ImmutableList.of(
-                "", "logLevel=;", "logLevel=FATAL;", "LogLevel= error", "LOGleVel = InFo ;", "LOGLEVEL=dEbug", "logLEVEL=TRACE;");
+                "", "logLevel=;", "logLevel=Off;", "logLevel=FATAL;", "LogLevel= error", "LOGleVel = InFo ;", "LOGLEVEL=dEbug", "logLEVEL=TRACE;", "logLevel=All;");
         final List<String> invalidLogLevels = ImmutableList.of(
                 "logLevel=something;", "LogLevel=5;");
         for (final String language : languages) {
