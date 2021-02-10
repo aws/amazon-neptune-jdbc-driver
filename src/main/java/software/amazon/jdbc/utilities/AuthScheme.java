@@ -15,6 +15,8 @@
 
 package software.amazon.jdbc.utilities;
 
+import org.checkerframework.checker.nullness.qual.NonNull;
+
 /**
  * Auth Scheme enum.
  */
@@ -25,7 +27,7 @@ public enum AuthScheme {
 
     private final String stringValue;
 
-    AuthScheme(final String stringValue) {
+    AuthScheme(@NonNull final String stringValue) {
         this.stringValue = stringValue;
     }
 
@@ -34,7 +36,7 @@ public enum AuthScheme {
      * @param in The case-insensitive string to be converted to enum.
      * @return The enum value if string is recognized as a valid value, otherwise null.
      */
-    public static AuthScheme fromString(final String in) {
+    public static AuthScheme fromString(@NonNull final String in) {
         for (AuthScheme scheme : AuthScheme.values()) {
             if (scheme.stringValue.equalsIgnoreCase(in)) {
                 return scheme;
