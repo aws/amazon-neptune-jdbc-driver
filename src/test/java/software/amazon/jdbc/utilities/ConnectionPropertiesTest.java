@@ -62,6 +62,7 @@ class ConnectionPropertiesTest {
             );
             // Set property through constructor.
             properties.put(ConnectionProperties.AUTH_SCHEME_KEY, validValue);
+            properties.put(ConnectionProperties.REGION_KEY, "region");
             Assertions.assertDoesNotThrow(() -> {
                 connectionProperties = new ConnectionProperties(properties);
             });
