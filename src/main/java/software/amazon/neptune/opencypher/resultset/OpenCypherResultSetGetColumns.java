@@ -152,12 +152,14 @@ public class OpenCypherResultSetGetColumns extends OpenCypherResultSet {
     /**
      * OpenCypherResultSetGetCatalogs constructor, initializes super class.
      *
-     * @param statement       Statement Object.
-     * @param nodeColumnInfos List of NodeColumnInfo Objects.
+     * @param statement                Statement Object.
+     * @param nodeColumnInfos          List of NodeColumnInfo Objects.
+     * @param resultSetInfoWithoutRows ResultSetInfoWithoutRows Object.
      */
-    public OpenCypherResultSetGetColumns(final Statement statement, final List<NodeColumnInfo> nodeColumnInfos)
-            throws Exception {
-        super(statement, null, null, nodeColumnInfos.size(), ORDERED_COLUMNS);
+    public OpenCypherResultSetGetColumns(final Statement statement, final List<NodeColumnInfo> nodeColumnInfos,
+                                         final ResultSetInfoWithoutRows resultSetInfoWithoutRows)
+            throws SQLException {
+        super(statement, resultSetInfoWithoutRows);
         for (final NodeColumnInfo nodeColumnInfo : nodeColumnInfos) {
             // Add defaults.
             final Map<String, Object> map = new HashMap<>(CONVERSION_MAP);
@@ -247,5 +249,9 @@ public class OpenCypherResultSetGetColumns extends OpenCypherResultSet {
             final NodeColumnInfo nodeInfo = (NodeColumnInfo) (nodeColumnInfo);
             return nodeInfo.labels.equals(this.labels) && nodeInfo.properties.equals(this.properties);
         }
+    }
+
+    public static List<String> getColumns() {
+        return ORDERED_COLUMNS;
     }
 }

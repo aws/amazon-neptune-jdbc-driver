@@ -36,7 +36,7 @@ public class OpenCypherDatabaseMetadataTest {
     private static final String HOSTNAME = "localhost";
     private static final Properties PROPERTIES = new Properties();
     private static MockOpenCypherDatabase database;
-    private java.sql.DatabaseMetaData databaseMetaData;
+    private static java.sql.DatabaseMetaData databaseMetaData;
     private static final Set<Set<String>> GET_TABLES_NODE_SET = ImmutableSet.of(
             ImmutableSet.of("Person"),
             ImmutableSet.of("Person", "Developer"),
@@ -63,9 +63,13 @@ public class OpenCypherDatabaseMetadataTest {
      * Function to get a random available port and initialize database before testing.
      */
     @BeforeAll
-    public static void initializeDatabase() {
+    public static void initializeDatabase() throws SQLException {
         database = MockOpenCypherDatabase.builder(HOSTNAME, OpenCypherDatabaseMetadataTest.class.getName()).build();
         PROPERTIES.putIfAbsent(ConnectionProperties.ENDPOINT_KEY, String.format("bolt://%s:%d", HOSTNAME, database.getPort()));
+        final java.sql.Connection connection = new OpenCypherConnection(new ConnectionProperties(PROPERTIES));
+        final java.sql.Statement statement = connection.createStatement();
+        statement.execute(CREATE_NODES);
+        databaseMetaData = connection.getMetaData();
     }
 
     /**
@@ -74,15 +78,6 @@ public class OpenCypherDatabaseMetadataTest {
     @AfterAll
     public static void shutdownDatabase() {
         database.shutdown();
-    }
-
-    @SneakyThrows
-    @BeforeEach
-    void initialize() {
-        final java.sql.Connection connection = new OpenCypherConnection(new ConnectionProperties(PROPERTIES));
-        final java.sql.Statement statement = connection.createStatement();
-        statement.execute(CREATE_NODES);
-        databaseMetaData = connection.getMetaData();
     }
 
     @Test

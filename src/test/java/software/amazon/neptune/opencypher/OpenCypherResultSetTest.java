@@ -33,15 +33,17 @@ public class OpenCypherResultSetTest {
     private static final String HOSTNAME = "localhost";
     private static final Properties PROPERTIES = new Properties();
     private static MockOpenCypherDatabase database;
-    private java.sql.Statement statement;
+    private static java.sql.Statement statement;
 
     /**
      * Function to get a random available port and initiaize database before testing.
      */
     @BeforeAll
-    public static void initializeDatabase() {
+    public static void initializeDatabase() throws SQLException {
         database = MockOpenCypherDatabase.builder(HOSTNAME, OpenCypherResultSetTest.class.getName()).build();
         PROPERTIES.putIfAbsent(ConnectionProperties.ENDPOINT_KEY, String.format("bolt://%s:%d", HOSTNAME, database.getPort()));
+        final java.sql.Connection connection = new OpenCypherConnection(new ConnectionProperties(PROPERTIES));
+        statement = connection.createStatement();
     }
 
     /**
@@ -54,8 +56,6 @@ public class OpenCypherResultSetTest {
 
     @BeforeEach
     void initialize() throws SQLException {
-        final java.sql.Connection connection = new OpenCypherConnection(new ConnectionProperties(PROPERTIES));
-        statement = connection.createStatement();
     }
 
     // Primitive types.
@@ -260,7 +260,6 @@ public class OpenCypherResultSetTest {
         final java.sql.ResultSet resultSet = statement.executeQuery(
                 "CREATE p=(lyn:Person { name:'Lyndon'})-[:WORKS {position:'developer'}]->(bqt:Company {product:'software'})<-[:WORKS {position:'developer'}]-(val:Person { name:'Valentina'}) RETURN p");
         Assertions.assertTrue(resultSet.next());
-        // System.out.println("Resultset: " + )
         Assertions.assertEquals(String.format("(%s)-[%s]->(%s)<-[%s]-(%s)",
                 "[Person] : {name=Lyndon}", "WORKS : {position=developer}",
                 "[Company] : {product=software}", "WORKS : {position=developer}", "[Person] : {name=Valentina}"),

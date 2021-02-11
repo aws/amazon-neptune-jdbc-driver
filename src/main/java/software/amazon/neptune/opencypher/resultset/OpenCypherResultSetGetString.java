@@ -40,16 +40,15 @@ public class OpenCypherResultSetGetString extends OpenCypherResultSet {
     /**
      * OpenCypherResultSetGetString constructor, initializes super class.
      *
-     * @param statement       Statement Object.
-     * @param rowCount        Number of rows.
-     * @param columns         List of ordered columns.
-     * @param constantReturns Map of return values for given keys.
+     * @param statement                Statement Object.
+     * @param resultSetInfoWithoutRows ResultSetInfoWithoutRows Object.
+     * @param constantReturns          Map of return values for given keys.
      */
-    public OpenCypherResultSetGetString(final Statement statement, final int rowCount, final List<String> columns,
+    public OpenCypherResultSetGetString(final Statement statement, final ResultSetInfoWithoutRows resultSetInfoWithoutRows,
                                         final List<Map<String, String>> constantReturns) {
-        super(statement, null, null, rowCount, columns);
-        this.rowCount = rowCount;
-        this.columns = columns;
+        super(statement, resultSetInfoWithoutRows);
+        this.rowCount = resultSetInfoWithoutRows.getRowCount();
+        this.columns = resultSetInfoWithoutRows.getColumns();
         this.constantReturns = constantReturns;
     }
 

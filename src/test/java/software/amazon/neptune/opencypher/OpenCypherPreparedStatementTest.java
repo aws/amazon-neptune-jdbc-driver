@@ -31,23 +31,28 @@ import java.io.Reader;
 import java.sql.Blob;
 import java.sql.Clob;
 import java.sql.NClob;
+import java.sql.SQLException;
 import java.util.Properties;
 
 public class OpenCypherPreparedStatementTest extends OpenCypherStatementTestBase {
     private static final String HOSTNAME = "localhost";
     private static final Properties PROPERTIES = new Properties();
     private static MockOpenCypherDatabase database;
-    private java.sql.PreparedStatement openCypherPreparedStatement;
-    private java.sql.PreparedStatement openCypherPreparedStatementLongQuery;
-    private java.sql.PreparedStatement openCypherPreparedStatementQuickQuery;
+    private static java.sql.PreparedStatement openCypherPreparedStatement;
+    private static java.sql.PreparedStatement openCypherPreparedStatementLongQuery;
+    private static java.sql.PreparedStatement openCypherPreparedStatementQuickQuery;
 
     /**
      * Function to get a random available port and initialize database before testing.
      */
     @BeforeAll
-    public static void initializeDatabase() {
+    public static void initializeDatabase() throws SQLException {
         database = MockOpenCypherDatabase.builder(HOSTNAME, OpenCypherPreparedStatementTest.class.getName()).build();
         PROPERTIES.putIfAbsent(ConnectionProperties.ENDPOINT_KEY, String.format("bolt://%s:%d", HOSTNAME, database.getPort()));
+        final java.sql.Connection connection = new OpenCypherConnection(new ConnectionProperties(PROPERTIES));
+        openCypherPreparedStatement = connection.prepareStatement("");
+        openCypherPreparedStatementLongQuery = connection.prepareStatement(getLongQuery());
+        openCypherPreparedStatementQuickQuery = connection.prepareStatement(QUICK_QUERY);
     }
 
     /**
@@ -61,23 +66,19 @@ public class OpenCypherPreparedStatementTest extends OpenCypherStatementTestBase
     @SneakyThrows
     @BeforeEach
     void initialize() {
-        final java.sql.Connection connection = new OpenCypherConnection(new ConnectionProperties(PROPERTIES));
-        openCypherPreparedStatement = connection.prepareStatement("");
-        openCypherPreparedStatementLongQuery = connection.prepareStatement(getLongQuery());
-        openCypherPreparedStatementQuickQuery = connection.prepareStatement(QUICK_QUERY);
     }
 
     @Test
     void testCancelQueryWithoutExecute() {
         launchCancelThread(0, openCypherPreparedStatementLongQuery);
         waitCancelToComplete();
-        HelperFunctions.expectFunctionThrows(SqlError.QUERY_NOT_STARTED, this::getCancelException);
+        HelperFunctions.expectFunctionThrows(SqlError.QUERY_NOT_STARTED_OR_COMPLETE, this::getCancelException);
     }
 
     @Test
     void testCancelQueryWhileExecuteInProgress() {
-        // Wait 1 second before attempting to cancel.
-        launchCancelThread(1000, openCypherPreparedStatementLongQuery);
+        // Wait 200 milliseconds before attempting to cancel.
+        launchCancelThread(200, openCypherPreparedStatementLongQuery);
         HelperFunctions.expectFunctionThrows(SqlError.QUERY_CANCELED,
                 () -> openCypherPreparedStatementLongQuery.execute());
         waitCancelToComplete();
@@ -85,14 +86,13 @@ public class OpenCypherPreparedStatementTest extends OpenCypherStatementTestBase
 
     @Test
     void testCancelQueryTwice() {
-        // Wait 1 second before attempting to cancel.
-        launchCancelThread(1000, openCypherPreparedStatementLongQuery);
-        HelperFunctions.expectFunctionThrows(SqlError.QUERY_CANCELED,
-                () -> openCypherPreparedStatementLongQuery.execute());
+        // Wait 200 milliseconds before attempting to cancel.
+        launchCancelThread(200, openCypherPreparedStatementLongQuery);
+        HelperFunctions.expectFunctionThrows(SqlError.QUERY_CANCELED, () -> openCypherPreparedStatementLongQuery.execute());
         waitCancelToComplete();
-        launchCancelThread(0, openCypherPreparedStatementLongQuery);
+        launchCancelThread(1, openCypherPreparedStatementLongQuery);
         waitCancelToComplete();
-        HelperFunctions.expectFunctionThrows(SqlError.QUERY_CANCELED, this::getCancelException);
+        HelperFunctions.expectFunctionThrows(SqlError.QUERY_NOT_STARTED_OR_COMPLETE, this::getCancelException);
     }
 
     @Test
@@ -100,7 +100,7 @@ public class OpenCypherPreparedStatementTest extends OpenCypherStatementTestBase
         Assertions.assertDoesNotThrow(() -> openCypherPreparedStatementQuickQuery.execute());
         launchCancelThread(0, openCypherPreparedStatementQuickQuery);
         waitCancelToComplete();
-        HelperFunctions.expectFunctionThrows(SqlError.QUERY_CANNOT_BE_CANCELLED, this::getCancelException);
+        HelperFunctions.expectFunctionThrows(SqlError.QUERY_NOT_STARTED_OR_COMPLETE, this::getCancelException);
     }
 
     @Test

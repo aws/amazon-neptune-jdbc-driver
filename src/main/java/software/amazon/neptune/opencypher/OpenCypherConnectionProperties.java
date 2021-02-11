@@ -66,4 +66,10 @@ public class OpenCypherConnectionProperties {
     protected boolean getUseEncryption() {
         return (boolean) properties.get(ConnectionProperties.USE_ENCRYPTION_KEY);
     }
+
+    protected Properties getProperties() {
+        final Properties newProperties = new Properties();
+        newProperties.putAll(properties);
+        return newProperties;
+    }
 }

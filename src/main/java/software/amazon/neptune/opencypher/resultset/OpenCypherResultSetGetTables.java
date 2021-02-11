@@ -18,8 +18,6 @@ package software.amazon.neptune.opencypher.resultset;
 
 import com.google.common.collect.ImmutableList;
 import org.neo4j.driver.Record;
-import org.neo4j.driver.Result;
-import org.neo4j.driver.Session;
 import org.neo4j.driver.Value;
 import org.neo4j.driver.internal.types.InternalTypeSystem;
 import org.neo4j.driver.types.Type;
@@ -72,23 +70,32 @@ public class OpenCypherResultSetGetTables extends OpenCypherResultSet implements
     /**
      * OpenCypherResultSetGetTables constructor, initializes super class.
      *
-     * @param statement Statement Object.
-     * @param session   Session Object.
-     * @param result    Result Object.
-     * @param rows      List of rows.
-     * @param columns   List of columns.
+     * @param statement             Statement Object.
+     * @param resultSetInfoWithRows ResultSetInfoWithRows Object.
      */
     public OpenCypherResultSetGetTables(final java.sql.Statement statement,
-                                        final Session session,
-                                        final Result result,
-                                        final List<Record> rows,
-                                        final List<String> columns) throws SQLException {
-        super(statement, session, result, rows, columns);
-        this.rows = rows;
-        if (!columns.equals(EXPECTED_COLUMNS)) {
+                                        final ResultSetInfoWithRows resultSetInfoWithRows) throws SQLException {
+        super(statement, resultSetInfoWithRows);
+        this.rows = resultSetInfoWithRows.getRows();
+        if (!resultSetInfoWithRows.getColumns().equals(EXPECTED_COLUMNS)) {
             throw new SQLException(String.format("Encountered unexpected return values for getTables function '%s'.",
-                    columns.toString()));
+                    resultSetInfoWithRows.getColumns().toString()));
         }
+    }
+
+    /**
+     * Function to sort nodes so that node sorting is consistent so that table names which are concatenated node labels
+     * are also sorted.
+     *
+     * @param nodes List of nodes to sort and Stringify.
+     * @return Return String joined list after sorting.
+     */
+    public static String nodeListToString(final List<String> nodes) {
+        // Don't overly care how it is sorted as long as it is consistent.
+        // Need to copy list in case it is an ImmutableList underneath.
+        final List<String> sortedNodes = new ArrayList<>(nodes);
+        java.util.Collections.sort(sortedNodes);
+        return String.join(":", sortedNodes);
     }
 
     @Override
@@ -117,26 +124,11 @@ public class OpenCypherResultSetGetTables extends OpenCypherResultSet implements
                 if (objectLabels.stream().anyMatch(o -> !(o instanceof String))) {
                     throw new SQLException("Unexpected datatype encountered while getting schema..");
                 }
-                return nodeListToString((List<String>)objectLabels);
+                return nodeListToString((List<String>) objectLabels);
             }
         }
         throw SqlError
                 .createSQLFeatureNotSupportedException(LOGGER, SqlError.INVALID_COLUMN_INDEX, columnIndex,
                         KEYS.size());
-    }
-
-    /**
-     * Function to sort nodes so that node sorting is consistent so that table names which are concatenated node labels
-     * are also sorted.
-     *
-     * @param nodes List of nodes to sort and Stringify.
-     * @return Return String joined list after sorting.
-     */
-    public static String nodeListToString(final List<String> nodes) {
-        // Don't overly care how it is sorted as long as it is consistent.
-        // Need to copy list in case it is an ImmutableList underneath.
-        final List<String> sortedNodes = new ArrayList<>(nodes);
-        java.util.Collections.sort(sortedNodes);
-        return String.join(":", sortedNodes);
     }
 }

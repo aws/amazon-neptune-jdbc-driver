@@ -31,6 +31,8 @@ public class OpenCypherResultSetGetSchemas extends OpenCypherResultSetGetString 
     private static final List<String> COLUMNS = ImmutableList.of("TABLE_SCHEM", "TABLE_CAT");
     private static final List<Record> ROWS = new ArrayList<>(0);
     private static final Map<String, String> CONVERSION_MAP = new HashMap<>();
+    private static final ResultSetInfoWithoutRows RESULT_SET_INFO_WITHOUT_ROWS =
+            new ResultSetInfoWithoutRows(null, null, 0, COLUMNS);
 
     static {
         CONVERSION_MAP.put("TABLE_SCHEM", null);
@@ -43,6 +45,6 @@ public class OpenCypherResultSetGetSchemas extends OpenCypherResultSetGetString 
      * @param statement Statement Object.
      */
     public OpenCypherResultSetGetSchemas(final Statement statement) {
-        super(statement, 0, COLUMNS, ImmutableList.of(CONVERSION_MAP));
+        super(statement, RESULT_SET_INFO_WITHOUT_ROWS, ImmutableList.of(CONVERSION_MAP));
     }
 }

@@ -28,6 +28,7 @@ import java.util.concurrent.Executor;
 public class OpenCypherConnection extends software.amazon.jdbc.Connection implements java.sql.Connection {
     /**
      * OpenCypherConnection constructor, initializes super class.
+     *
      * @param connectionProperties ConnectionProperties Object.
      */
     public OpenCypherConnection(@NonNull final ConnectionProperties connectionProperties) throws SQLException {
@@ -36,8 +37,9 @@ public class OpenCypherConnection extends software.amazon.jdbc.Connection implem
 
     @Override
     public boolean isValid(final int timeout) throws SQLException {
-        final String endpoint = getConnectionProperties().getEndpoint();
-        return OpenCypherQueryExecutor.isValid(endpoint, timeout, new OpenCypherConnectionProperties(getConnectionProperties()));
+        final OpenCypherQueryExecutor queryExecutor =
+                new OpenCypherQueryExecutor(new OpenCypherConnectionProperties(getConnectionProperties()));
+        return queryExecutor.isValid(timeout);
     }
 
     @Override
