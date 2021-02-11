@@ -32,7 +32,8 @@ public class OpenCypherConnectionProperties {
             ConnectionProperties.CONNECTION_TIMEOUT_MILLIS_KEY,
             ConnectionProperties.CONNECTION_RETRY_COUNT_KEY,
             ConnectionProperties.AUTH_SCHEME_KEY,
-            ConnectionProperties.REGION_KEY);
+            ConnectionProperties.REGION_KEY,
+            ConnectionProperties.USE_ENCRYPTION_KEY);
 
     /**
      * Constructor for OpenCypherConnectionProperties.
@@ -60,5 +61,9 @@ public class OpenCypherConnectionProperties {
 
     protected int getConnectionRetryCount() {
         return (int) properties.get(ConnectionProperties.CONNECTION_RETRY_COUNT_KEY);
+    }
+
+    protected boolean getUseEncryption() {
+        return (boolean) properties.get(ConnectionProperties.USE_ENCRYPTION_KEY);
     }
 }

@@ -30,7 +30,116 @@ import java.util.Properties;
 class ConnectionPropertiesTest {
     private ConnectionProperties connectionProperties;
 
-    // TODO - add test for other properties
+    @Test
+    void testDefaultValues() throws SQLException {
+        connectionProperties = new ConnectionProperties();
+        Assertions.assertEquals("", connectionProperties.getEndpoint());
+        Assertions.assertEquals(ConnectionProperties.DEFAULT_LOG_LEVEL, connectionProperties.getLogLevel());
+        Assertions.assertEquals(ConnectionProperties.DEFAULT_CONNECTION_TIMEOUT_MILLIS, connectionProperties.getConnectionTimeoutMillis());
+        Assertions.assertEquals(ConnectionProperties.DEFAULT_CONNECTION_RETRY_COUNT, connectionProperties.getConnectionRetryCount());
+        Assertions.assertEquals(ConnectionProperties.DEFAULT_AUTH_SCHEME, connectionProperties.getAuthScheme());
+        Assertions.assertEquals(ConnectionProperties.DEFAULT_USE_ENCRYPTION, connectionProperties.getUseEncryption());
+        Assertions.assertEquals("", connectionProperties.getRegion());
+    }
+
+    @Test
+    void testLogLevelSetting() throws SQLException {
+        final List<String> validLogLevels = ImmutableList.of(
+                "", "Off", "FATAL", "error", "InFo", "dEbug", "TRACE", "All");
+        final List<String> invalidLogLevels = ImmutableList.of(
+                "something", "5");
+
+        final Properties properties = new Properties();
+
+        // Verify valid property value doesn't throw error.
+        for (final String validValue : validLogLevels) {
+            // Set property through constructor.
+            properties.put(ConnectionProperties.LOG_LEVEL_KEY, validValue);
+            Assertions.assertDoesNotThrow(() -> {
+                connectionProperties = new ConnectionProperties(properties);
+            });
+        }
+
+        // Verify invalid property value throws error.
+        for (final String invalidValue : invalidLogLevels) {
+            // Set property through constructor.
+            properties.setProperty(ConnectionProperties.LOG_LEVEL_KEY, invalidValue);
+            Assertions.assertThrows(SQLException.class,
+                    () -> connectionProperties = new ConnectionProperties(properties));
+        }
+    }
+
+    @Test
+    void testConnectionTimeout() throws SQLException {
+        final List<String> validConnectionTimeouts = ImmutableList.of(
+                "0", "5", "10000");
+        final List<String> invalidConnectionTimeouts = ImmutableList.of(
+                "-1", "blah", String.valueOf((long)Integer.MAX_VALUE + 1000));
+
+        final Properties properties = new Properties();
+
+        // Verify empty string is set as default value.
+        properties.put(ConnectionProperties.CONNECTION_TIMEOUT_MILLIS_KEY, "");
+        Assertions.assertDoesNotThrow(() -> {
+            connectionProperties = new ConnectionProperties(properties);
+        });
+        Assertions.assertEquals(ConnectionProperties.DEFAULT_CONNECTION_TIMEOUT_MILLIS,
+                connectionProperties.getConnectionTimeoutMillis());
+
+        // Verify valid property value doesn't throw error.
+        for (final String validValue : validConnectionTimeouts) {
+            // Set property through constructor.
+            properties.put(ConnectionProperties.CONNECTION_TIMEOUT_MILLIS_KEY, validValue);
+            Assertions.assertDoesNotThrow(() -> {
+                connectionProperties = new ConnectionProperties(properties);
+            });
+            Assertions.assertEquals(Integer.parseInt(validValue), connectionProperties.getConnectionTimeoutMillis());
+        }
+
+        // Verify invalid property value throws error.
+        for (final String invalidValue : invalidConnectionTimeouts) {
+            // Set property through constructor.
+            properties.setProperty(ConnectionProperties.CONNECTION_TIMEOUT_MILLIS_KEY, invalidValue);
+            Assertions.assertThrows(SQLException.class,
+                    () -> connectionProperties = new ConnectionProperties(properties));
+        }
+    }
+
+    @Test
+    void testConnectionRetryCount() throws SQLException {
+        final List<String> validConnectionTimeouts = ImmutableList.of(
+                "0", "5", "10000");
+        final List<String> invalidConnectionTimeouts = ImmutableList.of(
+                "-1", "blah", String.valueOf((long)Integer.MAX_VALUE + 1000));
+
+        final Properties properties = new Properties();
+
+        // Verify empty string is set as default value.
+        properties.put(ConnectionProperties.CONNECTION_RETRY_COUNT_KEY, "");
+        Assertions.assertDoesNotThrow(() -> {
+            connectionProperties = new ConnectionProperties(properties);
+        });
+        Assertions.assertEquals(ConnectionProperties.DEFAULT_CONNECTION_RETRY_COUNT,
+                connectionProperties.getConnectionRetryCount());
+
+        // Verify valid property value doesn't throw error.
+        for (final String validValue : validConnectionTimeouts) {
+            // Set property through constructor.
+            properties.put(ConnectionProperties.CONNECTION_RETRY_COUNT_KEY, validValue);
+            Assertions.assertDoesNotThrow(() -> {
+                connectionProperties = new ConnectionProperties(properties);
+            });
+            Assertions.assertEquals(Integer.parseInt(validValue), connectionProperties.getConnectionRetryCount());
+        }
+
+        // Verify invalid property value throws error.
+        for (final String invalidValue : invalidConnectionTimeouts) {
+            // Set property through constructor.
+            properties.setProperty(ConnectionProperties.CONNECTION_RETRY_COUNT_KEY, invalidValue);
+            Assertions.assertThrows(SQLException.class,
+                    () -> connectionProperties = new ConnectionProperties(properties));
+        }
+    }
 
     @Test
     void testAuthScheme() throws SQLException {
@@ -40,12 +149,6 @@ class ConnectionPropertiesTest {
                 "-1;", "100;", "46hj7;", "foo;");
 
         final Properties properties = new Properties();
-
-        // Verify default property is set.
-        connectionProperties = new ConnectionProperties();
-        Assertions.assertEquals(ConnectionProperties.DEFAULT_AUTH_SCHEME, connectionProperties.getAuthScheme());
-        connectionProperties = new ConnectionProperties(properties);
-        Assertions.assertEquals(ConnectionProperties.DEFAULT_AUTH_SCHEME, connectionProperties.getAuthScheme());
 
         // Verify empty string is set as default value.
         properties.put(ConnectionProperties.AUTH_SCHEME_KEY, "");
@@ -100,12 +203,6 @@ class ConnectionPropertiesTest {
 
         final Properties properties = new Properties();
 
-        // Verify default property is set.
-        connectionProperties = new ConnectionProperties();
-        Assertions.assertEquals(ConnectionProperties.DEFAULT_USE_ENCRYPTION, connectionProperties.getUseEncryption());
-        connectionProperties = new ConnectionProperties(properties);
-        Assertions.assertEquals(ConnectionProperties.DEFAULT_USE_ENCRYPTION, connectionProperties.getUseEncryption());
-
         // Verify valid TRUE property value is set.
         for (final String validValue : validTrueValues) {
             // Set property through constructor.
@@ -114,7 +211,7 @@ class ConnectionPropertiesTest {
             Assertions.assertDoesNotThrow(() -> {
                 connectionProperties = new ConnectionProperties(properties);
             });
-            Assertions.assertEquals(true, connectionProperties.getUseEncryption());
+            Assertions.assertTrue(connectionProperties.getUseEncryption());
         }
 
         // Verify valid FALSE property value is set.
@@ -124,7 +221,7 @@ class ConnectionPropertiesTest {
             Assertions.assertDoesNotThrow(() -> {
                 connectionProperties = new ConnectionProperties(properties);
             });
-            Assertions.assertEquals(false, connectionProperties.getUseEncryption());
+            Assertions.assertFalse(connectionProperties.getUseEncryption());
         }
 
         // Verify invalid property value throws error.

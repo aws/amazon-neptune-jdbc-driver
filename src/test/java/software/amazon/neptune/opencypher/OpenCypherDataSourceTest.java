@@ -21,7 +21,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import software.amazon.neptune.NeptuneDriverTest;
+import software.amazon.neptune.NeptuneDriverTestWithEncryption;
 import software.amazon.neptune.opencypher.mock.MockOpenCypherDatabase;
 
 import java.sql.SQLException;
@@ -37,7 +37,7 @@ class OpenCypherDataSourceTest {
      */
     @BeforeAll
     public static void initializeDatabase() {
-        database = MockOpenCypherDatabase.builder("localhost", NeptuneDriverTest.class.getName()).build();
+        database = MockOpenCypherDatabase.builder("localhost", NeptuneDriverTestWithEncryption.class.getName()).build();
         validEndpoint = String.format("bolt://%s:%d", "localhost", database.getPort());
     }
 

@@ -63,7 +63,6 @@ public class OpenCypherConnectionTest {
                 String.format("bolt://%s:%d", HOSTNAME, database.getPort()));
     }
 
-
     /**
      * Function to get a shutdown database after testing.
      */
