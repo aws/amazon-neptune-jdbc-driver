@@ -61,7 +61,7 @@ public class OpenCypherQueryExecutor {
      *
      * @param connectionProperties properties to use for query executon.
      */
-    OpenCypherQueryExecutor(final OpenCypherConnectionProperties connectionProperties) {
+    OpenCypherQueryExecutor(final OpenCypherConnectionProperties connectionProperties) throws SQLException {
         this.connectionProperties = connectionProperties;
 
         // TODO: Implement authentication.
@@ -69,35 +69,11 @@ public class OpenCypherQueryExecutor {
         // final String password = properties.getPassword();
         // AuthTokens.basic(this.user, this.password), this.config);
 
-        // Driver config properties.
-        this.config = createConfigBuilder(connectionProperties).build();
-
         // Session config properties.
         this.sessionConfig = SessionConfig.builder().build();
-        this.driver = GraphDatabase.driver(connectionProperties.getEndpoint(), getConfig());
-    }
-
-    /**
-     * Creates ConfigBuilder based on the OpenCypher connection properties.
-     *
-     * @param properties The OpenCypher connection properties.
-     * @return The ConfigBuilder based on the OpenCypher connection properties.
-     */
-    private static Config.ConfigBuilder createConfigBuilder(final OpenCypherConnectionProperties properties) {
-        final Config.ConfigBuilder configBuilder = Config.builder();
-
-        final boolean useEncryption = properties.getUseEncryption();
-        //if (useEncryption) {
-            configBuilder.withEncryption();
-            configBuilder.withTrustStrategy(Config.TrustStrategy.trustAllCertificates());
-        //} else {
-        //    configBuilder.withoutEncryption();
-        //}
-        configBuilder.withConnectionTimeout(properties.getConnectionTimeout(), TimeUnit.MILLISECONDS);
-        // .withTrustStrategy(Config.TrustStrategy.trustAllCertificates()) // Required for Neptune manual test
-        // .withFetchSize(properties.getFetchSize())
-
-        return configBuilder;
+        // Driver config properties.
+        this.config = createConfigBuilder(connectionProperties).build();
+        this.driver = createDriver(connectionProperties.getEndpoint(), config, connectionProperties);
     }
 
     /**
@@ -110,10 +86,8 @@ public class OpenCypherQueryExecutor {
     public static boolean isValid(final String endpoint, final int timeout,
                                   final OpenCypherConnectionProperties properties) {
         try {
-            final Config tempConfig = Config.builder()
-                    .withConnectionTimeout(timeout, TimeUnit.MILLISECONDS)
-                    .build();
-            final Driver tempDriver = createDriver(endpoint, tempConfig, properties);
+            final Config config = createConfigBuilder(properties).build();
+            final Driver tempDriver = createDriver(endpoint, config, properties);
             tempDriver.verifyConnectivity();
             return true;
         } catch (final Exception e) {
@@ -122,16 +96,39 @@ public class OpenCypherQueryExecutor {
         }
     }
 
+    /**
+     * Creates ConfigBuilder based on the OpenCypher connection properties.
+     *
+     * @param properties The OpenCypher connection properties.
+     * @return The ConfigBuilder based on the OpenCypher connection properties.
+     */
+    private static Config.ConfigBuilder createConfigBuilder(final OpenCypherConnectionProperties properties) {
+        final Config.ConfigBuilder configBuilder = Config.builder();
+
+        final boolean useEncryption = properties.getUseEncryption();
+        if (useEncryption) {
+            configBuilder.withEncryption();
+            configBuilder.withTrustStrategy(Config.TrustStrategy.trustAllCertificates());
+        } else {
+            configBuilder.withoutEncryption();
+        }
+        configBuilder.withConnectionTimeout(properties.getConnectionTimeout(), TimeUnit.MILLISECONDS);
+        // .withTrustStrategy(Config.TrustStrategy.trustAllCertificates()) // Required for Neptune manual test
+        // .withFetchSize(properties.getFetchSize())
+
+        return configBuilder;
+    }
+
     private static Driver createDriver(final String endpoint, final Config config,
                                        final OpenCypherConnectionProperties properties)
             throws SQLException {
         if (properties.getAuthScheme().equals(AuthScheme.IAMSigV4)) {
-            System.out.println("IAM SigV4");
+            LOGGER.info("Connection with IAMSigV4 authentication.");
             return GraphDatabase.driver(endpoint,
                     OpenCypherIAMRequestGenerator.getSignedHeader(endpoint, properties.getRegion()),
                     config);
         } else {
-            System.out.println("No auth.");
+            LOGGER.info("Connection with no authentication.");
             return GraphDatabase.driver(endpoint, config);
         }
     }
@@ -238,7 +235,8 @@ public class OpenCypherQueryExecutor {
     @SneakyThrows
     public java.sql.ResultSet executeGetColumns(final java.sql.Statement statement, final String nodes)
             throws SQLException {
-        return new OpenCypherResultSetGetColumns(statement, OpenCypherSchemaHelper.getGraphSchema(connectionProperties.getEndpoint(), nodes));
+        return new OpenCypherResultSetGetColumns(statement,
+                OpenCypherSchemaHelper.getGraphSchema(connectionProperties.getEndpoint(), nodes));
     }
 
     @SneakyThrows

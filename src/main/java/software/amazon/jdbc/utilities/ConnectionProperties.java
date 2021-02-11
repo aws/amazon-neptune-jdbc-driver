@@ -20,6 +20,7 @@ import org.apache.log4j.Level;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -52,8 +53,8 @@ public class ConnectionProperties extends Properties {
     public static final AuthScheme DEFAULT_AUTH_SCHEME = AuthScheme.None;
     public static final boolean DEFAULT_USE_ENCRYPTION = true;
     public static final Map<String, Object> DEFAULT_PROPERTIES_MAP = new HashMap<>();
-    private static final Logger LOGGER = LoggerFactory.getLogger(ConnectionProperties.class);
     private static final Map<String, PropertyConverter<?>> PROPERTIES_MAP = new HashMap<>();
+    private static final Logger LOGGER = LoggerFactory.getLogger(ConnectionProperties.class);
 
     static {
         PROPERTIES_MAP.put(APPLICATION_NAME_KEY, (key, value) -> value);
@@ -85,7 +86,11 @@ public class ConnectionProperties extends Properties {
                 return DEFAULT_CONNECTION_TIMEOUT_MILLIS;
             }
             try {
-                return Integer.parseUnsignedInt(value);
+                final int retValue = Integer.parseUnsignedInt(value);
+                if (retValue < 0) {
+                    throw invalidConnectionPropertyError(key, value);
+                }
+                return retValue;
             } catch (final NumberFormatException e) {
                 throw invalidConnectionPropertyError(key, value);
             }
@@ -95,7 +100,11 @@ public class ConnectionProperties extends Properties {
                 return DEFAULT_CONNECTION_RETRY_COUNT;
             }
             try {
-                return Integer.parseUnsignedInt(value);
+                final int retValue = Integer.parseUnsignedInt(value);
+                if (retValue < 0) {
+                    throw invalidConnectionPropertyError(key, value);
+                }
+                return retValue;
             } catch (final NumberFormatException e) {
                 throw invalidConnectionPropertyError(key, value);
             }
@@ -199,7 +208,7 @@ public class ConnectionProperties extends Properties {
                 final String key = entry.getKey().toString();
                 final String value = entry.getValue().toString();
                 // Find matching property by comparing keys (case-insensitive)
-                if (key.toUpperCase().equals(mapKey.toUpperCase())) {
+                if (key.equalsIgnoreCase(mapKey)) {
                     // Insert resolved property into the map.
                     put(mapKey, PROPERTIES_MAP.get(mapKey).convert(key, value));
                     // Remove key for the resolved property.

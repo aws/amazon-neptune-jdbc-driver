@@ -38,6 +38,7 @@ import java.util.Comparator;
 import java.util.List;
 
 import static org.neo4j.helpers.ListenSocketAddress.listenAddress;
+import static org.neo4j.kernel.configuration.BoltConnector.EncryptionLevel.DISABLED;
 import static org.neo4j.kernel.configuration.BoltConnector.EncryptionLevel.REQUIRED;
 import static org.neo4j.kernel.configuration.Connector.ConnectorType.BOLT;
 import static org.neo4j.kernel.configuration.Settings.FALSE;
@@ -56,16 +57,6 @@ public final class MockOpenCypherDatabase {
 
     // Need lock to make sure we don't have port grab collisions (need to wait for binding).
     private static final Object LOCK = new Object();
-
-    /**
-     * OpenCypherDatabase constructor.
-     *
-     * @param host Host to initialize with.
-     * @param port Port to initialize with.
-     */
-    private MockOpenCypherDatabase(final String host, final int port, final String path) throws IOException {
-        this(host, port, path, ConnectionProperties.DEFAULT_USE_ENCRYPTION);
-    }
 
     /**
      * OpenCypherDatabase constructor.
@@ -95,11 +86,11 @@ public final class MockOpenCypherDatabase {
         dbBuilder.setConfig(boltConnector.type, BOLT.name());
         dbBuilder.setConfig(boltConnector.enabled, TRUE);
         dbBuilder.setConfig(boltConnector.listen_address, listenAddress(host, port));
-        //if (useEncryption) {
+        if (useEncryption) {
             dbBuilder.setConfig(boltConnector.encryption_level, REQUIRED.name());
-        //} else {
-        //    dbBuilder.setConfig(boltConnector.encryption_level, DISABLED.name());
-        //}
+        } else {
+            dbBuilder.setConfig(boltConnector.encryption_level, DISABLED.name());
+        }
         dbBuilder.setConfig(GraphDatabaseSettings.auth_enabled, FALSE);
         return dbBuilder;
     }
@@ -113,13 +104,26 @@ public final class MockOpenCypherDatabase {
      */
     @SneakyThrows
     public static MockOpenCypherDatabaseBuilder builder(final String host, final String callingClass) {
+        return builder(host, callingClass, ConnectionProperties.DEFAULT_USE_ENCRYPTION);
+    }
+
+    /**
+     * Function to initiate builder for MockOpenCypherDatabase
+     *
+     * @param host Host to use.
+     * @param callingClass Class calling builder (used for unique path).
+     * @param useEncryption Indicates whether to use encryption.
+     * @return Builder pattern for MockOpenCypherDatabase.
+     */
+    @SneakyThrows
+    public static MockOpenCypherDatabaseBuilder builder(final String host, final String callingClass, final boolean useEncryption) {
         synchronized (LOCK) {
             // Get random unassigned port.
             final ServerSocket socket = new ServerSocket(0);
             final int port = socket.getLocalPort();
             socket.setReuseAddress(true);
             socket.close();
-            final MockOpenCypherDatabase db = new MockOpenCypherDatabase(host, port, callingClass);
+            final MockOpenCypherDatabase db = new MockOpenCypherDatabase(host, port, callingClass, useEncryption);
             return new MockOpenCypherDatabaseBuilder(db);
         }
     }
