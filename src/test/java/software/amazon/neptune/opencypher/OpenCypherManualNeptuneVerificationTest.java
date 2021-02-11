@@ -16,7 +16,6 @@
 
 package software.amazon.neptune.opencypher;
 
-import lombok.SneakyThrows;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;

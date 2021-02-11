@@ -22,7 +22,6 @@ import lombok.Getter;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.driver.internal.types.InternalTypeSystem;
 import software.amazon.jdbc.utilities.ConnectionProperties;
@@ -119,7 +118,8 @@ public class OpenCypherResultSetMetadataTest {
     @BeforeAll
     public static void initializeDatabase() throws SQLException {
         database = MockOpenCypherDatabase.builder(HOSTNAME, OpenCypherResultSetMetadataTest.class.getName()).build();
-        PROPERTIES.putIfAbsent(ConnectionProperties.ENDPOINT_KEY, String.format("bolt://%s:%d", HOSTNAME, database.getPort()));
+        PROPERTIES.putIfAbsent(ConnectionProperties.ENDPOINT_KEY,
+                String.format("bolt://%s:%d", HOSTNAME, database.getPort()));
         final java.sql.Connection connection = new OpenCypherConnection(new ConnectionProperties(PROPERTIES));
         statement = connection.createStatement();
     }
