@@ -17,6 +17,7 @@
 package software.amazon.neptune.opencypher;
 
 import com.google.common.collect.ImmutableList;
+import software.amazon.jdbc.utilities.AuthScheme;
 import software.amazon.jdbc.utilities.ConnectionProperties;
 import java.util.List;
 import java.util.Properties;
@@ -27,10 +28,11 @@ import java.util.Properties;
 public class OpenCypherConnectionProperties {
     private final Properties properties = new Properties();
     private final List<String> keys = ImmutableList.of(
-            ConnectionProperties.ENDPOINT_KEY,              // "user", "password"
+            ConnectionProperties.ENDPOINT_KEY,
             ConnectionProperties.CONNECTION_TIMEOUT_MILLIS_KEY,
             ConnectionProperties.CONNECTION_RETRY_COUNT_KEY,
-            ConnectionProperties.AUTH_SCHEME_KEY);
+            ConnectionProperties.AUTH_SCHEME_KEY,
+            ConnectionProperties.REGION_KEY);
 
     /**
      * Constructor for OpenCypherConnectionProperties.
@@ -44,12 +46,12 @@ public class OpenCypherConnectionProperties {
         return (String) properties.get(ConnectionProperties.ENDPOINT_KEY);
     }
 
-    protected String getUser() {
-        return (String) properties.get(ConnectionProperties.USER_ID_KEY);
+    protected AuthScheme getAuthScheme() {
+        return (AuthScheme) properties.get(ConnectionProperties.AUTH_SCHEME_KEY);
     }
 
-    protected String getPassword() {
-        return (String) properties.get(ConnectionProperties.PASSWORD_KEY);
+    protected String getRegion() {
+        return (String) properties.get(ConnectionProperties.REGION_KEY);
     }
 
     protected int getConnectionTimeout() {

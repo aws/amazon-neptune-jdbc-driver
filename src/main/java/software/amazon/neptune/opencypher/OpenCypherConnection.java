@@ -37,7 +37,7 @@ public class OpenCypherConnection extends software.amazon.jdbc.Connection implem
     @Override
     public boolean isValid(final int timeout) throws SQLException {
         final String endpoint = getConnectionProperties().getEndpoint();
-        return OpenCypherQueryExecutor.isValid(endpoint, timeout);
+        return OpenCypherQueryExecutor.isValid(endpoint, timeout, new OpenCypherConnectionProperties(getConnectionProperties()));
     }
 
     @Override

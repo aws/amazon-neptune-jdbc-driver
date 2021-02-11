@@ -69,7 +69,7 @@ public class OpenCypherDataSource extends software.amazon.jdbc.DataSource implem
      */
     @Override
     public void setLoginTimeout(final int seconds) throws SQLException {
-        connectionProperties.setLoginTimeout(seconds);
+        connectionProperties.setConnectionTimeoutMillis(seconds);
     }
 
     /**
@@ -78,7 +78,7 @@ public class OpenCypherDataSource extends software.amazon.jdbc.DataSource implem
      */
     @Override
     public int getLoginTimeout() throws SQLException {
-        return connectionProperties.getLoginTimeout();
+        return connectionProperties.getConnectionTimeoutMillis();
     }
 
     /**
@@ -147,92 +147,6 @@ public class OpenCypherDataSource extends software.amazon.jdbc.DataSource implem
      */
     public String getEndpoint() {
         return connectionProperties.getEndpoint();
-    }
-
-    /**
-     * Sets the user Id.
-     * @param userId The user Id.
-     * @throws SQLException if value is invalid.
-     */
-    public void setUserId(final String userId) throws SQLException {
-        connectionProperties.setUserId(userId);
-    }
-
-    /**
-     * Gets the user Id.
-     * @return The user Id.
-     */
-    public String getUserId() {
-        return connectionProperties.getUserId();
-    }
-
-    /**
-     * Sets the password.
-     * @param password The password.
-     * @throws SQLException if value is invalid.
-     */
-    public void setPassword(final String password) throws SQLException {
-        connectionProperties.setPassword(password);
-    }
-
-    /**
-     * Gets the password.
-     * @return The password.
-     */
-    public String getPassword() {
-        return connectionProperties.getPassword();
-    }
-
-
-    /**
-     * Sets the access key Id.
-     * @param accessKeyId The access key Id.
-     * @throws SQLException if value is invalid.
-     */
-    public void setAccessKeyId(final String accessKeyId) throws SQLException {
-        connectionProperties.setAccessKeyId(accessKeyId);
-    }
-
-    /**
-     * Gets the access key Id.
-     * @return The access key Id.
-     */
-    public String getAccessKeyId() {
-        return connectionProperties.getAccessKeyId();
-    }
-
-    /**
-     * Sets the secret access key.
-     * @param secretAccessKey The secret access key.
-     * @throws SQLException if value is invalid.
-     */
-    public void setSecretAccessKey(final String secretAccessKey) throws SQLException {
-        connectionProperties.setSecretAccessKey(secretAccessKey);
-    }
-
-    /**
-     * Gets the secret access key.
-     * @return The secret access key.
-     */
-    public String getSecretAccessKey() {
-        return connectionProperties.getSecretAccessKey();
-    }
-
-    /**
-     * Sets the session token.
-     * @param sessionToken The session token.
-     * @throws SQLException if value is invalid.
-     */
-    public void setSessionToken(final String sessionToken) throws SQLException {
-        connectionProperties.setSessionToken(sessionToken);
-    }
-
-    /**
-     * Gets the session token.
-     * @return The session token.
-     */
-    public String getSessionToken() {
-        return connectionProperties.getSessionToken();
     }
 
     /**

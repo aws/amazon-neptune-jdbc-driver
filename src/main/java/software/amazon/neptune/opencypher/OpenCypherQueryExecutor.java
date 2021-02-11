@@ -26,6 +26,7 @@ import org.neo4j.driver.Session;
 import org.neo4j.driver.SessionConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import software.amazon.jdbc.utilities.AuthScheme;
 import software.amazon.jdbc.utilities.SqlError;
 import software.amazon.jdbc.utilities.SqlState;
 import software.amazon.neptune.opencypher.resultset.OpenCypherResultSet;
@@ -62,7 +63,7 @@ public class OpenCypherQueryExecutor {
      *
      * @param properties properties to use for query executon.
      */
-    OpenCypherQueryExecutor(final OpenCypherConnectionProperties properties) {
+    OpenCypherQueryExecutor(final OpenCypherConnectionProperties properties) throws SQLException {
         this.endpoint = properties.getEndpoint();
         // TODO: Implement authentication.
         // final String user = properties.getUser();
@@ -79,7 +80,7 @@ public class OpenCypherQueryExecutor {
 
         // Session config properties.
         this.sessionConfig = SessionConfig.builder().build();
-        this.driver = GraphDatabase.driver(this.endpoint, getConfig());
+        this.driver = createDriver(this.endpoint, config, properties);
     }
 
     /**
@@ -89,12 +90,13 @@ public class OpenCypherQueryExecutor {
      * @param timeout  Time in milliseconds to wait for the database operation used to validate the connection to complete.
      * @return true if the connection is valid, otherwise false.
      */
-    public static boolean isValid(final String endpoint, final int timeout) {
+    public static boolean isValid(final String endpoint, final int timeout,
+                                  final OpenCypherConnectionProperties properties) {
         try {
             final Config tempConfig = Config.builder()
                     .withConnectionTimeout(timeout, TimeUnit.MILLISECONDS)
                     .build();
-            final Driver tempDriver = GraphDatabase.driver(endpoint, tempConfig);
+            final Driver tempDriver = createDriver(endpoint, tempConfig, properties);
             tempDriver.verifyConnectivity();
             return true;
         } catch (final Exception e) {
@@ -103,12 +105,19 @@ public class OpenCypherQueryExecutor {
         }
     }
 
-    Config getConfig() {
-        return config;
-    }
+    private static Driver createDriver(final String endpoint, final Config config,
+                                       final OpenCypherConnectionProperties properties)
+            throws SQLException {
+        if (properties.getAuthScheme().equals(AuthScheme.IAMSigV4)) {
+            System.out.println("IAM SigV4");
+            return GraphDatabase.driver(endpoint,
+                    OpenCypherIAMRequestGenerator.getSignedHeader(endpoint, properties.getRegion()),
+                    config);
+        } else {
+            System.out.println("No auth.");
+            return GraphDatabase.driver(endpoint, config);
+        }
 
-    SessionConfig getSessionConfig() {
-        return sessionConfig;
     }
 
     /**
@@ -135,7 +144,8 @@ public class OpenCypherQueryExecutor {
      * @throws SQLException if query execution fails, or it was cancelled.
      */
     @SneakyThrows
-    public java.sql.ResultSet executeQuery(final String sql, final java.sql.Statement statement) throws SQLException {
+    public java.sql.ResultSet executeQuery(final String sql, final java.sql.Statement statement) throws
+            SQLException {
         final Constructor<?> constructor =
                 OpenCypherResultSet.class.getConstructor(java.sql.Statement.class, Session.class,
                         Result.class,

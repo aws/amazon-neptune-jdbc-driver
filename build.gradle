@@ -168,7 +168,7 @@ ext {
     lombokVersion = '1.18.16'
     jupiterVersion = '5.4.0'
     neo4jDBVersion = '3.5.19'
-    neo4jDriverVersion = '4.2.0'
+    neo4jDriverVersion = '4.0.0'
     puppyCrawlVersion = '8.8'
     findBugsVersion = '3.0.1'
     awsSdkVersion = '1.11.932'
@@ -218,12 +218,16 @@ dependencies {
     compile group: 'org.codehaus.plexus', name: 'plexus-utils', version: '3.2.0'
     compile group: 'com.fasterxml.jackson.dataformat', name: 'jackson-dataformat-cbor', version: '2.10.5'
 
+    // Creating IAM SigV4 Requests
+    compile group: 'com.amazonaws', name: 'amazon-neptune-gremlin-java-sigv4', version: '1.0'
+
     // Logging
     implementation group: 'org.slf4j', name: 'slf4j-log4j12', version: '1.7.29'
     implementation group: 'org.apache.logging.log4j', name: 'log4j-api', version: log4jVersion
     implementation group: 'org.apache.logging.log4j', name: 'log4j-core', version: log4jVersion
 
     // Utilities
+    compile group: 'com.google.code.gson', name: 'gson', version: '2.7'
     implementation group: 'com.google.guava', name: 'guava', version: '29.0-jre'
     compileOnly group: 'org.projectlombok', name: 'lombok', version: lombokVersion
     annotationProcessor group: 'org.projectlombok', name: 'lombok', version: lombokVersion

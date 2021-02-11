@@ -26,7 +26,6 @@ import org.junit.jupiter.api.Test;
 import software.amazon.jdbc.utilities.ConnectionProperties;
 import software.amazon.neptune.opencypher.OpenCypherConnection;
 import software.amazon.neptune.opencypher.mock.MockOpenCypherDatabase;
-
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.List;
@@ -43,15 +42,11 @@ public class NeptuneDriverTest {
             "jdbc:neptune:opencyher//;", "jdbc:neptune:opencypher:/");
     private final List<String> languages = ImmutableList.of("opencypher");
     private final List<Boolean> semicolons = ImmutableList.of(true, false);
-    private final List<String> properties = ImmutableList.of("user=username", "user=username;password=password");
     private java.sql.Driver driver;
 
-    private static String createValidUrl(final String language, final String properties,
-                          final boolean trailingSemicolon) {
+    private static String createValidUrl(final String language,
+                                         final boolean trailingSemicolon) {
         String url = String.format("jdbc:neptune:%s://%s", language, validEndpoint);
-        if (!properties.isEmpty()) {
-            url += String.format(";%s", properties);
-        }
         if (trailingSemicolon) {
             url += ";";
         }
@@ -94,10 +89,8 @@ public class NeptuneDriverTest {
     @Test
     void testAcceptsUrl() throws SQLException {
         for (final String language : languages) {
-            for (final String property : properties) {
-                for (final Boolean semicolon : semicolons) {
-                    final String url = createValidUrl(language, property, semicolon);
-                }
+            for (final Boolean semicolon : semicolons) {
+                final String url = createValidUrl(language, semicolon);
             }
         }
         for (final String url : invalidUrls) {
@@ -108,18 +101,16 @@ public class NeptuneDriverTest {
     @Test
     void testConnect() throws SQLException {
         for (final String language : languages) {
-            for (final String property : properties) {
-                for (final Boolean semicolon : semicolons) {
-                    final String validUrl = createValidUrl(language, property, semicolon);
-                    Assertions.assertTrue(driver.connect(validUrl, new Properties()) instanceof OpenCypherConnection);
-                }
+            for (final Boolean semicolon : semicolons) {
+                final String validUrl = createValidUrl(language, semicolon);
+                Assertions.assertTrue(driver.connect(validUrl, new Properties()) instanceof OpenCypherConnection);
             }
         }
-        final String validUrl = createValidUrl("opencypher", "", false);
+        final String validUrl = createValidUrl("opencypher", false);
         Assertions.assertNull(driver.connect(validUrl, null));
 
         for (final String invalidUrl : invalidUrls) {
-             Assertions.assertNull(driver.connect(invalidUrl, new Properties()));
+            Assertions.assertNull(driver.connect(invalidUrl, new Properties()));
         }
         Assertions.assertNull(driver.connect(null, new Properties()));
 
@@ -129,20 +120,19 @@ public class NeptuneDriverTest {
     void testLogLevelSetting() throws SQLException {
         Assertions.assertEquals(ConnectionProperties.DEFAULT_LOG_LEVEL, LogManager.getRootLogger().getLevel());
         final List<String> validLogLevels = ImmutableList.of(
-                "", "logLevel=;", "logLevel=Off;", "logLevel=FATAL;", "LogLevel= error", "LOGleVel = InFo ;", "LOGLEVEL=dEbug", "logLEVEL=TRACE;", "logLevel=All;");
+                "", "logLevel=;", "logLevel=Off;", "logLevel=FATAL;", "LogLevel= error", "LOGleVel = InFo ;",
+                "LOGLEVEL=dEbug", "logLEVEL=TRACE;", "logLevel=All;");
         final List<String> invalidLogLevels = ImmutableList.of(
                 "logLevel=something;", "LogLevel=5;");
         for (final String language : languages) {
-            for (final String property : properties) {
-                final String url = createValidUrl(language, property, true);
-                for (final String logLevel : validLogLevels) {
-                    final String validUrl = appendProperty(url, logLevel, false);
-                    Assertions.assertTrue(driver.connect(validUrl, new Properties()) instanceof OpenCypherConnection);
-                }
-                for (final String invalidLogLevel : invalidLogLevels) {
-                    final String invalidUrl = appendProperty(url, invalidLogLevel, false);
-                    Assertions.assertNull(driver.connect(invalidUrl, new Properties()));
-                }
+            final String url = createValidUrl(language, true);
+            for (final String logLevel : validLogLevels) {
+                final String validUrl = appendProperty(url, logLevel, false);
+                Assertions.assertTrue(driver.connect(validUrl, new Properties()) instanceof OpenCypherConnection);
+            }
+            for (final String invalidLogLevel : invalidLogLevels) {
+                final String invalidUrl = appendProperty(url, invalidLogLevel, false);
+                Assertions.assertNull(driver.connect(invalidUrl, new Properties()));
             }
         }
         // Reset logging so that it doesn't affect other tests.
@@ -152,21 +142,20 @@ public class NeptuneDriverTest {
     @Test
     void testConnectionTimeout() throws SQLException {
         final List<String> validConnectionTimeouts = ImmutableList.of(
-                "", "connectionTimeout=;", "connectionTimeout=0;", "connectionTimeout= 5", "ConnectionTimeouT = 10000 ;");
-        @SuppressWarnings("NumericOverflow")
-        final List<String> invalidConnectionTimeouts = ImmutableList.of(
-                "connectionTimeout=-1;", "connectionTimeout=blah;", "connectionTimeout=" + (long)(Integer.MAX_VALUE + 1));
+                "", "connectionTimeout=;", "connectionTimeout=0;", "connectionTimeout= 5",
+                "ConnectionTimeouT = 10000 ;");
+        @SuppressWarnings("NumericOverflow") final List<String> invalidConnectionTimeouts = ImmutableList.of(
+                "connectionTimeout=-1;", "connectionTimeout=blah;",
+                "connectionTimeout=" + (long) (Integer.MAX_VALUE + 1));
         for (final String language : languages) {
-            for (final String property : properties) {
-                final String url = createValidUrl(language, property, true);
-                for (final String validConnectionTimeout : validConnectionTimeouts) {
-                    final String validUrl = appendProperty(url, validConnectionTimeout, false);
-                    Assertions.assertTrue(driver.connect(validUrl, new Properties()) instanceof OpenCypherConnection);
-                }
-                for (final String invalidConnectionTimeout : invalidConnectionTimeouts) {
-                    final String invalidUrl = appendProperty(url, invalidConnectionTimeout, false);
-                    Assertions.assertNull(driver.connect(invalidUrl, new Properties()));
-                }
+            final String url = createValidUrl(language, true);
+            for (final String validConnectionTimeout : validConnectionTimeouts) {
+                final String validUrl = appendProperty(url, validConnectionTimeout, false);
+                Assertions.assertTrue(driver.connect(validUrl, new Properties()) instanceof OpenCypherConnection);
+            }
+            for (final String invalidConnectionTimeout : invalidConnectionTimeouts) {
+                final String invalidUrl = appendProperty(url, invalidConnectionTimeout, false);
+                Assertions.assertNull(driver.connect(invalidUrl, new Properties()));
             }
         }
     }
@@ -174,11 +163,9 @@ public class NeptuneDriverTest {
     @Test
     void testDriverManagerGetConnection() throws SQLException {
         for (final String language : languages) {
-            for (final String property : properties) {
-                for (final Boolean semicolon : semicolons) {
-                    final String url = createValidUrl(language, property, semicolon);
-                    Assertions.assertTrue(DriverManager.getConnection(url) instanceof OpenCypherConnection);
-                }
+            for (final Boolean semicolon : semicolons) {
+                final String url = createValidUrl(language, semicolon);
+                Assertions.assertTrue(DriverManager.getConnection(url) instanceof OpenCypherConnection);
             }
         }
         for (final String url : invalidUrls) {
@@ -190,11 +177,9 @@ public class NeptuneDriverTest {
     @Test
     void testDriverManagerGetDriver() throws SQLException {
         for (final String language : languages) {
-            for (final String property : properties) {
-                for (final Boolean semicolon : semicolons) {
-                    final String url = createValidUrl(language, property, semicolon);
-                    Assertions.assertTrue(DriverManager.getDriver(url) instanceof NeptuneDriver);
-                }
+            for (final Boolean semicolon : semicolons) {
+                final String url = createValidUrl(language, semicolon);
+                Assertions.assertTrue(DriverManager.getDriver(url) instanceof NeptuneDriver);
             }
         }
         for (final String url : invalidUrls) {

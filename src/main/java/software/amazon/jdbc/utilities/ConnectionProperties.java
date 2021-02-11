@@ -33,20 +33,17 @@ import java.util.regex.Pattern;
  */
 public class ConnectionProperties extends Properties {
     public static final String APPLICATION_NAME_KEY = "ApplicationName";
-    public static final String AWS_CREDENTIALS_PROVIDER_CLASS_KEY = "AwsCredentialsProviderClass";
-    public static final String CUSTOM_CREDENTIALS_FILE_PATH_KEY = "CustomCredentialsFilePath";
     public static final String ENDPOINT_KEY = "Endpoint";
-    public static final String USER_ID_KEY = "User";
-    public static final String PASSWORD_KEY = "Password";
-    public static final String ACCESS_KEY_ID_KEY = "AccessKeyId";
-    public static final String SECRET_ACCESS_KEY_KEY = "SecretAccessKey";
-    public static final String SESSION_TOKEN_KEY = "SessionToken";
     public static final String LOG_LEVEL_KEY = "LogLevel";
     public static final String CONNECTION_TIMEOUT_MILLIS_KEY = "ConnectionTimeout";
     public static final String CONNECTION_RETRY_COUNT_KEY = "ConnectionRetryCount";
-    public static final String LOGIN_TIMEOUT_SEC_KEY = "LoginTimeoutSec";
     public static final String AUTH_SCHEME_KEY = "AuthScheme";
     public static final String USE_ENCRYPTION_KEY = "UseEncryption";
+    public static final String REGION_KEY = "Region";
+
+    // TODO: Revisit. We should probably support these.
+    public static final String AWS_CREDENTIALS_PROVIDER_CLASS_KEY = "AwsCredentialsProviderClass";
+    public static final String CUSTOM_CREDENTIALS_FILE_PATH_KEY = "CustomCredentialsFilePath";
 
     public static final Level DEFAULT_LOG_LEVEL = Level.INFO;
     public static final int DEFAULT_CONNECTION_TIMEOUT_MILLIS = 5000;
@@ -54,32 +51,16 @@ public class ConnectionProperties extends Properties {
     public static final int DEFAULT_LOGIN_TIMEOUT_SEC = 0;
     public static final AuthScheme DEFAULT_AUTH_SCHEME = AuthScheme.None;
     public static final boolean DEFAULT_USE_ENCRYPTION = true;
-
+    public static final Map<String, Object> DEFAULT_PROPERTIES_MAP = new HashMap<>();
     private static final Logger LOGGER = LoggerFactory.getLogger(ConnectionProperties.class);
-
-    private static boolean isWhitespace(@NonNull final String value) {
-        return Pattern.matches("^\\s*$", value);
-    }
-
-    /**
-     * Property converter interface.
-     * @param <T> Type to convert string property to.
-     */
-    interface PropertyConverter <T> {
-        T convert(@NonNull String key, @NonNull String value) throws SQLException;
-    }
-
     private static final Map<String, PropertyConverter<?>> PROPERTIES_MAP = new HashMap<>();
+
     static {
         PROPERTIES_MAP.put(APPLICATION_NAME_KEY, (key, value) -> value);
         PROPERTIES_MAP.put(AWS_CREDENTIALS_PROVIDER_CLASS_KEY, (key, value) -> value);
         PROPERTIES_MAP.put(CUSTOM_CREDENTIALS_FILE_PATH_KEY, (key, value) -> value);
         PROPERTIES_MAP.put(ENDPOINT_KEY, (key, value) -> value);
-        PROPERTIES_MAP.put(USER_ID_KEY, (key, value) -> value);
-        PROPERTIES_MAP.put(PASSWORD_KEY, (key, value) -> value);
-        PROPERTIES_MAP.put(ACCESS_KEY_ID_KEY, (key, value) -> value);
-        PROPERTIES_MAP.put(SECRET_ACCESS_KEY_KEY, (key, value) -> value);
-        PROPERTIES_MAP.put(SESSION_TOKEN_KEY, (key, value) -> value);
+        PROPERTIES_MAP.put(REGION_KEY, (key, value) -> value);
         PROPERTIES_MAP.put(LOG_LEVEL_KEY, (key, value) -> {
             if (isWhitespace(value)) {
                 return DEFAULT_LOG_LEVEL;
@@ -99,33 +80,23 @@ public class ConnectionProperties extends Properties {
             }
             return logLevelsMap.get(value.toUpperCase());
         });
-        PROPERTIES_MAP.put(CONNECTION_TIMEOUT_MILLIS_KEY, (key, value) ->  {
+        PROPERTIES_MAP.put(CONNECTION_TIMEOUT_MILLIS_KEY, (key, value) -> {
             if (isWhitespace(value)) {
                 return DEFAULT_CONNECTION_TIMEOUT_MILLIS;
             }
             try {
                 return Integer.parseUnsignedInt(value);
-            } catch (NumberFormatException e) {
+            } catch (final NumberFormatException e) {
                 throw invalidConnectionPropertyError(key, value);
             }
         });
-        PROPERTIES_MAP.put(CONNECTION_RETRY_COUNT_KEY, (key, value) ->  {
+        PROPERTIES_MAP.put(CONNECTION_RETRY_COUNT_KEY, (key, value) -> {
             if (isWhitespace(value)) {
                 return DEFAULT_CONNECTION_RETRY_COUNT;
             }
             try {
                 return Integer.parseUnsignedInt(value);
-            } catch (NumberFormatException e) {
-                throw invalidConnectionPropertyError(key, value);
-            }
-        });
-        PROPERTIES_MAP.put(LOGIN_TIMEOUT_SEC_KEY, (key, value) -> {
-            if (isWhitespace(value)) {
-                return DEFAULT_LOGIN_TIMEOUT_SEC;
-            }
-            try {
-                return Integer.parseUnsignedInt(value);
-            } catch (NumberFormatException e) {
+            } catch (final NumberFormatException e) {
                 throw invalidConnectionPropertyError(key, value);
             }
         });
@@ -152,15 +123,14 @@ public class ConnectionProperties extends Properties {
         });
     }
 
-    public static final Map<String, Object> DEFAULT_PROPERTIES_MAP = new HashMap<>();
     static {
         DEFAULT_PROPERTIES_MAP.put(ENDPOINT_KEY, "");
         DEFAULT_PROPERTIES_MAP.put(LOG_LEVEL_KEY, DEFAULT_LOG_LEVEL);
         DEFAULT_PROPERTIES_MAP.put(CONNECTION_TIMEOUT_MILLIS_KEY, DEFAULT_CONNECTION_TIMEOUT_MILLIS);
         DEFAULT_PROPERTIES_MAP.put(CONNECTION_RETRY_COUNT_KEY, DEFAULT_CONNECTION_RETRY_COUNT);
-        DEFAULT_PROPERTIES_MAP.put(LOGIN_TIMEOUT_SEC_KEY, DEFAULT_LOGIN_TIMEOUT_SEC);
         DEFAULT_PROPERTIES_MAP.put(AUTH_SCHEME_KEY, DEFAULT_AUTH_SCHEME);
         DEFAULT_PROPERTIES_MAP.put(USE_ENCRYPTION_KEY, DEFAULT_USE_ENCRYPTION);
+        DEFAULT_PROPERTIES_MAP.put(REGION_KEY, "");
     }
 
     /**
@@ -172,14 +142,51 @@ public class ConnectionProperties extends Properties {
 
     /**
      * ConnectionProperties constructor.
+     *
      * @param properties initial set of connection properties coming from the connection string.
      */
     public ConnectionProperties(@NonNull final Properties properties) throws SQLException {
         resolveProperties(properties);
     }
 
+    private static boolean isWhitespace(@NonNull final String value) {
+        return Pattern.matches("^\\s*$", value);
+    }
+
+    private static SQLException invalidConnectionPropertyError(final Object key, final Object value) {
+        return SqlError.createSQLException(
+                LOGGER,
+                SqlState.CONNECTION_EXCEPTION,
+                SqlError.INVALID_CONNECTION_PROPERTY, key, value);
+    }
+
+    private static SQLException missingConnectionPropertyError(final String reason) {
+        return SqlError.createSQLException(
+                LOGGER,
+                SqlState.CONNECTION_EXCEPTION,
+                SqlError.MISSING_CONNECTION_PROPERTY, reason);
+    }
+
+    private static SQLException invalidConnectionPropertyValueError(final String key, final String reason) {
+        return SqlError.createSQLException(
+                LOGGER,
+                SqlState.CONNECTION_EXCEPTION,
+                SqlError.INVALID_VALUE_CONNECTION_PROPERTY, key, reason);
+    }
+
+    /**
+     * Check if the property is supported by the driver.
+     *
+     * @param name The name of the property.
+     * @return {@code true} if property is supported; {@code false} otherwise.
+     */
+    public static boolean isSupportedProperty(final String name) {
+        return PROPERTIES_MAP.containsKey(name);
+    }
+
     /**
      * Resolves input properties and converts them into the valid set of properties.
+     *
      * @param inputProperties map of properties coming from the connection string.
      * @throws SQLException if invalid input property is detected.
      */
@@ -187,8 +194,8 @@ public class ConnectionProperties extends Properties {
         // List of input properties keys used to keep track of unresolved properties.
         final List<Object> inputPropertiesKeys = new ArrayList<>(inputProperties.keySet());
 
-        for (String mapKey : PROPERTIES_MAP.keySet()) {
-            for (Map.Entry<Object, Object> entry : inputProperties.entrySet()) {
+        for (final String mapKey : PROPERTIES_MAP.keySet()) {
+            for (final Map.Entry<Object, Object> entry : inputProperties.entrySet()) {
                 final String key = entry.getKey().toString();
                 final String value = entry.getValue().toString();
                 // Find matching property by comparing keys (case-insensitive)
@@ -214,27 +221,21 @@ public class ConnectionProperties extends Properties {
             final Object value = inputProperties.get(key);
             throw invalidConnectionPropertyError(key, value);
         }
-    }
 
-    private static SQLException invalidConnectionPropertyError(final Object key, final Object value) {
-        return SqlError.createSQLException(
-                LOGGER,
-                SqlState.CONNECTION_EXCEPTION,
-                SqlError.INVALID_CONNECTION_PROPERTY, key, value);
-    }
-
-    /**
-     * Sets the application name.
-     * @param applicationName The application name.
-     * @throws SQLException if value is invalid.
-     */
-    public void setApplicationName(final String applicationName) throws SQLException {
-        setProperty(APPLICATION_NAME_KEY,
-                (String)PROPERTIES_MAP.get(APPLICATION_NAME_KEY).convert(APPLICATION_NAME_KEY, applicationName));
+        // If IAMSigV4 is specified, we need the region provided to us.
+        if (getAuthScheme().equals(AuthScheme.IAMSigV4)) {
+            if (getRegion().isEmpty()) {
+                throw missingConnectionPropertyError("A Region must be provided to use IAMSigV4 Authentication");
+            }
+            if (!getUseEncryption()) {
+                throw invalidConnectionPropertyValueError(USE_ENCRYPTION_KEY, "Encryption must be enabled if IAMSigV4 is used.");
+            }
+        }
     }
 
     /**
      * Gets the application name.
+     *
      * @return The application name.
      */
     public String getApplicationName() {
@@ -242,18 +243,19 @@ public class ConnectionProperties extends Properties {
     }
 
     /**
-     * Sets the AWS credentials provider class.
-     * @param awsCredentialsProviderClass The AWS credentials provider class.
+     * Sets the application name.
+     *
+     * @param applicationName The application name.
      * @throws SQLException if value is invalid.
      */
-    public void setAwsCredentialsProviderClass(final String awsCredentialsProviderClass) throws SQLException {
-        setProperty(AWS_CREDENTIALS_PROVIDER_CLASS_KEY,
-                (String)PROPERTIES_MAP.get(AWS_CREDENTIALS_PROVIDER_CLASS_KEY)
-                        .convert(AWS_CREDENTIALS_PROVIDER_CLASS_KEY, awsCredentialsProviderClass));
+    public void setApplicationName(final String applicationName) throws SQLException {
+        setProperty(APPLICATION_NAME_KEY,
+                (String) PROPERTIES_MAP.get(APPLICATION_NAME_KEY).convert(APPLICATION_NAME_KEY, applicationName));
     }
 
     /**
      * Gets the AWS credentials provider class.
+     *
      * @return The AWS credentials provider class.
      */
     public String getAwsCredentialsProviderClass() {
@@ -261,18 +263,20 @@ public class ConnectionProperties extends Properties {
     }
 
     /**
-     * Sets the custom credentials filepath.
-     * @param customCredentialsFilePath The custom credentials filepath.
+     * Sets the AWS credentials provider class.
+     *
+     * @param awsCredentialsProviderClass The AWS credentials provider class.
      * @throws SQLException if value is invalid.
      */
-    public void setCustomCredentialsFilePath(final String customCredentialsFilePath) throws SQLException {
-        setProperty(CUSTOM_CREDENTIALS_FILE_PATH_KEY,
-                (String)PROPERTIES_MAP.get(CUSTOM_CREDENTIALS_FILE_PATH_KEY)
-                        .convert(CUSTOM_CREDENTIALS_FILE_PATH_KEY, customCredentialsFilePath));
+    public void setAwsCredentialsProviderClass(final String awsCredentialsProviderClass) throws SQLException {
+        setProperty(AWS_CREDENTIALS_PROVIDER_CLASS_KEY,
+                (String) PROPERTIES_MAP.get(AWS_CREDENTIALS_PROVIDER_CLASS_KEY)
+                        .convert(AWS_CREDENTIALS_PROVIDER_CLASS_KEY, awsCredentialsProviderClass));
     }
 
     /**
      * Gets the custom credentials filepath.
+     *
      * @return The custom credentials filepath.
      */
     public String getCustomCredentialsFilePath() {
@@ -280,17 +284,20 @@ public class ConnectionProperties extends Properties {
     }
 
     /**
-     * Sets the connection endpoint.
-     * @param endpoint The connection endpoint.
+     * Sets the custom credentials filepath.
+     *
+     * @param customCredentialsFilePath The custom credentials filepath.
      * @throws SQLException if value is invalid.
      */
-    public void setEndpoint(final String endpoint) throws SQLException {
-        setProperty(ENDPOINT_KEY,
-                (String)PROPERTIES_MAP.get(ENDPOINT_KEY).convert(ENDPOINT_KEY, endpoint));
+    public void setCustomCredentialsFilePath(final String customCredentialsFilePath) throws SQLException {
+        setProperty(CUSTOM_CREDENTIALS_FILE_PATH_KEY,
+                (String) PROPERTIES_MAP.get(CUSTOM_CREDENTIALS_FILE_PATH_KEY)
+                        .convert(CUSTOM_CREDENTIALS_FILE_PATH_KEY, customCredentialsFilePath));
     }
 
     /**
      * Gets the connection endpoint.
+     *
      * @return The connection endpoint.
      */
     public String getEndpoint() {
@@ -298,98 +305,28 @@ public class ConnectionProperties extends Properties {
     }
 
     /**
-     * Sets the user Id.
-     * @param userId The user Id.
+     * Sets the connection endpoint.
+     *
+     * @param endpoint The connection endpoint.
      * @throws SQLException if value is invalid.
      */
-    public void setUserId(final String userId) throws SQLException {
-        setProperty(USER_ID_KEY,
-                (String)PROPERTIES_MAP.get(USER_ID_KEY).convert(USER_ID_KEY, userId));
+    public void setEndpoint(final String endpoint) throws SQLException {
+        setProperty(ENDPOINT_KEY,
+                (String) PROPERTIES_MAP.get(ENDPOINT_KEY).convert(ENDPOINT_KEY, endpoint));
     }
 
     /**
-     * Gets the user Id.
-     * @return The user Id.
+     * Gets the logging level.
+     *
+     * @return The logging level.
      */
-    public String getUserId() {
-        return getProperty(USER_ID_KEY);
-    }
-
-    /**
-     * Sets the password.
-     * @param password The password.
-     * @throws SQLException if value is invalid.
-     */
-    public void setPassword(final String password) throws SQLException {
-        setProperty(PASSWORD_KEY,
-                (String)PROPERTIES_MAP.get(PASSWORD_KEY).convert(PASSWORD_KEY, password));
-    }
-
-    /**
-     * Gets the password.
-     * @return The password.
-     */
-    public String getPassword() {
-        return getProperty(PASSWORD_KEY);
-    }
-
-
-    /**
-     * Sets the access key Id.
-     * @param accessKeyId The access key Id.
-     * @throws SQLException if value is invalid.
-     */
-    public void setAccessKeyId(final String accessKeyId) throws SQLException {
-        setProperty(ACCESS_KEY_ID_KEY,
-                (String)PROPERTIES_MAP.get(ACCESS_KEY_ID_KEY).convert(ACCESS_KEY_ID_KEY, accessKeyId));
-    }
-
-    /**
-     * Gets the access key Id.
-     * @return The access key Id.
-     */
-    public String getAccessKeyId() {
-        return getProperty(ACCESS_KEY_ID_KEY);
-    }
-
-    /**
-     * Sets the secret access key.
-     * @param secretAccessKey The secret access key.
-     * @throws SQLException if value is invalid.
-     */
-    public void setSecretAccessKey(final String secretAccessKey) throws SQLException {
-        setProperty(SECRET_ACCESS_KEY_KEY,
-                (String)PROPERTIES_MAP.get(SECRET_ACCESS_KEY_KEY).convert(SECRET_ACCESS_KEY_KEY, secretAccessKey));
-    }
-
-    /**
-     * Gets the secret access key.
-     * @return The secret access key.
-     */
-    public String getSecretAccessKey() {
-        return getProperty(SECRET_ACCESS_KEY_KEY);
-    }
-
-    /**
-     * Sets the session token.
-     * @param sessionToken The session token.
-     * @throws SQLException if value is invalid.
-     */
-    public void setSessionToken(final String sessionToken) throws SQLException {
-        setProperty(SESSION_TOKEN_KEY,
-                (String)PROPERTIES_MAP.get(SESSION_TOKEN_KEY).convert(SESSION_TOKEN_KEY, sessionToken));
-    }
-
-    /**
-     * Gets the session token.
-     * @return The session token.
-     */
-    public String getSessionToken() {
-        return getProperty(SESSION_TOKEN_KEY);
+    public Level getLogLevel() {
+        return (Level) get(LOG_LEVEL_KEY);
     }
 
     /**
      * Sets the logging level.
+     *
      * @param logLevel The logging level.
      * @throws SQLException if value is invalid.
      */
@@ -401,15 +338,17 @@ public class ConnectionProperties extends Properties {
     }
 
     /**
-     * Gets the logging level.
-     * @return The logging level.
+     * Gets the connection timeout in milliseconds.
+     *
+     * @return The connection timeout in milliseconds.
      */
-    public Level getLogLevel() {
-        return (Level)get(LOG_LEVEL_KEY);
+    public int getConnectionTimeoutMillis() {
+        return (int) get(CONNECTION_TIMEOUT_MILLIS_KEY);
     }
 
     /**
      * Sets the connection timeout in milliseconds.
+     *
      * @param timeoutMillis The connection timeout in milliseconds.
      * @throws SQLException if value is invalid.
      */
@@ -421,15 +360,17 @@ public class ConnectionProperties extends Properties {
     }
 
     /**
-     * Gets the connection timeout in milliseconds.
-     * @return The connection timeout in milliseconds.
+     * Gets the connection retry count.
+     *
+     * @return The connection retry count.
      */
-    public int getConnectionTimeoutMillis() {
-        return (int)get(CONNECTION_TIMEOUT_MILLIS_KEY);
+    public int getConnectionRetryCount() {
+        return (int) get(CONNECTION_RETRY_COUNT_KEY);
     }
 
     /**
      * Sets the connection retry count.
+     *
      * @param retryCount The connection retry count.
      * @throws SQLException if value is invalid.
      */
@@ -441,35 +382,17 @@ public class ConnectionProperties extends Properties {
     }
 
     /**
-     * Gets the connection retry count.
-     * @return The connection retry count.
+     * Gets the authentication scheme.
+     *
+     * @return The authentication scheme.
      */
-    public int getConnectionRetryCount() {
-        return (int) get(CONNECTION_RETRY_COUNT_KEY);
-    }
-
-    /**
-     * Sets the timeout for opening a connection.
-     * @param loginTimeout The connect timeout in seconds.
-     * @throws SQLException if value is invalid.
-     */
-    public void setLoginTimeout(final int loginTimeout) throws SQLException {
-        if (loginTimeout < 0) {
-            throw invalidConnectionPropertyError(LOGIN_TIMEOUT_SEC_KEY, loginTimeout);
-        }
-        put(LOGIN_TIMEOUT_SEC_KEY, loginTimeout);
-    }
-
-    /**
-     * Gets the timeout for opening a connection.
-     * @return The connect timeout in seconds.
-     */
-    public int getLoginTimeout() {
-        return (int) get(LOGIN_TIMEOUT_SEC_KEY);
+    public AuthScheme getAuthScheme() {
+        return (AuthScheme) get(AUTH_SCHEME_KEY);
     }
 
     /**
      * Sets the authentication scheme.
+     *
      * @param authScheme The authentication scheme.
      * @throws SQLException if value is invalid.
      */
@@ -481,15 +404,17 @@ public class ConnectionProperties extends Properties {
     }
 
     /**
-     * Gets the authentication scheme.
-     * @return The authentication scheme.
+     * Gets the use encryption.
+     *
+     * @return The use encryption.
      */
-    public AuthScheme getAuthScheme() {
-        return (AuthScheme)get(AUTH_SCHEME_KEY);
+    public boolean getUseEncryption() {
+        return (boolean) get(USE_ENCRYPTION_KEY);
     }
 
     /**
      * Sets the use encryption.
+     *
      * @param useEncryption The use encryption.
      */
     public void setUseEncryption(final boolean useEncryption) {
@@ -497,20 +422,31 @@ public class ConnectionProperties extends Properties {
     }
 
     /**
-     * Gets the use encryption.
-     * @return The use encryption.
+     * Gets the region.
+     *
+     * @return The region.
      */
-    public boolean getUseEncryption() {
-        return (boolean)get(USE_ENCRYPTION_KEY);
+    public String getRegion() {
+        return getProperty(REGION_KEY);
     }
 
     /**
-     * Check if the property is supported by the driver.
+     * Sets the region.
      *
-     * @param name The name of the property.
-     * @return {@code true} if property is supported; {@code false} otherwise.
+     * @param region The region.
+     * @throws SQLException if value is invalid.
      */
-    public static boolean isSupportedProperty(final String name) {
-        return PROPERTIES_MAP.containsKey(name);
+    public void setRegion(final String region) throws SQLException {
+        setProperty(REGION_KEY,
+                (String) PROPERTIES_MAP.get(REGION_KEY).convert(REGION_KEY, region));
+    }
+
+    /**
+     * Property converter interface.
+     *
+     * @param <T> Type to convert string property to.
+     */
+    interface PropertyConverter<T> {
+        T convert(@NonNull String key, @NonNull String value) throws SQLException;
     }
 }
