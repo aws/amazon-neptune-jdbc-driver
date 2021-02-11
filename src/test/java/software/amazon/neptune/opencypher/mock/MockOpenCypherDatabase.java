@@ -20,11 +20,14 @@ import lombok.Getter;
 import lombok.SneakyThrows;
 import org.junit.ClassRule;
 import org.neo4j.graphdb.GraphDatabaseService;
+import org.neo4j.graphdb.factory.GraphDatabaseBuilder;
 import org.neo4j.graphdb.factory.GraphDatabaseFactory;
 import org.neo4j.graphdb.factory.GraphDatabaseSettings;
 import org.neo4j.harness.junit.Neo4jRule;
 import org.neo4j.kernel.configuration.BoltConnector;
 import org.neo4j.kernel.configuration.Settings;
+import software.amazon.jdbc.utilities.ConnectionProperties;
+
 import java.io.File;
 import java.io.IOException;
 import java.net.ServerSocket;
@@ -33,8 +36,9 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+
 import static org.neo4j.helpers.ListenSocketAddress.listenAddress;
-import static org.neo4j.kernel.configuration.BoltConnector.EncryptionLevel.DISABLED;
+import static org.neo4j.kernel.configuration.BoltConnector.EncryptionLevel.REQUIRED;
 import static org.neo4j.kernel.configuration.Connector.ConnectorType.BOLT;
 import static org.neo4j.kernel.configuration.Settings.FALSE;
 import static org.neo4j.kernel.configuration.Settings.STRING;
@@ -60,6 +64,17 @@ public final class MockOpenCypherDatabase {
      * @param port Port to initialize with.
      */
     private MockOpenCypherDatabase(final String host, final int port, final String path) throws IOException {
+        this(host, port, path, ConnectionProperties.DEFAULT_USE_ENCRYPTION);
+    }
+
+    /**
+     * OpenCypherDatabase constructor.
+     *
+     * @param host Host to initialize with.
+     * @param port Port to initialize with.
+     * @param useEncryption Encryption usage to initialize with.
+     */
+    private MockOpenCypherDatabase(final String host, final int port, final String path, final boolean useEncryption) throws IOException {
         this.host = host;
         this.port = port;
         final File dbPath = new File(DB_PATH + path);
@@ -69,16 +84,24 @@ public final class MockOpenCypherDatabase {
                     .map(Path::toFile)
                     .forEach(File::delete);
         }
-        final BoltConnector boltConnector = new BoltConnector("bolt");
-        graphDb = new GraphDatabaseFactory()
-                .newEmbeddedDatabaseBuilder(dbPath)
-                .setConfig(Settings.setting("dbms.directories.import", STRING, "data"), "../../data")
-                .setConfig(boltConnector.type, BOLT.name())
-                .setConfig(boltConnector.enabled, TRUE)
-                .setConfig(boltConnector.listen_address, listenAddress(host, port))
-                .setConfig(boltConnector.encryption_level, DISABLED.name())
-                .setConfig(GraphDatabaseSettings.auth_enabled, FALSE)
+        graphDb = graphDbBuilder(dbPath, host, port, useEncryption)
                 .newGraphDatabase();
+    }
+
+    private static GraphDatabaseBuilder graphDbBuilder(final File dbPath, final String host, final int port, final boolean useEncryption) {
+        final GraphDatabaseBuilder dbBuilder = new GraphDatabaseFactory().newEmbeddedDatabaseBuilder(dbPath);
+        final BoltConnector boltConnector = new BoltConnector("bolt");
+        dbBuilder.setConfig(Settings.setting("dbms.directories.import", STRING, "data"), "../../data");
+        dbBuilder.setConfig(boltConnector.type, BOLT.name());
+        dbBuilder.setConfig(boltConnector.enabled, TRUE);
+        dbBuilder.setConfig(boltConnector.listen_address, listenAddress(host, port));
+        //if (useEncryption) {
+            dbBuilder.setConfig(boltConnector.encryption_level, REQUIRED.name());
+        //} else {
+        //    dbBuilder.setConfig(boltConnector.encryption_level, DISABLED.name());
+        //}
+        dbBuilder.setConfig(GraphDatabaseSettings.auth_enabled, FALSE);
+        return dbBuilder;
     }
 
     /**
