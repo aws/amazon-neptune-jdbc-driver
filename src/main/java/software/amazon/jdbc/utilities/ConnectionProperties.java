@@ -86,11 +86,11 @@ public class ConnectionProperties extends Properties {
                 return DEFAULT_CONNECTION_TIMEOUT_MILLIS;
             }
             try {
-                final int retValue = Integer.parseUnsignedInt(value);
-                if (retValue < 0) {
+                final int intValue = Integer.parseUnsignedInt(value);
+                if (intValue < 0) {
                     throw invalidConnectionPropertyError(key, value);
                 }
-                return retValue;
+                return intValue;
             } catch (final NumberFormatException e) {
                 throw invalidConnectionPropertyError(key, value);
             }
@@ -100,11 +100,11 @@ public class ConnectionProperties extends Properties {
                 return DEFAULT_CONNECTION_RETRY_COUNT;
             }
             try {
-                final int retValue = Integer.parseUnsignedInt(value);
-                if (retValue < 0) {
+                final int intValue = Integer.parseUnsignedInt(value);
+                if (intValue < 0) {
                     throw invalidConnectionPropertyError(key, value);
                 }
-                return retValue;
+                return intValue;
             } catch (final NumberFormatException e) {
                 throw invalidConnectionPropertyError(key, value);
             }

@@ -113,8 +113,6 @@ public class OpenCypherQueryExecutor {
             configBuilder.withoutEncryption();
         }
         configBuilder.withConnectionTimeout(properties.getConnectionTimeout(), TimeUnit.MILLISECONDS);
-        // .withTrustStrategy(Config.TrustStrategy.trustAllCertificates()) // Required for Neptune manual test
-        // .withFetchSize(properties.getFetchSize())
 
         return configBuilder;
     }
