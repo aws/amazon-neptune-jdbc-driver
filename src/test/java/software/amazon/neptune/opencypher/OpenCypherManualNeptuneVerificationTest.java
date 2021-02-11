@@ -46,10 +46,8 @@ public class OpenCypherManualNeptuneVerificationTest {
 
     private java.sql.DatabaseMetaData databaseMetaData;
 
-
-    @SneakyThrows
     @BeforeEach
-    void initialize() {
+    void initialize() throws SQLException {
         final String endpoint = String.format("bolt://%s:%d", HOSTNAME, 8182);
         /*final Config config = Config.builder()
                 .withConnectionTimeout(3, TimeUnit.SECONDS)
