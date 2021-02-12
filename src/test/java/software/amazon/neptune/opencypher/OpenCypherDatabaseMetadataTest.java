@@ -17,11 +17,9 @@
 package software.amazon.neptune.opencypher;
 
 import com.google.common.collect.ImmutableSet;
-import lombok.SneakyThrows;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import software.amazon.jdbc.utilities.ConnectionProperties;
 import software.amazon.neptune.opencypher.mock.MockOpenCypherDatabase;
@@ -35,8 +33,6 @@ import java.util.Set;
 public class OpenCypherDatabaseMetadataTest {
     private static final String HOSTNAME = "localhost";
     private static final Properties PROPERTIES = new Properties();
-    private static MockOpenCypherDatabase database;
-    private java.sql.DatabaseMetaData databaseMetaData;
     private static final Set<Set<String>> GET_TABLES_NODE_SET = ImmutableSet.of(
             ImmutableSet.of("Person"),
             ImmutableSet.of("Person", "Developer"),
@@ -52,7 +48,11 @@ public class OpenCypherDatabaseMetadataTest {
             ImmutableSet.of("Person", "Developer", "Human"));
     private static final String CREATE_NODES;
     private static final Set<String> GET_TABLES_NULL_SET = ImmutableSet.of(
-            "TABLE_CAT", "TABLE_SCHEM", "TYPE_CAT", "TYPE_SCHEM", "TYPE_NAME", "SELF_REFERENCING_COL_NAME", "REF_GENERATION");
+            "TABLE_CAT", "TABLE_SCHEM", "TYPE_CAT", "TYPE_SCHEM", "TYPE_NAME", "SELF_REFERENCING_COL_NAME",
+            "REF_GENERATION");
+    private static MockOpenCypherDatabase database;
+    private static java.sql.DatabaseMetaData databaseMetaData;
+
     static {
         final StringBuilder stringBuilder = new StringBuilder();
         GET_TABLES_NODE_SET.forEach(n -> stringBuilder.append(String.format(" CREATE (:%s {})", String.join(":", n))));
@@ -63,9 +63,14 @@ public class OpenCypherDatabaseMetadataTest {
      * Function to get a random available port and initialize database before testing.
      */
     @BeforeAll
-    public static void initializeDatabase() {
+    public static void initializeDatabase() throws SQLException {
         database = MockOpenCypherDatabase.builder(HOSTNAME, OpenCypherDatabaseMetadataTest.class.getName()).build();
-        PROPERTIES.putIfAbsent(ConnectionProperties.ENDPOINT_KEY, String.format("bolt://%s:%d", HOSTNAME, database.getPort()));
+        PROPERTIES.putIfAbsent(ConnectionProperties.ENDPOINT_KEY,
+                String.format("bolt://%s:%d", HOSTNAME, database.getPort()));
+        final java.sql.Connection connection = new OpenCypherConnection(new ConnectionProperties(PROPERTIES));
+        final java.sql.Statement statement = connection.createStatement();
+        statement.execute(CREATE_NODES);
+        databaseMetaData = connection.getMetaData();
     }
 
     /**
@@ -74,15 +79,6 @@ public class OpenCypherDatabaseMetadataTest {
     @AfterAll
     public static void shutdownDatabase() {
         database.shutdown();
-    }
-
-    @SneakyThrows
-    @BeforeEach
-    void initialize() {
-        final java.sql.Connection connection = new OpenCypherConnection(new ConnectionProperties(PROPERTIES));
-        final java.sql.Statement statement = connection.createStatement();
-        statement.execute(CREATE_NODES);
-        databaseMetaData = connection.getMetaData();
     }
 
     @Test

@@ -22,6 +22,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import software.amazon.jdbc.utilities.ConnectionProperties;
+import software.amazon.neptune.opencypher.resultset.OpenCypherResultSet;
 import software.amazon.neptune.opencypher.resultset.OpenCypherResultSetGetColumns;
 import software.amazon.neptune.opencypher.resultset.OpenCypherResultSetGetTables;
 import software.amazon.neptune.opencypher.utilities.OpenCypherGetColumnUtilities;
@@ -77,7 +78,10 @@ public class OpenCypherResultSetGetColumnsTest {
     @Test
     void generateOpenCypherResultSetGetColumnsManuallyTest() throws Exception {
         final ResultSet resultSet =
-                new OpenCypherResultSetGetColumns(statement, OpenCypherGetColumnUtilities.NODE_COLUMN_INFOS);
+                new OpenCypherResultSetGetColumns(statement, OpenCypherGetColumnUtilities.NODE_COLUMN_INFOS,
+                        new OpenCypherResultSet.ResultSetInfoWithoutRows(null, null,
+                                OpenCypherGetColumnUtilities.NODE_COLUMN_INFOS.size(),
+                                OpenCypherResultSetGetColumns.getColumns()));
         final ResultSetMetaData resultSetMetaData = resultSet.getMetaData();
         verifyResultSetMetadata(resultSetMetaData);
         verifyResultSet(resultSet);

@@ -22,7 +22,6 @@ import org.slf4j.LoggerFactory;
 import software.amazon.jdbc.Driver;
 import software.amazon.jdbc.utilities.ConnectionProperties;
 import software.amazon.neptune.opencypher.OpenCypherConnection;
-import software.amazon.neptune.opencypher.OpenCypherQueryExecutor;
 
 import javax.annotation.Nullable;
 import java.sql.DriverManager;
@@ -32,7 +31,7 @@ import java.util.Properties;
 import java.util.regex.Pattern;
 
 public class NeptuneDriver extends Driver implements java.sql.Driver {
-    private static final Logger LOGGER = LoggerFactory.getLogger(OpenCypherQueryExecutor.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(NeptuneDriver.class);
     public static final String CONN_STRING_PREFIX = "jdbc:neptune:";
     private static final Pattern CONN_STRING_PATTERN = Pattern.compile(CONN_STRING_PREFIX + "(\\w+)://(.*)");
 

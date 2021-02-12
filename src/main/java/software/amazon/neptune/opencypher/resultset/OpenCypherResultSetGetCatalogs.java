@@ -28,6 +28,8 @@ public class OpenCypherResultSetGetCatalogs extends OpenCypherResultSetGetString
      */
     private static final List<String> COLUMNS = ImmutableList.of("TABLE_CAT");
     private static final Map<String, String> CONVERSION_MAP = new HashMap<>();
+    private static final ResultSetInfoWithoutRows RESULT_SET_INFO_WITHOUT_ROWS =
+            new ResultSetInfoWithoutRows(null, null, 0, COLUMNS);
 
     static {
         CONVERSION_MAP.put("TABLE_CAT", null);
@@ -39,6 +41,6 @@ public class OpenCypherResultSetGetCatalogs extends OpenCypherResultSetGetString
      * @param statement Statement Object.
      */
     public OpenCypherResultSetGetCatalogs(final Statement statement) {
-        super(statement, 0, COLUMNS, ImmutableList.of(CONVERSION_MAP));
+        super(statement, RESULT_SET_INFO_WITHOUT_ROWS, ImmutableList.of(CONVERSION_MAP));
     }
 }

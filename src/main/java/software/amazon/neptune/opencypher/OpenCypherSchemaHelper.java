@@ -49,11 +49,11 @@ public class OpenCypherSchemaHelper {
      * @param endpoint Endpoint to connect to.
      * @param nodes    Nodes to use if only single table is targeted.
      * @return List of NodeColumnInfo.
-     * @throws Exception Thrown if an error is encountered.
+     * @throws SQLException Thrown if an error is encountered.
      */
     public static List<OpenCypherResultSetGetColumns.NodeColumnInfo> getGraphSchema(final String endpoint,
                                                                                     final String nodes)
-            throws Exception {
+            throws SQLException {
         // Create unique directory if doesn't exist
         // If does exist, delete current contents
         final String directory = createUniqueDirectoryForThread();
@@ -70,16 +70,22 @@ public class OpenCypherSchemaHelper {
     }
 
     @VisibleForTesting
-    static String createUniqueDirectoryForThread() throws Exception {
+    static String createUniqueDirectoryForThread() throws SQLException {
         // Thread id is unique, so use it to create output directory.
         // Before output directory is created, check if it exists and delete contents if it does.
         final Path path = Paths.get(String.format("%d", Thread.currentThread().getId())).toAbsolutePath();
         LOGGER.info(String.format("Creating directory '%s'", path.toString()));
-        deleteDirectoryIfExists(path);
+        try {
+            deleteDirectoryIfExists(path);
+        } catch (IOException e) {
+            // TODO: Better exception
+            throw new SQLException(e);
+        }
         final File outputDirectory = new File(path.toAbsolutePath().toString());
         if (!outputDirectory.exists()) {
             if (!outputDirectory.mkdirs()) {
-                throw new Exception("Failed to create unique output directory.");
+                // TODO: Better exception
+                throw new SQLException("Failed to create unique output directory.");
             }
         }
         return path.toString();

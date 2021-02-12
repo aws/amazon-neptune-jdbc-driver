@@ -22,7 +22,6 @@ import lombok.Getter;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.driver.internal.types.InternalTypeSystem;
 import software.amazon.jdbc.utilities.ConnectionProperties;
@@ -111,15 +110,18 @@ public class OpenCypherResultSetMetadataTest {
                     InternalTypeSystem.TYPE_SYSTEM.POINT().name())
     );
     private static MockOpenCypherDatabase database;
-    private java.sql.Statement statement;
+    private static java.sql.Statement statement;
 
     /**
      * Function to get a random available port and initiaize database before testing.
      */
     @BeforeAll
-    public static void initializeDatabase() {
+    public static void initializeDatabase() throws SQLException {
         database = MockOpenCypherDatabase.builder(HOSTNAME, OpenCypherResultSetMetadataTest.class.getName()).build();
-        PROPERTIES.putIfAbsent(ConnectionProperties.ENDPOINT_KEY, String.format("bolt://%s:%d", HOSTNAME, database.getPort()));
+        PROPERTIES.putIfAbsent(ConnectionProperties.ENDPOINT_KEY,
+                String.format("bolt://%s:%d", HOSTNAME, database.getPort()));
+        final java.sql.Connection connection = new OpenCypherConnection(new ConnectionProperties(PROPERTIES));
+        statement = connection.createStatement();
     }
 
     /**
@@ -128,12 +130,6 @@ public class OpenCypherResultSetMetadataTest {
     @AfterAll
     public static void shutdownDatabase() {
         database.shutdown();
-    }
-
-    @BeforeEach
-    void initialize() throws SQLException {
-        final java.sql.Connection connection = new OpenCypherConnection(new ConnectionProperties(PROPERTIES));
-        statement = connection.createStatement();
     }
 
     ResultSetMetaData getResultSetMetaData(final String query) throws SQLException {

@@ -27,6 +27,8 @@ public class OpenCypherResultSetGetTableTypes extends OpenCypherResultSetGetStri
      * TABLE_TYPE String => table type. Typical types are "TABLE", "VIEW", "SYSTEM TABLE", "GLOBAL TEMPORARY", "LOCAL TEMPORARY", "ALIAS", "SYNONYM".
      */
     private static final List<String> COLUMNS = ImmutableList.of("TABLE_TYPE");
+    private static final ResultSetInfoWithoutRows RESULT_SET_INFO_WITHOUT_ROWS =
+            new ResultSetInfoWithoutRows(null, null, 1, COLUMNS);
     private static final Map<String, String> CONVERSION_MAP = new HashMap<>();
 
     static {
@@ -39,6 +41,6 @@ public class OpenCypherResultSetGetTableTypes extends OpenCypherResultSetGetStri
      * @param statement Statement Object.
      */
     public OpenCypherResultSetGetTableTypes(final Statement statement) {
-        super(statement, 1, COLUMNS, ImmutableList.of(CONVERSION_MAP));
+        super(statement, RESULT_SET_INFO_WITHOUT_ROWS, ImmutableList.of(CONVERSION_MAP));
     }
 }

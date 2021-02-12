@@ -16,6 +16,8 @@
 
 package software.amazon.neptune.opencypher.resultset;
 
+import lombok.AllArgsConstructor;
+import lombok.Getter;
 import org.neo4j.driver.Record;
 import org.neo4j.driver.Result;
 import org.neo4j.driver.Session;
@@ -42,42 +44,28 @@ public class OpenCypherResultSet extends software.amazon.jdbc.ResultSet implemen
     /**
      * OpenCypherResultSet constructor, initializes super class.
      *
-     * @param statement Statement Object.
-     * @param result    Result Object.
-     * @param session   Session Object.
-     * @param rows      List of rows.
-     * @param columns   List of Columns.
+     * @param statement     Statement Object.
+     * @param resultSetInfo ResultSetInfoWithRows Object.
      */
-    public OpenCypherResultSet(final java.sql.Statement statement,
-                               final Session session,
-                               final Result result,
-                               final List<Record> rows,
-                               final List<String> columns) {
-        super(statement, columns, rows.size());
-        this.session = session;
-        this.result = result;
-        this.columns = columns;
-        this.rows = rows;
+    public OpenCypherResultSet(final java.sql.Statement statement, final ResultSetInfoWithRows resultSetInfo) {
+        super(statement, resultSetInfo.getColumns(), resultSetInfo.getRows().size());
+        this.session = resultSetInfo.getSession();
+        this.result = resultSetInfo.getResult();
+        this.columns = resultSetInfo.getColumns();
+        this.rows = resultSetInfo.getRows();
     }
 
     /**
      * OpenCypherResultSet constructor, initializes super class.
      *
      * @param statement Statement Object.
-     * @param session   Session Object.
-     * @param result    Result Object.
-     * @param rowCount  Number of rows in result.
-     * @param columns   List of Columns.
+     * @param resultSetInfo ResultSetInfoWithoutRows Object.
      */
-    public OpenCypherResultSet(final java.sql.Statement statement,
-                               final Session session,
-                               final Result result,
-                               final int rowCount,
-                               final List<String> columns) {
-        super(statement, columns, rowCount);
-        this.session = session;
-        this.result = result;
-        this.columns = columns;
+    public OpenCypherResultSet(final java.sql.Statement statement, final ResultSetInfoWithoutRows resultSetInfo) {
+        super(statement, resultSetInfo.getColumns(), resultSetInfo.getRowCount());
+        this.session = resultSetInfo.getSession();
+        this.result = resultSetInfo.getResult();
+        this.columns = resultSetInfo.getColumns();
         this.rows = null;
     }
 
@@ -154,5 +142,23 @@ public class OpenCypherResultSet extends software.amazon.jdbc.ResultSet implemen
         LOGGER.trace("Getting column {} as an Object using provided Map.", columnIndex);
         final Value value = getValue(columnIndex);
         return getObject(columnIndex, map.get(OpenCypherTypeMapping.BOLT_TO_JDBC_TYPE_MAP.get(value.type()).name()));
+    }
+
+    @AllArgsConstructor
+    @Getter
+    public static class ResultSetInfoWithRows {
+        private final Session session;
+        private final Result result;
+        private final List<Record> rows;
+        private final List<String> columns;
+    }
+
+    @AllArgsConstructor
+    @Getter
+    public static class ResultSetInfoWithoutRows {
+        private final Session session;
+        private final Result result;
+        private final int rowCount;
+        private final List<String> columns;
     }
 }

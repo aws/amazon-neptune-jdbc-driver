@@ -19,7 +19,6 @@ package software.amazon.neptune.opencypher;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import software.amazon.jdbc.helpers.HelperFunctions;
 import software.amazon.jdbc.utilities.ConnectionProperties;
@@ -29,15 +28,18 @@ import java.sql.SQLException;
 
 public class OpenCypherStatementTest extends OpenCypherStatementTestBase {
     private static MockOpenCypherDatabase database;
-    private java.sql.Statement statement;
+    private static java.sql.Statement statement;
 
     /**
      * Function to get a random available port and initialize database before testing.
      */
     @BeforeAll
-    public static void initializeDatabase() {
+    public static void initializeDatabase() throws SQLException {
         database = MockOpenCypherDatabase.builder(HOSTNAME, OpenCypherStatementTest.class.getName()).build();
-        PROPERTIES.putIfAbsent(ConnectionProperties.ENDPOINT_KEY, String.format("bolt://%s:%d", HOSTNAME, database.getPort()));
+        PROPERTIES.putIfAbsent(ConnectionProperties.ENDPOINT_KEY,
+                String.format("bolt://%s:%d", HOSTNAME, database.getPort()));
+        final java.sql.Connection connection = new OpenCypherConnection(new ConnectionProperties(PROPERTIES));
+        statement = connection.createStatement();
     }
 
     /**
@@ -48,36 +50,30 @@ public class OpenCypherStatementTest extends OpenCypherStatementTestBase {
         database.shutdown();
     }
 
-    @BeforeEach
-    void initialize() throws SQLException {
-        final java.sql.Connection connection = new OpenCypherConnection(new ConnectionProperties(PROPERTIES));
-        statement = connection.createStatement();
-    }
-
     @Test
     void testCancelQueryWithoutExecute() {
         launchCancelThread(0, statement);
         waitCancelToComplete();
-        HelperFunctions.expectFunctionThrows(SqlError.QUERY_NOT_STARTED, this::getCancelException);
+        HelperFunctions.expectFunctionThrows(SqlError.QUERY_NOT_STARTED_OR_COMPLETE, this::getCancelException);
     }
 
     @Test
     void testCancelQueryWhileExecuteInProgress() {
-        // Wait 1 second before attempting to cancel.
-        launchCancelThread(1000, statement);
+        // Wait 200 milliseconds before attempting to cancel.
+        launchCancelThread(200, statement);
         HelperFunctions.expectFunctionThrows(SqlError.QUERY_CANCELED, () -> statement.execute(getLongQuery()));
         waitCancelToComplete();
     }
 
     @Test
     void testCancelQueryTwice() {
-        // Wait 1 second before attempting to cancel.
-        launchCancelThread(1000, statement);
+        // Wait 200 milliseconds before attempting to cancel.
+        launchCancelThread(200, statement);
         HelperFunctions.expectFunctionThrows(SqlError.QUERY_CANCELED, () -> statement.execute(getLongQuery()));
         waitCancelToComplete();
-        launchCancelThread(0, statement);
+        launchCancelThread(1, statement);
         waitCancelToComplete();
-        HelperFunctions.expectFunctionThrows(SqlError.QUERY_CANCELED, this::getCancelException);
+        HelperFunctions.expectFunctionThrows(SqlError.QUERY_NOT_STARTED_OR_COMPLETE, this::getCancelException);
     }
 
     @Test
@@ -85,6 +81,6 @@ public class OpenCypherStatementTest extends OpenCypherStatementTestBase {
         Assertions.assertDoesNotThrow(() -> statement.execute(QUICK_QUERY));
         launchCancelThread(0, statement);
         waitCancelToComplete();
-        HelperFunctions.expectFunctionThrows(SqlError.QUERY_CANNOT_BE_CANCELLED, this::getCancelException);
+        HelperFunctions.expectFunctionThrows(SqlError.QUERY_NOT_STARTED_OR_COMPLETE, this::getCancelException);
     }
 }

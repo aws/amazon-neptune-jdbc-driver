@@ -1,34 +1,32 @@
 /*
- * Copyright <2020> Amazon.com, final Inc. or its affiliates. All Rights Reserved.
+ * Copyright <2020> Amazon.com, Inc. or its affiliates. All Rights Reserved.
  *
- * Licensed under the Apache License, final Version 2.0 (the "License").
+ * Licensed under the Apache License, Version 2.0 (the "License").
  * You may not use this file except in compliance with the License.
  * A copy of the License is located at
  *
  *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * or in the "license" file accompanying this file. This file is distributed
- * on an "AS IS" BASIS, final WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, final either
+ * on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
  * express or implied. See the License for the specific language governing
  * permissions and limitations under the License.
- *
  */
 
 package software.amazon.neptune.opencypher;
 
-import lombok.SneakyThrows;
+import org.neo4j.driver.AuthToken;
+import org.neo4j.driver.AuthTokens;
 import org.neo4j.driver.Config;
 import org.neo4j.driver.Driver;
 import org.neo4j.driver.GraphDatabase;
 import org.neo4j.driver.Record;
 import org.neo4j.driver.Result;
 import org.neo4j.driver.Session;
-import org.neo4j.driver.SessionConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import software.amazon.jdbc.utilities.AuthScheme;
-import software.amazon.jdbc.utilities.SqlError;
-import software.amazon.jdbc.utilities.SqlState;
+import software.amazon.jdbc.utilities.QueryExecutor;
 import software.amazon.neptune.opencypher.resultset.OpenCypherResultSet;
 import software.amazon.neptune.opencypher.resultset.OpenCypherResultSetGetCatalogs;
 import software.amazon.neptune.opencypher.resultset.OpenCypherResultSetGetColumns;
@@ -38,56 +36,91 @@ import software.amazon.neptune.opencypher.resultset.OpenCypherResultSetGetTables
 import java.lang.reflect.Constructor;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 
-/**
- * OpenCypher implementation of QueryExecution.
- */
-public class OpenCypherQueryExecutor {
+public class OpenCypherQueryExecutor extends QueryExecutor {
     private static final Logger LOGGER = LoggerFactory.getLogger(OpenCypherQueryExecutor.class);
-    private static final int MAX_FETCH_SIZE = Integer.MAX_VALUE;
-    private final OpenCypherConnectionProperties connectionProperties;
-    private final Object lock = new Object();
-    private final Driver driver;
-    private final Config config;
-    private Session session;
-    private SessionConfig sessionConfig;
-    private int queryTimeout = -1;
-    private boolean queryExecuted = false;
-    private boolean queryCancelled = false;
+    private static final Object DRIVER_LOCK = new Object();
+    private static OpenCypherConnectionProperties previousOpenCypherConnectionProperties = null;
+    private static Driver driver = null;
+    private final OpenCypherConnectionProperties openCypherConnectionProperties;
+    private final Object sessionLock = new Object();
+    private Session session = null;
+
+    OpenCypherQueryExecutor(final OpenCypherConnectionProperties openCypherConnectionProperties) {
+        this.openCypherConnectionProperties = openCypherConnectionProperties;
+    }
+
+    private static boolean propertiesEqual(
+            final OpenCypherConnectionProperties openCypherConnectionProperties1,
+            final OpenCypherConnectionProperties openCypherConnectionProperties2) {
+        final Properties properties1 = openCypherConnectionProperties1.getProperties();
+        final Properties properties2 = openCypherConnectionProperties2.getProperties();
+        if (!properties1.keySet().equals(properties2.keySet())) {
+            System.out.println("Keyset different.");
+            return false;
+        }
+        for (final Object key : properties1.keySet()) {
+            if (!properties1.get(key).equals(properties2.get(key))) {
+                System.out.println("Keyset value different.");
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private static Driver createDriver(final Config config,
+                                       final OpenCypherConnectionProperties openCypherConnectionProperties)
+            throws SQLException {
+        AuthToken authToken = AuthTokens.none();
+        if (openCypherConnectionProperties.getAuthScheme().equals(AuthScheme.IAMSigV4)) {
+            LOGGER.info("Creating driver with IAMSigV4 authentication.");
+            authToken = OpenCypherIAMRequestGenerator
+                    .getSignedHeader(openCypherConnectionProperties.getEndpoint(),
+                            openCypherConnectionProperties.getRegion());
+        }
+        return GraphDatabase.driver(openCypherConnectionProperties.getEndpoint(), authToken, config);
+    }
+
+    private static Driver getDriver(final Config config,
+                                    final OpenCypherConnectionProperties openCypherConnectionProperties,
+                                    final boolean returnNew)
+            throws SQLException {
+        if (returnNew) {
+            return createDriver(config, openCypherConnectionProperties);
+        }
+        if ((driver == null) ||
+                !propertiesEqual(previousOpenCypherConnectionProperties, openCypherConnectionProperties)) {
+            previousOpenCypherConnectionProperties = openCypherConnectionProperties;
+            return createDriver(config, openCypherConnectionProperties);
+        }
+        return driver;
+    }
 
     /**
-     * OpenCypherQueryExecutor constructor.
+     * Function to return max fetch size.
      *
-     * @param connectionProperties properties to use for query executon.
+     * @return Max fetch size (Integer max value).
      */
-    OpenCypherQueryExecutor(final OpenCypherConnectionProperties connectionProperties) throws SQLException {
-        this.connectionProperties = connectionProperties;
-
-        // TODO: Implement authentication.
-        // final String user = properties.getUser();
-        // final String password = properties.getPassword();
-        // AuthTokens.basic(this.user, this.password), this.config);
-
-        // Session config properties.
-        this.sessionConfig = SessionConfig.builder().build();
-        // Driver config properties.
-        this.config = createConfigBuilder(connectionProperties).build();
-        this.driver = createDriver(connectionProperties.getEndpoint(), config, connectionProperties);
+    @Override
+    public int getMaxFetchSize() {
+        return Integer.MAX_VALUE;
     }
 
     /**
      * Verify that connection to database is functional.
      *
-     * @param endpoint Connection endpoint.
-     * @param timeout  Time in milliseconds to wait for the database operation used to validate the connection to complete.
+     * @param timeout Time in milliseconds to wait for the database operation used to validate the connection to complete.
      * @return true if the connection is valid, otherwise false.
      */
-    public static boolean isValid(final String endpoint, final int timeout,
-                                  final OpenCypherConnectionProperties properties) {
+    public boolean isValid(final int timeout) {
         try {
-            final Config config = createConfigBuilder(properties).build();
-            final Driver tempDriver = createDriver(endpoint, config, properties);
+            final Config config = createConfigBuilder().withConnectionTimeout(timeout, TimeUnit.MILLISECONDS).build();
+            final Driver tempDriver;
+            synchronized (DRIVER_LOCK) {
+                tempDriver = getDriver(config, openCypherConnectionProperties, true);
+            }
             tempDriver.verifyConnectivity();
             return true;
         } catch (final Exception e) {
@@ -96,54 +129,23 @@ public class OpenCypherQueryExecutor {
         }
     }
 
-    /**
-     * Creates ConfigBuilder based on the OpenCypher connection properties.
-     *
-     * @param properties The OpenCypher connection properties.
-     * @return The ConfigBuilder based on the OpenCypher connection properties.
-     */
-    private static Config.ConfigBuilder createConfigBuilder(final OpenCypherConnectionProperties properties) {
+    private Config.ConfigBuilder createConfigBuilder() {
         final Config.ConfigBuilder configBuilder = Config.builder();
-
-        final boolean useEncryption = properties.getUseEncryption();
+        final boolean useEncryption = openCypherConnectionProperties.getUseEncryption();
         if (useEncryption) {
+            LOGGER.info("Creating driver with encryption.");
             configBuilder.withEncryption();
             configBuilder.withTrustStrategy(Config.TrustStrategy.trustAllCertificates());
         } else {
+            LOGGER.info("Creating driver without encryption.");
             configBuilder.withoutEncryption();
         }
-        configBuilder.withConnectionTimeout(properties.getConnectionTimeout(), TimeUnit.MILLISECONDS);
+        // TODO: Make this a config.
+        configBuilder.withMaxConnectionPoolSize(1000);
+        configBuilder
+                .withConnectionTimeout(openCypherConnectionProperties.getConnectionTimeout(), TimeUnit.MILLISECONDS);
 
         return configBuilder;
-    }
-
-    private static Driver createDriver(final String endpoint, final Config config,
-                                       final OpenCypherConnectionProperties properties)
-            throws SQLException {
-        if (properties.getAuthScheme().equals(AuthScheme.IAMSigV4)) {
-            LOGGER.info("Connection with IAMSigV4 authentication.");
-            return GraphDatabase.driver(endpoint,
-                    OpenCypherIAMRequestGenerator.getSignedHeader(endpoint, properties.getRegion()),
-                    config);
-        } else {
-            LOGGER.info("Connection with no authentication.");
-            return GraphDatabase.driver(endpoint, config);
-        }
-    }
-
-    /**
-     * This value overrides the default fetch size set in driver's config properties.
-     *
-     * @param fetchSize Number of records to return by query.
-     */
-    protected void setFetchSize(final int fetchSize) {
-        this.sessionConfig = SessionConfig.builder()
-                .withFetchSize(fetchSize)
-                .build();
-    }
-
-    protected int getMaxFetchSize() throws SQLException {
-        return MAX_FETCH_SIZE;
     }
 
     /**
@@ -154,14 +156,17 @@ public class OpenCypherQueryExecutor {
      * @return java.sql.ResultSet object returned from query execution.
      * @throws SQLException if query execution fails, or it was cancelled.
      */
-    @SneakyThrows
+    @Override
     public java.sql.ResultSet executeQuery(final String sql, final java.sql.Statement statement) throws
             SQLException {
-        final Constructor<?> constructor =
-                OpenCypherResultSet.class.getConstructor(java.sql.Statement.class, Session.class,
-                        Result.class,
-                        List.class, List.class);
-        return runQuery(constructor, statement, sql);
+        final Constructor<?> constructor;
+        try {
+            constructor = OpenCypherResultSet.class
+                    .getConstructor(java.sql.Statement.class, OpenCypherResultSet.ResultSetInfoWithRows.class);
+        } catch (final NoSuchMethodException e) {
+            throw new SQLException(e);
+        }
+        return runCancellableQuery(constructor, statement, sql);
     }
 
     /**
@@ -171,16 +176,20 @@ public class OpenCypherQueryExecutor {
      * @return java.sql.ResultSet object returned from query execution.
      * @throws SQLException if query execution fails, or it was cancelled.
      */
-    @SneakyThrows
+    @Override
     public java.sql.ResultSet executeGetTables(final java.sql.Statement statement, final String tableName)
             throws SQLException {
-        final Constructor<?> constructor =
-                OpenCypherResultSetGetTables.class.getConstructor(java.sql.Statement.class, Session.class,
-                        Result.class,
-                        List.class, List.class);
+        final Constructor<?> constructor;
+        try {
+            constructor =
+                    OpenCypherResultSetGetTables.class
+                            .getConstructor(java.sql.Statement.class, OpenCypherResultSet.ResultSetInfoWithRows.class);
+        } catch (final NoSuchMethodException e) {
+            throw new SQLException(e);
+        }
         final String query = tableName == null ? "MATCH (n) RETURN DISTINCT LABELS(n)" :
                 String.format("MATCH (n:%s) RETURN DISTINCT LABELS(n)", tableName);
-        return runQuery(constructor, statement, query);
+        return runCancellableQuery(constructor, statement, query);
     }
 
     /**
@@ -190,7 +199,7 @@ public class OpenCypherQueryExecutor {
      * @return java.sql.ResulSet Object containing schemas.
      * @throws SQLException if query execution fails, or it was cancelled.
      */
-    @SneakyThrows
+    @Override
     public java.sql.ResultSet executeGetSchemas(final java.sql.Statement statement)
             throws SQLException {
         return new OpenCypherResultSetGetSchemas(statement);
@@ -200,12 +209,10 @@ public class OpenCypherQueryExecutor {
      * Function to get catalogs.
      *
      * @param statement java.sql.Statement Object required for result set.
-     * @return java.sql.ResulSet Object containing catalogs.
-     * @throws SQLException if query execution fails, or it was cancelled.
+     * @return java.sql.ResultSet Object containing catalogs.
      */
-    @SneakyThrows
-    public java.sql.ResultSet executeGetCatalogs(final java.sql.Statement statement)
-            throws SQLException {
+    @Override
+    public java.sql.ResultSet executeGetCatalogs(final java.sql.Statement statement) {
         return new OpenCypherResultSetGetCatalogs(statement);
     }
 
@@ -213,12 +220,10 @@ public class OpenCypherQueryExecutor {
      * Function to get table types.
      *
      * @param statement java.sql.Statement Object required for result set.
-     * @return java.sql.ResulSet Object containing table types.
-     * @throws SQLException if query execution fails, or it was cancelled.
+     * @return java.sql.ResultSet Object containing table types.
      */
-    @SneakyThrows
-    public java.sql.ResultSet executeGetTableTypes(final java.sql.Statement statement)
-            throws SQLException {
+    @Override
+    public java.sql.ResultSet executeGetTableTypes(final java.sql.Statement statement) {
         return new OpenCypherResultSetGetTableTypes(statement);
     }
 
@@ -227,110 +232,47 @@ public class OpenCypherQueryExecutor {
      *
      * @param statement java.sql.Statement Object required for result set.
      * @param nodes     String containing nodes to get schema for.
-     * @return java.sql.ResulSet Object containing columns.
-     * @throws SQLException if query execution fails, or it was cancelled.
+     * @return java.sql.ResultSet Object containing columns.
      */
-    @SneakyThrows
+    @Override
     public java.sql.ResultSet executeGetColumns(final java.sql.Statement statement, final String nodes)
             throws SQLException {
-        return new OpenCypherResultSetGetColumns(statement,
-                OpenCypherSchemaHelper.getGraphSchema(connectionProperties.getEndpoint(), nodes));
+        final List<OpenCypherResultSetGetColumns.NodeColumnInfo> nodeColumnInfoList =
+                OpenCypherSchemaHelper.getGraphSchema(openCypherConnectionProperties.getEndpoint(), nodes);
+        return new OpenCypherResultSetGetColumns(statement, nodeColumnInfoList,
+                new OpenCypherResultSet.ResultSetInfoWithoutRows(null, null, nodeColumnInfoList.size(),
+                        OpenCypherResultSetGetColumns.getColumns())
+        );
     }
 
-    @SneakyThrows
-    private java.sql.ResultSet runQuery(final Constructor<?> constructor, final java.sql.Statement statement,
-                                        final String query) throws SQLException {
-        synchronized (lock) {
-            queryCancelled = false;
-            queryExecuted = false;
+    @Override
+    @SuppressWarnings("unchecked")
+    protected <T> T runQuery(final String query) throws SQLException {
+        synchronized (sessionLock) {
+            synchronized (DRIVER_LOCK) {
+                driver = getDriver(createConfigBuilder().build(), openCypherConnectionProperties, false);
+            }
+            session = driver.session();
         }
 
-        try {
-            session = driver.session(sessionConfig);
-            final Result result = session.run(query);
-            final List<Record> rows = result.list();
-            final List<String> columns = result.keys();
-            synchronized (lock) {
-                if (queryCancelled) {
-                    throw SqlError.createSQLException(
-                            LOGGER,
-                            SqlState.OPERATION_CANCELED,
-                            SqlError.QUERY_CANCELED);
-                }
-                queryExecuted = true;
-            }
-            return (java.sql.ResultSet) constructor.newInstance(
-                    statement, session, result, rows, columns);
-
-        } catch (final RuntimeException e) {
-            synchronized (lock) {
-                if (queryCancelled) {
-                    throw SqlError.createSQLException(
-                            LOGGER,
-                            SqlState.OPERATION_CANCELED,
-                            SqlError.QUERY_CANCELED);
-                } else {
-                    throw SqlError.createSQLException(
-                            LOGGER,
-                            SqlState.OPERATION_CANCELED,
-                            SqlError.QUERY_FAILED, e.getMessage());
-                }
-            }
+        final Result result = session.run(query);
+        final List<Record> rows = result.list();
+        final List<String> columns = result.keys();
+        final OpenCypherResultSet.ResultSetInfoWithRows openCypherResultSet =
+                new OpenCypherResultSet.ResultSetInfoWithRows(session, result, rows, columns);
+        synchronized (sessionLock) {
+            session = null;
         }
+        return (T) openCypherResultSet;
     }
 
-    /**
-     * Function to cancel running query.
-     * This has to be run in the different thread from the one running the query.
-     *
-     * @throws SQLException if query cancellation fails.
-     */
-    protected void cancelQuery() throws SQLException {
-        LOGGER.info("Cancel query invoked.");
-        synchronized (lock) {
-            if (session == null) {
-                throw SqlError.createSQLException(
-                        LOGGER,
-                        SqlState.OPERATION_CANCELED,
-                        SqlError.QUERY_NOT_STARTED);
-            }
-
-            if (queryCancelled) {
-                throw SqlError.createSQLException(
-                        LOGGER,
-                        SqlState.OPERATION_CANCELED,
-                        SqlError.QUERY_CANCELED);
-            }
-
-            if (!queryExecuted) {
+    @Override
+    protected void performCancel() throws SQLException {
+        synchronized (sessionLock) {
+            if (session != null) {
                 //noinspection deprecation
                 session.reset();
-                LOGGER.debug("Cancel query succeeded.");
-                queryCancelled = true;
-            } else {
-                throw SqlError.createSQLException(
-                        LOGGER,
-                        SqlState.OPERATION_CANCELED,
-                        SqlError.QUERY_CANNOT_BE_CANCELLED);
             }
         }
-    }
-
-    /**
-     * Get query execution timeout in seconds.
-     *
-     * @return Query execution timeout in seconds.
-     */
-    public int getQueryTimeout() {
-        return queryTimeout;
-    }
-
-    /**
-     * Set query execution timeout to the timeout in seconds.
-     *
-     * @param seconds Time in seconds to set query timeout to.
-     */
-    public void setQueryTimeout(final int seconds) {
-        queryTimeout = seconds;
     }
 }
