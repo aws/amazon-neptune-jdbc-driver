@@ -138,8 +138,7 @@ public class OpenCypherQueryExecutor extends QueryExecutor {
             LOGGER.info("Creating driver without encryption.");
             configBuilder.withoutEncryption();
         }
-        // TODO: Make this a config.
-        configBuilder.withMaxConnectionPoolSize(1000);
+        configBuilder.withMaxConnectionPoolSize(openCypherConnectionProperties.getConnectionPoolSize());
         configBuilder
                 .withConnectionTimeout(openCypherConnectionProperties.getConnectionTimeout(), TimeUnit.MILLISECONDS);
 

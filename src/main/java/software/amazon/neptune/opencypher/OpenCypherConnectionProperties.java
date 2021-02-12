@@ -72,4 +72,8 @@ public class OpenCypherConnectionProperties {
         newProperties.putAll(properties);
         return newProperties;
     }
+
+    protected int getConnectionPoolSize() {
+        return (int) properties.get(ConnectionProperties.CONNECTION_POOL_SIZE_KEY);
+    }
 }

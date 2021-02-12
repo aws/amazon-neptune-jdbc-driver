@@ -18,7 +18,7 @@ package software.amazon.jdbc;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import software.amazon.jdbc.utilities.Unwrapper;
+import software.amazon.jdbc.utilities.CastHelper;
 import java.sql.SQLException;
 
 /**
@@ -29,11 +29,11 @@ public abstract class ResultSetMetaData implements java.sql.ResultSetMetaData {
 
     @Override
     public boolean isWrapperFor(final Class<?> iface) {
-        return Unwrapper.isWrapperFor(iface, this);
+        return CastHelper.isWrapperFor(iface, this);
     }
 
     @Override
     public <T> T unwrap(final Class<T> iface) throws SQLException {
-        return Unwrapper.unwrap(iface, LOGGER, this);
+        return CastHelper.unwrap(iface, LOGGER, this);
     }
 }

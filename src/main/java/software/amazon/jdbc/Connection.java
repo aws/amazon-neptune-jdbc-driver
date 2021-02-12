@@ -20,12 +20,11 @@ import org.apache.log4j.LogManager;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import software.amazon.jdbc.utilities.CastHelper;
 import software.amazon.jdbc.utilities.ConnectionProperties;
 import software.amazon.jdbc.utilities.SqlError;
 import software.amazon.jdbc.utilities.SqlState;
-import software.amazon.jdbc.utilities.Unwrapper;
 import software.amazon.jdbc.utilities.Warning;
-
 import java.sql.Array;
 import java.sql.Blob;
 import java.sql.ClientInfoStatus;
@@ -143,7 +142,7 @@ public abstract class Connection implements java.sql.Connection {
 
     @Override
     public boolean isWrapperFor(final Class<?> iface) {
-        return Unwrapper.isWrapperFor(iface, this);
+        return CastHelper.isWrapperFor(iface, this);
     }
 
     @Override
@@ -165,7 +164,7 @@ public abstract class Connection implements java.sql.Connection {
 
     @Override
     public <T> T unwrap(final Class<T> iface) throws SQLException {
-        return Unwrapper.unwrap(iface, LOGGER, this);
+        return CastHelper.unwrap(iface, LOGGER, this);
     }
 
     @Override
@@ -182,6 +181,7 @@ public abstract class Connection implements java.sql.Connection {
 
     /**
      * Set a new warning if there were none, or add a new warning to the end of the list.
+     *
      * @param warning the {@link SQLWarning} to be set.SQLError
      */
     protected void addWarning(final SQLWarning warning) {
@@ -204,6 +204,7 @@ public abstract class Connection implements java.sql.Connection {
 
     /**
      * Verify the connection is open.
+     *
      * @throws SQLException if the connection is closed.
      */
     protected void verifyOpen() throws SQLException {

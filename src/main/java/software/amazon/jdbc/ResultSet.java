@@ -19,10 +19,10 @@ package software.amazon.jdbc;
 import lombok.Getter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import software.amazon.jdbc.utilities.CastHelper;
 import software.amazon.jdbc.utilities.JavaToJdbcTypeConverter;
 import software.amazon.jdbc.utilities.SqlError;
 import software.amazon.jdbc.utilities.SqlState;
-import software.amazon.jdbc.utilities.Unwrapper;
 import java.io.InputStream;
 import java.io.Reader;
 import java.math.BigDecimal;
@@ -66,8 +66,11 @@ public abstract class ResultSet implements java.sql.ResultSet {
     }
 
     protected abstract void doClose() throws SQLException;
+
     protected abstract int getDriverFetchSize() throws SQLException;
+
     protected abstract void setDriverFetchSize(int rows);
+
     protected abstract Object getConvertedValue(int columnIndex) throws SQLException;
 
     /**
@@ -140,12 +143,12 @@ public abstract class ResultSet implements java.sql.ResultSet {
 
     @Override
     public <T> T unwrap(final Class<T> iface) throws SQLException {
-        return Unwrapper.unwrap(iface, LOGGER, this);
+        return CastHelper.unwrap(iface, LOGGER, this);
     }
 
     @Override
     public boolean isWrapperFor(final Class<?> iface) {
-        return Unwrapper.isWrapperFor(iface, this);
+        return CastHelper.isWrapperFor(iface, this);
     }
 
     @Override

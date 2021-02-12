@@ -18,9 +18,9 @@ package software.amazon.jdbc;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import software.amazon.jdbc.utilities.CastHelper;
 import software.amazon.jdbc.utilities.SqlError;
 import software.amazon.jdbc.utilities.SqlState;
-import software.amazon.jdbc.utilities.Unwrapper;
 import software.amazon.jdbc.utilities.Warning;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -376,7 +376,7 @@ public abstract class Statement implements java.sql.Statement {
 
     @Override
     public boolean isWrapperFor(final Class<?> iface) {
-        return Unwrapper.isWrapperFor(iface, this);
+        return CastHelper.isWrapperFor(iface, this);
     }
 
     @Override
@@ -393,7 +393,7 @@ public abstract class Statement implements java.sql.Statement {
 
     @Override
     public <T> T unwrap(final Class<T> iface) throws SQLException {
-        return Unwrapper.unwrap(iface, LOGGER, this);
+        return CastHelper.unwrap(iface, LOGGER, this);
     }
 
     /**
