@@ -18,6 +18,7 @@ package software.amazon.jdbc;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import software.amazon.jdbc.utilities.CastHelper;
 import software.amazon.jdbc.utilities.SqlError;
 import software.amazon.jdbc.utilities.SqlState;
 import software.amazon.jdbc.utilities.Warning;
@@ -375,7 +376,7 @@ public abstract class Statement implements java.sql.Statement {
 
     @Override
     public boolean isWrapperFor(final Class<?> iface) {
-        return (null != iface) && iface.isAssignableFrom(this.getClass());
+        return CastHelper.isWrapperFor(iface, this);
     }
 
     @Override
@@ -392,15 +393,7 @@ public abstract class Statement implements java.sql.Statement {
 
     @Override
     public <T> T unwrap(final Class<T> iface) throws SQLException {
-        if (iface.isAssignableFrom(this.getClass())) {
-            return iface.cast(this);
-        }
-
-        throw SqlError.createSQLException(
-                LOGGER,
-                SqlState.DATA_EXCEPTION,
-                SqlError.CANNOT_UNWRAP,
-                iface.toString());
+        return CastHelper.unwrap(iface, LOGGER, this);
     }
 
     /**

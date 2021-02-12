@@ -19,6 +19,7 @@ package software.amazon.jdbc;
 import lombok.Getter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import software.amazon.jdbc.utilities.CastHelper;
 import software.amazon.jdbc.utilities.JavaToJdbcTypeConverter;
 import software.amazon.jdbc.utilities.SqlError;
 import software.amazon.jdbc.utilities.SqlState;
@@ -65,8 +66,11 @@ public abstract class ResultSet implements java.sql.ResultSet {
     }
 
     protected abstract void doClose() throws SQLException;
+
     protected abstract int getDriverFetchSize() throws SQLException;
+
     protected abstract void setDriverFetchSize(int rows);
+
     protected abstract Object getConvertedValue(int columnIndex) throws SQLException;
 
     /**
@@ -139,20 +143,12 @@ public abstract class ResultSet implements java.sql.ResultSet {
 
     @Override
     public <T> T unwrap(final Class<T> iface) throws SQLException {
-        if (iface.isAssignableFrom(this.getClass())) {
-            return iface.cast(this);
-        }
-
-        throw SqlError.createSQLException(
-                LOGGER,
-                SqlState.DATA_EXCEPTION,
-                SqlError.CANNOT_UNWRAP,
-                iface.toString());
+        return CastHelper.unwrap(iface, LOGGER, this);
     }
 
     @Override
     public boolean isWrapperFor(final Class<?> iface) {
-        return (null != iface) && iface.isAssignableFrom(this.getClass());
+        return CastHelper.isWrapperFor(iface, this);
     }
 
     @Override

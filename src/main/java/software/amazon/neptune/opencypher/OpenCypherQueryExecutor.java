@@ -58,12 +58,10 @@ public class OpenCypherQueryExecutor extends QueryExecutor {
         final Properties properties1 = openCypherConnectionProperties1.getProperties();
         final Properties properties2 = openCypherConnectionProperties2.getProperties();
         if (!properties1.keySet().equals(properties2.keySet())) {
-            System.out.println("Keyset different.");
             return false;
         }
         for (final Object key : properties1.keySet()) {
             if (!properties1.get(key).equals(properties2.get(key))) {
-                System.out.println("Keyset value different.");
                 return false;
             }
         }
@@ -140,8 +138,7 @@ public class OpenCypherQueryExecutor extends QueryExecutor {
             LOGGER.info("Creating driver without encryption.");
             configBuilder.withoutEncryption();
         }
-        // TODO: Make this a config.
-        configBuilder.withMaxConnectionPoolSize(1000);
+        configBuilder.withMaxConnectionPoolSize(openCypherConnectionProperties.getConnectionPoolSize());
         configBuilder
                 .withConnectionTimeout(openCypherConnectionProperties.getConnectionTimeout(), TimeUnit.MILLISECONDS);
 

@@ -20,7 +20,6 @@ import org.apache.log4j.Level;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -41,6 +40,7 @@ public class ConnectionProperties extends Properties {
     public static final String AUTH_SCHEME_KEY = "AuthScheme";
     public static final String USE_ENCRYPTION_KEY = "UseEncryption";
     public static final String REGION_KEY = "Region";
+    public static final String CONNECTION_POOL_SIZE_KEY = "ConnectionPoolSize";
 
     // TODO: Revisit. We should probably support these.
     public static final String AWS_CREDENTIALS_PROVIDER_CLASS_KEY = "AwsCredentialsProviderClass";
@@ -50,6 +50,7 @@ public class ConnectionProperties extends Properties {
     public static final int DEFAULT_CONNECTION_TIMEOUT_MILLIS = 5000;
     public static final int DEFAULT_CONNECTION_RETRY_COUNT = 3;
     public static final int DEFAULT_LOGIN_TIMEOUT_SEC = 0;
+    public static final int DEFAULT_CONNECTION_POOL_SIZE = 1000;
     public static final AuthScheme DEFAULT_AUTH_SCHEME = AuthScheme.None;
     public static final boolean DEFAULT_USE_ENCRYPTION = true;
     public static final Map<String, Object> DEFAULT_PROPERTIES_MAP = new HashMap<>();
@@ -62,6 +63,10 @@ public class ConnectionProperties extends Properties {
         PROPERTIES_MAP.put(CUSTOM_CREDENTIALS_FILE_PATH_KEY, (key, value) -> value);
         PROPERTIES_MAP.put(ENDPOINT_KEY, (key, value) -> value);
         PROPERTIES_MAP.put(REGION_KEY, (key, value) -> value);
+        PROPERTIES_MAP.put(CONNECTION_TIMEOUT_MILLIS_KEY, ConnectionProperties::getUnsigned);
+        PROPERTIES_MAP.put(CONNECTION_RETRY_COUNT_KEY, ConnectionProperties::getUnsigned);
+        PROPERTIES_MAP.put(CONNECTION_POOL_SIZE_KEY, ConnectionProperties::getUnsigned);
+        PROPERTIES_MAP.put(USE_ENCRYPTION_KEY, ConnectionProperties::getBoolean);
         PROPERTIES_MAP.put(LOG_LEVEL_KEY, (key, value) -> {
             if (isWhitespace(value)) {
                 return DEFAULT_LOG_LEVEL;
@@ -81,34 +86,6 @@ public class ConnectionProperties extends Properties {
             }
             return logLevelsMap.get(value.toUpperCase());
         });
-        PROPERTIES_MAP.put(CONNECTION_TIMEOUT_MILLIS_KEY, (key, value) -> {
-            if (isWhitespace(value)) {
-                return DEFAULT_CONNECTION_TIMEOUT_MILLIS;
-            }
-            try {
-                final int intValue = Integer.parseUnsignedInt(value);
-                if (intValue < 0) {
-                    throw invalidConnectionPropertyError(key, value);
-                }
-                return intValue;
-            } catch (final NumberFormatException e) {
-                throw invalidConnectionPropertyError(key, value);
-            }
-        });
-        PROPERTIES_MAP.put(CONNECTION_RETRY_COUNT_KEY, (key, value) -> {
-            if (isWhitespace(value)) {
-                return DEFAULT_CONNECTION_RETRY_COUNT;
-            }
-            try {
-                final int intValue = Integer.parseUnsignedInt(value);
-                if (intValue < 0) {
-                    throw invalidConnectionPropertyError(key, value);
-                }
-                return intValue;
-            } catch (final NumberFormatException e) {
-                throw invalidConnectionPropertyError(key, value);
-            }
-        });
         PROPERTIES_MAP.put(AUTH_SCHEME_KEY, (key, value) -> {
             if (isWhitespace(value)) {
                 return DEFAULT_AUTH_SCHEME;
@@ -117,18 +94,6 @@ public class ConnectionProperties extends Properties {
                 throw invalidConnectionPropertyError(key, value);
             }
             return AuthScheme.fromString(value);
-        });
-        PROPERTIES_MAP.put(USE_ENCRYPTION_KEY, (key, value) -> {
-            if (isWhitespace(value)) {
-                return DEFAULT_USE_ENCRYPTION;
-            }
-            final Map<String, Boolean> stringBooleanMap = ImmutableMap.of(
-                    "1", true, "true", true,
-                    "0", false, "false", false);
-            if (!stringBooleanMap.containsKey(value.toLowerCase())) {
-                throw invalidConnectionPropertyError(key, value);
-            }
-            return stringBooleanMap.get(value.toLowerCase());
         });
     }
 
@@ -140,6 +105,7 @@ public class ConnectionProperties extends Properties {
         DEFAULT_PROPERTIES_MAP.put(AUTH_SCHEME_KEY, DEFAULT_AUTH_SCHEME);
         DEFAULT_PROPERTIES_MAP.put(USE_ENCRYPTION_KEY, DEFAULT_USE_ENCRYPTION);
         DEFAULT_PROPERTIES_MAP.put(REGION_KEY, "");
+        DEFAULT_PROPERTIES_MAP.put(CONNECTION_POOL_SIZE_KEY, DEFAULT_CONNECTION_POOL_SIZE);
     }
 
     /**
@@ -160,6 +126,34 @@ public class ConnectionProperties extends Properties {
 
     private static boolean isWhitespace(@NonNull final String value) {
         return Pattern.matches("^\\s*$", value);
+    }
+
+    private static int getUnsigned(@NonNull final String key, @NonNull final String value) throws SQLException {
+        if (isWhitespace(value)) {
+            return (int) DEFAULT_PROPERTIES_MAP.get(key);
+        }
+        try {
+            final int intValue = Integer.parseUnsignedInt(value);
+            if (intValue < 0) {
+                throw invalidConnectionPropertyError(key, value);
+            }
+            return intValue;
+        } catch (final NumberFormatException | SQLException e) {
+            throw invalidConnectionPropertyError(key, value);
+        }
+    }
+
+    private static boolean getBoolean(@NonNull final String key, @NonNull final String value) throws SQLException {
+        if (isWhitespace(value)) {
+            return (boolean) DEFAULT_PROPERTIES_MAP.get(key);
+        }
+        final Map<String, Boolean> stringBooleanMap = ImmutableMap.of(
+                "1", true, "true", true,
+                "0", false, "false", false);
+        if (!stringBooleanMap.containsKey(value.toLowerCase())) {
+            throw invalidConnectionPropertyError(key, value);
+        }
+        return stringBooleanMap.get(value.toLowerCase());
     }
 
     private static SQLException invalidConnectionPropertyError(final Object key, final Object value) {
@@ -237,7 +231,8 @@ public class ConnectionProperties extends Properties {
                 throw missingConnectionPropertyError("A Region must be provided to use IAMSigV4 Authentication");
             }
             if (!getUseEncryption()) {
-                throw invalidConnectionPropertyValueError(USE_ENCRYPTION_KEY, "Encryption must be enabled if IAMSigV4 is used.");
+                throw invalidConnectionPropertyValueError(USE_ENCRYPTION_KEY,
+                        "Encryption must be enabled if IAMSigV4 is used.");
             }
         }
     }
@@ -448,6 +443,28 @@ public class ConnectionProperties extends Properties {
     public void setRegion(final String region) throws SQLException {
         setProperty(REGION_KEY,
                 (String) PROPERTIES_MAP.get(REGION_KEY).convert(REGION_KEY, region));
+    }
+
+    /**
+     * Gets the connection pool size.
+     *
+     * @return The connection pool size.
+     */
+    public int getConnectionPoolSize() {
+        return (int) get(CONNECTION_POOL_SIZE_KEY);
+    }
+
+    /**
+     * Sets the connection pool size.
+     *
+     * @param connectionPoolSize The connection pool size.
+     * @throws SQLException if value is invalid.
+     */
+    public void setConnectionPoolSize(final int connectionPoolSize) throws SQLException {
+        if (connectionPoolSize < 0) {
+            throw invalidConnectionPropertyError(CONNECTION_POOL_SIZE_KEY, connectionPoolSize);
+        }
+        put(CONNECTION_POOL_SIZE_KEY, connectionPoolSize);
     }
 
     /**

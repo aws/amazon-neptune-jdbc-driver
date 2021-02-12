@@ -16,8 +16,8 @@
 
 package software.amazon.jdbc;
 
-import software.amazon.jdbc.utilities.SqlError;
-import software.amazon.jdbc.utilities.SqlState;
+import org.slf4j.LoggerFactory;
+import software.amazon.jdbc.utilities.CastHelper;
 import java.io.PrintWriter;
 import java.sql.SQLException;
 import java.sql.SQLFeatureNotSupportedException;
@@ -31,20 +31,12 @@ public abstract class DataSource implements javax.sql.DataSource, javax.sql.Conn
 
     @Override
     public <T> T unwrap(final Class<T> iface) throws SQLException {
-        if (isWrapperFor(iface)) {
-            return iface.cast(this);
-        }
-
-        throw SqlError.createSQLException(
-                LOGGER,
-                SqlState.DATA_EXCEPTION,
-                SqlError.CANNOT_UNWRAP,
-                iface.toString());
+        return CastHelper.unwrap(iface, LoggerFactory.getLogger(DataSource.class), this);
     }
 
     @Override
-    public boolean isWrapperFor(final Class<?> iface) throws SQLException {
-        return (null != iface) && iface.isAssignableFrom(this.getClass());
+    public boolean isWrapperFor(final Class<?> iface) {
+        return CastHelper.isWrapperFor(iface, this);
     }
 
     @Override

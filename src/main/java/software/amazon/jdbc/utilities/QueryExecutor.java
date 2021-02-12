@@ -136,7 +136,6 @@ public abstract class QueryExecutor {
             synchronized (lock) {
                 if (queryState.equals(QueryState.CANCELLED)) {
                     resetQueryState();
-                    System.out.println("throwing");
                     throw SqlError.createSQLException(
                             LOGGER,
                             SqlState.OPERATION_CANCELED,
