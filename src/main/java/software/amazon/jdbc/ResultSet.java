@@ -22,6 +22,7 @@ import org.slf4j.LoggerFactory;
 import software.amazon.jdbc.utilities.JavaToJdbcTypeConverter;
 import software.amazon.jdbc.utilities.SqlError;
 import software.amazon.jdbc.utilities.SqlState;
+import software.amazon.jdbc.utilities.Unwrapper;
 import java.io.InputStream;
 import java.io.Reader;
 import java.math.BigDecimal;
@@ -139,20 +140,12 @@ public abstract class ResultSet implements java.sql.ResultSet {
 
     @Override
     public <T> T unwrap(final Class<T> iface) throws SQLException {
-        if (iface.isAssignableFrom(this.getClass())) {
-            return iface.cast(this);
-        }
-
-        throw SqlError.createSQLException(
-                LOGGER,
-                SqlState.DATA_EXCEPTION,
-                SqlError.CANNOT_UNWRAP,
-                iface.toString());
+        return Unwrapper.unwrap(iface, LOGGER, this);
     }
 
     @Override
     public boolean isWrapperFor(final Class<?> iface) {
-        return (null != iface) && iface.isAssignableFrom(this.getClass());
+        return Unwrapper.isWrapperFor(iface, this);
     }
 
     @Override

@@ -48,7 +48,6 @@ public class OpenCypherDataSource extends software.amazon.jdbc.DataSource implem
 
     @Override
     public Connection getConnection(final String username, final String password) throws SQLException {
-        // TODO: Add some auth logic.
         return DriverManager.getConnection(OPEN_CYPHER_PREFIX, connectionProperties);
     }
 

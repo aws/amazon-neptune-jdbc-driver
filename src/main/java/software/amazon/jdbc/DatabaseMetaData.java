@@ -18,7 +18,7 @@ package software.amazon.jdbc;
 
 import org.slf4j.LoggerFactory;
 import software.amazon.jdbc.utilities.SqlError;
-import software.amazon.jdbc.utilities.SqlState;
+import software.amazon.jdbc.utilities.Unwrapper;
 import java.sql.ResultSet;
 import java.sql.RowIdLifetime;
 import java.sql.SQLException;
@@ -36,29 +36,21 @@ public abstract class DatabaseMetaData implements java.sql.DatabaseMetaData {
 
     /**
      * DatabaseMetaData constructor.
+     *
      * @param connection Connection Object.
      */
     public DatabaseMetaData(final java.sql.Connection connection) {
         this.connection = connection;
     }
 
-    // TODO: This unwrap and isWrapperFor is everywhere, try to make a generic static function to handle them.
     @Override
     public <T> T unwrap(final Class<T> iface) throws SQLException {
-        if (iface.isAssignableFrom(this.getClass())) {
-            return iface.cast(this);
-        }
-
-        throw SqlError.createSQLException(
-                LOGGER,
-                SqlState.DATA_EXCEPTION,
-                SqlError.CANNOT_UNWRAP,
-                iface.toString());
+        return Unwrapper.unwrap(iface, LOGGER, this);
     }
 
     @Override
     public boolean isWrapperFor(final Class<?> iface) {
-        return (null != iface) && iface.isAssignableFrom(this.getClass());
+        return Unwrapper.isWrapperFor(iface, this);
     }
 
     @Override

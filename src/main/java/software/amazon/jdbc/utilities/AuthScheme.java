@@ -37,7 +37,7 @@ public enum AuthScheme {
      * @return The enum value if string is recognized as a valid value, otherwise null.
      */
     public static AuthScheme fromString(@NonNull final String in) {
-        for (AuthScheme scheme : AuthScheme.values()) {
+        for (final AuthScheme scheme : AuthScheme.values()) {
             if (scheme.stringValue.equalsIgnoreCase(in)) {
                 return scheme;
             }
