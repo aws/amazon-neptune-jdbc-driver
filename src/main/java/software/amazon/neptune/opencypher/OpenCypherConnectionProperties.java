@@ -31,6 +31,7 @@ public class OpenCypherConnectionProperties {
             ConnectionProperties.ENDPOINT_KEY,
             ConnectionProperties.CONNECTION_TIMEOUT_MILLIS_KEY,
             ConnectionProperties.CONNECTION_RETRY_COUNT_KEY,
+            ConnectionProperties.CONNECTION_POOL_SIZE_KEY,
             ConnectionProperties.AUTH_SCHEME_KEY,
             ConnectionProperties.REGION_KEY,
             ConnectionProperties.USE_ENCRYPTION_KEY);
