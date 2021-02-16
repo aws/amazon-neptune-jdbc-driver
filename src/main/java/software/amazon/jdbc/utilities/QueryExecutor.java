@@ -125,8 +125,10 @@ public abstract class QueryExecutor {
                                                          final String query) throws SQLException {
         synchronized (lock) {
             if (queryState.equals(QueryState.IN_PROGRESS)) {
-                // TODO: Fix exception.
-                throw new SQLException("Another query is already in progress.");
+                throw SqlError.createSQLException(
+                        LOGGER,
+                        SqlState.OPERATION_CANCELED,
+                        SqlError.QUERY_IN_PROGRESS);
             }
             queryState = QueryState.IN_PROGRESS;
         }
@@ -157,7 +159,7 @@ public abstract class QueryExecutor {
                     throw SqlError.createSQLException(
                             LOGGER,
                             SqlState.OPERATION_CANCELED,
-                            SqlError.QUERY_FAILED, e.getMessage());
+                            SqlError.QUERY_FAILED, e);
                 }
             }
         }

@@ -19,6 +19,7 @@ package software.amazon.jdbc;
 import org.slf4j.LoggerFactory;
 import software.amazon.jdbc.utilities.ConnectionProperties;
 import software.amazon.jdbc.utilities.SqlError;
+import software.amazon.jdbc.utilities.SqlState;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -130,8 +131,10 @@ public abstract class Driver implements java.sql.Driver {
         if (matcher.matches()) {
             return matcher.group(1);
         }
-        // TODO proper exception.
-        throw new SQLException("Unsupported url " + url);
+        throw SqlError.createSQLException(
+                LOGGER,
+                SqlState.CONNECTION_EXCEPTION,
+                SqlError.UNSUPPORTED_LANGUAGE, url);
     }
 
     protected String getPropertyString(final String url, final Pattern jdbcPattern) throws SQLException {
@@ -139,8 +142,10 @@ public abstract class Driver implements java.sql.Driver {
         if (matcher.matches()) {
             return matcher.group(2);
         }
-        // TODO proper exception.
-        throw new SQLException("Unsupported property string.");
+        throw SqlError.createSQLException(
+                LOGGER,
+                SqlState.CONNECTION_EXCEPTION,
+                SqlError.UNSUPPORTED_PROPERTIES_STRING, url);
     }
 
     protected Properties parsePropertyString(final String propertyString) {

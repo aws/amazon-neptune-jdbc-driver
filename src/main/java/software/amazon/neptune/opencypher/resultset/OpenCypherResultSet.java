@@ -26,6 +26,8 @@ import org.neo4j.driver.internal.types.InternalTypeSystem;
 import org.neo4j.driver.types.Type;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import software.amazon.jdbc.utilities.SqlError;
+import software.amazon.jdbc.utilities.SqlState;
 import software.amazon.neptune.opencypher.OpenCypherTypeMapping;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
@@ -125,7 +127,10 @@ public class OpenCypherResultSet extends software.amazon.jdbc.ResultSet implemen
     private Value getValue(final int columnIndex) throws SQLException {
         verifyOpen();
         if (rows == null) {
-            throw new SQLException("Error, invalid ResultSet type for this functionality.");
+            throw SqlError.createSQLException(
+                    LOGGER,
+                    SqlState.DATA_EXCEPTION,
+                    SqlError.UNSUPPORTED_RESULT_SET_TYPE);
         }
         validateRowColumn(columnIndex);
         final Value value = rows.get(getRowIndex()).get(columnIndex);

@@ -347,7 +347,10 @@ public abstract class ResultSet implements java.sql.ResultSet {
     public <T> T getObject(final int columnIndex, final Class<T> type) throws SQLException {
         LOGGER.trace("Getting column {} as an Object using provided Type.", columnIndex);
         if (type == null) {
-            throw new SQLException("Type provided to getObject is null.");
+            throw SqlError.createSQLException(
+                    LOGGER,
+                    SqlState.DATA_EXCEPTION,
+                    SqlError.INVALID_TYPE);
         }
         return (T) JavaToJdbcTypeConverter.CLASS_CONVERTER_MAP.get(type).function(getConvertedValue(columnIndex));
     }

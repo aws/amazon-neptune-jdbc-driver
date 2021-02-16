@@ -25,6 +25,8 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import software.amazon.jdbc.utilities.SqlError;
+import software.amazon.jdbc.utilities.SqlState;
 import software.amazon.neptune.opencypher.resultset.OpenCypherResultSetGetColumns;
 import java.io.File;
 import java.io.IOException;
@@ -78,14 +80,18 @@ public class OpenCypherSchemaHelper {
         try {
             deleteDirectoryIfExists(path);
         } catch (IOException e) {
-            // TODO: Better exception
-            throw new SQLException(e);
+            throw SqlError.createSQLException(
+                    LOGGER,
+                    SqlState.CONNECTION_FAILURE,
+                    SqlError.FAILED_TO_DELETE_DIRECTORY);
         }
         final File outputDirectory = new File(path.toAbsolutePath().toString());
         if (!outputDirectory.exists()) {
             if (!outputDirectory.mkdirs()) {
-                // TODO: Better exception
-                throw new SQLException("Failed to create unique output directory.");
+                throw SqlError.createSQLException(
+                        LOGGER,
+                        SqlState.CONNECTION_FAILURE,
+                        SqlError.FAILED_TO_CREATE_DIRECTORY);
             }
         }
         return path.toString();
@@ -113,7 +119,10 @@ public class OpenCypherSchemaHelper {
                                                         final String outputPath) throws SQLException {
         final String[] endpointSplit = endpoint.split(":");
         if ((endpointSplit.length != 3) || (!endpointSplit[1].startsWith("//"))) {
-            throw new SQLException("Could not run schema against endpoint '" + endpoint + "'.");
+            throw SqlError.createSQLException(
+                    LOGGER,
+                    SqlState.CONNECTION_FAILURE,
+                    SqlError.INVALID_ENDPOINT, endpoint);
         }
         final String adjustedEndpoint = endpointSplit[1].substring(2);
         final List<String> arguments = new LinkedList<>();
@@ -142,7 +151,10 @@ public class OpenCypherSchemaHelper {
             cmd.run();
             return getOutputFiles(outputPath);
         } catch (final Exception e) {
-            throw new SQLException(String.format("Failed to run schema export '%s'.", e));
+            throw SqlError.createSQLException(
+                    LOGGER,
+                    SqlState.CONNECTION_FAILURE,
+                    SqlError.FAILED_TO_RUN_SCHEMA_EXPORT, e);
         }
     }
 

@@ -25,6 +25,7 @@ import org.slf4j.LoggerFactory;
 import software.amazon.jdbc.utilities.JavaToJdbcTypeConverter;
 import software.amazon.jdbc.utilities.JdbcType;
 import software.amazon.jdbc.utilities.SqlError;
+import software.amazon.jdbc.utilities.SqlState;
 import software.amazon.neptune.opencypher.OpenCypherTypeMapping;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSetMetaData;
@@ -196,8 +197,10 @@ public class OpenCypherResultSetGetColumns extends OpenCypherResultSet {
                 map.put("COLUMN_SIZE", null);
             }
             if (!map.keySet().equals(new HashSet<>(ORDERED_COLUMNS))) {
-                throw new SQLException(
-                        "Encountered error while parsing column metadata. Map key set does not match expected key set.");
+                throw SqlError.createSQLException(
+                        LOGGER,
+                        SqlState.DATA_TYPE_TRANSFORM_VIOLATION,
+                        SqlError.UNSUPPORTED_TYPE, map.keySet().toString());
             }
             rows.add(map);
         }

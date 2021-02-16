@@ -24,6 +24,7 @@ import org.neo4j.driver.types.Type;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import software.amazon.jdbc.utilities.SqlError;
+import software.amazon.jdbc.utilities.SqlState;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -79,8 +80,10 @@ public class OpenCypherResultSetGetTables extends OpenCypherResultSet implements
         super(statement, resultSetInfoWithRows);
         this.rows = resultSetInfoWithRows.getRows();
         if (!resultSetInfoWithRows.getColumns().equals(EXPECTED_COLUMNS)) {
-            throw new SQLException(String.format("Encountered unexpected return values for getTables function '%s'.",
-                    resultSetInfoWithRows.getColumns().toString()));
+            throw SqlError.createSQLException(
+                    LOGGER,
+                    SqlState.DATA_TYPE_TRANSFORM_VIOLATION,
+                    SqlError.UNSUPPORTED_TYPE, resultSetInfoWithRows.getColumns().toString());
         }
     }
 
@@ -119,11 +122,17 @@ public class OpenCypherResultSetGetTables extends OpenCypherResultSet implements
             } else if (key.equals(TABLE_NAME)) {
                 final Value labels = rows.get(getRowIndex()).get(LABELS_KEY);
                 if (!labels.type().equals(InternalTypeSystem.TYPE_SYSTEM.LIST())) {
-                    throw new SQLException("Unexpected key encountered while getting schema.");
+                    throw SqlError.createSQLException(
+                            LOGGER,
+                            SqlState.DATA_TYPE_TRANSFORM_VIOLATION,
+                            SqlError.UNSUPPORTED_TYPE, labels.toString());
                 }
                 final List<?> objectLabels = labels.asList();
                 if (objectLabels.stream().anyMatch(o -> !(o instanceof String))) {
-                    throw new SQLException("Unexpected datatype encountered while getting schema..");
+                    throw SqlError.createSQLException(
+                            LOGGER,
+                            SqlState.DATA_TYPE_TRANSFORM_VIOLATION,
+                            SqlError.UNSUPPORTED_TYPE, objectLabels.toString());
                 }
                 return nodeListToString((List<String>) objectLabels);
             }
