@@ -19,6 +19,7 @@ package software.amazon.neptune.opencypher;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import software.amazon.jdbc.helpers.HelperFunctions;
 import software.amazon.jdbc.utilities.ConnectionProperties;
@@ -48,10 +49,6 @@ public class OpenCypherPreparedStatementTest extends OpenCypherStatementTestBase
         database = MockOpenCypherDatabase.builder(HOSTNAME, OpenCypherPreparedStatementTest.class.getName()).build();
         PROPERTIES.putIfAbsent(ConnectionProperties.ENDPOINT_KEY,
                 String.format("bolt://%s:%d", HOSTNAME, database.getPort()));
-        final java.sql.Connection connection = new OpenCypherConnection(new ConnectionProperties(PROPERTIES));
-        openCypherPreparedStatement = connection.prepareStatement("");
-        openCypherPreparedStatementLongQuery = connection.prepareStatement(getLongQuery());
-        openCypherPreparedStatementQuickQuery = connection.prepareStatement(QUICK_QUERY);
     }
 
     /**
@@ -60,6 +57,14 @@ public class OpenCypherPreparedStatementTest extends OpenCypherStatementTestBase
     @AfterAll
     public static void shutdownDatabase() {
         database.shutdown();
+    }
+
+    @BeforeEach
+    void initialize() throws SQLException {
+        final java.sql.Connection connection = new OpenCypherConnection(new ConnectionProperties(PROPERTIES));
+        openCypherPreparedStatement = connection.prepareStatement("");
+        openCypherPreparedStatementLongQuery = connection.prepareStatement(getLongQuery());
+        openCypherPreparedStatementQuickQuery = connection.prepareStatement(QUICK_QUERY);
     }
 
     @Test
