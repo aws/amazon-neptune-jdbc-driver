@@ -31,6 +31,7 @@ import java.sql.Blob;
 import java.sql.Clob;
 import java.sql.NClob;
 import java.sql.SQLException;
+import java.sql.SQLFeatureNotSupportedException;
 import java.util.Properties;
 
 public class OpenCypherPreparedStatementTest extends OpenCypherStatementTestBase {
@@ -105,119 +106,119 @@ public class OpenCypherPreparedStatementTest extends OpenCypherStatementTestBase
 
     @Test
     void testExecuteUpdate() {
-        HelperFunctions.expectFunctionThrows(SqlError.PARAMETERS_NOT_SUPPORTED,
+        Assertions.assertThrows(SQLFeatureNotSupportedException.class,
                 () -> openCypherPreparedStatement.executeUpdate());
     }
 
     @Test
     void testMisc() {
-        HelperFunctions
-                .expectFunctionThrows(SqlError.PARAMETERS_NOT_SUPPORTED, () -> openCypherPreparedStatement.addBatch());
-        HelperFunctions.expectFunctionThrows(SqlError.PARAMETERS_NOT_SUPPORTED,
+        Assertions.assertThrows(SQLFeatureNotSupportedException.class,
+                () -> openCypherPreparedStatement.addBatch());
+        Assertions.assertThrows(SQLFeatureNotSupportedException.class,
                 () -> openCypherPreparedStatement.clearParameters());
-        HelperFunctions.expectFunctionThrows(SqlError.PARAMETERS_NOT_SUPPORTED,
+        Assertions.assertThrows(SQLFeatureNotSupportedException.class,
                 () -> openCypherPreparedStatement.getParameterMetaData());
     }
 
     @Test
     void testSet() {
-        HelperFunctions.expectFunctionThrows(SqlError.PARAMETERS_NOT_SUPPORTED,
+        Assertions.assertThrows(SQLFeatureNotSupportedException.class,
                 () -> openCypherPreparedStatement.setArray(0, null));
-        HelperFunctions.expectFunctionThrows(SqlError.PARAMETERS_NOT_SUPPORTED,
+        Assertions.assertThrows(SQLFeatureNotSupportedException.class,
                 () -> openCypherPreparedStatement.setAsciiStream(0, null, 0));
-        HelperFunctions.expectFunctionThrows(SqlError.PARAMETERS_NOT_SUPPORTED,
+        Assertions.assertThrows(SQLFeatureNotSupportedException.class,
                 () -> openCypherPreparedStatement.setAsciiStream(0, null, 0));
-        HelperFunctions.expectFunctionThrows(SqlError.PARAMETERS_NOT_SUPPORTED,
+        Assertions.assertThrows(SQLFeatureNotSupportedException.class,
                 () -> openCypherPreparedStatement.setAsciiStream(0, null, (long) 0));
-        HelperFunctions.expectFunctionThrows(SqlError.PARAMETERS_NOT_SUPPORTED,
+        Assertions.assertThrows(SQLFeatureNotSupportedException.class,
                 () -> openCypherPreparedStatement.setAsciiStream(0, null));
-        HelperFunctions.expectFunctionThrows(SqlError.PARAMETERS_NOT_SUPPORTED,
+        Assertions.assertThrows(SQLFeatureNotSupportedException.class,
                 () -> openCypherPreparedStatement.setBigDecimal(0, null));
-        HelperFunctions.expectFunctionThrows(SqlError.PARAMETERS_NOT_SUPPORTED,
+        Assertions.assertThrows(SQLFeatureNotSupportedException.class,
                 () -> openCypherPreparedStatement.setBinaryStream(0, null, 0));
-        HelperFunctions.expectFunctionThrows(SqlError.PARAMETERS_NOT_SUPPORTED,
+        Assertions.assertThrows(SQLFeatureNotSupportedException.class,
                 () -> openCypherPreparedStatement.setBinaryStream(0, null, (long) 0));
-        HelperFunctions.expectFunctionThrows(SqlError.PARAMETERS_NOT_SUPPORTED,
+        Assertions.assertThrows(SQLFeatureNotSupportedException.class,
                 () -> openCypherPreparedStatement.setBinaryStream(0, null));
-        HelperFunctions.expectFunctionThrows(SqlError.PARAMETERS_NOT_SUPPORTED,
+        Assertions.assertThrows(SQLFeatureNotSupportedException.class,
                 () -> openCypherPreparedStatement.setBlob(0, (Blob) null));
-        HelperFunctions.expectFunctionThrows(SqlError.PARAMETERS_NOT_SUPPORTED,
+        Assertions.assertThrows(SQLFeatureNotSupportedException.class,
                 () -> openCypherPreparedStatement.setBlob(0, null, 0));
-        HelperFunctions.expectFunctionThrows(SqlError.PARAMETERS_NOT_SUPPORTED,
+        Assertions.assertThrows(SQLFeatureNotSupportedException.class,
                 () -> openCypherPreparedStatement.setBlob(0, (InputStream) null));
-        HelperFunctions.expectFunctionThrows(SqlError.PARAMETERS_NOT_SUPPORTED,
+        Assertions.assertThrows(SQLFeatureNotSupportedException.class,
                 () -> openCypherPreparedStatement.setBoolean(0, false));
-        HelperFunctions.expectFunctionThrows(SqlError.PARAMETERS_NOT_SUPPORTED,
+        Assertions.assertThrows(SQLFeatureNotSupportedException.class,
                 () -> openCypherPreparedStatement.setByte(0, (byte) 0));
-        HelperFunctions.expectFunctionThrows(SqlError.PARAMETERS_NOT_SUPPORTED,
+        Assertions.assertThrows(SQLFeatureNotSupportedException.class,
                 () -> openCypherPreparedStatement.setBytes(0, null));
-        HelperFunctions.expectFunctionThrows(SqlError.PARAMETERS_NOT_SUPPORTED,
+        Assertions.assertThrows(SQLFeatureNotSupportedException.class,
                 () -> openCypherPreparedStatement.setCharacterStream(0, null, 0));
-        HelperFunctions.expectFunctionThrows(SqlError.PARAMETERS_NOT_SUPPORTED,
+        Assertions.assertThrows(SQLFeatureNotSupportedException.class,
                 () -> openCypherPreparedStatement.setCharacterStream(0, null, (long) 0));
-        HelperFunctions.expectFunctionThrows(SqlError.PARAMETERS_NOT_SUPPORTED,
+        Assertions.assertThrows(SQLFeatureNotSupportedException.class,
                 () -> openCypherPreparedStatement.setCharacterStream(0, null));
-        HelperFunctions.expectFunctionThrows(SqlError.PARAMETERS_NOT_SUPPORTED,
+        Assertions.assertThrows(SQLFeatureNotSupportedException.class,
                 () -> openCypherPreparedStatement.setClob(0, (Clob) null));
-        HelperFunctions.expectFunctionThrows(SqlError.PARAMETERS_NOT_SUPPORTED,
+        Assertions.assertThrows(SQLFeatureNotSupportedException.class,
                 () -> openCypherPreparedStatement.setClob(0, null, 0));
-        HelperFunctions.expectFunctionThrows(SqlError.PARAMETERS_NOT_SUPPORTED,
+        Assertions.assertThrows(SQLFeatureNotSupportedException.class,
                 () -> openCypherPreparedStatement.setClob(0, (Reader) null));
-        HelperFunctions.expectFunctionThrows(SqlError.PARAMETERS_NOT_SUPPORTED,
+        Assertions.assertThrows(SQLFeatureNotSupportedException.class,
                 () -> openCypherPreparedStatement.setDate(0, null));
-        HelperFunctions.expectFunctionThrows(SqlError.PARAMETERS_NOT_SUPPORTED,
+        Assertions.assertThrows(SQLFeatureNotSupportedException.class,
                 () -> openCypherPreparedStatement.setDate(0, null, null));
-        HelperFunctions.expectFunctionThrows(SqlError.PARAMETERS_NOT_SUPPORTED,
+        Assertions.assertThrows(SQLFeatureNotSupportedException.class,
                 () -> openCypherPreparedStatement.setDouble(0, 0));
-        HelperFunctions.expectFunctionThrows(SqlError.PARAMETERS_NOT_SUPPORTED,
+        Assertions.assertThrows(SQLFeatureNotSupportedException.class,
                 () -> openCypherPreparedStatement.setFloat(0, (float) 0));
-        HelperFunctions.expectFunctionThrows(SqlError.PARAMETERS_NOT_SUPPORTED,
+        Assertions.assertThrows(SQLFeatureNotSupportedException.class,
                 () -> openCypherPreparedStatement.setInt(0, 0));
-        HelperFunctions.expectFunctionThrows(SqlError.PARAMETERS_NOT_SUPPORTED,
+        Assertions.assertThrows(SQLFeatureNotSupportedException.class,
                 () -> openCypherPreparedStatement.setLong(0, 0));
-        HelperFunctions.expectFunctionThrows(SqlError.PARAMETERS_NOT_SUPPORTED,
+        Assertions.assertThrows(SQLFeatureNotSupportedException.class,
                 () -> openCypherPreparedStatement.setNCharacterStream(0, null, 0));
-        HelperFunctions.expectFunctionThrows(SqlError.PARAMETERS_NOT_SUPPORTED,
+        Assertions.assertThrows(SQLFeatureNotSupportedException.class,
                 () -> openCypherPreparedStatement.setNCharacterStream(0, null));
-        HelperFunctions.expectFunctionThrows(SqlError.PARAMETERS_NOT_SUPPORTED,
+        Assertions.assertThrows(SQLFeatureNotSupportedException.class,
                 () -> openCypherPreparedStatement.setNClob(0, (NClob) null));
-        HelperFunctions.expectFunctionThrows(SqlError.PARAMETERS_NOT_SUPPORTED,
+        Assertions.assertThrows(SQLFeatureNotSupportedException.class,
                 () -> openCypherPreparedStatement.setNClob(0, null, 0));
-        HelperFunctions.expectFunctionThrows(SqlError.PARAMETERS_NOT_SUPPORTED,
+        Assertions.assertThrows(SQLFeatureNotSupportedException.class,
                 () -> openCypherPreparedStatement.setNClob(0, (Reader) null));
-        HelperFunctions.expectFunctionThrows(SqlError.PARAMETERS_NOT_SUPPORTED,
+        Assertions.assertThrows(SQLFeatureNotSupportedException.class,
                 () -> openCypherPreparedStatement.setNString(0, null));
-        HelperFunctions.expectFunctionThrows(SqlError.PARAMETERS_NOT_SUPPORTED,
+        Assertions.assertThrows(SQLFeatureNotSupportedException.class,
                 () -> openCypherPreparedStatement.setNull(0, 0));
-        HelperFunctions.expectFunctionThrows(SqlError.PARAMETERS_NOT_SUPPORTED,
+        Assertions.assertThrows(SQLFeatureNotSupportedException.class,
                 () -> openCypherPreparedStatement.setNull(0, 0, ""));
-        HelperFunctions.expectFunctionThrows(SqlError.PARAMETERS_NOT_SUPPORTED,
+        Assertions.assertThrows(SQLFeatureNotSupportedException.class,
                 () -> openCypherPreparedStatement.setObject(0, null, 0));
-        HelperFunctions.expectFunctionThrows(SqlError.PARAMETERS_NOT_SUPPORTED,
+        Assertions.assertThrows(SQLFeatureNotSupportedException.class,
                 () -> openCypherPreparedStatement.setObject(0, null));
-        HelperFunctions.expectFunctionThrows(SqlError.PARAMETERS_NOT_SUPPORTED,
+        Assertions.assertThrows(SQLFeatureNotSupportedException.class,
                 () -> openCypherPreparedStatement.setObject(0, null, 0, 0));
-        HelperFunctions.expectFunctionThrows(SqlError.PARAMETERS_NOT_SUPPORTED,
+        Assertions.assertThrows(SQLFeatureNotSupportedException.class,
                 () -> openCypherPreparedStatement.setRef(0, null));
-        HelperFunctions.expectFunctionThrows(SqlError.PARAMETERS_NOT_SUPPORTED,
+        Assertions.assertThrows(SQLFeatureNotSupportedException.class,
                 () -> openCypherPreparedStatement.setRowId(0, null));
-        HelperFunctions.expectFunctionThrows(SqlError.PARAMETERS_NOT_SUPPORTED,
+        Assertions.assertThrows(SQLFeatureNotSupportedException.class,
                 () -> openCypherPreparedStatement.setSQLXML(0, null));
-        HelperFunctions.expectFunctionThrows(SqlError.PARAMETERS_NOT_SUPPORTED,
+        Assertions.assertThrows(SQLFeatureNotSupportedException.class,
                 () -> openCypherPreparedStatement.setShort(0, (short) 0));
-        HelperFunctions.expectFunctionThrows(SqlError.PARAMETERS_NOT_SUPPORTED,
+        Assertions.assertThrows(SQLFeatureNotSupportedException.class,
                 () -> openCypherPreparedStatement.setString(0, null));
-        HelperFunctions.expectFunctionThrows(SqlError.PARAMETERS_NOT_SUPPORTED,
+        Assertions.assertThrows(SQLFeatureNotSupportedException.class,
                 () -> openCypherPreparedStatement.setTime(0, null));
-        HelperFunctions.expectFunctionThrows(SqlError.PARAMETERS_NOT_SUPPORTED,
+        Assertions.assertThrows(SQLFeatureNotSupportedException.class,
                 () -> openCypherPreparedStatement.setTime(0, null, null));
-        HelperFunctions.expectFunctionThrows(SqlError.PARAMETERS_NOT_SUPPORTED,
+        Assertions.assertThrows(SQLFeatureNotSupportedException.class,
                 () -> openCypherPreparedStatement.setTimestamp(0, null));
-        HelperFunctions.expectFunctionThrows(SqlError.PARAMETERS_NOT_SUPPORTED,
+        Assertions.assertThrows(SQLFeatureNotSupportedException.class,
                 () -> openCypherPreparedStatement.setTimestamp(0, null, null));
-        HelperFunctions.expectFunctionThrows(SqlError.PARAMETERS_NOT_SUPPORTED,
+        Assertions.assertThrows(SQLFeatureNotSupportedException.class,
                 () -> openCypherPreparedStatement.setURL(0, null));
-        HelperFunctions.expectFunctionThrows(SqlError.PARAMETERS_NOT_SUPPORTED,
+        Assertions.assertThrows(SQLFeatureNotSupportedException.class,
                 () -> openCypherPreparedStatement.setUnicodeStream(0, null, 0));
     }
 }

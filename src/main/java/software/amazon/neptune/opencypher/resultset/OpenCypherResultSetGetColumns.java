@@ -216,21 +216,15 @@ public class OpenCypherResultSetGetColumns extends OpenCypherResultSet {
     protected Object getConvertedValue(final int columnIndex) throws SQLException {
         verifyOpen();
         final int index = getRowIndex();
-        if ((index >= rows.size()) || (index < 0)) {
-            throw SqlError
-                    .createSQLFeatureNotSupportedException(LOGGER, SqlError.INVALID_INDEX, index + 1,
-                            rows.size());
-        } else if ((columnIndex > ORDERED_COLUMNS.size()) || (columnIndex <= 0)) {
-            throw SqlError
-                    .createSQLFeatureNotSupportedException(LOGGER, SqlError.INVALID_COLUMN_INDEX, columnIndex,
-                            ORDERED_COLUMNS.size());
+        if ((index >= rows.size()) || (index < 0)
+                || ((columnIndex > ORDERED_COLUMNS.size()) || (columnIndex <= 0))) {
+            throw SqlError.createSQLFeatureNotSupportedException(LOGGER);
         }
         final String key = ORDERED_COLUMNS.get(columnIndex - 1);
         if (rows.get(index).containsKey(key)) {
             return rows.get(index).get(key);
         } else {
-            throw SqlError
-                    .createSQLFeatureNotSupportedException(LOGGER, SqlError.INVALID_COLUMN_LABEL, key);
+            throw SqlError.createSQLFeatureNotSupportedException(LOGGER);
         }
     }
 

@@ -24,6 +24,7 @@ import org.neo4j.driver.types.Type;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import software.amazon.jdbc.utilities.SqlError;
+
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -127,8 +128,6 @@ public class OpenCypherResultSetGetTables extends OpenCypherResultSet implements
                 return nodeListToString((List<String>) objectLabels);
             }
         }
-        throw SqlError
-                .createSQLFeatureNotSupportedException(LOGGER, SqlError.INVALID_COLUMN_INDEX, columnIndex,
-                        KEYS.size());
+        throw SqlError.createSQLFeatureNotSupportedException(LOGGER);
     }
 }

@@ -18,6 +18,7 @@ package software.amazon.jdbc;
 
 import org.slf4j.LoggerFactory;
 import software.amazon.jdbc.utilities.ConnectionProperties;
+import software.amazon.jdbc.utilities.SqlError;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -121,7 +122,7 @@ public abstract class Driver implements java.sql.Driver {
 
     @Override
     public Logger getParentLogger() throws SQLFeatureNotSupportedException {
-        return null;
+        throw SqlError.createSQLFeatureNotSupportedException(LOGGER);
     }
 
     protected String getLanguage(final String url, final Pattern jdbcPattern) throws SQLException {

@@ -146,69 +146,69 @@ public abstract class DatabaseMetaData implements java.sql.DatabaseMetaData {
                                        final String foreignCatalog, final String foreignSchema,
                                        final String foreignTable)
             throws SQLException {
-        throw SqlError.createSQLFeatureNotSupportedException(LOGGER, SqlError.UNSUPPORTED_CROSS_REFERENCE);
+        throw SqlError.createSQLFeatureNotSupportedException(LOGGER);
     }
 
     @Override
     public ResultSet getExportedKeys(final String catalog, final String schema, final String table)
             throws SQLException {
-        throw SqlError.createSQLFeatureNotSupportedException(LOGGER, SqlError.UNSUPPORTED_EXPORTED_KEYS);
+        throw SqlError.createSQLFeatureNotSupportedException(LOGGER);
     }
 
     @Override
     public ResultSet getFunctionColumns(final String catalog, final String schemaNamePattern,
                                         final String tableNamePattern, final String columnNamePattern)
             throws SQLException {
-        throw SqlError.createSQLFeatureNotSupportedException(LOGGER, SqlError.UNSUPPORTED_FUNCTION_COLUMNS);
+        throw SqlError.createSQLFeatureNotSupportedException(LOGGER);
     }
 
     @Override
     public ResultSet getFunctions(final String catalog, final String schemaPattern, final String functionNamePattern)
             throws SQLException {
-        throw SqlError.createSQLFeatureNotSupportedException(LOGGER, SqlError.UNSUPPORTED_FUNCTIONS);
+        throw SqlError.createSQLFeatureNotSupportedException(LOGGER);
     }
 
     @Override
     public ResultSet getProcedureColumns(final String catalog, final String schemaPattern,
                                          final String procedureNamePattern, final String columnNamePattern)
             throws SQLException {
-        throw SqlError.createSQLFeatureNotSupportedException(LOGGER, SqlError.UNSUPPORTED_PROCEDURE_COLUMNS);
+        throw SqlError.createSQLFeatureNotSupportedException(LOGGER);
     }
 
     @Override
     public ResultSet getPseudoColumns(final String catalog, final String schemaPattern, final String tableNamePattern,
                                       final String columnNamePattern) throws SQLException {
-        throw SqlError.createSQLFeatureNotSupportedException(LOGGER, SqlError.UNSUPPORTED_PSEUDO_COLUMNS);
+        throw SqlError.createSQLFeatureNotSupportedException(LOGGER);
     }
 
     @Override
     public ResultSet getSuperTables(final String catalog, final String schemaPattern, final String tableNamePattern)
             throws SQLException {
-        throw SqlError.createSQLFeatureNotSupportedException(LOGGER, SqlError.UNSUPPORTED_SUPER_TABLES);
+        throw SqlError.createSQLFeatureNotSupportedException(LOGGER);
     }
 
     @Override
     public ResultSet getSuperTypes(final String catalog, final String schemaPattern, final String tableNamePattern)
             throws SQLException {
-        throw SqlError.createSQLFeatureNotSupportedException(LOGGER, SqlError.UNSUPPORTED_SUPER_TYPES);
+        throw SqlError.createSQLFeatureNotSupportedException(LOGGER);
     }
 
     @Override
     public ResultSet getTablePrivileges(final String catalog, final String schemaPattern, final String tableNamePattern)
             throws SQLException {
-        throw SqlError.createSQLFeatureNotSupportedException(LOGGER, SqlError.UNSUPPORTED_TABLE_PRIVILEGES);
+        throw SqlError.createSQLFeatureNotSupportedException(LOGGER);
     }
 
     @Override
     public ResultSet getUDTs(final String catalog, final String schemaPattern, final String typeNamePattern,
                              final int[] types) throws SQLException {
-        throw SqlError.createSQLFeatureNotSupportedException(LOGGER, SqlError.UNSUPPORTED_USER_DEFINED_TYPES);
+        throw SqlError.createSQLFeatureNotSupportedException(LOGGER);
     }
 
     @Override
     public ResultSet getVersionColumns(final String catalog, final String schema, final String table)
             throws SQLException {
-        throw SqlError.createSQLFeatureNotSupportedException(LOGGER, SqlError.UNSUPPORTED_VERSION_COLUMNS);
+        throw SqlError.createSQLFeatureNotSupportedException(LOGGER);
     }
 
     @Override

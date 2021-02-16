@@ -191,23 +191,23 @@ public abstract class ResultSet implements java.sql.ResultSet {
     @Override
     public void beforeFirst() throws SQLException {
         verifyOpen();
-        throw SqlError.createSQLFeatureNotSupportedException(LOGGER, SqlError.RESULT_FORWARD_ONLY);
+        throw SqlError.createSQLFeatureNotSupportedException(LOGGER);
     }
 
     @Override
     public void afterLast() throws SQLException {
         verifyOpen();
-        throw SqlError.createSQLFeatureNotSupportedException(LOGGER, SqlError.RESULT_FORWARD_ONLY);
+        throw SqlError.createSQLFeatureNotSupportedException(LOGGER);
     }
 
     @Override
     public boolean first() throws SQLException {
-        throw SqlError.createSQLFeatureNotSupportedException(LOGGER, SqlError.RESULT_FORWARD_ONLY);
+        throw SqlError.createSQLFeatureNotSupportedException(LOGGER);
     }
 
     @Override
     public boolean last() throws SQLException {
-        throw SqlError.createSQLFeatureNotSupportedException(LOGGER, SqlError.RESULT_FORWARD_ONLY);
+        throw SqlError.createSQLFeatureNotSupportedException(LOGGER);
     }
 
     @Override
@@ -219,9 +219,9 @@ public abstract class ResultSet implements java.sql.ResultSet {
     public boolean absolute(final int row) throws SQLException {
         verifyOpen();
         if (row < 1) {
-            throw SqlError.createSQLFeatureNotSupportedException(LOGGER, SqlError.INVALID_ROW_VALUE);
+            throw SqlError.createSQLFeatureNotSupportedException(LOGGER);
         } else if (getRowIndex() > row) {
-            throw SqlError.createSQLFeatureNotSupportedException(LOGGER, SqlError.RESULT_FORWARD_ONLY);
+            throw SqlError.createSQLFeatureNotSupportedException(LOGGER);
         }
 
         while ((getRowIndex() < row) && next()) {
@@ -238,7 +238,7 @@ public abstract class ResultSet implements java.sql.ResultSet {
     @Override
     public void setFetchDirection(final int direction) throws SQLException {
         if (direction != java.sql.ResultSet.FETCH_FORWARD) {
-            throw SqlError.createSQLFeatureNotSupportedException(LOGGER, SqlError.RESULT_FORWARD_ONLY);
+            throw SqlError.createSQLFeatureNotSupportedException(LOGGER);
         }
     }
 
@@ -354,10 +354,7 @@ public abstract class ResultSet implements java.sql.ResultSet {
 
     @Override
     public Object getObject(final int columnIndex, final Map<String, Class<?>> map) throws SQLException {
-        throw SqlError.createSQLFeatureNotSupportedException(
-                LOGGER,
-                SqlError.UNSUPPORTED_TYPE,
-                Object.class.toString());
+        throw SqlError.createSQLFeatureNotSupportedException(LOGGER);
     }
 
     @Override
@@ -372,136 +369,88 @@ public abstract class ResultSet implements java.sql.ResultSet {
 
     @Override
     public String getCursorName() throws SQLException {
-        throw SqlError.createSQLFeatureNotSupportedException(LOGGER, SqlError.READ_ONLY);
+        throw SqlError.createSQLFeatureNotSupportedException(LOGGER);
     }
 
     // Add default not supported for all types.
     @Override
     public BigDecimal getBigDecimal(final int columnIndex) throws SQLException {
-        throw SqlError.createSQLFeatureNotSupportedException(
-                LOGGER,
-                SqlError.UNSUPPORTED_TYPE,
-                String.class.toString());
+        throw SqlError.createSQLFeatureNotSupportedException(LOGGER);
     }
 
     @Override
     public BigDecimal getBigDecimal(final int columnIndex, final int scale) throws SQLException {
-        throw SqlError.createSQLFeatureNotSupportedException(
-                LOGGER,
-                SqlError.UNSUPPORTED_TYPE,
-                BigDecimal.class.toString());
+        throw SqlError.createSQLFeatureNotSupportedException(LOGGER);
     }
 
     @Override
     public InputStream getAsciiStream(final int columnIndex) throws SQLException {
-        throw SqlError.createSQLFeatureNotSupportedException(
-                LOGGER,
-                SqlError.UNSUPPORTED_TYPE,
-                InputStream.class.toString());
+        throw SqlError.createSQLFeatureNotSupportedException(LOGGER);
     }
 
     @Override
     public InputStream getUnicodeStream(final int columnIndex) throws SQLException {
-        throw SqlError.createSQLFeatureNotSupportedException(
-                LOGGER,
-                SqlError.UNSUPPORTED_TYPE,
-                InputStream.class.toString());
+        throw SqlError.createSQLFeatureNotSupportedException(LOGGER);
     }
 
     @Override
     public InputStream getBinaryStream(final int columnIndex) throws SQLException {
-        throw SqlError.createSQLFeatureNotSupportedException(
-                LOGGER,
-                SqlError.UNSUPPORTED_TYPE,
-                InputStream.class.toString());
+        throw SqlError.createSQLFeatureNotSupportedException(LOGGER);
     }
 
     @Override
     public Ref getRef(final int columnIndex) throws SQLException {
-        throw SqlError.createSQLFeatureNotSupportedException(
-                LOGGER,
-                SqlError.UNSUPPORTED_TYPE,
-                Ref.class.toString());
+        throw SqlError.createSQLFeatureNotSupportedException(LOGGER);
     }
 
     @Override
     public Blob getBlob(final int columnIndex) throws SQLException {
-        throw SqlError.createSQLFeatureNotSupportedException(
-                LOGGER,
-                SqlError.UNSUPPORTED_TYPE,
-                Blob.class.toString());
+        throw SqlError.createSQLFeatureNotSupportedException(LOGGER);
     }
 
     @Override
     public Clob getClob(final int columnIndex) throws SQLException {
-        throw SqlError.createSQLFeatureNotSupportedException(
-                LOGGER,
-                SqlError.UNSUPPORTED_TYPE,
-                Clob.class.toString());
+        throw SqlError.createSQLFeatureNotSupportedException(LOGGER);
     }
 
     @Override
     public Array getArray(final int columnIndex) throws SQLException {
-        throw SqlError.createSQLFeatureNotSupportedException(
-                LOGGER,
-                SqlError.UNSUPPORTED_TYPE,
-                Array.class.toString());
+        throw SqlError.createSQLFeatureNotSupportedException(LOGGER);
     }
 
     @Override
     public URL getURL(final int columnIndex) throws SQLException {
-        throw SqlError.createSQLFeatureNotSupportedException(
-                LOGGER,
-                SqlError.UNSUPPORTED_TYPE,
-                URL.class.toString());
+        throw SqlError.createSQLFeatureNotSupportedException(LOGGER);
     }
 
     @Override
     public RowId getRowId(final int columnIndex) throws SQLException {
-        throw SqlError.createSQLFeatureNotSupportedException(
-                LOGGER,
-                SqlError.UNSUPPORTED_TYPE,
-                RowId.class.toString());
+        throw SqlError.createSQLFeatureNotSupportedException(LOGGER);
     }
 
     @Override
     public NClob getNClob(final int columnIndex) throws SQLException {
-        throw SqlError.createSQLFeatureNotSupportedException(
-                LOGGER,
-                SqlError.UNSUPPORTED_TYPE,
-                NClob.class.toString());
+        throw SqlError.createSQLFeatureNotSupportedException(LOGGER);
     }
 
     @Override
     public SQLXML getSQLXML(final int columnIndex) throws SQLException {
-        throw SqlError.createSQLFeatureNotSupportedException(
-                LOGGER,
-                SqlError.UNSUPPORTED_TYPE,
-                Array.class.toString());
+        throw SqlError.createSQLFeatureNotSupportedException(LOGGER);
     }
 
     @Override
     public String getNString(final int columnIndex) throws SQLException {
-        throw SqlError.createSQLFeatureNotSupportedException(
-                LOGGER,
-                SqlError.UNSUPPORTED_TYPE,
-                String.class.toString());
+        throw SqlError.createSQLFeatureNotSupportedException(LOGGER);
     }
 
     @Override
     public Reader getNCharacterStream(final int columnIndex) throws SQLException {
-        throw SqlError.createSQLFeatureNotSupportedException(
-                LOGGER,
-                SqlError.UNSUPPORTED_TYPE,
-                Reader.class.toString());
+        throw SqlError.createSQLFeatureNotSupportedException(LOGGER);
     }
 
     @Override
     public Reader getCharacterStream(final int columnIndex) throws SQLException {
-        throw SqlError.createSQLFeatureNotSupportedException(
-                LOGGER,
-                SqlError.UNSUPPORTED_TYPE,
-                String.class.toString());
+        throw SqlError.createSQLFeatureNotSupportedException(LOGGER);
     }
 
     // Default implementation for all label functions to just use findColumn(label) to find idx and lookup with idx.
@@ -685,7 +634,7 @@ public abstract class ResultSet implements java.sql.ResultSet {
     public boolean relative(final int rows) throws SQLException {
         verifyOpen();
         if (rows < 0) {
-            throw SqlError.createSQLFeatureNotSupportedException(LOGGER, SqlError.RESULT_FORWARD_ONLY);
+            throw SqlError.createSQLFeatureNotSupportedException(LOGGER);
         }
 
         int rowCopy = rows;
@@ -714,480 +663,480 @@ public abstract class ResultSet implements java.sql.ResultSet {
 
     @Override
     public void moveToCurrentRow() throws SQLException {
-        throw SqlError.createSQLFeatureNotSupportedException(LOGGER, SqlError.RESULT_FORWARD_ONLY);
+        throw SqlError.createSQLFeatureNotSupportedException(LOGGER);
     }
 
     @Override
     public void refreshRow() throws SQLException {
-        throw SqlError.createSQLFeatureNotSupportedException(LOGGER, SqlError.UNSUPPORTED_REFRESH_ROW);
+        throw SqlError.createSQLFeatureNotSupportedException(LOGGER);
     }
 
     @Override
     public boolean previous() throws SQLException {
-        throw SqlError.createSQLFeatureNotSupportedException(LOGGER, SqlError.RESULT_FORWARD_ONLY);
+        throw SqlError.createSQLFeatureNotSupportedException(LOGGER);
     }
 
     @Override
     public void insertRow() throws SQLException {
-        throw SqlError.createSQLFeatureNotSupportedException(LOGGER, SqlError.READ_ONLY);
+        throw SqlError.createSQLFeatureNotSupportedException(LOGGER);
     }
 
     @Override
     public void moveToInsertRow() throws SQLException {
-        throw SqlError.createSQLFeatureNotSupportedException(LOGGER, SqlError.READ_ONLY);
+        throw SqlError.createSQLFeatureNotSupportedException(LOGGER);
     }
 
     @Override
     public void deleteRow() throws SQLException {
-        throw SqlError.createSQLFeatureNotSupportedException(LOGGER, SqlError.READ_ONLY);
+        throw SqlError.createSQLFeatureNotSupportedException(LOGGER);
     }
 
     @Override
     public void cancelRowUpdates() throws SQLException {
-        throw SqlError.createSQLFeatureNotSupportedException(LOGGER, SqlError.READ_ONLY);
+        throw SqlError.createSQLFeatureNotSupportedException(LOGGER);
     }
 
     @Override
     public void updateArray(final int columnIndex, final Array x) throws SQLException {
-        throw SqlError.createSQLFeatureNotSupportedException(LOGGER, SqlError.READ_ONLY);
+        throw SqlError.createSQLFeatureNotSupportedException(LOGGER);
     }
 
     @Override
     public void updateArray(final String columnLabel, final Array x) throws SQLException {
-        throw SqlError.createSQLFeatureNotSupportedException(LOGGER, SqlError.READ_ONLY);
+        throw SqlError.createSQLFeatureNotSupportedException(LOGGER);
     }
 
     @Override
     public void updateAsciiStream(final int columnIndex, final InputStream x, final int length)
             throws SQLException {
-        throw SqlError.createSQLFeatureNotSupportedException(LOGGER, SqlError.READ_ONLY);
+        throw SqlError.createSQLFeatureNotSupportedException(LOGGER);
     }
 
     @Override
     public void updateAsciiStream(final String columnLabel, final InputStream x, final int length)
             throws SQLException {
-        throw SqlError.createSQLFeatureNotSupportedException(LOGGER, SqlError.READ_ONLY);
+        throw SqlError.createSQLFeatureNotSupportedException(LOGGER);
     }
 
     @Override
     public void updateAsciiStream(final int columnIndex, final InputStream x, final long length)
             throws SQLException {
-        throw SqlError.createSQLFeatureNotSupportedException(LOGGER, SqlError.READ_ONLY);
+        throw SqlError.createSQLFeatureNotSupportedException(LOGGER);
     }
 
     @Override
     public void updateAsciiStream(final String columnLabel, final InputStream x, final long length)
             throws SQLException {
-        throw SqlError.createSQLFeatureNotSupportedException(LOGGER, SqlError.READ_ONLY);
+        throw SqlError.createSQLFeatureNotSupportedException(LOGGER);
     }
 
     @Override
     public void updateAsciiStream(final int columnIndex, final InputStream x) throws SQLException {
-        throw SqlError.createSQLFeatureNotSupportedException(LOGGER, SqlError.READ_ONLY);
+        throw SqlError.createSQLFeatureNotSupportedException(LOGGER);
     }
 
     @Override
     public void updateAsciiStream(final String columnLabel, final InputStream x) throws SQLException {
-        throw SqlError.createSQLFeatureNotSupportedException(LOGGER, SqlError.READ_ONLY);
+        throw SqlError.createSQLFeatureNotSupportedException(LOGGER);
     }
 
     @Override
     public void updateBigDecimal(final int columnIndex, final BigDecimal x) throws SQLException {
-        throw SqlError.createSQLFeatureNotSupportedException(LOGGER, SqlError.READ_ONLY);
+        throw SqlError.createSQLFeatureNotSupportedException(LOGGER);
     }
 
     @Override
     public void updateBigDecimal(final String columnLabel, final BigDecimal x) throws SQLException {
-        throw SqlError.createSQLFeatureNotSupportedException(LOGGER, SqlError.READ_ONLY);
+        throw SqlError.createSQLFeatureNotSupportedException(LOGGER);
     }
 
     @Override
     public void updateBinaryStream(final int columnIndex, final InputStream x, final int i1)
             throws SQLException {
-        throw SqlError.createSQLFeatureNotSupportedException(LOGGER, SqlError.READ_ONLY);
+        throw SqlError.createSQLFeatureNotSupportedException(LOGGER);
     }
 
     @Override
     public void updateBinaryStream(final String columnLabel, final InputStream x, final int i)
             throws SQLException {
-        throw SqlError.createSQLFeatureNotSupportedException(LOGGER, SqlError.READ_ONLY);
+        throw SqlError.createSQLFeatureNotSupportedException(LOGGER);
     }
 
     @Override
     public void updateBinaryStream(final int columnIndex, final InputStream x, final long length)
             throws SQLException {
-        throw SqlError.createSQLFeatureNotSupportedException(LOGGER, SqlError.READ_ONLY);
+        throw SqlError.createSQLFeatureNotSupportedException(LOGGER);
     }
 
     @Override
     public void updateBinaryStream(final String columnLabel, final InputStream x, final long length)
             throws SQLException {
-        throw SqlError.createSQLFeatureNotSupportedException(LOGGER, SqlError.READ_ONLY);
+        throw SqlError.createSQLFeatureNotSupportedException(LOGGER);
     }
 
     @Override
     public void updateBinaryStream(final int columnIndex, final InputStream x) throws SQLException {
-        throw SqlError.createSQLFeatureNotSupportedException(LOGGER, SqlError.READ_ONLY);
+        throw SqlError.createSQLFeatureNotSupportedException(LOGGER);
     }
 
     @Override
     public void updateBinaryStream(final String columnLabel, final InputStream x)
             throws SQLException {
-        throw SqlError.createSQLFeatureNotSupportedException(LOGGER, SqlError.READ_ONLY);
+        throw SqlError.createSQLFeatureNotSupportedException(LOGGER);
     }
 
     @Override
     public void updateBlob(final int columnIndex, final Blob x) throws SQLException {
-        throw SqlError.createSQLFeatureNotSupportedException(LOGGER, SqlError.READ_ONLY);
+        throw SqlError.createSQLFeatureNotSupportedException(LOGGER);
     }
 
     @Override
     public void updateBlob(final String columnLabel, final Blob x) throws SQLException {
-        throw SqlError.createSQLFeatureNotSupportedException(LOGGER, SqlError.READ_ONLY);
+        throw SqlError.createSQLFeatureNotSupportedException(LOGGER);
     }
 
     @Override
     public void updateBlob(final int columnIndex, final InputStream x, final long length)
             throws SQLException {
-        throw SqlError.createSQLFeatureNotSupportedException(LOGGER, SqlError.READ_ONLY);
+        throw SqlError.createSQLFeatureNotSupportedException(LOGGER);
     }
 
     @Override
     public void updateBlob(final String columnLabel, final InputStream x, final long length)
             throws SQLException {
-        throw SqlError.createSQLFeatureNotSupportedException(LOGGER, SqlError.READ_ONLY);
+        throw SqlError.createSQLFeatureNotSupportedException(LOGGER);
     }
 
     @Override
     public void updateBlob(final int columnIndex, final InputStream x) throws SQLException {
-        throw SqlError.createSQLFeatureNotSupportedException(LOGGER, SqlError.READ_ONLY);
+        throw SqlError.createSQLFeatureNotSupportedException(LOGGER);
     }
 
     @Override
     public void updateBlob(final String columnLabel, final InputStream x) throws SQLException {
-        throw SqlError.createSQLFeatureNotSupportedException(LOGGER, SqlError.READ_ONLY);
+        throw SqlError.createSQLFeatureNotSupportedException(LOGGER);
     }
 
     @Override
     public void updateBoolean(final int columnIndex, final boolean x) throws SQLException {
-        throw SqlError.createSQLFeatureNotSupportedException(LOGGER, SqlError.READ_ONLY);
+        throw SqlError.createSQLFeatureNotSupportedException(LOGGER);
     }
 
     @Override
     public void updateBoolean(final String columnLabel, final boolean x) throws SQLException {
-        throw SqlError.createSQLFeatureNotSupportedException(LOGGER, SqlError.READ_ONLY);
+        throw SqlError.createSQLFeatureNotSupportedException(LOGGER);
     }
 
     @Override
     public void updateByte(final int columnIndex, final byte x) throws SQLException {
-        throw SqlError.createSQLFeatureNotSupportedException(LOGGER, SqlError.READ_ONLY);
+        throw SqlError.createSQLFeatureNotSupportedException(LOGGER);
     }
 
     @Override
     public void updateByte(final String columnLabel, final byte x) throws SQLException {
-        throw SqlError.createSQLFeatureNotSupportedException(LOGGER, SqlError.READ_ONLY);
+        throw SqlError.createSQLFeatureNotSupportedException(LOGGER);
     }
 
     @Override
     public void updateBytes(final int columnIndex, final byte[] x) throws SQLException {
-        throw SqlError.createSQLFeatureNotSupportedException(LOGGER, SqlError.READ_ONLY);
+        throw SqlError.createSQLFeatureNotSupportedException(LOGGER);
     }
 
     @Override
     public void updateBytes(final String columnLabel, final byte[] x) throws SQLException {
-        throw SqlError.createSQLFeatureNotSupportedException(LOGGER, SqlError.READ_ONLY);
+        throw SqlError.createSQLFeatureNotSupportedException(LOGGER);
     }
 
     @Override
     public void updateCharacterStream(final int columnIndex, final Reader x, final int length)
             throws SQLException {
-        throw SqlError.createSQLFeatureNotSupportedException(LOGGER, SqlError.READ_ONLY);
+        throw SqlError.createSQLFeatureNotSupportedException(LOGGER);
     }
 
     @Override
     public void updateCharacterStream(final String columnLabel, final Reader x, final int length)
             throws SQLException {
-        throw SqlError.createSQLFeatureNotSupportedException(LOGGER, SqlError.READ_ONLY);
+        throw SqlError.createSQLFeatureNotSupportedException(LOGGER);
     }
 
     @Override
     public void updateCharacterStream(final int columnIndex, final Reader x, final long length)
             throws SQLException {
-        throw SqlError.createSQLFeatureNotSupportedException(LOGGER, SqlError.READ_ONLY);
+        throw SqlError.createSQLFeatureNotSupportedException(LOGGER);
     }
 
     @Override
     public void updateCharacterStream(final String columnLabel, final Reader x, final long length)
             throws SQLException {
-        throw SqlError.createSQLFeatureNotSupportedException(LOGGER, SqlError.READ_ONLY);
+        throw SqlError.createSQLFeatureNotSupportedException(LOGGER);
     }
 
     @Override
     public void updateCharacterStream(final int columnIndex, final Reader x) throws SQLException {
-        throw SqlError.createSQLFeatureNotSupportedException(LOGGER, SqlError.READ_ONLY);
+        throw SqlError.createSQLFeatureNotSupportedException(LOGGER);
     }
 
     @Override
     public void updateCharacterStream(final String columnLabel, final Reader x) throws SQLException {
-        throw SqlError.createSQLFeatureNotSupportedException(LOGGER, SqlError.READ_ONLY);
+        throw SqlError.createSQLFeatureNotSupportedException(LOGGER);
     }
 
     @Override
     public void updateClob(final int columnIndex, final Clob x) throws SQLException {
-        throw SqlError.createSQLFeatureNotSupportedException(LOGGER, SqlError.READ_ONLY);
+        throw SqlError.createSQLFeatureNotSupportedException(LOGGER);
     }
 
     @Override
     public void updateClob(final String columnLabel, final Clob x) throws SQLException {
-        throw SqlError.createSQLFeatureNotSupportedException(LOGGER, SqlError.READ_ONLY);
+        throw SqlError.createSQLFeatureNotSupportedException(LOGGER);
     }
 
     @Override
     public void updateClob(final int columnIndex, final Reader x, final long length)
             throws SQLException {
-        throw SqlError.createSQLFeatureNotSupportedException(LOGGER, SqlError.READ_ONLY);
+        throw SqlError.createSQLFeatureNotSupportedException(LOGGER);
     }
 
     @Override
     public void updateClob(final String columnLabel, final Reader x, final long length)
             throws SQLException {
-        throw SqlError.createSQLFeatureNotSupportedException(LOGGER, SqlError.READ_ONLY);
+        throw SqlError.createSQLFeatureNotSupportedException(LOGGER);
     }
 
     @Override
     public void updateClob(final int columnIndex, final Reader x) throws SQLException {
-        throw SqlError.createSQLFeatureNotSupportedException(LOGGER, SqlError.READ_ONLY);
+        throw SqlError.createSQLFeatureNotSupportedException(LOGGER);
     }
 
     @Override
     public void updateClob(final String columnLabel, final Reader x) throws SQLException {
-        throw SqlError.createSQLFeatureNotSupportedException(LOGGER, SqlError.READ_ONLY);
+        throw SqlError.createSQLFeatureNotSupportedException(LOGGER);
     }
 
     @Override
     public void updateDate(final int columnIndex, final Date x) throws SQLException {
-        throw SqlError.createSQLFeatureNotSupportedException(LOGGER, SqlError.READ_ONLY);
+        throw SqlError.createSQLFeatureNotSupportedException(LOGGER);
     }
 
     @Override
     public void updateDate(final String columnLabel, final Date x) throws SQLException {
-        throw SqlError.createSQLFeatureNotSupportedException(LOGGER, SqlError.READ_ONLY);
+        throw SqlError.createSQLFeatureNotSupportedException(LOGGER);
     }
 
     @Override
     public void updateDouble(final int columnIndex, final double x) throws SQLException {
-        throw SqlError.createSQLFeatureNotSupportedException(LOGGER, SqlError.READ_ONLY);
+        throw SqlError.createSQLFeatureNotSupportedException(LOGGER);
     }
 
     @Override
     public void updateDouble(final String columnLabel, final double x) throws SQLException {
-        throw SqlError.createSQLFeatureNotSupportedException(LOGGER, SqlError.READ_ONLY);
+        throw SqlError.createSQLFeatureNotSupportedException(LOGGER);
     }
 
     @Override
     public void updateFloat(final int columnIndex, final float x) throws SQLException {
-        throw SqlError.createSQLFeatureNotSupportedException(LOGGER, SqlError.READ_ONLY);
+        throw SqlError.createSQLFeatureNotSupportedException(LOGGER);
     }
 
     @Override
     public void updateFloat(final String columnLabel, final float x) throws SQLException {
-        throw SqlError.createSQLFeatureNotSupportedException(LOGGER, SqlError.READ_ONLY);
+        throw SqlError.createSQLFeatureNotSupportedException(LOGGER);
     }
 
     @Override
     public void updateInt(final int columnIndex, final int x) throws SQLException {
-        throw SqlError.createSQLFeatureNotSupportedException(LOGGER, SqlError.READ_ONLY);
+        throw SqlError.createSQLFeatureNotSupportedException(LOGGER);
     }
 
     @Override
     public void updateInt(final String columnLabel, final int x) throws SQLException {
-        throw SqlError.createSQLFeatureNotSupportedException(LOGGER, SqlError.READ_ONLY);
+        throw SqlError.createSQLFeatureNotSupportedException(LOGGER);
     }
 
     @Override
     public void updateLong(final int columnIndex, final long l) throws SQLException {
-        throw SqlError.createSQLFeatureNotSupportedException(LOGGER, SqlError.READ_ONLY);
+        throw SqlError.createSQLFeatureNotSupportedException(LOGGER);
     }
 
     @Override
     public void updateLong(final String columnLabel, final long l) throws SQLException {
-        throw SqlError.createSQLFeatureNotSupportedException(LOGGER, SqlError.READ_ONLY);
+        throw SqlError.createSQLFeatureNotSupportedException(LOGGER);
     }
 
     @Override
     public void updateNCharacterStream(final int columnIndex, final Reader x, final long length)
             throws SQLException {
-        throw SqlError.createSQLFeatureNotSupportedException(LOGGER, SqlError.READ_ONLY);
+        throw SqlError.createSQLFeatureNotSupportedException(LOGGER);
     }
 
     @Override
     public void updateNCharacterStream(final String columnLabel, final Reader x, final long length)
             throws SQLException {
-        throw SqlError.createSQLFeatureNotSupportedException(LOGGER, SqlError.READ_ONLY);
+        throw SqlError.createSQLFeatureNotSupportedException(LOGGER);
     }
 
     @Override
     public void updateNCharacterStream(final int columnIndex, final Reader x) throws SQLException {
-        throw SqlError.createSQLFeatureNotSupportedException(LOGGER, SqlError.READ_ONLY);
+        throw SqlError.createSQLFeatureNotSupportedException(LOGGER);
     }
 
     @Override
     public void updateNCharacterStream(final String columnLabel, final Reader x) throws SQLException {
-        throw SqlError.createSQLFeatureNotSupportedException(LOGGER, SqlError.READ_ONLY);
+        throw SqlError.createSQLFeatureNotSupportedException(LOGGER);
     }
 
     @Override
     public void updateNClob(final int columnIndex, final NClob nClob) throws SQLException {
-        throw SqlError.createSQLFeatureNotSupportedException(LOGGER, SqlError.READ_ONLY);
+        throw SqlError.createSQLFeatureNotSupportedException(LOGGER);
     }
 
     @Override
     public void updateNClob(final String columnLabel, final NClob nClob) throws SQLException {
-        throw SqlError.createSQLFeatureNotSupportedException(LOGGER, SqlError.READ_ONLY);
+        throw SqlError.createSQLFeatureNotSupportedException(LOGGER);
     }
 
     @Override
     public void updateNClob(final int columnIndex, final Reader x, final long length)
             throws SQLException {
-        throw SqlError.createSQLFeatureNotSupportedException(LOGGER, SqlError.READ_ONLY);
+        throw SqlError.createSQLFeatureNotSupportedException(LOGGER);
     }
 
     @Override
     public void updateNClob(final String columnLabel, final Reader x, final long length)
             throws SQLException {
-        throw SqlError.createSQLFeatureNotSupportedException(LOGGER, SqlError.READ_ONLY);
+        throw SqlError.createSQLFeatureNotSupportedException(LOGGER);
     }
 
     @Override
     public void updateNClob(final int columnIndex, final Reader x) throws SQLException {
-        throw SqlError.createSQLFeatureNotSupportedException(LOGGER, SqlError.READ_ONLY);
+        throw SqlError.createSQLFeatureNotSupportedException(LOGGER);
     }
 
     @Override
     public void updateNClob(final String columnLabel, final Reader x) throws SQLException {
-        throw SqlError.createSQLFeatureNotSupportedException(LOGGER, SqlError.READ_ONLY);
+        throw SqlError.createSQLFeatureNotSupportedException(LOGGER);
     }
 
     @Override
     public void updateNString(final int columnIndex, final String x) throws SQLException {
-        throw SqlError.createSQLFeatureNotSupportedException(LOGGER, SqlError.READ_ONLY);
+        throw SqlError.createSQLFeatureNotSupportedException(LOGGER);
     }
 
     @Override
     public void updateNString(final String columnLabel, final String x) throws SQLException {
-        throw SqlError.createSQLFeatureNotSupportedException(LOGGER, SqlError.READ_ONLY);
+        throw SqlError.createSQLFeatureNotSupportedException(LOGGER);
     }
 
     @Override
     public void updateNull(final int columnIndex) throws SQLException {
-        throw SqlError.createSQLFeatureNotSupportedException(LOGGER, SqlError.READ_ONLY);
+        throw SqlError.createSQLFeatureNotSupportedException(LOGGER);
     }
 
     @Override
     public void updateNull(final String columnLabel) throws SQLException {
-        throw SqlError.createSQLFeatureNotSupportedException(LOGGER, SqlError.READ_ONLY);
+        throw SqlError.createSQLFeatureNotSupportedException(LOGGER);
     }
 
     @Override
     public void updateObject(final int columnIndex, final Object x, final int scaleOrLength)
             throws SQLException {
-        throw SqlError.createSQLFeatureNotSupportedException(LOGGER, SqlError.READ_ONLY);
+        throw SqlError.createSQLFeatureNotSupportedException(LOGGER);
     }
 
     @Override
     public void updateObject(final int columnIndex, final Object x) throws SQLException {
-        throw SqlError.createSQLFeatureNotSupportedException(LOGGER, SqlError.READ_ONLY);
+        throw SqlError.createSQLFeatureNotSupportedException(LOGGER);
     }
 
     @Override
     public void updateObject(final String columnLabel, final Object x, final int scaleOrLength)
             throws SQLException {
-        throw SqlError.createSQLFeatureNotSupportedException(LOGGER, SqlError.READ_ONLY);
+        throw SqlError.createSQLFeatureNotSupportedException(LOGGER);
     }
 
     @Override
     public void updateObject(final String columnLabel, final Object x) throws SQLException {
-        throw SqlError.createSQLFeatureNotSupportedException(LOGGER, SqlError.READ_ONLY);
+        throw SqlError.createSQLFeatureNotSupportedException(LOGGER);
     }
 
     @Override
     public void updateRef(final int columnIndex, final Ref x) throws SQLException {
-        throw SqlError.createSQLFeatureNotSupportedException(LOGGER, SqlError.READ_ONLY);
+        throw SqlError.createSQLFeatureNotSupportedException(LOGGER);
     }
 
     @Override
     public void updateRef(final String columnLabel, final Ref x) throws SQLException {
-        throw SqlError.createSQLFeatureNotSupportedException(LOGGER, SqlError.READ_ONLY);
+        throw SqlError.createSQLFeatureNotSupportedException(LOGGER);
     }
 
     @Override
     public void updateRow() throws SQLException {
-        throw SqlError.createSQLFeatureNotSupportedException(LOGGER, SqlError.READ_ONLY);
+        throw SqlError.createSQLFeatureNotSupportedException(LOGGER);
     }
 
     @Override
     public void updateRowId(final int columnIndex, final RowId x) throws SQLException {
-        throw SqlError.createSQLFeatureNotSupportedException(LOGGER, SqlError.READ_ONLY);
+        throw SqlError.createSQLFeatureNotSupportedException(LOGGER);
     }
 
     @Override
     public void updateRowId(final String columnLabel, final RowId x) throws SQLException {
-        throw SqlError.createSQLFeatureNotSupportedException(LOGGER, SqlError.READ_ONLY);
+        throw SqlError.createSQLFeatureNotSupportedException(LOGGER);
     }
 
     @Override
     public void updateSQLXML(final int columnIndex, final SQLXML x) throws SQLException {
-        throw SqlError.createSQLFeatureNotSupportedException(LOGGER, SqlError.READ_ONLY);
+        throw SqlError.createSQLFeatureNotSupportedException(LOGGER);
     }
 
     @Override
     public void updateSQLXML(final String columnLabel, final SQLXML x) throws SQLException {
-        throw SqlError.createSQLFeatureNotSupportedException(LOGGER, SqlError.READ_ONLY);
+        throw SqlError.createSQLFeatureNotSupportedException(LOGGER);
     }
 
     @Override
     public void updateShort(final int columnIndex, final short x) throws SQLException {
-        throw SqlError.createSQLFeatureNotSupportedException(LOGGER, SqlError.READ_ONLY);
+        throw SqlError.createSQLFeatureNotSupportedException(LOGGER);
     }
 
     @Override
     public void updateShort(final String columnLabel, final short x) throws SQLException {
-        throw SqlError.createSQLFeatureNotSupportedException(LOGGER, SqlError.READ_ONLY);
+        throw SqlError.createSQLFeatureNotSupportedException(LOGGER);
     }
 
     @Override
     public void updateString(final int columnIndex, final String x) throws SQLException {
-        throw SqlError.createSQLFeatureNotSupportedException(LOGGER, SqlError.READ_ONLY);
+        throw SqlError.createSQLFeatureNotSupportedException(LOGGER);
     }
 
     @Override
     public void updateString(final String columnLabel, final String x) throws SQLException {
-        throw SqlError.createSQLFeatureNotSupportedException(LOGGER, SqlError.READ_ONLY);
+        throw SqlError.createSQLFeatureNotSupportedException(LOGGER);
     }
 
     @Override
     public void updateTime(final int columnIndex, final Time x) throws SQLException {
-        throw SqlError.createSQLFeatureNotSupportedException(LOGGER, SqlError.READ_ONLY);
+        throw SqlError.createSQLFeatureNotSupportedException(LOGGER);
     }
 
     @Override
     public void updateTime(final String columnLabel, final Time x) throws SQLException {
-        throw SqlError.createSQLFeatureNotSupportedException(LOGGER, SqlError.READ_ONLY);
+        throw SqlError.createSQLFeatureNotSupportedException(LOGGER);
     }
 
     @Override
     public void updateTimestamp(final int columnIndex, final Timestamp x) throws SQLException {
-        throw SqlError.createSQLFeatureNotSupportedException(LOGGER, SqlError.READ_ONLY);
+        throw SqlError.createSQLFeatureNotSupportedException(LOGGER);
     }
 
     @Override
     public void updateTimestamp(final String columnLabel, final Timestamp x) throws SQLException {
-        throw SqlError.createSQLFeatureNotSupportedException(LOGGER, SqlError.READ_ONLY);
+        throw SqlError.createSQLFeatureNotSupportedException(LOGGER);
     }
 
     protected void validateRowColumn(final int columnIndex) throws SQLException {
         if ((getRowIndex() >= rowCount) || (columnIndex >= columns.size())) {
-            throw SqlError.createSQLFeatureNotSupportedException(LOGGER, SqlError.INVALID_INDEX);
+            throw SqlError.createSQLFeatureNotSupportedException(LOGGER);
         }
     }
 }

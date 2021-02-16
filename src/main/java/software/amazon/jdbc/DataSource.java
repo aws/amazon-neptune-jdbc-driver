@@ -18,6 +18,7 @@ package software.amazon.jdbc;
 
 import org.slf4j.LoggerFactory;
 import software.amazon.jdbc.utilities.CastHelper;
+import software.amazon.jdbc.utilities.SqlError;
 import java.io.PrintWriter;
 import java.sql.SQLException;
 import java.sql.SQLFeatureNotSupportedException;
@@ -27,7 +28,7 @@ import java.util.logging.Logger;
  * Abstract implementation of DataSource for JDBC Driver.
  */
 public abstract class DataSource implements javax.sql.DataSource, javax.sql.ConnectionPoolDataSource {
-    private static final java.util.logging.Logger LOGGER = Logger.getLogger(DataSource.class.toString());
+    private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(DataSource.class);
 
     @Override
     public <T> T unwrap(final Class<T> iface) throws SQLException {
@@ -51,7 +52,7 @@ public abstract class DataSource implements javax.sql.DataSource, javax.sql.Conn
 
     @Override
     public Logger getParentLogger() throws SQLFeatureNotSupportedException {
-        return LOGGER;
+        throw SqlError.createSQLFeatureNotSupportedException(LOGGER);
     }
 
     // TODO: Get and set of different properties. Either done generically through this class or custom in OpenCypher implementation.

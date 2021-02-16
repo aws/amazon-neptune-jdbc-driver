@@ -39,6 +39,7 @@ public enum SqlError {
     FAILED_TO_NOTIFY_CONSUMER_THREAD,
     FAILED_TO_PROPAGATE_ERROR,
     FAILED_TO_SHUTDOWN_RETRIEVAL_EXECUTOR_SERVICE,
+    FEATURE_NOT_SUPPORTED,
     INCORRECT_SOURCE_TYPE_AT_CELL,
     INVALID_AAD_ACCESS_TOKEN_RESPONSE,
     INVALID_COLUMN_LABEL,
@@ -70,7 +71,6 @@ public enum SqlError {
     OKTA_SESSION_TOKEN_REQUEST_FAILED,
     OKTA_SESSION_TOKEN_ERROR,
     PARAMETERS_NOT_SUPPORTED,
-    POOLING_NOT_SUPPORTED,
     QUERY_FAILED,
     QUERY_NOT_STARTED_OR_COMPLETE,
     QUERY_CANNOT_BE_CANCELLED,
@@ -93,7 +93,7 @@ public enum SqlError {
     UNSUPPORTED_FUNCTIONS,
     UNSUPPORTED_FUNCTION_COLUMNS,
     UNSUPPORTED_GENERATED_KEYS,
-    UNSUPPORTED_PREPARE_STATEMENT, // TODO Add me to resource file
+    UNSUPPORTED_PREPARE_STATEMENT,
     UNSUPPORTED_PREPARE_CALL,
     UNSUPPORTED_PROCEDURE_COLUMNS,
     UNSUPPORTED_PROPERTY,
@@ -124,42 +124,6 @@ public enum SqlError {
     }
 
     /**
-     * Get the error message and log the message.
-     *
-     * @param logger     The {@link Logger} contains log info.
-     * @param key        Resource key for bundle provided to constructor.
-     * @param formatArgs Any additional arguments to format the resource string with.
-     * @return error massage
-     */
-    static String getErrorMessage(
-            final Logger logger,
-            final SqlError key,
-            final Object... formatArgs) {
-        final String error = lookup(key, formatArgs);
-        logger.error(error);
-        return error;
-    }
-
-    /**
-     * Create {@link SQLException} of error and log the message with a {@link java.util.logging.Logger}.
-     *
-     * @param logger     The {@link java.util.logging.Logger} contains log info.
-     * @param sqlState   A code identifying the SQL error condition.
-     * @param key        Resource key for bundle provided to constructor.
-     * @param formatArgs Any additional arguments to format the resource string with.
-     * @return SQLException with error message.
-     */
-    public static SQLException createSQLException(
-            final java.util.logging.Logger logger,
-            final SqlState sqlState,
-            final SqlError key,
-            final Object... formatArgs) {
-        final String error = lookup(key, formatArgs);
-        logger.severe(error);
-        return new SQLException(error, sqlState.getSqlState());
-    }
-
-    /**
      * Create SQLException of error and log the message with a {@link Logger}.
      *
      * @param logger     The {@link Logger} contains log info.
@@ -176,42 +140,17 @@ public enum SqlError {
         final String error = lookup(key, formatArgs);
         logger.error(error);
         return new SQLException(error, sqlState.getSqlState());
-    }
-
-    /**
-     * Create SQLException of error and log the message with a {@link Logger}.
-     *
-     * @param logger     The {@link Logger} contains log info.
-     * @param sqlState   A code identifying the SQL error condition.
-     * @param exception  An {@link Exception} instance.
-     * @param key        Resource key for bundle provided to constructor.
-     * @param formatArgs Any additional arguments to format the resource string with.
-     * @return SQLException with error message.
-     */
-    public static SQLException createSQLException(
-            final Logger logger,
-            final SqlState sqlState,
-            final Exception exception,
-            final SqlError key,
-            final Object... formatArgs) {
-        final String error = lookup(key, formatArgs);
-        logger.error(error);
-        return new SQLException(error, sqlState.getSqlState(), exception);
     }
 
     /**
      * Create {@link SQLFeatureNotSupportedException} of error and log the message with a {@link Logger}.
      *
      * @param logger     The {@link Logger} contains log info.
-     * @param key        Resource key for bundle provided to constructor.
-     * @param formatArgs Any additional arguments to format the resource string with.
      * @return SQLFeatureNotSupportedException with error message.
      */
     public static SQLFeatureNotSupportedException createSQLFeatureNotSupportedException(
-            final Logger logger,
-            final SqlError key,
-            final Object... formatArgs) {
-        final String error = lookup(key, formatArgs);
+            final Logger logger) {
+        final String error = lookup(FEATURE_NOT_SUPPORTED);
         logger.trace(error);
         return new SQLFeatureNotSupportedException(error);
     }
