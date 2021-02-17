@@ -27,6 +27,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import software.amazon.jdbc.utilities.AuthScheme;
 import software.amazon.jdbc.utilities.QueryExecutor;
+import software.amazon.jdbc.utilities.SqlError;
+import software.amazon.jdbc.utilities.SqlState;
 import software.amazon.neptune.opencypher.resultset.OpenCypherResultSet;
 import software.amazon.neptune.opencypher.resultset.OpenCypherResultSetGetCatalogs;
 import software.amazon.neptune.opencypher.resultset.OpenCypherResultSetGetColumns;
@@ -161,7 +163,10 @@ public class OpenCypherQueryExecutor extends QueryExecutor {
             constructor = OpenCypherResultSet.class
                     .getConstructor(java.sql.Statement.class, OpenCypherResultSet.ResultSetInfoWithRows.class);
         } catch (final NoSuchMethodException e) {
-            throw new SQLException(e);
+            throw SqlError.createSQLException(
+                    LOGGER,
+                    SqlState.INVALID_QUERY_EXPRESSION,
+                    SqlError.QUERY_FAILED, e);
         }
         return runCancellableQuery(constructor, statement, sql);
     }
@@ -182,7 +187,10 @@ public class OpenCypherQueryExecutor extends QueryExecutor {
                     OpenCypherResultSetGetTables.class
                             .getConstructor(java.sql.Statement.class, OpenCypherResultSet.ResultSetInfoWithRows.class);
         } catch (final NoSuchMethodException e) {
-            throw new SQLException(e);
+            throw SqlError.createSQLException(
+                    LOGGER,
+                    SqlState.CONNECTION_EXCEPTION,
+                    SqlError.CONN_FAILED, e);
         }
         final String query = tableName == null ? "MATCH (n) RETURN DISTINCT LABELS(n)" :
                 String.format("MATCH (n:%s) RETURN DISTINCT LABELS(n)", tableName);

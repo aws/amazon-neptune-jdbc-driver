@@ -25,6 +25,7 @@ import org.slf4j.LoggerFactory;
 import software.amazon.jdbc.utilities.JavaToJdbcTypeConverter;
 import software.amazon.jdbc.utilities.JdbcType;
 import software.amazon.jdbc.utilities.SqlError;
+import software.amazon.jdbc.utilities.SqlState;
 import software.amazon.neptune.opencypher.OpenCypherTypeMapping;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSetMetaData;
@@ -196,8 +197,10 @@ public class OpenCypherResultSetGetColumns extends OpenCypherResultSet {
                 map.put("COLUMN_SIZE", null);
             }
             if (!map.keySet().equals(new HashSet<>(ORDERED_COLUMNS))) {
-                throw new SQLException(
-                        "Encountered error while parsing column metadata. Map key set does not match expected key set.");
+                throw SqlError.createSQLException(
+                        LOGGER,
+                        SqlState.DATA_TYPE_TRANSFORM_VIOLATION,
+                        SqlError.UNSUPPORTED_TYPE, map.keySet().toString());
             }
             rows.add(map);
         }
@@ -216,21 +219,15 @@ public class OpenCypherResultSetGetColumns extends OpenCypherResultSet {
     protected Object getConvertedValue(final int columnIndex) throws SQLException {
         verifyOpen();
         final int index = getRowIndex();
-        if ((index >= rows.size()) || (index < 0)) {
-            throw SqlError
-                    .createSQLFeatureNotSupportedException(LOGGER, SqlError.INVALID_INDEX, index + 1,
-                            rows.size());
-        } else if ((columnIndex > ORDERED_COLUMNS.size()) || (columnIndex <= 0)) {
-            throw SqlError
-                    .createSQLFeatureNotSupportedException(LOGGER, SqlError.INVALID_COLUMN_INDEX, columnIndex,
-                            ORDERED_COLUMNS.size());
+        if ((index >= rows.size()) || (index < 0)
+                || ((columnIndex > ORDERED_COLUMNS.size()) || (columnIndex <= 0))) {
+            throw SqlError.createSQLFeatureNotSupportedException(LOGGER);
         }
         final String key = ORDERED_COLUMNS.get(columnIndex - 1);
         if (rows.get(index).containsKey(key)) {
             return rows.get(index).get(key);
         } else {
-            throw SqlError
-                    .createSQLFeatureNotSupportedException(LOGGER, SqlError.INVALID_COLUMN_LABEL, key);
+            throw SqlError.createSQLFeatureNotSupportedException(LOGGER);
         }
     }
 

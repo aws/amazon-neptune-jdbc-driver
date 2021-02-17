@@ -21,6 +21,7 @@ import org.junit.jupiter.api.Test;
 import software.amazon.jdbc.helpers.HelperFunctions;
 import software.amazon.jdbc.mock.MockDataSource;
 import software.amazon.jdbc.mock.MockStatement;
+import software.amazon.jdbc.utilities.SqlError;
 
 /**
  * Test for abstract DataSource Object.
@@ -48,6 +49,6 @@ public class DataSourceTest {
         HelperFunctions.expectFunctionDoesntThrow(() -> dataSource.getLogWriter(), null);
         HelperFunctions.expectFunctionDoesntThrow(() -> dataSource.setLogWriter(null));
         HelperFunctions.expectFunctionDoesntThrow(() -> dataSource.getLogWriter(), null);
-        HelperFunctions.expectFunctionDoesntThrow(() -> dataSource.getParentLogger());
+        HelperFunctions.expectFunctionThrows(SqlError.FEATURE_NOT_SUPPORTED, () -> dataSource.getParentLogger());
     }
 }

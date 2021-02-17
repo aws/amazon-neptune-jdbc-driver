@@ -65,21 +65,15 @@ public class OpenCypherResultSetGetString extends OpenCypherResultSet {
     protected Object getConvertedValue(final int columnIndex) throws SQLException {
         verifyOpen();
         final int index = getRowIndex();
-        if ((index >= constantReturns.size()) || (index < 0)) {
-            throw SqlError
-                    .createSQLFeatureNotSupportedException(LOGGER, SqlError.INVALID_INDEX, index + 1,
-                            constantReturns.size());
-        } else if ((columnIndex > columns.size()) || (columnIndex <= 0)) {
-            throw SqlError
-                    .createSQLFeatureNotSupportedException(LOGGER, SqlError.INVALID_COLUMN_INDEX, columnIndex,
-                            columns.size());
+        if ((index >= constantReturns.size()) || (index < 0)
+            || ((columnIndex > columns.size()) || (columnIndex <= 0))) {
+            throw SqlError.createSQLFeatureNotSupportedException(LOGGER);
         }
         final String key = columns.get(columnIndex - 1);
         if (constantReturns.get(index).containsKey(key)) {
             return constantReturns.get(index).get(key);
         } else {
-            throw SqlError
-                    .createSQLFeatureNotSupportedException(LOGGER, SqlError.INVALID_COLUMN_LABEL, key);
+            throw SqlError.createSQLFeatureNotSupportedException(LOGGER);
         }
     }
 }

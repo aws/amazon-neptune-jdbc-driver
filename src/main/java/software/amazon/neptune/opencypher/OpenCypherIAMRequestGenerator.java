@@ -26,6 +26,11 @@ import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.HttpVersion;
 import org.neo4j.driver.AuthToken;
 import org.neo4j.driver.AuthTokens;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import software.amazon.jdbc.utilities.SqlError;
+import software.amazon.jdbc.utilities.SqlState;
+
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
@@ -34,7 +39,7 @@ import java.util.Map;
  * Class to help with IAM authentication.
  */
 public class OpenCypherIAMRequestGenerator {
-
+    private static final Logger LOGGER = LoggerFactory.getLogger(OpenCypherIAMRequestGenerator.class);
     private static final AWSCredentialsProvider AWS_CREDENTIALS_PROVIDER = new DefaultAWSCredentialsProviderChain();
     private static final Gson GSON = new Gson();
 
@@ -52,7 +57,10 @@ public class OpenCypherIAMRequestGenerator {
         try {
             new NeptuneNettyHttpSigV4Signer(region, AWS_CREDENTIALS_PROVIDER).signRequest(request);
         } catch (final NeptuneSigV4SignerException e) {
-            throw new SQLException(e);
+            throw SqlError.createSQLException(
+                    LOGGER,
+                    SqlState.CONNECTION_EXCEPTION,
+                    SqlError.FAILED_TO_OBTAIN_AUTH_TOKEN, e);
         }
 
         final Map<String, Object> requestMap = new HashMap<>();
