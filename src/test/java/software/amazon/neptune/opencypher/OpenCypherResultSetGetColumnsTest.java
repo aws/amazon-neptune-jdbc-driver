@@ -21,11 +21,11 @@ import com.google.common.collect.ImmutableMap;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import software.amazon.jdbc.utilities.ConnectionProperties;
 import software.amazon.neptune.opencypher.resultset.OpenCypherResultSet;
 import software.amazon.neptune.opencypher.resultset.OpenCypherResultSetGetColumns;
 import software.amazon.neptune.opencypher.resultset.OpenCypherResultSetGetTables;
 import software.amazon.neptune.opencypher.utilities.OpenCypherGetColumnUtilities;
+
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
@@ -70,8 +70,8 @@ public class OpenCypherResultSetGetColumnsTest {
     @BeforeAll
     public static void initialize() throws SQLException {
         // Make up fake endpoint since we aren't actually connection.
-        PROPERTIES.putIfAbsent(ConnectionProperties.ENDPOINT_KEY, String.format("bolt://%s:%d", "localhost", 123));
-        final java.sql.Connection connection = new OpenCypherConnection(new ConnectionProperties(PROPERTIES));
+        PROPERTIES.putIfAbsent(OpenCypherConnectionProperties.ENDPOINT_KEY, String.format("bolt://%s:%d", "localhost", 123));
+        final java.sql.Connection connection = new OpenCypherConnection(new OpenCypherConnectionProperties(PROPERTIES));
         statement = connection.createStatement();
     }
 

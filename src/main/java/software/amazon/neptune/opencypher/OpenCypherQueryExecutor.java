@@ -143,7 +143,7 @@ public class OpenCypherQueryExecutor extends QueryExecutor {
         }
         configBuilder.withMaxConnectionPoolSize(openCypherConnectionProperties.getConnectionPoolSize());
         configBuilder
-                .withConnectionTimeout(openCypherConnectionProperties.getConnectionTimeout(), TimeUnit.MILLISECONDS);
+                .withConnectionTimeout(openCypherConnectionProperties.getConnectionTimeoutMillis(), TimeUnit.MILLISECONDS);
 
         return configBuilder;
     }

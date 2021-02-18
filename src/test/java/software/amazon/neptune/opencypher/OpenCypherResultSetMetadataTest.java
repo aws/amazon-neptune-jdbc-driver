@@ -24,13 +24,14 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.neo4j.driver.internal.types.InternalTypeSystem;
-import software.amazon.jdbc.utilities.ConnectionProperties;
 import software.amazon.neptune.opencypher.mock.MockOpenCypherDatabase;
+
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Types;
 import java.util.List;
 import java.util.Properties;
+
 import static software.amazon.neptune.opencypher.mock.OpenCypherQueryLiterals.DATE;
 import static software.amazon.neptune.opencypher.mock.OpenCypherQueryLiterals.DATE_TIME;
 import static software.amazon.neptune.opencypher.mock.OpenCypherQueryLiterals.DURATION;
@@ -118,9 +119,9 @@ public class OpenCypherResultSetMetadataTest {
     @BeforeAll
     public static void initializeDatabase() throws SQLException {
         database = MockOpenCypherDatabase.builder(HOSTNAME, OpenCypherResultSetMetadataTest.class.getName()).build();
-        PROPERTIES.putIfAbsent(ConnectionProperties.ENDPOINT_KEY,
+        PROPERTIES.putIfAbsent(OpenCypherConnectionProperties.ENDPOINT_KEY,
                 String.format("bolt://%s:%d", HOSTNAME, database.getPort()));
-        final java.sql.Connection connection = new OpenCypherConnection(new ConnectionProperties(PROPERTIES));
+        final java.sql.Connection connection = new OpenCypherConnection(new OpenCypherConnectionProperties(PROPERTIES));
         statement = connection.createStatement();
     }
 

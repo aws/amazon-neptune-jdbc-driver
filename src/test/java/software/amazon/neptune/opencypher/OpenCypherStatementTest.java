@@ -21,9 +21,9 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import software.amazon.jdbc.helpers.HelperFunctions;
-import software.amazon.jdbc.utilities.ConnectionProperties;
 import software.amazon.jdbc.utilities.SqlError;
 import software.amazon.neptune.opencypher.mock.MockOpenCypherDatabase;
+
 import java.sql.SQLException;
 
 public class OpenCypherStatementTest extends OpenCypherStatementTestBase {
@@ -36,9 +36,9 @@ public class OpenCypherStatementTest extends OpenCypherStatementTestBase {
     @BeforeAll
     public static void initializeDatabase() throws SQLException {
         database = MockOpenCypherDatabase.builder(HOSTNAME, OpenCypherStatementTest.class.getName()).build();
-        PROPERTIES.putIfAbsent(ConnectionProperties.ENDPOINT_KEY,
+        PROPERTIES.putIfAbsent(OpenCypherConnectionProperties.ENDPOINT_KEY,
                 String.format("bolt://%s:%d", HOSTNAME, database.getPort()));
-        final java.sql.Connection connection = new OpenCypherConnection(new ConnectionProperties(PROPERTIES));
+        final java.sql.Connection connection = new OpenCypherConnection(new OpenCypherConnectionProperties(PROPERTIES));
         statement = connection.createStatement();
     }
 

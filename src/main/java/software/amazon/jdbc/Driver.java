@@ -17,7 +17,6 @@
 package software.amazon.jdbc;
 
 import org.slf4j.LoggerFactory;
-import software.amazon.jdbc.utilities.ConnectionProperties;
 import software.amazon.jdbc.utilities.SqlError;
 import software.amazon.jdbc.utilities.SqlState;
 
@@ -146,7 +145,7 @@ public abstract class Driver implements java.sql.Driver {
                 SqlError.UNSUPPORTED_PROPERTIES_STRING, url);
     }
 
-    protected Properties parsePropertyString(final String propertyString) {
+    protected Properties parsePropertyString(final String propertyString, final String firstPropertyKey) {
         final Properties properties = new Properties();
         if (propertyString.isEmpty()) {
             return properties;
@@ -156,7 +155,7 @@ public abstract class Driver implements java.sql.Driver {
         if (propertyArray.length == 0) {
             return properties;
         } else if (!propertyArray[0].trim().isEmpty()) {
-            properties.setProperty(ConnectionProperties.ENDPOINT_KEY, propertyArray[0].trim());
+            properties.setProperty(firstPropertyKey, propertyArray[0].trim());
         }
         for (int i = 1; i < propertyArray.length; i++) {
             if (propertyArray[i].contains("=")) {

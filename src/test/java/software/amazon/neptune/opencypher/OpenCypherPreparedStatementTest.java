@@ -22,9 +22,9 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import software.amazon.jdbc.helpers.HelperFunctions;
-import software.amazon.jdbc.utilities.ConnectionProperties;
 import software.amazon.jdbc.utilities.SqlError;
 import software.amazon.neptune.opencypher.mock.MockOpenCypherDatabase;
+
 import java.io.InputStream;
 import java.io.Reader;
 import java.sql.Blob;
@@ -48,7 +48,7 @@ public class OpenCypherPreparedStatementTest extends OpenCypherStatementTestBase
     @BeforeAll
     public static void initializeDatabase() throws SQLException {
         database = MockOpenCypherDatabase.builder(HOSTNAME, OpenCypherPreparedStatementTest.class.getName()).build();
-        PROPERTIES.putIfAbsent(ConnectionProperties.ENDPOINT_KEY,
+        PROPERTIES.putIfAbsent(OpenCypherConnectionProperties.ENDPOINT_KEY,
                 String.format("bolt://%s:%d", HOSTNAME, database.getPort()));
     }
 
@@ -62,7 +62,7 @@ public class OpenCypherPreparedStatementTest extends OpenCypherStatementTestBase
 
     @BeforeEach
     void initialize() throws SQLException {
-        final java.sql.Connection connection = new OpenCypherConnection(new ConnectionProperties(PROPERTIES));
+        final java.sql.Connection connection = new OpenCypherConnection(new OpenCypherConnectionProperties(PROPERTIES));
         openCypherPreparedStatement = connection.prepareStatement("");
         openCypherPreparedStatementLongQuery = connection.prepareStatement(getLongQuery());
         openCypherPreparedStatementQuickQuery = connection.prepareStatement(QUICK_QUERY);

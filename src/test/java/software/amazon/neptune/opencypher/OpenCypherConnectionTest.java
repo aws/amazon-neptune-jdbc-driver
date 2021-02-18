@@ -59,7 +59,7 @@ public class OpenCypherConnectionTest {
                 .withRelationship(MockOpenCypherNodes.VALENTINA, MockOpenCypherNodes.TOOTSIE, "GIVES_PETS_TO",
                         "GETS_PETS_FROM")
                 .build();
-        PROPERTIES.putIfAbsent(ConnectionProperties.ENDPOINT_KEY,
+        PROPERTIES.putIfAbsent(OpenCypherConnectionProperties.ENDPOINT_KEY,
                 String.format("bolt://%s:%d", HOSTNAME, database.getPort()));
     }
 
@@ -73,7 +73,7 @@ public class OpenCypherConnectionTest {
 
     @BeforeEach
     void initialize() throws SQLException {
-        connection = new OpenCypherConnection(new ConnectionProperties(PROPERTIES));
+        connection = new OpenCypherConnection(new OpenCypherConnectionProperties(PROPERTIES));
     }
 
     @Test
@@ -100,12 +100,12 @@ public class OpenCypherConnectionTest {
 
     @Test
     void testLogLevelChanged() throws SQLException {
-        Assertions.assertEquals(ConnectionProperties.DEFAULT_LOG_LEVEL, LogManager.getRootLogger().getLevel());
+        Assertions.assertEquals(OpenCypherConnectionProperties.DEFAULT_LOG_LEVEL, LogManager.getRootLogger().getLevel());
 
         final Properties properties = new Properties();
         properties.putAll(PROPERTIES);
         properties.put("logLevel", "ERROR");
-        connection = new OpenCypherConnection(new ConnectionProperties(properties));
+        connection = new OpenCypherConnection(new OpenCypherConnectionProperties(properties));
         Assertions.assertEquals(Level.ERROR, LogManager.getRootLogger().getLevel());
 
         // Reset logging so that it doesn't affect other tests.

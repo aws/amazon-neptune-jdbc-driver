@@ -24,7 +24,7 @@ import software.amazon.jdbc.utilities.CastHelper;
 import software.amazon.jdbc.utilities.ConnectionProperties;
 import software.amazon.jdbc.utilities.SqlError;
 import software.amazon.jdbc.utilities.SqlState;
-import software.amazon.jdbc.utilities.Warning;
+
 import java.sql.Array;
 import java.sql.ClientInfoStatus;
 import java.sql.ResultSet;
@@ -91,17 +91,17 @@ public abstract class Connection implements java.sql.Connection {
             throw SqlError.createSQLClientInfoException(LOGGER, SqlError.CONN_CLOSED, failures);
         }
         connectionProperties.clear();
-        if (properties != null) {
-            for (final String name : properties.stringPropertyNames()) {
-                if (ConnectionProperties.isSupportedProperty(name)) {
-                    final String value = properties.getProperty(name);
-                    connectionProperties.put(name, value);
-                    LOGGER.debug("Successfully set property with name {{}} and value {{}}", name, value);
-                } else {
-                    addWarning(new SQLWarning(Warning.lookup(Warning.UNSUPPORTED_PROPERTY, name)));
-                }
-            }
-        }
+        //if (properties != null) {
+        //    for (final String name : properties.stringPropertyNames()) {
+        //        if (ConnectionProperties.isSupportedProperty(name)) {
+        //            final String value = properties.getProperty(name);
+        //            connectionProperties.put(name, value);
+        //            LOGGER.debug("Successfully set property with name {{}} and value {{}}", name, value);
+        //        } else {
+        //            addWarning(new SQLWarning(Warning.lookup(Warning.UNSUPPORTED_PROPERTY, name)));
+        //        }
+        //    }
+        //}
         LOGGER.debug("Successfully set client info with all properties.");
     }
 

@@ -20,8 +20,8 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
-import software.amazon.jdbc.utilities.ConnectionProperties;
 import software.amazon.neptune.opencypher.utilities.OpenCypherGetColumnUtilities;
+
 import java.sql.SQLException;
 import java.util.Properties;
 
@@ -57,9 +57,9 @@ public class OpenCypherManualNeptuneVerificationTest {
 
         final Driver driver = GraphDatabase.driver(endpoint, null, config);
         driver.verifyConnectivity();*/
-        PROPERTIES.putIfAbsent(ConnectionProperties.ENDPOINT_KEY, endpoint);
+        PROPERTIES.putIfAbsent(OpenCypherConnectionProperties.ENDPOINT_KEY, endpoint);
         System.out.println("Endpoint " + endpoint);
-        final java.sql.Connection connection = new OpenCypherConnection(new ConnectionProperties(PROPERTIES));
+        final java.sql.Connection connection = new OpenCypherConnection(new OpenCypherConnectionProperties(PROPERTIES));
         final java.sql.Statement statement = connection.createStatement();
         // statement.execute(CREATE_NODES);
         databaseMetaData = connection.getMetaData();

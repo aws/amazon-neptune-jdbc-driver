@@ -22,6 +22,7 @@ import org.slf4j.LoggerFactory;
 import software.amazon.jdbc.Driver;
 import software.amazon.jdbc.utilities.ConnectionProperties;
 import software.amazon.neptune.opencypher.OpenCypherConnection;
+import software.amazon.neptune.opencypher.OpenCypherConnectionProperties;
 
 import javax.annotation.Nullable;
 import java.sql.DriverManager;
@@ -67,9 +68,9 @@ public class NeptuneDriver extends Driver implements java.sql.Driver {
         try {
             final String language = getLanguage(url, CONN_STRING_PATTERN);
             final String propertyString = getPropertyString(url, CONN_STRING_PATTERN);
-            final Properties properties = parsePropertyString(propertyString);
+            final Properties properties = parsePropertyString(propertyString, firstPropertyKey(language));
             properties.putAll(info);
-            connectionProperties = new ConnectionProperties(properties);
+            connectionProperties = connectionProperties(language, properties);
             connection = (java.sql.Connection) connectionMap.get(language)
                     .getConstructor(ConnectionProperties.class)
                     .newInstance(connectionProperties);
@@ -86,5 +87,21 @@ public class NeptuneDriver extends Driver implements java.sql.Driver {
         }
         LOGGER.error("Failed to create connection after {} attempts.", retryCount);
         return null;
+    }
+
+    private ConnectionProperties connectionProperties(final String language, final Properties properties) throws SQLException {
+        if ("opencypher".equalsIgnoreCase(language)) {
+            return new OpenCypherConnectionProperties(properties);
+        }
+        // TODO - implement for other languages
+        return new OpenCypherConnectionProperties(properties);
+    }
+
+    private String firstPropertyKey(final String language) {
+        if ("opencypher".equalsIgnoreCase(language)) {
+            return OpenCypherConnectionProperties.ENDPOINT_KEY;
+        }
+        // TODO - implement for other languages
+        return OpenCypherConnectionProperties.ENDPOINT_KEY;
     }
 }

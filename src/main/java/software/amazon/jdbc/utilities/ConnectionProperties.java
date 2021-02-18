@@ -29,90 +29,40 @@ import java.util.Properties;
 import java.util.regex.Pattern;
 
 /**
- * Class that manages connection properties.
+ * Class that contains connection properties.
  */
-public class ConnectionProperties extends Properties {
+public abstract class ConnectionProperties extends Properties {
     public static final String APPLICATION_NAME_KEY = "ApplicationName";
-    public static final String ENDPOINT_KEY = "Endpoint";
-    public static final String LOG_LEVEL_KEY = "LogLevel";
     public static final String CONNECTION_TIMEOUT_MILLIS_KEY = "ConnectionTimeout";
     public static final String CONNECTION_RETRY_COUNT_KEY = "ConnectionRetryCount";
-    public static final String AUTH_SCHEME_KEY = "AuthScheme";
-    public static final String USE_ENCRYPTION_KEY = "UseEncryption";
-    public static final String REGION_KEY = "Region";
-    public static final String CONNECTION_POOL_SIZE_KEY = "ConnectionPoolSize";
+    public static final String LOG_LEVEL_KEY = "LogLevel";
 
-    // TODO: Revisit. We should probably support these.
-    public static final String AWS_CREDENTIALS_PROVIDER_CLASS_KEY = "AwsCredentialsProviderClass";
-    public static final String CUSTOM_CREDENTIALS_FILE_PATH_KEY = "CustomCredentialsFilePath";
-
-    public static final Level DEFAULT_LOG_LEVEL = Level.INFO;
     public static final int DEFAULT_CONNECTION_TIMEOUT_MILLIS = 5000;
     public static final int DEFAULT_CONNECTION_RETRY_COUNT = 3;
-    public static final int DEFAULT_LOGIN_TIMEOUT_SEC = 0;
-    public static final int DEFAULT_CONNECTION_POOL_SIZE = 1000;
-    public static final AuthScheme DEFAULT_AUTH_SCHEME = AuthScheme.None;
-    public static final boolean DEFAULT_USE_ENCRYPTION = true;
+    public static final Level DEFAULT_LOG_LEVEL = Level.INFO;
+
     public static final Map<String, Object> DEFAULT_PROPERTIES_MAP = new HashMap<>();
-    private static final Map<String, PropertyConverter<?>> PROPERTIES_MAP = new HashMap<>();
+    private static final Map<String, ConnectionProperties.PropertyConverter<?>> PROPERTY_CONVERTER_MAP = new HashMap<>();
     private static final Logger LOGGER = LoggerFactory.getLogger(ConnectionProperties.class);
 
     static {
-        PROPERTIES_MAP.put(APPLICATION_NAME_KEY, (key, value) -> value);
-        PROPERTIES_MAP.put(AWS_CREDENTIALS_PROVIDER_CLASS_KEY, (key, value) -> value);
-        PROPERTIES_MAP.put(CUSTOM_CREDENTIALS_FILE_PATH_KEY, (key, value) -> value);
-        PROPERTIES_MAP.put(ENDPOINT_KEY, (key, value) -> value);
-        PROPERTIES_MAP.put(REGION_KEY, (key, value) -> value);
-        PROPERTIES_MAP.put(CONNECTION_TIMEOUT_MILLIS_KEY, ConnectionProperties::getUnsigned);
-        PROPERTIES_MAP.put(CONNECTION_RETRY_COUNT_KEY, ConnectionProperties::getUnsigned);
-        PROPERTIES_MAP.put(CONNECTION_POOL_SIZE_KEY, ConnectionProperties::getUnsigned);
-        PROPERTIES_MAP.put(USE_ENCRYPTION_KEY, ConnectionProperties::getBoolean);
-        PROPERTIES_MAP.put(LOG_LEVEL_KEY, (key, value) -> {
-            if (isWhitespace(value)) {
-                return DEFAULT_LOG_LEVEL;
-            }
-            final Map<String, Level> logLevelsMap = ImmutableMap.<String, Level>builder()
-                    .put("OFF", Level.OFF)
-                    .put("FATAL", Level.FATAL)
-                    .put("ERROR", Level.ERROR)
-                    .put("WARN", Level.WARN)
-                    .put("INFO", Level.INFO)
-                    .put("DEBUG", Level.DEBUG)
-                    .put("TRACE", Level.TRACE)
-                    .put("ALL", Level.ALL)
-                    .build();
-            if (!logLevelsMap.containsKey(value.toUpperCase())) {
-                throw invalidConnectionPropertyError(key, value);
-            }
-            return logLevelsMap.get(value.toUpperCase());
-        });
-        PROPERTIES_MAP.put(AUTH_SCHEME_KEY, (key, value) -> {
-            if (isWhitespace(value)) {
-                return DEFAULT_AUTH_SCHEME;
-            }
-            if (AuthScheme.fromString(value) == null) {
-                throw invalidConnectionPropertyError(key, value);
-            }
-            return AuthScheme.fromString(value);
-        });
+        PROPERTY_CONVERTER_MAP.put(APPLICATION_NAME_KEY, (key, value) -> value);
+        PROPERTY_CONVERTER_MAP.put(CONNECTION_TIMEOUT_MILLIS_KEY, ConnectionProperties::toUnsigned);
+        PROPERTY_CONVERTER_MAP.put(CONNECTION_RETRY_COUNT_KEY, ConnectionProperties::toUnsigned);
+        PROPERTY_CONVERTER_MAP.put(LOG_LEVEL_KEY, ConnectionProperties::toLogLevel);
     }
 
     static {
-        DEFAULT_PROPERTIES_MAP.put(ENDPOINT_KEY, "");
-        DEFAULT_PROPERTIES_MAP.put(LOG_LEVEL_KEY, DEFAULT_LOG_LEVEL);
         DEFAULT_PROPERTIES_MAP.put(CONNECTION_TIMEOUT_MILLIS_KEY, DEFAULT_CONNECTION_TIMEOUT_MILLIS);
         DEFAULT_PROPERTIES_MAP.put(CONNECTION_RETRY_COUNT_KEY, DEFAULT_CONNECTION_RETRY_COUNT);
-        DEFAULT_PROPERTIES_MAP.put(AUTH_SCHEME_KEY, DEFAULT_AUTH_SCHEME);
-        DEFAULT_PROPERTIES_MAP.put(USE_ENCRYPTION_KEY, DEFAULT_USE_ENCRYPTION);
-        DEFAULT_PROPERTIES_MAP.put(REGION_KEY, "");
-        DEFAULT_PROPERTIES_MAP.put(CONNECTION_POOL_SIZE_KEY, DEFAULT_CONNECTION_POOL_SIZE);
+        DEFAULT_PROPERTIES_MAP.put(LOG_LEVEL_KEY, DEFAULT_LOG_LEVEL);
     }
 
     /**
      * ConnectionProperties constructor.
      */
     public ConnectionProperties() throws SQLException {
-        resolveProperties(new Properties());
+        this(new Properties(), null, null);
     }
 
     /**
@@ -120,121 +70,23 @@ public class ConnectionProperties extends Properties {
      *
      * @param properties initial set of connection properties coming from the connection string.
      */
-    public ConnectionProperties(@NonNull final Properties properties) throws SQLException {
+    public ConnectionProperties(@NonNull final Properties properties,
+                                final Map<String, Object> defaultPropertiesMap,
+                                final Map<String, ConnectionProperties.PropertyConverter<?>> propertyConverterMap)
+            throws SQLException {
+
+        if (defaultPropertiesMap != null) {
+            DEFAULT_PROPERTIES_MAP.putAll(defaultPropertiesMap);
+        }
+        if (propertyConverterMap != null) {
+            PROPERTY_CONVERTER_MAP.putAll(propertyConverterMap);
+        }
+        if (properties.isEmpty()) {
+            putAll(DEFAULT_PROPERTIES_MAP);
+            return;
+        }
+
         resolveProperties(properties);
-    }
-
-    private static boolean isWhitespace(@NonNull final String value) {
-        return Pattern.matches("^\\s*$", value);
-    }
-
-    private static int getUnsigned(@NonNull final String key, @NonNull final String value) throws SQLException {
-        if (isWhitespace(value)) {
-            return (int) DEFAULT_PROPERTIES_MAP.get(key);
-        }
-        try {
-            final int intValue = Integer.parseUnsignedInt(value);
-            if (intValue < 0) {
-                throw invalidConnectionPropertyError(key, value);
-            }
-            return intValue;
-        } catch (final NumberFormatException | SQLException e) {
-            throw invalidConnectionPropertyError(key, value);
-        }
-    }
-
-    private static boolean getBoolean(@NonNull final String key, @NonNull final String value) throws SQLException {
-        if (isWhitespace(value)) {
-            return (boolean) DEFAULT_PROPERTIES_MAP.get(key);
-        }
-        final Map<String, Boolean> stringBooleanMap = ImmutableMap.of(
-                "1", true, "true", true,
-                "0", false, "false", false);
-        if (!stringBooleanMap.containsKey(value.toLowerCase())) {
-            throw invalidConnectionPropertyError(key, value);
-        }
-        return stringBooleanMap.get(value.toLowerCase());
-    }
-
-    private static SQLException invalidConnectionPropertyError(final Object key, final Object value) {
-        return SqlError.createSQLException(
-                LOGGER,
-                SqlState.CONNECTION_EXCEPTION,
-                SqlError.INVALID_CONNECTION_PROPERTY, key, value);
-    }
-
-    private static SQLException missingConnectionPropertyError(final String reason) {
-        return SqlError.createSQLException(
-                LOGGER,
-                SqlState.CONNECTION_EXCEPTION,
-                SqlError.MISSING_CONNECTION_PROPERTY, reason);
-    }
-
-    private static SQLException invalidConnectionPropertyValueError(final String key, final String reason) {
-        return SqlError.createSQLException(
-                LOGGER,
-                SqlState.CONNECTION_EXCEPTION,
-                SqlError.INVALID_VALUE_CONNECTION_PROPERTY, key, reason);
-    }
-
-    /**
-     * Check if the property is supported by the driver.
-     *
-     * @param name The name of the property.
-     * @return {@code true} if property is supported; {@code false} otherwise.
-     */
-    public static boolean isSupportedProperty(final String name) {
-        return PROPERTIES_MAP.containsKey(name);
-    }
-
-    /**
-     * Resolves input properties and converts them into the valid set of properties.
-     *
-     * @param inputProperties map of properties coming from the connection string.
-     * @throws SQLException if invalid input property is detected.
-     */
-    private void resolveProperties(final Properties inputProperties) throws SQLException {
-        // List of input properties keys used to keep track of unresolved properties.
-        final List<Object> inputPropertiesKeys = new ArrayList<>(inputProperties.keySet());
-
-        for (final String mapKey : PROPERTIES_MAP.keySet()) {
-            for (final Map.Entry<Object, Object> entry : inputProperties.entrySet()) {
-                final String key = entry.getKey().toString();
-                final String value = entry.getValue().toString();
-                // Find matching property by comparing keys (case-insensitive)
-                if (key.equalsIgnoreCase(mapKey)) {
-                    // Insert resolved property into the map.
-                    put(mapKey, PROPERTIES_MAP.get(mapKey).convert(key, value));
-                    // Remove key for the resolved property.
-                    inputPropertiesKeys.remove(key);
-                    break;
-                }
-            }
-            // If property was not resolved, insert default value, if it exists.
-            if (!containsKey(mapKey)
-                    && DEFAULT_PROPERTIES_MAP.containsKey(mapKey)) {
-                put(mapKey, DEFAULT_PROPERTIES_MAP.get(mapKey));
-            }
-        }
-
-        // If there are any unresolved properties left, raise an error.
-        if (!inputPropertiesKeys.isEmpty()) {
-            // Take the first invalid property to display in the error message.
-            final Object key = inputPropertiesKeys.get(0);
-            final Object value = inputProperties.get(key);
-            throw invalidConnectionPropertyError(key, value);
-        }
-
-        // If IAMSigV4 is specified, we need the region provided to us.
-        if (getAuthScheme().equals(AuthScheme.IAMSigV4)) {
-            if (getRegion().isEmpty()) {
-                throw missingConnectionPropertyError("A Region must be provided to use IAMSigV4 Authentication");
-            }
-            if (!getUseEncryption()) {
-                throw invalidConnectionPropertyValueError(USE_ENCRYPTION_KEY,
-                        "Encryption must be enabled if IAMSigV4 is used.");
-            }
-        }
     }
 
     /**
@@ -254,91 +106,7 @@ public class ConnectionProperties extends Properties {
      */
     public void setApplicationName(final String applicationName) throws SQLException {
         setProperty(APPLICATION_NAME_KEY,
-                (String) PROPERTIES_MAP.get(APPLICATION_NAME_KEY).convert(APPLICATION_NAME_KEY, applicationName));
-    }
-
-    /**
-     * Gets the AWS credentials provider class.
-     *
-     * @return The AWS credentials provider class.
-     */
-    public String getAwsCredentialsProviderClass() {
-        return getProperty(AWS_CREDENTIALS_PROVIDER_CLASS_KEY);
-    }
-
-    /**
-     * Sets the AWS credentials provider class.
-     *
-     * @param awsCredentialsProviderClass The AWS credentials provider class.
-     * @throws SQLException if value is invalid.
-     */
-    public void setAwsCredentialsProviderClass(final String awsCredentialsProviderClass) throws SQLException {
-        setProperty(AWS_CREDENTIALS_PROVIDER_CLASS_KEY,
-                (String) PROPERTIES_MAP.get(AWS_CREDENTIALS_PROVIDER_CLASS_KEY)
-                        .convert(AWS_CREDENTIALS_PROVIDER_CLASS_KEY, awsCredentialsProviderClass));
-    }
-
-    /**
-     * Gets the custom credentials filepath.
-     *
-     * @return The custom credentials filepath.
-     */
-    public String getCustomCredentialsFilePath() {
-        return getProperty(CUSTOM_CREDENTIALS_FILE_PATH_KEY);
-    }
-
-    /**
-     * Sets the custom credentials filepath.
-     *
-     * @param customCredentialsFilePath The custom credentials filepath.
-     * @throws SQLException if value is invalid.
-     */
-    public void setCustomCredentialsFilePath(final String customCredentialsFilePath) throws SQLException {
-        setProperty(CUSTOM_CREDENTIALS_FILE_PATH_KEY,
-                (String) PROPERTIES_MAP.get(CUSTOM_CREDENTIALS_FILE_PATH_KEY)
-                        .convert(CUSTOM_CREDENTIALS_FILE_PATH_KEY, customCredentialsFilePath));
-    }
-
-    /**
-     * Gets the connection endpoint.
-     *
-     * @return The connection endpoint.
-     */
-    public String getEndpoint() {
-        return getProperty(ENDPOINT_KEY);
-    }
-
-    /**
-     * Sets the connection endpoint.
-     *
-     * @param endpoint The connection endpoint.
-     * @throws SQLException if value is invalid.
-     */
-    public void setEndpoint(final String endpoint) throws SQLException {
-        setProperty(ENDPOINT_KEY,
-                (String) PROPERTIES_MAP.get(ENDPOINT_KEY).convert(ENDPOINT_KEY, endpoint));
-    }
-
-    /**
-     * Gets the logging level.
-     *
-     * @return The logging level.
-     */
-    public Level getLogLevel() {
-        return (Level) get(LOG_LEVEL_KEY);
-    }
-
-    /**
-     * Sets the logging level.
-     *
-     * @param logLevel The logging level.
-     * @throws SQLException if value is invalid.
-     */
-    public void setLogLevel(final Level logLevel) throws SQLException {
-        if (logLevel == null) {
-            throw invalidConnectionPropertyError(LOG_LEVEL_KEY, logLevel);
-        }
-        put(LOG_LEVEL_KEY, logLevel);
+                (String) PROPERTY_CONVERTER_MAP.get(APPLICATION_NAME_KEY).convert(APPLICATION_NAME_KEY, applicationName));
     }
 
     /**
@@ -386,85 +154,169 @@ public class ConnectionProperties extends Properties {
     }
 
     /**
-     * Gets the authentication scheme.
+     * Gets the logging level.
      *
-     * @return The authentication scheme.
+     * @return The logging level.
      */
-    public AuthScheme getAuthScheme() {
-        return (AuthScheme) get(AUTH_SCHEME_KEY);
+    public Level getLogLevel() {
+        return (Level) get(LOG_LEVEL_KEY);
     }
 
     /**
-     * Sets the authentication scheme.
+     * Sets the logging level.
      *
-     * @param authScheme The authentication scheme.
+     * @param logLevel The logging level.
      * @throws SQLException if value is invalid.
      */
-    public void setAuthScheme(final AuthScheme authScheme) throws SQLException {
-        if (authScheme == null) {
-            throw invalidConnectionPropertyError(AUTH_SCHEME_KEY, authScheme);
+    public void setLogLevel(final Level logLevel) throws SQLException {
+        if (logLevel == null) {
+            throw invalidConnectionPropertyError(LOG_LEVEL_KEY, logLevel);
         }
-        put(AUTH_SCHEME_KEY, authScheme);
+        put(LOG_LEVEL_KEY, logLevel);
     }
 
     /**
-     * Gets the use encryption.
-     *
-     * @return The use encryption.
+     * Validate properties.
      */
-    public boolean getUseEncryption() {
-        return (boolean) get(USE_ENCRYPTION_KEY);
+    protected abstract void validateProperties() throws SQLException;
+
+    /**
+     * Check if the property is supported by the driver.
+     *
+     * @param name The name of the property.
+     * @return {@code true} if property is supported; {@code false} otherwise.
+     */
+    public abstract boolean isSupportedProperty(final String name);
+
+    /**
+     * Gets the entire set of properties.
+     * @return The entire set of properties.
+     */
+    public Properties getProperties() {
+        final Properties newProperties = new Properties();
+        newProperties.putAll(this);
+        return newProperties;
     }
 
     /**
-     * Sets the use encryption.
+     * Resolves input properties and converts them into the valid set of properties.
      *
-     * @param useEncryption The use encryption.
+     * @param inputProperties map of properties coming from the connection string.
+     * @throws SQLException if invalid input property is detected.
      */
-    public void setUseEncryption(final boolean useEncryption) {
-        put(USE_ENCRYPTION_KEY, useEncryption);
-    }
+    private void resolveProperties(final Properties inputProperties) throws SQLException {
+        // List of input properties keys used to keep track of unresolved properties.
+        final List<Object> inputPropertiesKeys = new ArrayList<>(inputProperties.keySet());
 
-    /**
-     * Gets the region.
-     *
-     * @return The region.
-     */
-    public String getRegion() {
-        return getProperty(REGION_KEY);
-    }
-
-    /**
-     * Sets the region.
-     *
-     * @param region The region.
-     * @throws SQLException if value is invalid.
-     */
-    public void setRegion(final String region) throws SQLException {
-        setProperty(REGION_KEY,
-                (String) PROPERTIES_MAP.get(REGION_KEY).convert(REGION_KEY, region));
-    }
-
-    /**
-     * Gets the connection pool size.
-     *
-     * @return The connection pool size.
-     */
-    public int getConnectionPoolSize() {
-        return (int) get(CONNECTION_POOL_SIZE_KEY);
-    }
-
-    /**
-     * Sets the connection pool size.
-     *
-     * @param connectionPoolSize The connection pool size.
-     * @throws SQLException if value is invalid.
-     */
-    public void setConnectionPoolSize(final int connectionPoolSize) throws SQLException {
-        if (connectionPoolSize < 0) {
-            throw invalidConnectionPropertyError(CONNECTION_POOL_SIZE_KEY, connectionPoolSize);
+        for (final String mapKey : PROPERTY_CONVERTER_MAP.keySet()) {
+            for (final Map.Entry<Object, Object> entry : inputProperties.entrySet()) {
+                final String key = entry.getKey().toString();
+                final String value = entry.getValue().toString();
+                // Find matching property by comparing keys (case-insensitive)
+                if (key.equalsIgnoreCase(mapKey)) {
+                    // Insert resolved property into the map.
+                    put(mapKey, PROPERTY_CONVERTER_MAP.get(mapKey).convert(key, value));
+                    // Remove key for the resolved property.
+                    inputPropertiesKeys.remove(key);
+                    break;
+                }
+            }
+            // If property was not resolved, insert default value, if it exists.
+            if (!containsKey(mapKey) && DEFAULT_PROPERTIES_MAP.containsKey(mapKey)) {
+                put(mapKey, DEFAULT_PROPERTIES_MAP.get(mapKey));
+            }
         }
-        put(CONNECTION_POOL_SIZE_KEY, connectionPoolSize);
+
+        // If there are any unresolved properties left, raise an error.
+        if (!inputPropertiesKeys.isEmpty()) {
+            // Take the first invalid property to display in the error message.
+            final Object key = inputPropertiesKeys.get(0);
+            final Object value = inputProperties.get(key);
+            throw invalidConnectionPropertyError(key, value);
+        }
+
+        validateProperties();
+    }
+
+    protected static Level toLogLevel(@NonNull final String key, @NonNull final String value) throws SQLException {
+        if (isWhitespace(value)) {
+            return DEFAULT_LOG_LEVEL;
+        }
+        final Map<String, Level> logLevelsMap = ImmutableMap.<String, Level>builder()
+                .put("OFF", Level.OFF)
+                .put("FATAL", Level.FATAL)
+                .put("ERROR", Level.ERROR)
+                .put("WARN", Level.WARN)
+                .put("INFO", Level.INFO)
+                .put("DEBUG", Level.DEBUG)
+                .put("TRACE", Level.TRACE)
+                .put("ALL", Level.ALL)
+                .build();
+        if (!logLevelsMap.containsKey(value.toUpperCase())) {
+            throw invalidConnectionPropertyError(key, value);
+        }
+        return logLevelsMap.get(value.toUpperCase());
+    }
+
+    protected static int toUnsigned(@NonNull final String key, @NonNull final String value) throws SQLException {
+        if (isWhitespace(value)) {
+            if (DEFAULT_PROPERTIES_MAP.containsKey(key)) {
+                return (int) DEFAULT_PROPERTIES_MAP.get(key);
+            } else {
+                throw invalidConnectionPropertyError(key, value);
+            }
+        }
+        try {
+            final int intValue = Integer.parseUnsignedInt(value);
+            if (intValue < 0) {
+                throw invalidConnectionPropertyError(key, value);
+            }
+            return intValue;
+        } catch (final NumberFormatException | SQLException e) {
+            throw invalidConnectionPropertyError(key, value);
+        }
+    }
+
+    protected static boolean toBoolean(@NonNull final String key, @NonNull final String value) throws SQLException {
+        if (isWhitespace(value)) {
+            if (DEFAULT_PROPERTIES_MAP.containsKey(key)) {
+                return (boolean) DEFAULT_PROPERTIES_MAP.get(key);
+            } else {
+                throw invalidConnectionPropertyError(key, value);
+            }
+        }
+        final Map<String, Boolean> stringBooleanMap = ImmutableMap.of(
+                "1", true, "true", true,
+                "0", false, "false", false);
+        if (!stringBooleanMap.containsKey(value.toLowerCase())) {
+            throw invalidConnectionPropertyError(key, value);
+        }
+        return stringBooleanMap.get(value.toLowerCase());
+    }
+
+    protected static boolean isWhitespace(@NonNull final String value) {
+        return Pattern.matches("^\\s*$", value);
+    }
+
+    protected static SQLException invalidConnectionPropertyError(final Object key, final Object value) {
+        return SqlError.createSQLException(
+                LOGGER,
+                SqlState.CONNECTION_EXCEPTION,
+                SqlError.INVALID_CONNECTION_PROPERTY, key, value);
+    }
+
+    protected static SQLException missingConnectionPropertyError(final String reason) {
+        return SqlError.createSQLException(
+                LOGGER,
+                SqlState.CONNECTION_EXCEPTION,
+                SqlError.MISSING_CONNECTION_PROPERTY, reason);
+    }
+
+    protected static SQLException invalidConnectionPropertyValueError(final String key, final String reason) {
+        return SqlError.createSQLException(
+                LOGGER,
+                SqlState.CONNECTION_EXCEPTION,
+                SqlError.INVALID_VALUE_CONNECTION_PROPERTY, key, reason);
     }
 
     /**
@@ -472,7 +324,7 @@ public class ConnectionProperties extends Properties {
      *
      * @param <T> Type to convert string property to.
      */
-    interface PropertyConverter<T> {
+    protected interface PropertyConverter<T> {
         T convert(@NonNull String key, @NonNull String value) throws SQLException;
     }
 }
