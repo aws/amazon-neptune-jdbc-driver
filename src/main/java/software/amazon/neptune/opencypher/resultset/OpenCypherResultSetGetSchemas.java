@@ -17,9 +17,7 @@
 package software.amazon.neptune.opencypher.resultset;
 
 import com.google.common.collect.ImmutableList;
-import org.neo4j.driver.Record;
 import java.sql.Statement;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
