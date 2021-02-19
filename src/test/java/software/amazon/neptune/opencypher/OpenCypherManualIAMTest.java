@@ -127,7 +127,7 @@ public class OpenCypherManualIAMTest {
             System.out.println("Table: " + resultSet.getString("TABLE_NAME"));
             for (int i = 0; i < columnCount; i++) {
                 final String columnName = resultSet.getMetaData().getColumnName(i + 1);
-                if (!columnName.equals("TABLE_NAME")) {
+                if (!"TABLE_NAME".equals(columnName)) {
                     System.out.println("\t" + resultSet.getMetaData().getColumnName(i + 1) + " - '" +
                             resultSet.getString(i + 1) + "'");
                 }
