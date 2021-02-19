@@ -80,7 +80,7 @@ public class OpenCypherManualIAMTest {
         final Statement statement = connection.createStatement();
         final Instant start = Instant.now();
         try {
-            launchCancelThread(statement, 600);
+            launchCancelThread(statement, 1000);
             final ResultSet resultSet = statement.executeQuery(createLongQuery());
         } catch (final SQLException e) {
             System.out.println("Encountered exception: " + e);
@@ -124,16 +124,19 @@ public class OpenCypherManualIAMTest {
         Assertions.assertTrue(resultSet.next());
         do {
             final int columnCount = resultSet.getMetaData().getColumnCount();
-            System.out.println("Column count: " + columnCount);
+            System.out.println("Table: " + resultSet.getString("TABLE_NAME"));
             for (int i = 0; i < columnCount; i++) {
-                System.out.println("Column: " + resultSet.getMetaData().getColumnName(i + 1) + " - " +
-                        resultSet.getString(i + 1));
+                final String columnName = resultSet.getMetaData().getColumnName(i + 1);
+                if (!columnName.equals("TABLE_NAME")) {
+                    System.out.println("\t" + resultSet.getMetaData().getColumnName(i + 1) + " - '" +
+                            resultSet.getString(i + 1) + "'");
+                }
             }
         } while (resultSet.next());
     }
 
     String createLongQuery() {
-        final int nodeCount = 200;
+        final int nodeCount = 1000;
         final StringBuilder createStatement = new StringBuilder();
         for (int i = 0; i < nodeCount; i++) {
             createStatement.append(String.format("CREATE (node%d:Foo)", i));

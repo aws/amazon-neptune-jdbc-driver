@@ -71,11 +71,10 @@ public class OpenCypherSchemaHelper {
         }
 
         // Clean up
-        /*
         try {
             deleteDirectoryIfExists(Paths.get(directory));
         } catch (final IOException ignored) {
-        }*/
+        }
 
         return nodeColumnInfoList;
     }
