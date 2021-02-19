@@ -41,8 +41,6 @@ public abstract class Driver implements java.sql.Driver {
     static final String DRIVER_VERSION;
     static final String APP_NAME_SUFFIX;
     static final String APPLICATION_NAME;
-    private static final Pattern KEY_VALUE_PATTERN = Pattern.compile("(\\w+)=(\\w+)");
-    private static final Pattern KEY_VALUE_NUM_PATTERN = Pattern.compile("(\\w+)=(-?\\d+)");
     private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(Driver.class);
 
     static {
@@ -161,14 +159,15 @@ public abstract class Driver implements java.sql.Driver {
             properties.setProperty(ConnectionProperties.ENDPOINT_KEY, propertyArray[0].trim());
         }
         for (int i = 1; i < propertyArray.length; i++) {
-            final Matcher wordMatcher = KEY_VALUE_PATTERN.matcher(propertyArray[i]);
-            if (wordMatcher.matches()) {
-                properties.setProperty(wordMatcher.group(1), wordMatcher.group(2));
-            } else {
-                final Matcher numMatcher = KEY_VALUE_NUM_PATTERN.matcher(propertyArray[i]);
-                if (numMatcher.matches()) {
-                    properties.setProperty(numMatcher.group(1), numMatcher.group(2));
+            if (propertyArray[i].contains("=")) {
+                final String[] keyValue = propertyArray[i].split("=");
+                if (keyValue.length != 2) {
+                    LOGGER.warn("Encountered property that could not be parsed: " + propertyArray[i] + ".");
+                } else {
+                    properties.setProperty(keyValue[0], keyValue[1]);
                 }
+            } else {
+                properties.setProperty(propertyArray[i], "");
             }
         }
         return properties;

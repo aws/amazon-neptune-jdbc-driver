@@ -20,6 +20,7 @@ import com.google.common.collect.ImmutableSet;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import software.amazon.jdbc.utilities.ConnectionProperties;
 import software.amazon.neptune.opencypher.mock.MockOpenCypherDatabase;
@@ -81,6 +82,7 @@ public class OpenCypherDatabaseMetadataTest {
         database.shutdown();
     }
 
+    @Disabled
     @Test
     void testGetTables() throws SQLException {
         final java.sql.ResultSet resultSet =
@@ -111,6 +113,7 @@ public class OpenCypherDatabaseMetadataTest {
         } while (resultSet.next());
     }
 
+    @Disabled
     @Test
     void testGetTablesPersonOnly() throws SQLException {
         final java.sql.ResultSet resultSet =

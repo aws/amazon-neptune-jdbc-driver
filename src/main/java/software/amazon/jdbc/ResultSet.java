@@ -1138,8 +1138,14 @@ public abstract class ResultSet implements java.sql.ResultSet {
     }
 
     protected void validateRowColumn(final int columnIndex) throws SQLException {
-        if ((getRowIndex() >= rowCount) || (columnIndex >= columns.size())) {
-            throw SqlError.createSQLFeatureNotSupportedException(LOGGER);
+        if ((getRowIndex() < 0) || (getRowIndex() >= rowCount)) {
+            throw SqlError.createSQLException(LOGGER, SqlState.DATA_EXCEPTION, SqlError.INVALID_INDEX, getRowIndex() + 1,
+                    rowCount);
+        }
+        if ((columnIndex <= 0) || (columnIndex > columns.size())) {
+            throw SqlError
+                    .createSQLException(LOGGER, SqlState.DATA_EXCEPTION, SqlError.INVALID_COLUMN_INDEX, columnIndex,
+                            columns.size());
         }
     }
 }

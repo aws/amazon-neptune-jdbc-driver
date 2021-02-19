@@ -29,7 +29,6 @@ public class OpenCypherResultSetGetSchemas extends OpenCypherResultSetGetString 
      * TABLE_CAT String => catalog name
      */
     private static final List<String> COLUMNS = ImmutableList.of("TABLE_SCHEM", "TABLE_CAT");
-    private static final List<Record> ROWS = new ArrayList<>(0);
     private static final Map<String, String> CONVERSION_MAP = new HashMap<>();
     private static final ResultSetInfoWithoutRows RESULT_SET_INFO_WITHOUT_ROWS =
             new ResultSetInfoWithoutRows(null, null, 0, COLUMNS);

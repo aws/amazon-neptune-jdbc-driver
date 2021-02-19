@@ -29,6 +29,7 @@ import software.amazon.jdbc.utilities.AuthScheme;
 import software.amazon.jdbc.utilities.QueryExecutor;
 import software.amazon.jdbc.utilities.SqlError;
 import software.amazon.jdbc.utilities.SqlState;
+import software.amazon.neptune.opencypher.resultset.OpenCypherMetadataCache;
 import software.amazon.neptune.opencypher.resultset.OpenCypherResultSet;
 import software.amazon.neptune.opencypher.resultset.OpenCypherResultSetGetCatalogs;
 import software.amazon.neptune.opencypher.resultset.OpenCypherResultSetGetColumns;
@@ -175,26 +176,22 @@ public class OpenCypherQueryExecutor extends QueryExecutor {
      * Function to get tables.
      *
      * @param statement java.sql.Statement Object required for result set.
+     * @param tableName String table name with colon delimits.
      * @return java.sql.ResultSet object returned from query execution.
      * @throws SQLException if query execution fails, or it was cancelled.
      */
     @Override
     public java.sql.ResultSet executeGetTables(final java.sql.Statement statement, final String tableName)
             throws SQLException {
-        final Constructor<?> constructor;
-        try {
-            constructor =
-                    OpenCypherResultSetGetTables.class
-                            .getConstructor(java.sql.Statement.class, OpenCypherResultSet.ResultSetInfoWithRows.class);
-        } catch (final NoSuchMethodException e) {
-            throw SqlError.createSQLException(
-                    LOGGER,
-                    SqlState.CONNECTION_EXCEPTION,
-                    SqlError.CONN_FAILED, e);
+        if (!OpenCypherMetadataCache.isOpenCypherMetadataCached()) {
+            OpenCypherMetadataCache.updateCache(openCypherConnectionProperties.getEndpoint(), null,
+                    (openCypherConnectionProperties.getAuthScheme() == AuthScheme.IAMSigV4));
         }
-        final String query = tableName == null ? "MATCH (n) RETURN DISTINCT LABELS(n)" :
-                String.format("MATCH (n:%s) RETURN DISTINCT LABELS(n)", tableName);
-        return runCancellableQuery(constructor, statement, query);
+
+        final List<OpenCypherResultSetGetColumns.NodeColumnInfo> nodeColumnInfoList =
+                OpenCypherMetadataCache.getFilteredCacheNodeColumnInfos(tableName);
+        return new OpenCypherResultSetGetTables(statement, nodeColumnInfoList,
+                OpenCypherMetadataCache.getFilteredResultSetInfoWithoutRowsForTables(tableName));
     }
 
     /**
@@ -242,12 +239,15 @@ public class OpenCypherQueryExecutor extends QueryExecutor {
     @Override
     public java.sql.ResultSet executeGetColumns(final java.sql.Statement statement, final String nodes)
             throws SQLException {
+        if (!OpenCypherMetadataCache.isOpenCypherMetadataCached()) {
+            OpenCypherMetadataCache.updateCache(openCypherConnectionProperties.getEndpoint(), null,
+                    (openCypherConnectionProperties.getAuthScheme() == AuthScheme.IAMSigV4));
+        }
+
         final List<OpenCypherResultSetGetColumns.NodeColumnInfo> nodeColumnInfoList =
-                OpenCypherSchemaHelper.getGraphSchema(openCypherConnectionProperties.getEndpoint(), nodes);
+                OpenCypherMetadataCache.getFilteredCacheNodeColumnInfos(nodes);
         return new OpenCypherResultSetGetColumns(statement, nodeColumnInfoList,
-                new OpenCypherResultSet.ResultSetInfoWithoutRows(null, null, nodeColumnInfoList.size(),
-                        OpenCypherResultSetGetColumns.getColumns())
-        );
+                OpenCypherMetadataCache.getFilteredResultSetInfoWithoutRowsForColumns(nodes));
     }
 
     @Override

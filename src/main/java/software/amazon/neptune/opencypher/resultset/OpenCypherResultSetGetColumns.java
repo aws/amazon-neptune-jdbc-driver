@@ -37,7 +37,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
-public class OpenCypherResultSetGetColumns extends OpenCypherResultSet {
+public class OpenCypherResultSetGetColumns extends OpenCypherResultSet implements java.sql.ResultSet {
     private static final Logger LOGGER = LoggerFactory.getLogger(OpenCypherResultSetGetColumns.class);
     /**
      * TABLE_CAT String => table catalog (may be null)
@@ -151,7 +151,7 @@ public class OpenCypherResultSetGetColumns extends OpenCypherResultSet {
     private final List<Map<String, Object>> rows = new ArrayList<>();
 
     /**
-     * OpenCypherResultSetGetCatalogs constructor, initializes super class.
+     * OpenCypherResultSetGetColumns constructor, initializes super class.
      *
      * @param statement                Statement Object.
      * @param nodeColumnInfos          List of NodeColumnInfo Objects.
@@ -162,13 +162,14 @@ public class OpenCypherResultSetGetColumns extends OpenCypherResultSet {
             throws SQLException {
         super(statement, resultSetInfoWithoutRows);
         for (final NodeColumnInfo nodeColumnInfo : nodeColumnInfos) {
-            // Add defaults.
-            final Map<String, Object> map = new HashMap<>(CONVERSION_MAP);
-
-            // Set table name.
-            map.put("TABLE_NAME", OpenCypherResultSetGetTables.nodeListToString(nodeColumnInfo.labels));
             int i = 1;
             for (final Map<String, Object> property : nodeColumnInfo.properties) {
+                // Add defaults.
+                final Map<String, Object> map = new HashMap<>(CONVERSION_MAP);
+
+                // Set table name.
+                map.put("TABLE_NAME", OpenCypherResultSetGetTables.nodeListToString(nodeColumnInfo.labels));
+
                 // Get column type.
                 final String dataType = property.get("dataType").toString();
                 map.put("TYPE_NAME", dataType);
@@ -195,15 +196,21 @@ public class OpenCypherResultSetGetColumns extends OpenCypherResultSet {
                 map.put("NUM_PREC_RADIX", 10);
                 map.put("ORDINAL_POSITION", i++);
                 map.put("COLUMN_SIZE", null);
+
+                if (!map.keySet().equals(new HashSet<>(ORDERED_COLUMNS))) {
+                    throw SqlError.createSQLException(
+                            LOGGER,
+                            SqlState.DATA_TYPE_TRANSFORM_VIOLATION,
+                            SqlError.UNSUPPORTED_TYPE, map.keySet().toString());
+                }
+
+                rows.add(map);
             }
-            if (!map.keySet().equals(new HashSet<>(ORDERED_COLUMNS))) {
-                throw SqlError.createSQLException(
-                        LOGGER,
-                        SqlState.DATA_TYPE_TRANSFORM_VIOLATION,
-                        SqlError.UNSUPPORTED_TYPE, map.keySet().toString());
-            }
-            rows.add(map);
         }
+    }
+
+    public static List<String> getColumns() {
+        return ORDERED_COLUMNS;
     }
 
     @Override
@@ -219,10 +226,13 @@ public class OpenCypherResultSetGetColumns extends OpenCypherResultSet {
     protected Object getConvertedValue(final int columnIndex) throws SQLException {
         verifyOpen();
         final int index = getRowIndex();
-        if ((index >= rows.size()) || (index < 0)
-                || ((columnIndex > ORDERED_COLUMNS.size()) || (columnIndex <= 0))) {
-            throw SqlError.createSQLFeatureNotSupportedException(LOGGER);
+        if ((index < 0) || (index >= rows.size())) {
+            throw SqlError.createSQLException(LOGGER, SqlState.DATA_EXCEPTION, SqlError.INVALID_INDEX, getRowIndex() + 1, rows.size());
         }
+        if ((columnIndex <= 0) || (columnIndex > ORDERED_COLUMNS.size())) {
+            throw SqlError.createSQLException(LOGGER, SqlState.DATA_EXCEPTION, SqlError.INVALID_COLUMN_INDEX, columnIndex, ORDERED_COLUMNS.size());
+        }
+
         final String key = ORDERED_COLUMNS.get(columnIndex - 1);
         if (rows.get(index).containsKey(key)) {
             return rows.get(index).get(key);
@@ -246,9 +256,5 @@ public class OpenCypherResultSetGetColumns extends OpenCypherResultSet {
             final NodeColumnInfo nodeInfo = (NodeColumnInfo) (nodeColumnInfo);
             return nodeInfo.labels.equals(this.labels) && nodeInfo.properties.equals(this.properties);
         }
-    }
-
-    public static List<String> getColumns() {
-        return ORDERED_COLUMNS;
     }
 }

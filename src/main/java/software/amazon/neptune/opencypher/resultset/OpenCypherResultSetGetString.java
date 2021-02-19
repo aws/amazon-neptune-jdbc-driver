@@ -33,7 +33,6 @@ public class OpenCypherResultSetGetString extends OpenCypherResultSet {
     /**
      * TABLE_TYPE String => table type. Typical types are "TABLE", "VIEW", "SYSTEM TABLE", "GLOBAL TEMPORARY", "LOCAL TEMPORARY", "ALIAS", "SYNONYM".
      */
-    private final int rowCount;
     private final List<String> columns;
     private final List<Map<String, String>> constantReturns;
 
@@ -47,7 +46,6 @@ public class OpenCypherResultSetGetString extends OpenCypherResultSet {
     public OpenCypherResultSetGetString(final Statement statement, final ResultSetInfoWithoutRows resultSetInfoWithoutRows,
                                         final List<Map<String, String>> constantReturns) {
         super(statement, resultSetInfoWithoutRows);
-        this.rowCount = resultSetInfoWithoutRows.getRowCount();
         this.columns = resultSetInfoWithoutRows.getColumns();
         this.constantReturns = constantReturns;
     }

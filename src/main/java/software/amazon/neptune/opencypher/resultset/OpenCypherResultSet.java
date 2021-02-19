@@ -133,7 +133,7 @@ public class OpenCypherResultSet extends software.amazon.jdbc.ResultSet implemen
                     SqlError.UNSUPPORTED_RESULT_SET_TYPE);
         }
         validateRowColumn(columnIndex);
-        final Value value = rows.get(getRowIndex()).get(columnIndex);
+        final Value value = rows.get(getRowIndex()).get(columnIndex - 1);
         wasNull = value.isNull();
         return value;
     }
