@@ -16,6 +16,7 @@
 
 package software.amazon.jdbc;
 
+import lombok.SneakyThrows;
 import org.apache.log4j.LogManager;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.slf4j.Logger;
@@ -44,14 +45,18 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * Abstract implementation of Connection for JDBC Driver.
  */
 public abstract class Connection implements java.sql.Connection {
-    private static final Logger LOGGER = LoggerFactory.getLogger(Connection.class);
-    private final ConnectionProperties connectionProperties;
     private final AtomicBoolean isClosed = new AtomicBoolean(false);
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(Connection.class);
+    private ConnectionProperties connectionProperties;
     private Map<String, Class<?>> typeMap = new HashMap<>();
     private SQLWarning warnings = null;
 
     protected Connection(@NonNull final ConnectionProperties connectionProperties) throws SQLException {
         this.connectionProperties = connectionProperties;
+        this.connectionProperties.putIfAbsent(
+                ConnectionProperties.APPLICATION_NAME_KEY,
+                Driver.APPLICATION_NAME);
         setLogLevel();
     }
 
@@ -63,56 +68,92 @@ public abstract class Connection implements java.sql.Connection {
         LogManager.getRootLogger().setLevel(connectionProperties.getLogLevel());
     }
 
+    private Map<String, ClientInfoStatus> getFailures(@NonNull final String name, final String value) {
+        final Properties newProperties = new Properties();
+        newProperties.setProperty(name, value);
+
+        return getFailures(newProperties);
+    }
+
+    private Map<String, ClientInfoStatus> getFailures(final Properties properties) {
+        final Map<String, ClientInfoStatus> clientInfoStatusMap = new HashMap<>();
+        if (properties != null) {
+            for (final String name : properties.stringPropertyNames()) {
+                clientInfoStatusMap.put(name, ClientInfoStatus.REASON_UNKNOWN);
+            }
+        }
+        return clientInfoStatusMap;
+    }
+
     /*
         Functions that have their implementation in this Connection class.
      */
     @Override
-    // TODO: AN-405 - Redo Connection getClientInfo() and setClientInfo()
     public Properties getClientInfo() throws SQLException {
         verifyOpen();
         final Properties clientInfo = new Properties();
         clientInfo.putAll(connectionProperties);
-        clientInfo.putIfAbsent(
-                ConnectionProperties.APPLICATION_NAME_KEY,
-                Driver.APPLICATION_NAME);
         return clientInfo;
     }
 
+    @SneakyThrows
     @Override
-    // TODO: AN-405 - Redo Connection getClientInfo() and setClientInfo()
     public void setClientInfo(final Properties properties) throws SQLClientInfoException {
         if (isClosed.get()) {
-            final Map<String, ClientInfoStatus> failures = new HashMap<>();
-            if (properties != null) {
-                for (final String name : properties.stringPropertyNames()) {
-                    failures.put(name, ClientInfoStatus.REASON_UNKNOWN);
-                }
-            }
-            throw SqlError.createSQLClientInfoException(LOGGER, SqlError.CONN_CLOSED, failures);
+            throw SqlError.createSQLClientInfoException(
+                    LOGGER,
+                    getFailures(properties),
+                    SqlError.CONN_CLOSED);
         }
-        connectionProperties.clear();
-        //if (properties != null) {
-        //    for (final String name : properties.stringPropertyNames()) {
-        //        if (ConnectionProperties.isSupportedProperty(name)) {
-        //            final String value = properties.getProperty(name);
-        //            connectionProperties.put(name, value);
-        //            LOGGER.debug("Successfully set property with name {{}} and value {{}}", name, value);
-        //        } else {
-        //            addWarning(new SQLWarning(Warning.lookup(Warning.UNSUPPORTED_PROPERTY, name)));
-        //        }
-        //    }
-        //}
+        if (properties != null) {
+            for (final String name : properties.stringPropertyNames()) {
+                final String value = properties.getProperty(name);
+                setClientInfo(name, value);
+            }
+        }
         LOGGER.debug("Successfully set client info with all properties.");
     }
 
     @Override
     public String getClientInfo(final String name) throws SQLException {
         verifyOpen();
-        if (name == null) {
-            LOGGER.debug("Null value is passed as name, falling back to get client info with null.");
+        if (name == null || !connectionProperties.isSupportedProperty(name)) {
+            LOGGER.debug("Invalid value is passed as a name, falling back to get client info with null.");
             return null;
         }
-        return connectionProperties.getProperty(name);
+        return connectionProperties.get(name).toString();
+    }
+
+    @Override
+    public void setClientInfo(@NonNull final String name, final String value) throws SQLClientInfoException {
+        if (isClosed.get()) {
+            throw SqlError.createSQLClientInfoException(
+                    LOGGER,
+                    getFailures(name, value),
+                    SqlError.CONN_CLOSED);
+        }
+
+        if (!connectionProperties.isSupportedProperty(name)) {
+            throw SqlError.createSQLClientInfoException(
+                    LOGGER,
+                    getFailures(name, value),
+                    SqlError.INVALID_CONNECTION_PROPERTY, name, value);
+        }
+
+        try {
+            if (value != null) {
+                connectionProperties.validateAndSetProperty(name, value);
+                LOGGER.debug("Successfully set client info with name {{}} and value {{}}", name, value);
+            } else {
+                connectionProperties.remove(name);
+                LOGGER.debug("Successfully removed client info with name {{}}", name);
+            }
+        } catch (SQLException ex) {
+            throw SqlError.createSQLClientInfoException(
+                    LOGGER,
+                    getFailures(name, value),
+                    ex);
+        }
     }
 
     @Override
@@ -146,17 +187,6 @@ public abstract class Connection implements java.sql.Connection {
     public String nativeSQL(final String sql) throws SQLException {
         verifyOpen();
         return sql;
-    }
-
-    @Override
-    public void setClientInfo(final String name, final String value) throws SQLClientInfoException {
-        if ((name != null) && (value != null)) {
-            final Properties properties = new Properties();
-            properties.setProperty(name, value);
-            setClientInfo(properties);
-        } else {
-            setClientInfo(null);
-        }
     }
 
     @Override

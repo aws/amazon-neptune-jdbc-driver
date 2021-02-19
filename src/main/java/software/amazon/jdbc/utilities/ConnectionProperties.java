@@ -199,10 +199,23 @@ public abstract class ConnectionProperties extends Properties {
     }
 
     /**
+     * Resolves a property and sets its value.
+     *
+     * @param name The name of the property.
+     * @param value The value of the property.
+     * @throws SQLException If the property name or value is invalid.
+     */
+    public void validateAndSetProperty(final String name, final Object value) throws SQLException {
+        final Properties properties = new Properties();
+        properties.put(name, value);
+        resolveProperties(properties);
+    }
+
+    /**
      * Resolves input properties and converts them into the valid set of properties.
      *
      * @param inputProperties map of properties coming from the connection string.
-     * @throws SQLException if invalid input property is detected.
+     * @throws SQLException if invalid input property name or value is detected.
      */
     private void resolveProperties(final Properties inputProperties) throws SQLException {
         // List of input properties keys used to keep track of unresolved properties.
