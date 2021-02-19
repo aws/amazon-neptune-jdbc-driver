@@ -17,16 +17,15 @@
 package software.amazon.neptune.opencypher.resultset;
 
 import com.google.common.collect.ImmutableList;
-import org.neo4j.driver.Record;
-import org.neo4j.driver.Value;
 import org.neo4j.driver.internal.types.InternalTypeSystem;
 import org.neo4j.driver.types.Type;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import software.amazon.jdbc.utilities.SqlError;
 import software.amazon.jdbc.utilities.SqlState;
-
+import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -47,13 +46,12 @@ public class OpenCypherResultSetGetTables extends OpenCypherResultSet implements
      * SELF_REFERENCING_COL_NAME String => name of the designated "identifier" column of a typed table (may be null)
      * REF_GENERATION String => specifies how values in SELF_REFERENCING_COL_NAME are created. Values are "SYSTEM", "USER", "DERIVED". (may be null)
      */
-    private static final List<String> KEYS = ImmutableList.of(
+    private static final List<String> ORDERED_COLUMNS = ImmutableList.of(
             "TABLE_CAT", "TABLE_SCHEM", "TABLE_NAME", "TABLE_TYPE", "REMARKS", "TYPE_CAT", "TYPE_SCHEM", "TYPE_NAME",
             "SELF_REFERENCING_COL_NAME", "REF_GENERATION");
     private static final Map<String, Object> MAPPED_KEYS = new HashMap<>();
-    private static final List<String> EXPECTED_COLUMNS = ImmutableList.of("LABELS(n)");
     private static final String TABLE_NAME = "TABLE_NAME";
-    private static final String LABELS_KEY = "LABELS(n)";
+    private static final List<Type> ROW_TYPES = new ArrayList<>();
 
     static {
         MAPPED_KEYS.put("TABLE_CAT", null);
@@ -65,25 +63,30 @@ public class OpenCypherResultSetGetTables extends OpenCypherResultSet implements
         MAPPED_KEYS.put("TYPE_NAME", null);
         MAPPED_KEYS.put("SELF_REFERENCING_COL_NAME", null);
         MAPPED_KEYS.put("REF_GENERATION", null);
+
+        for (int i = 0; i < ORDERED_COLUMNS.size(); i++) {
+            ROW_TYPES.add(InternalTypeSystem.TYPE_SYSTEM.STRING());
+        }
     }
 
-    private final List<Record> rows;
+    private final List<Map<String, Object>> rows = new ArrayList<>();
 
     /**
      * OpenCypherResultSetGetTables constructor, initializes super class.
      *
-     * @param statement             Statement Object.
-     * @param resultSetInfoWithRows ResultSetInfoWithRows Object.
+     * @param statement                Statement Object.
+     * @param nodeColumnInfos          List of NodeColumnInfo Objects.
+     * @param resultSetInfoWithoutRows ResultSetInfoWithoutRows Object.
      */
-    public OpenCypherResultSetGetTables(final java.sql.Statement statement,
-                                        final ResultSetInfoWithRows resultSetInfoWithRows) throws SQLException {
-        super(statement, resultSetInfoWithRows);
-        this.rows = resultSetInfoWithRows.getRows();
-        if (!resultSetInfoWithRows.getColumns().equals(EXPECTED_COLUMNS)) {
-            throw SqlError.createSQLException(
-                    LOGGER,
-                    SqlState.DATA_TYPE_TRANSFORM_VIOLATION,
-                    SqlError.UNSUPPORTED_TYPE, resultSetInfoWithRows.getColumns().toString());
+    public OpenCypherResultSetGetTables(final Statement statement,
+                                        final List<OpenCypherResultSetGetColumns.NodeColumnInfo> nodeColumnInfos,
+                                        final ResultSetInfoWithoutRows resultSetInfoWithoutRows) {
+        super(statement, resultSetInfoWithoutRows);
+        for (final OpenCypherResultSetGetColumns.NodeColumnInfo nodeColumnInfo : nodeColumnInfos) {
+            // Add defaults, table name, and push into List.
+            final Map<String, Object> map = new HashMap<>(MAPPED_KEYS);
+            map.put(TABLE_NAME, nodeListToString(nodeColumnInfo.getLabels()));
+            rows.add(map);
         }
     }
 
@@ -102,41 +105,31 @@ public class OpenCypherResultSetGetTables extends OpenCypherResultSet implements
         return String.join(":", sortedNodes);
     }
 
+    public static List<String> getColumns() {
+        return ORDERED_COLUMNS;
+    }
+
     @Override
-    protected java.sql.ResultSetMetaData getOpenCypherMetadata() throws SQLException {
-        // All are string types.
-        final List<Type> rowTypes = new ArrayList<>();
-        for (int i = 0; i < MAPPED_KEYS.size(); i++) {
-            rowTypes.add(InternalTypeSystem.TYPE_SYSTEM.STRING());
-        }
-        return new OpenCypherResultSetMetadata(KEYS, rowTypes);
+    protected ResultSetMetaData getOpenCypherMetadata() {
+        return new OpenCypherResultSetMetadata(ORDERED_COLUMNS, ROW_TYPES);
     }
 
     @Override
     protected Object getConvertedValue(final int columnIndex) throws SQLException {
         verifyOpen();
-        if (columnIndex <= KEYS.size() && columnIndex > 0) {
-            final String key = KEYS.get(columnIndex - 1);
-            if (MAPPED_KEYS.containsKey(key)) {
-                return MAPPED_KEYS.get(key);
-            } else if (key.equals(TABLE_NAME)) {
-                final Value labels = rows.get(getRowIndex()).get(LABELS_KEY);
-                if (!labels.type().equals(InternalTypeSystem.TYPE_SYSTEM.LIST())) {
-                    throw SqlError.createSQLException(
-                            LOGGER,
-                            SqlState.DATA_TYPE_TRANSFORM_VIOLATION,
-                            SqlError.UNSUPPORTED_TYPE, labels.toString());
-                }
-                final List<?> objectLabels = labels.asList();
-                if (objectLabels.stream().anyMatch(o -> !(o instanceof String))) {
-                    throw SqlError.createSQLException(
-                            LOGGER,
-                            SqlState.DATA_TYPE_TRANSFORM_VIOLATION,
-                            SqlError.UNSUPPORTED_TYPE, objectLabels.toString());
-                }
-                return nodeListToString((List<String>) objectLabels);
-            }
+        final int index = getRowIndex();
+        if ((index < 0) || (index >= rows.size())) {
+            throw SqlError.createSQLException(LOGGER, SqlState.DATA_EXCEPTION, SqlError.INVALID_INDEX, index + 1, rows.size());
         }
-        throw SqlError.createSQLFeatureNotSupportedException(LOGGER);
+        if ((columnIndex <= 0) || (columnIndex > ORDERED_COLUMNS.size())) {
+            throw SqlError.createSQLException(LOGGER, SqlState.DATA_EXCEPTION, SqlError.INVALID_COLUMN_INDEX, columnIndex, ORDERED_COLUMNS.size());
+        }
+
+        final String key = ORDERED_COLUMNS.get(columnIndex - 1);
+        if (rows.get(index).containsKey(key)) {
+            return rows.get(index).get(key);
+        } else {
+            throw SqlError.createSQLFeatureNotSupportedException(LOGGER);
+        }
     }
 }

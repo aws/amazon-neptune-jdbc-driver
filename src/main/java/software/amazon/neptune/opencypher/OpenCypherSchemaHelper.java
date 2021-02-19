@@ -54,20 +54,28 @@ public class OpenCypherSchemaHelper {
      * @throws SQLException Thrown if an error is encountered.
      */
     public static List<OpenCypherResultSetGetColumns.NodeColumnInfo> getGraphSchema(final String endpoint,
-                                                                                    final String nodes)
+                                                                                    final String nodes,
+                                                                                    final boolean useIAM)
             throws SQLException {
         // Create unique directory if doesn't exist
         // If does exist, delete current contents
         final String directory = createUniqueDirectoryForThread();
 
         // Run process
-        final List<String> outputFiles = runGremlinSchemaGrabber(endpoint, nodes, directory);
+        final List<String> outputFiles = runGremlinSchemaGrabber(endpoint, nodes, directory, useIAM);
 
         // Validate to see if files are json
         final List<OpenCypherResultSetGetColumns.NodeColumnInfo> nodeColumnInfoList = new ArrayList<>();
         for (final String file : outputFiles) {
             parseFile(file, nodeColumnInfoList);
         }
+
+        // Clean up
+        try {
+            deleteDirectoryIfExists(Paths.get(directory));
+        } catch (final IOException ignored) {
+        }
+
         return nodeColumnInfoList;
     }
 
@@ -116,7 +124,8 @@ public class OpenCypherSchemaHelper {
 
     @VisibleForTesting
     private static List<String> runGremlinSchemaGrabber(final String endpoint, final String nodes,
-                                                        final String outputPath) throws SQLException {
+                                                        final String outputPath, final boolean useIAM)
+            throws SQLException {
         final String[] endpointSplit = endpoint.split(":");
         if ((endpointSplit.length != 3) || (!endpointSplit[1].startsWith("//"))) {
             throw SqlError.createSQLException(
@@ -125,12 +134,26 @@ public class OpenCypherSchemaHelper {
                     SqlError.INVALID_ENDPOINT, endpoint);
         }
         final String adjustedEndpoint = endpointSplit[1].substring(2);
+
+        // Setup arguments
         final List<String> arguments = new LinkedList<>();
         arguments.add("create-pg-config");
         arguments.add("-e");
         arguments.add(adjustedEndpoint);
         arguments.add("-d");
         arguments.add(outputPath);
+
+        // This gremlin utility requires that the SERVICE_REGION is set no matter what usage of IAM is being used.
+        if (useIAM) {
+            if (!System.getenv().containsKey("SERVICE_REGION")) {
+                throw SqlError.createSQLException(
+                        LOGGER,
+                        SqlState.OPERATION_CANCELED,
+                        SqlError.MISSING_SERVICE_REGION);
+            }
+            arguments.add("--use-iam-auth");
+        }
+
         if (nodes != null && !nodes.isEmpty()) {
             final String[] nodeSplit = nodes.split(":");
             for (final String node : nodeSplit) {

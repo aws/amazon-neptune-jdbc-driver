@@ -16,48 +16,161 @@
 
 package software.amazon.neptune.opencypher;
 
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
+import lombok.AllArgsConstructor;
+import lombok.SneakyThrows;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
-import org.neo4j.driver.Config;
-import org.neo4j.driver.Driver;
-import org.neo4j.driver.GraphDatabase;
 import software.amazon.jdbc.utilities.ConnectionProperties;
 import java.sql.Connection;
+import java.sql.DatabaseMetaData;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.time.Duration;
+import java.time.Instant;
+import java.util.AbstractMap;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Properties;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class OpenCypherManualIAMTest {
-
+    private static final int PORT = 8182;
     private static final String HOSTNAME = "iam-auth-test.cluster-cdubgfjknn5r.us-east-1.neptune.amazonaws.com";
+    private static final String ENDPOINT = String.format("bolt://%s:%d", HOSTNAME, PORT);
+    private static final String REGION = "us-east-1";
+    private static final String AUTH = "IamSigV4";
+    private static final String ENCRYPTION = "TRUE";
+    private static final String CONNECTION_STRING =
+            String.format("jdbc:neptune:opencypher://%s;useEncryption=%s;authScheme=%s;region=%s;", ENDPOINT,
+                    ENCRYPTION,
+                    AUTH, REGION);
+    private static final String CREATE_NODES = String.format("CREATE (:%s %s)", "Person:Developer", "{hello:'world'}") +
+            String.format(" CREATE (:%s %s)", "Person", "{person:1234}") +
+            String.format(" CREATE (:%s %s)", "Human", "{hello:'world'}") +
+            String.format(" CREATE (:%s %s)", "Human", "{hello:123}") +
+            String.format(" CREATE (:%s %s)", "Developer", "{hello:123}") +
+            String.format(" CREATE (:%s %s)", "Person", "{p1:true}") +
+            String.format(" CREATE (:%s %s)", "Person", "{p1:1.0}") +
+            " CREATE (:Foo {foo:'foo'})-[:Rel {rel:'rel'}]->(:Bar {bar:'bar'})";
+    private final Map<String, List<Map.Entry<String, String>>> tableMap = new HashMap<>();
 
     @Disabled
     @Test
-    void testBasicIamAuthDirectly() throws Exception {
-        final String endpoint = String.format("bolt://%s:%d", HOSTNAME, 8182);
-        final Config config = Config.builder()
-                .withConnectionTimeout(3, TimeUnit.SECONDS)
-                .withMaxConnectionPoolSize(1000)
-                .withEncryption()
-                .withTrustStrategy(Config.TrustStrategy.trustAllCertificates())
-                .build();
-        final Driver driver = GraphDatabase
-                .driver(endpoint, OpenCypherIAMRequestGenerator.getSignedHeader(endpoint, "us-east-1"), config);
-        // This will throw and fail if authentication fails.
-        driver.verifyConnectivity();
+    void testBasicIamAuth() throws Exception {
+        final Connection connection = DriverManager.getConnection(CONNECTION_STRING);
+        Assertions.assertTrue(connection.isValid(1000));
     }
 
     @Disabled
     @Test
-    void testBasicIamAuthJDBC() throws Exception {
-        final String endpoint = String.format("bolt://%s:%d", HOSTNAME, 8182);
-        final String region = "us-east-1";
-        final String auth = "IamSigV4";
+    void testLongRunningQuery() throws Exception {
         final Properties properties = new Properties();
-        properties.put(ConnectionProperties.ENDPOINT_KEY, endpoint);
-        properties.put(ConnectionProperties.AUTH_SCHEME_KEY, auth);
-        properties.put(ConnectionProperties.REGION_KEY, region);
+        properties.put(ConnectionProperties.ENDPOINT_KEY, ENDPOINT);
+        properties.put(ConnectionProperties.AUTH_SCHEME_KEY, AUTH);
+        properties.put(ConnectionProperties.REGION_KEY, REGION);
         final Connection connection = new OpenCypherConnection(new ConnectionProperties(properties));
         Assertions.assertTrue(connection.isValid(1000));
+        final Statement statement = connection.createStatement();
+        final Instant start = Instant.now();
+        try {
+            launchCancelThread(statement, 1000);
+            final ResultSet resultSet = statement.executeQuery(createLongQuery());
+        } catch (final SQLException e) {
+            System.out.println("Encountered exception: " + e);
+        }
+        final Instant end = Instant.now();
+        System.out.println("Time diff: " + Duration.between(start, end).toMillis() + " ms");
+    }
+
+    @Disabled
+    @Test
+    void testGetColumns() throws SQLException {
+        final Connection connection = DriverManager.getConnection(CONNECTION_STRING);
+        final DatabaseMetaData databaseMetaData = connection.getMetaData();
+        final ResultSet resultSet = databaseMetaData.getColumns(null, null, null, null);
+        Assertions.assertTrue(resultSet.next());
+        do {
+            final String table = resultSet.getString("TABLE_NAME");
+            final String column = resultSet.getString("COLUMN_NAME");
+            final String type = resultSet.getString("TYPE_NAME");
+            if (!tableMap.containsKey(table)) {
+                tableMap.put(table, new ArrayList<>());
+            }
+            tableMap.get(table).add(new AbstractMap.SimpleImmutableEntry<String, String>(column, type) {
+            });
+        } while (resultSet.next());
+
+        for (final Map.Entry<String, List<Map.Entry<String, String>>> entry : tableMap.entrySet()) {
+            System.out.println("Table: " + entry.getKey());
+            for (final Map.Entry<String, String> columnTypePair : entry.getValue()) {
+                System.out.println("\tColumn: " + columnTypePair.getKey() + ",\t Type: " + columnTypePair.getValue());
+            }
+        }
+    }
+
+    @Disabled
+    @Test
+    void testGetTables() throws SQLException {
+        final Connection connection = DriverManager.getConnection(CONNECTION_STRING);
+        final DatabaseMetaData databaseMetaData = connection.getMetaData();
+        final ResultSet resultSet = databaseMetaData.getTables(null, null, null, null);
+        Assertions.assertTrue(resultSet.next());
+        do {
+            final int columnCount = resultSet.getMetaData().getColumnCount();
+            System.out.println("Table: " + resultSet.getString("TABLE_NAME"));
+            for (int i = 0; i < columnCount; i++) {
+                final String columnName = resultSet.getMetaData().getColumnName(i + 1);
+                if (!"TABLE_NAME".equals(columnName)) {
+                    System.out.println("\t" + resultSet.getMetaData().getColumnName(i + 1) + " - '" +
+                            resultSet.getString(i + 1) + "'");
+                }
+            }
+        } while (resultSet.next());
+    }
+
+    String createLongQuery() {
+        final int nodeCount = 1000;
+        final StringBuilder createStatement = new StringBuilder();
+        for (int i = 0; i < nodeCount; i++) {
+            createStatement.append(String.format("CREATE (node%d:Foo)", i));
+            if (i != (nodeCount - 1)) {
+                createStatement.append(" ");
+            }
+        }
+        return createStatement.toString();
+    }
+
+    void launchCancelThread(final Statement statement, final int waitTime) {
+        final ExecutorService cancelThread = Executors.newSingleThreadExecutor(
+                new ThreadFactoryBuilder().setNameFormat("cancelThread").setDaemon(true).build());
+        cancelThread.execute(new Cancel(statement, waitTime));
+    }
+
+
+    /**
+     * Class to cancel query in a separate thread.
+     */
+    @AllArgsConstructor
+    public static class Cancel implements Runnable {
+        private final Statement statement;
+        private final int waitTime;
+
+        @SneakyThrows
+        @Override
+        public void run() {
+            try {
+                Thread.sleep(waitTime);
+                statement.cancel();
+            } catch (final SQLException e) {
+                System.out.println("Cancel exception: " + e);
+            }
+        }
     }
 }

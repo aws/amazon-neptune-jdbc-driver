@@ -30,6 +30,7 @@ public class OpenCypherDatabaseMetadata extends DatabaseMetaData implements java
 
     /**
      * OpenCypherDatabaseMetadata constructor, initializes super class.
+     *
      * @param connection Connection Object.
      */
     OpenCypherDatabaseMetadata(final java.sql.Connection connection) {
