@@ -17,7 +17,6 @@
 package software.amazon.neptune.opencypher;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
-import javafx.util.Pair;
 import lombok.AllArgsConstructor;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.Assertions;
@@ -32,6 +31,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -59,7 +59,7 @@ public class OpenCypherManualIAMTest {
             String.format(" CREATE (:%s %s)", "Person", "{p1:true}") +
             String.format(" CREATE (:%s %s)", "Person", "{p1:1.0}") +
             " CREATE (:Foo {foo:'foo'})-[:Rel {rel:'rel'}]->(:Bar {bar:'bar'})";
-    private final Map<String, List<Pair<String, String>>> tableMap = new HashMap<>();
+    private final Map<String, List<Map.Entry<String, String>>> tableMap = new HashMap<>();
 
     @Disabled
     @Test
@@ -103,12 +103,13 @@ public class OpenCypherManualIAMTest {
             if (!tableMap.containsKey(table)) {
                 tableMap.put(table, new ArrayList<>());
             }
-            tableMap.get(table).add(new Pair<>(column, type));
+            tableMap.get(table).add(new AbstractMap.SimpleImmutableEntry<String, String>(column, type) {
+            });
         } while (resultSet.next());
 
-        for (final Map.Entry<String, List<Pair<String, String>>> entry : tableMap.entrySet()) {
+        for (final Map.Entry<String, List<Map.Entry<String, String>>> entry : tableMap.entrySet()) {
             System.out.println("Table: " + entry.getKey());
-            for (final Pair<String, String> columnTypePair : entry.getValue()) {
+            for (final Map.Entry<String, String> columnTypePair : entry.getValue()) {
                 System.out.println("\tColumn: " + columnTypePair.getKey() + ",\t Type: " + columnTypePair.getValue());
             }
         }
