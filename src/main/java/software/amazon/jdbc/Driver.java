@@ -35,11 +35,11 @@ import java.util.regex.Pattern;
  * Abstract implementation of Driver for JDBC Driver.
  */
 public abstract class Driver implements java.sql.Driver {
-    static final int DRIVER_MAJOR_VERSION;
-    static final int DRIVER_MINOR_VERSION;
-    static final String DRIVER_VERSION;
-    static final String APP_NAME_SUFFIX;
-    static final String APPLICATION_NAME;
+    public static final int DRIVER_MAJOR_VERSION;
+    public static final int DRIVER_MINOR_VERSION;
+    public static final String DRIVER_VERSION;
+    public static final String APP_NAME_SUFFIX;
+    public static final String APPLICATION_NAME;
     private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(Driver.class);
 
     static {

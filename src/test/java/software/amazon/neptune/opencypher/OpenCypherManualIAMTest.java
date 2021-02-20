@@ -22,7 +22,7 @@ import lombok.SneakyThrows;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
-import software.amazon.jdbc.utilities.ConnectionProperties;
+
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.DriverManager;
@@ -72,10 +72,10 @@ public class OpenCypherManualIAMTest {
     @Test
     void testLongRunningQuery() throws Exception {
         final Properties properties = new Properties();
-        properties.put(ConnectionProperties.ENDPOINT_KEY, ENDPOINT);
-        properties.put(ConnectionProperties.AUTH_SCHEME_KEY, AUTH);
-        properties.put(ConnectionProperties.REGION_KEY, REGION);
-        final Connection connection = new OpenCypherConnection(new ConnectionProperties(properties));
+        properties.put(OpenCypherConnectionProperties.ENDPOINT_KEY, ENDPOINT);
+        properties.put(OpenCypherConnectionProperties.AUTH_SCHEME_KEY, AUTH);
+        properties.put(OpenCypherConnectionProperties.REGION_KEY, REGION);
+        final Connection connection = new OpenCypherConnection(new OpenCypherConnectionProperties(properties));
         Assertions.assertTrue(connection.isValid(1000));
         final Statement statement = connection.createStatement();
         final Instant start = Instant.now();
