@@ -118,7 +118,7 @@ public abstract class Connection implements java.sql.Connection {
     public String getClientInfo(final String name) throws SQLException {
         verifyOpen();
         if (name == null || !connectionProperties.isSupportedProperty(name)) {
-            LOGGER.debug("Invalid value is passed as a name, falling back to get client info with null.");
+            LOGGER.debug("Invalid name '{}' passed to getClientInfo, returning null for value.", name);
             return null;
         }
         return connectionProperties.get(name).toString();
@@ -143,10 +143,10 @@ public abstract class Connection implements java.sql.Connection {
         try {
             if (value != null) {
                 connectionProperties.validateAndSetProperty(name, value);
-                LOGGER.debug("Successfully set client info with name {{}} and value {{}}", name, value);
+                LOGGER.debug("Successfully set client info with name '{}' and value '{}'", name, value);
             } else {
                 connectionProperties.remove(name);
-                LOGGER.debug("Successfully removed client info with name {{}}", name);
+                LOGGER.debug("Successfully removed client info with name '{}'", name);
             }
         } catch (SQLException ex) {
             throw SqlError.createSQLClientInfoException(
