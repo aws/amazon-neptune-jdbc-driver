@@ -26,7 +26,7 @@ import org.neo4j.graphdb.factory.GraphDatabaseSettings;
 import org.neo4j.harness.junit.Neo4jRule;
 import org.neo4j.kernel.configuration.BoltConnector;
 import org.neo4j.kernel.configuration.Settings;
-import software.amazon.jdbc.utilities.ConnectionProperties;
+import software.amazon.neptune.opencypher.OpenCypherConnectionProperties;
 
 import java.io.File;
 import java.io.IOException;
@@ -104,7 +104,7 @@ public final class MockOpenCypherDatabase {
      */
     @SneakyThrows
     public static MockOpenCypherDatabaseBuilder builder(final String host, final String callingClass) {
-        return builder(host, callingClass, ConnectionProperties.DEFAULT_USE_ENCRYPTION);
+        return builder(host, callingClass, OpenCypherConnectionProperties.DEFAULT_USE_ENCRYPTION);
     }
 
     /**

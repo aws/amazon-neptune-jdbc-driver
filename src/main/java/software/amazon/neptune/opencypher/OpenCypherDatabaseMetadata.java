@@ -243,6 +243,7 @@ public class OpenCypherDatabaseMetadata extends DatabaseMetaData implements java
 
     @Override
     public ResultSet getClientInfoProperties() throws SQLException {
+        // TODO
         return null;
     }
 }

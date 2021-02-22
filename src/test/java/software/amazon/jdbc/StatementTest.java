@@ -22,11 +22,11 @@ import software.amazon.jdbc.helpers.HelperFunctions;
 import software.amazon.jdbc.mock.MockConnection;
 import software.amazon.jdbc.mock.MockResultSet;
 import software.amazon.jdbc.mock.MockStatement;
-import software.amazon.jdbc.utilities.ConnectionProperties;
+import software.amazon.neptune.opencypher.OpenCypherConnectionProperties;
+
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.SQLWarning;
-import java.util.Properties;
 
 /**
  * Test for abstract Statement Object.
@@ -37,7 +37,7 @@ public class StatementTest {
 
     @BeforeEach
     void initialize() throws SQLException {
-        connection = new MockConnection(new ConnectionProperties(new Properties()));
+        connection = new MockConnection(new OpenCypherConnectionProperties());
         statement = new MockStatement(connection);
     }
 

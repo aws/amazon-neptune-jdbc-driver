@@ -14,31 +14,32 @@
  *
  */
 
-package software.amazon.jdbc.utilities;
+package software.amazon.neptune.opencypher;
 
 import com.google.common.collect.ImmutableList;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import software.amazon.jdbc.utilities.AuthScheme;
 
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Properties;
 
 /**
- * Test for ConnectionProperties.
+ * Test for OpenCypherConnectionProperties.
  */
-class ConnectionPropertiesTest {
-    private ConnectionProperties connectionProperties;
+class OpenCypherConnectionPropertiesTest {
+    private OpenCypherConnectionProperties connectionProperties;
 
     @Test
     void testDefaultValues() throws SQLException {
-        connectionProperties = new ConnectionProperties();
+        connectionProperties = new OpenCypherConnectionProperties();
         Assertions.assertEquals("", connectionProperties.getEndpoint());
-        Assertions.assertEquals(ConnectionProperties.DEFAULT_LOG_LEVEL, connectionProperties.getLogLevel());
-        Assertions.assertEquals(ConnectionProperties.DEFAULT_CONNECTION_TIMEOUT_MILLIS, connectionProperties.getConnectionTimeoutMillis());
-        Assertions.assertEquals(ConnectionProperties.DEFAULT_CONNECTION_RETRY_COUNT, connectionProperties.getConnectionRetryCount());
-        Assertions.assertEquals(ConnectionProperties.DEFAULT_AUTH_SCHEME, connectionProperties.getAuthScheme());
-        Assertions.assertEquals(ConnectionProperties.DEFAULT_USE_ENCRYPTION, connectionProperties.getUseEncryption());
+        Assertions.assertEquals(OpenCypherConnectionProperties.DEFAULT_LOG_LEVEL, connectionProperties.getLogLevel());
+        Assertions.assertEquals(OpenCypherConnectionProperties.DEFAULT_CONNECTION_TIMEOUT_MILLIS, connectionProperties.getConnectionTimeoutMillis());
+        Assertions.assertEquals(OpenCypherConnectionProperties.DEFAULT_CONNECTION_RETRY_COUNT, connectionProperties.getConnectionRetryCount());
+        Assertions.assertEquals(OpenCypherConnectionProperties.DEFAULT_AUTH_SCHEME, connectionProperties.getAuthScheme());
+        Assertions.assertEquals(OpenCypherConnectionProperties.DEFAULT_USE_ENCRYPTION, connectionProperties.getUseEncryption());
         Assertions.assertEquals("", connectionProperties.getRegion());
     }
 
@@ -54,18 +55,18 @@ class ConnectionPropertiesTest {
         // Verify valid property value doesn't throw error.
         for (final String validValue : validLogLevels) {
             // Set property through constructor.
-            properties.put(ConnectionProperties.LOG_LEVEL_KEY, validValue);
+            properties.put(OpenCypherConnectionProperties.LOG_LEVEL_KEY, validValue);
             Assertions.assertDoesNotThrow(() -> {
-                connectionProperties = new ConnectionProperties(properties);
+                connectionProperties = new OpenCypherConnectionProperties(properties);
             });
         }
 
         // Verify invalid property value throws error.
         for (final String invalidValue : invalidLogLevels) {
             // Set property through constructor.
-            properties.setProperty(ConnectionProperties.LOG_LEVEL_KEY, invalidValue);
+            properties.setProperty(OpenCypherConnectionProperties.LOG_LEVEL_KEY, invalidValue);
             Assertions.assertThrows(SQLException.class,
-                    () -> connectionProperties = new ConnectionProperties(properties));
+                    () -> connectionProperties = new OpenCypherConnectionProperties(properties));
         }
     }
 
@@ -79,19 +80,19 @@ class ConnectionPropertiesTest {
         final Properties properties = new Properties();
 
         // Verify empty string is set as default value.
-        properties.put(ConnectionProperties.CONNECTION_TIMEOUT_MILLIS_KEY, "");
+        properties.put(OpenCypherConnectionProperties.CONNECTION_TIMEOUT_MILLIS_KEY, "");
         Assertions.assertDoesNotThrow(() -> {
-            connectionProperties = new ConnectionProperties(properties);
+            connectionProperties = new OpenCypherConnectionProperties(properties);
         });
-        Assertions.assertEquals(ConnectionProperties.DEFAULT_CONNECTION_TIMEOUT_MILLIS,
+        Assertions.assertEquals(OpenCypherConnectionProperties.DEFAULT_CONNECTION_TIMEOUT_MILLIS,
                 connectionProperties.getConnectionTimeoutMillis());
 
         // Verify valid property value doesn't throw error.
         for (final String validValue : validConnectionTimeouts) {
             // Set property through constructor.
-            properties.put(ConnectionProperties.CONNECTION_TIMEOUT_MILLIS_KEY, validValue);
+            properties.put(OpenCypherConnectionProperties.CONNECTION_TIMEOUT_MILLIS_KEY, validValue);
             Assertions.assertDoesNotThrow(() -> {
-                connectionProperties = new ConnectionProperties(properties);
+                connectionProperties = new OpenCypherConnectionProperties(properties);
             });
             Assertions.assertEquals(Integer.parseInt(validValue), connectionProperties.getConnectionTimeoutMillis());
         }
@@ -99,9 +100,9 @@ class ConnectionPropertiesTest {
         // Verify invalid property value throws error.
         for (final String invalidValue : invalidConnectionTimeouts) {
             // Set property through constructor.
-            properties.setProperty(ConnectionProperties.CONNECTION_TIMEOUT_MILLIS_KEY, invalidValue);
+            properties.setProperty(OpenCypherConnectionProperties.CONNECTION_TIMEOUT_MILLIS_KEY, invalidValue);
             Assertions.assertThrows(SQLException.class,
-                    () -> connectionProperties = new ConnectionProperties(properties));
+                    () -> connectionProperties = new OpenCypherConnectionProperties(properties));
         }
     }
 
@@ -115,19 +116,19 @@ class ConnectionPropertiesTest {
         final Properties properties = new Properties();
 
         // Verify empty string is set as default value.
-        properties.put(ConnectionProperties.CONNECTION_RETRY_COUNT_KEY, "");
+        properties.put(OpenCypherConnectionProperties.CONNECTION_RETRY_COUNT_KEY, "");
         Assertions.assertDoesNotThrow(() -> {
-            connectionProperties = new ConnectionProperties(properties);
+            connectionProperties = new OpenCypherConnectionProperties(properties);
         });
-        Assertions.assertEquals(ConnectionProperties.DEFAULT_CONNECTION_RETRY_COUNT,
+        Assertions.assertEquals(OpenCypherConnectionProperties.DEFAULT_CONNECTION_RETRY_COUNT,
                 connectionProperties.getConnectionRetryCount());
 
         // Verify valid property value doesn't throw error.
         for (final String validValue : validConnectionTimeouts) {
             // Set property through constructor.
-            properties.put(ConnectionProperties.CONNECTION_RETRY_COUNT_KEY, validValue);
+            properties.put(OpenCypherConnectionProperties.CONNECTION_RETRY_COUNT_KEY, validValue);
             Assertions.assertDoesNotThrow(() -> {
-                connectionProperties = new ConnectionProperties(properties);
+                connectionProperties = new OpenCypherConnectionProperties(properties);
             });
             Assertions.assertEquals(Integer.parseInt(validValue), connectionProperties.getConnectionRetryCount());
         }
@@ -135,9 +136,9 @@ class ConnectionPropertiesTest {
         // Verify invalid property value throws error.
         for (final String invalidValue : invalidConnectionTimeouts) {
             // Set property through constructor.
-            properties.setProperty(ConnectionProperties.CONNECTION_RETRY_COUNT_KEY, invalidValue);
+            properties.setProperty(OpenCypherConnectionProperties.CONNECTION_RETRY_COUNT_KEY, invalidValue);
             Assertions.assertThrows(SQLException.class,
-                    () -> connectionProperties = new ConnectionProperties(properties));
+                    () -> connectionProperties = new OpenCypherConnectionProperties(properties));
         }
     }
 
@@ -151,9 +152,9 @@ class ConnectionPropertiesTest {
         final Properties properties = new Properties();
 
         // Verify empty string is set as default value.
-        properties.put(ConnectionProperties.AUTH_SCHEME_KEY, "");
+        properties.put(OpenCypherConnectionProperties.AUTH_SCHEME_KEY, "");
         Assertions.assertDoesNotThrow(() -> {
-            connectionProperties = new ConnectionProperties(properties);
+            connectionProperties = new OpenCypherConnectionProperties(properties);
         });
         Assertions.assertEquals(AuthScheme.None, connectionProperties.getAuthScheme());
 
@@ -164,14 +165,14 @@ class ConnectionPropertiesTest {
                     AuthScheme.fromString(validValue)
             );
             // Set property through constructor.
-            properties.put(ConnectionProperties.AUTH_SCHEME_KEY, validValue);
-            properties.put(ConnectionProperties.REGION_KEY, "region");
+            properties.put(OpenCypherConnectionProperties.AUTH_SCHEME_KEY, validValue);
+            properties.put(OpenCypherConnectionProperties.REGION_KEY, "region");
             Assertions.assertDoesNotThrow(() -> {
-                connectionProperties = new ConnectionProperties(properties);
+                connectionProperties = new OpenCypherConnectionProperties(properties);
             });
             Assertions.assertEquals(AuthScheme.fromString(validValue), connectionProperties.getAuthScheme());
             // Set property directly.
-            connectionProperties = new ConnectionProperties();
+            connectionProperties = new OpenCypherConnectionProperties();
             connectionProperties.setAuthScheme(AuthScheme.fromString(validValue));
             Assertions.assertEquals(AuthScheme.fromString(validValue), connectionProperties.getAuthScheme());
         }
@@ -180,12 +181,12 @@ class ConnectionPropertiesTest {
         for (final String invalidValue : invalidAuthSchemes) {
             // Convert string to enum.
             Assertions.assertNull(
-                AuthScheme.fromString(invalidValue)
+                    AuthScheme.fromString(invalidValue)
             );
             // Set property through constructor.
-            properties.setProperty(ConnectionProperties.AUTH_SCHEME_KEY, invalidValue);
+            properties.setProperty(OpenCypherConnectionProperties.AUTH_SCHEME_KEY, invalidValue);
             Assertions.assertThrows(SQLException.class,
-                    () -> connectionProperties = new ConnectionProperties(properties));
+                    () -> connectionProperties = new OpenCypherConnectionProperties(properties));
             // Set property directly.
             Assertions.assertThrows(SQLException.class,
                     () -> connectionProperties.setAuthScheme(AuthScheme.fromString(invalidValue)));
@@ -207,9 +208,9 @@ class ConnectionPropertiesTest {
         for (final String validValue : validTrueValues) {
             // Set property through constructor.
 
-            properties.put(ConnectionProperties.USE_ENCRYPTION_KEY, validValue);
+            properties.put(OpenCypherConnectionProperties.USE_ENCRYPTION_KEY, validValue);
             Assertions.assertDoesNotThrow(() -> {
-                connectionProperties = new ConnectionProperties(properties);
+                connectionProperties = new OpenCypherConnectionProperties(properties);
             });
             Assertions.assertTrue(connectionProperties.getUseEncryption());
         }
@@ -217,9 +218,9 @@ class ConnectionPropertiesTest {
         // Verify valid FALSE property value is set.
         for (final String validValue : validFalseValues) {
             // Set property through constructor.
-            properties.put(ConnectionProperties.USE_ENCRYPTION_KEY, validValue);
+            properties.put(OpenCypherConnectionProperties.USE_ENCRYPTION_KEY, validValue);
             Assertions.assertDoesNotThrow(() -> {
-                connectionProperties = new ConnectionProperties(properties);
+                connectionProperties = new OpenCypherConnectionProperties(properties);
             });
             Assertions.assertFalse(connectionProperties.getUseEncryption());
         }
@@ -227,9 +228,9 @@ class ConnectionPropertiesTest {
         // Verify invalid property value throws error.
         for (final String invalidValue : invalidValues) {
             // Set properties through constructor.
-            properties.setProperty(ConnectionProperties.USE_ENCRYPTION_KEY, invalidValue);
+            properties.setProperty(OpenCypherConnectionProperties.USE_ENCRYPTION_KEY, invalidValue);
             Assertions.assertThrows(SQLException.class,
-                    () -> connectionProperties = new ConnectionProperties(properties));
+                    () -> connectionProperties = new OpenCypherConnectionProperties(properties));
         }
     }
 }

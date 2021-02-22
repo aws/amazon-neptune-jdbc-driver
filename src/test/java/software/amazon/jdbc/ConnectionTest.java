@@ -17,12 +17,15 @@
 package software.amazon.jdbc;
 
 import com.google.common.collect.ImmutableMap;
+import org.apache.log4j.Level;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import software.amazon.jdbc.helpers.HelperFunctions;
 import software.amazon.jdbc.mock.MockConnection;
 import software.amazon.jdbc.mock.MockStatement;
 import software.amazon.jdbc.utilities.ConnectionProperties;
+import software.amazon.jdbc.utilities.SqlError;
+import software.amazon.neptune.opencypher.OpenCypherConnectionProperties;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -32,6 +35,7 @@ import java.util.Map;
 import java.util.Properties;
 
 import static software.amazon.jdbc.utilities.ConnectionProperties.APPLICATION_NAME_KEY;
+import static software.amazon.jdbc.utilities.ConnectionProperties.LOG_LEVEL_KEY;
 
 /**
  * Test for abstract Connection Object.
@@ -44,22 +48,23 @@ public class ConnectionTest {
     private static final String TEST_NATIVE_SQL = "native sql";
     private static final String TEST_PROP_KEY_UNSUPPORTED = "unsupported";
     private static final String TEST_PROP_VAL_UNSUPPORTED = "unsupported";
-    private static final String TEST_PROP_KEY = APPLICATION_NAME_KEY;
-    private static final String TEST_PROP_VAL = Driver.APPLICATION_NAME;
+    private static final String TEST_PROP_KEY = LOG_LEVEL_KEY;
+    private static final Level TEST_PROP_VAL = Level.INFO;
     private static final Properties TEST_PROP = new Properties();
-    private static final Properties TEST_PROP_EMPTY = new Properties();
-    private static final Properties TEST_INITIAL_PROP = new Properties();
+    private static final Properties TEST_PROP_INITIAL = new Properties();
+    private static final Properties TEST_PROP_MODIFIED = new Properties();
+
     private static final Map<String, Class<?>> TEST_TYPE_MAP =
             new ImmutableMap.Builder<String, Class<?>>().put("String", String.class).build();
 
     @BeforeEach
     void initialize() throws SQLException {
-        connection = new MockConnection(new ConnectionProperties(new Properties()));
+        connection = new MockConnection(new OpenCypherConnectionProperties());
         TEST_PROP.put(TEST_PROP_KEY, TEST_PROP_VAL);
-        TEST_PROP.put(APPLICATION_NAME_KEY, Driver.APPLICATION_NAME);
-        TEST_PROP_EMPTY.put(APPLICATION_NAME_KEY, Driver.APPLICATION_NAME);
-        TEST_INITIAL_PROP.putAll(TEST_PROP_EMPTY);
-        TEST_INITIAL_PROP.putAll(ConnectionProperties.DEFAULT_PROPERTIES_MAP);
+        TEST_PROP_INITIAL.put(APPLICATION_NAME_KEY, Driver.APPLICATION_NAME);
+        TEST_PROP_INITIAL.putAll(ConnectionProperties.DEFAULT_PROPERTIES_MAP);
+        TEST_PROP_MODIFIED.putAll(TEST_PROP_INITIAL);
+        TEST_PROP_MODIFIED.remove(TEST_PROP_KEY);
     }
 
     @Test
@@ -117,27 +122,40 @@ public class ConnectionTest {
 
     @Test
     void testClientInfo() {
-        HelperFunctions.expectFunctionDoesntThrow(() -> connection.getClientInfo(), TEST_INITIAL_PROP);
-        HelperFunctions.expectFunctionDoesntThrow(() -> connection.getClientInfo(null), null);
-        HelperFunctions.expectFunctionDoesntThrow(() -> connection.setClientInfo(TEST_PROP_KEY, TEST_PROP_VAL));
-        HelperFunctions.expectFunctionDoesntThrow(() -> connection.getClientInfo(TEST_PROP_KEY), TEST_PROP_VAL);
-        HelperFunctions.expectFunctionDoesntThrow(() -> connection.getClientInfo(null), null);
+        HelperFunctions.expectFunctionDoesntThrow(() -> connection.getClientInfo(), TEST_PROP_INITIAL);
+
         HelperFunctions.expectFunctionDoesntThrow(() -> connection.setClientInfo(null));
-        HelperFunctions.expectFunctionDoesntThrow(() -> connection.getClientInfo(), TEST_PROP_EMPTY);
+        HelperFunctions.expectFunctionDoesntThrow(() -> connection.getClientInfo(null), null);
+        HelperFunctions.expectFunctionDoesntThrow(() -> connection.getClientInfo(), TEST_PROP_INITIAL);
+
+        HelperFunctions.expectFunctionDoesntThrow(() -> connection.getClientInfo(), TEST_PROP_INITIAL);
+
+        HelperFunctions.expectFunctionDoesntThrow(() -> connection.setClientInfo(TEST_PROP_KEY, String.valueOf(TEST_PROP_VAL)));
+        HelperFunctions.expectFunctionDoesntThrow(() -> connection.getClientInfo(TEST_PROP_KEY), String.valueOf(TEST_PROP_VAL));
+
+        HelperFunctions.expectFunctionDoesntThrow(() -> connection.setClientInfo(TEST_PROP_KEY, ""));
+        HelperFunctions.expectFunctionDoesntThrow(() -> connection.getClientInfo(), TEST_PROP_INITIAL);
+
         HelperFunctions.expectFunctionDoesntThrow(() -> connection.setClientInfo(TEST_PROP));
-        HelperFunctions.expectFunctionDoesntThrow(() -> connection.getClientInfo(), TEST_PROP);
+        HelperFunctions.expectFunctionDoesntThrow(() -> connection.getClientInfo(TEST_PROP_KEY), String.valueOf(TEST_PROP_VAL));
 
-        HelperFunctions.expectFunctionDoesntThrow(() -> connection.setClientInfo(null));
         HelperFunctions.expectFunctionDoesntThrow(() -> connection.setClientInfo(TEST_PROP_KEY, null));
-        HelperFunctions.expectFunctionDoesntThrow(() -> connection.getClientInfo(), TEST_PROP_EMPTY);
+        HelperFunctions.expectFunctionDoesntThrow(() -> connection.getClientInfo(), TEST_PROP_MODIFIED);
 
-        HelperFunctions.expectFunctionDoesntThrow(() -> connection.clearWarnings());
-        HelperFunctions.expectFunctionDoesntThrow(() -> connection.setClientInfo(TEST_PROP_KEY_UNSUPPORTED, TEST_PROP_VAL_UNSUPPORTED));
-        HelperFunctions.expectFunctionDoesntThrow(() -> connection.getWarnings(), HelperFunctions.TEST_SQL_WARNING_UNSUPPORTED);
+        HelperFunctions.expectFunctionThrows(
+                SqlError.lookup(SqlError.INVALID_CONNECTION_PROPERTY, TEST_PROP_KEY_UNSUPPORTED, ""),
+                () -> connection.setClientInfo(TEST_PROP_KEY_UNSUPPORTED, ""));
+        HelperFunctions.expectFunctionThrows(
+                SqlError.lookup(SqlError.INVALID_CONNECTION_PROPERTY, TEST_PROP_KEY, TEST_PROP_VAL_UNSUPPORTED),
+                () -> connection.setClientInfo(TEST_PROP_KEY, TEST_PROP_VAL_UNSUPPORTED));
 
         HelperFunctions.expectFunctionDoesntThrow(() -> connection.close());
-        HelperFunctions.expectFunctionThrows(() -> connection.setClientInfo(TEST_PROP_KEY, TEST_PROP_VAL));
-        HelperFunctions.expectFunctionThrows(() -> connection.setClientInfo(TEST_PROP));
+        HelperFunctions.expectFunctionThrows(
+                SqlError.CONN_CLOSED,
+                () -> connection.setClientInfo(TEST_PROP_KEY, String.valueOf(TEST_PROP_VAL)));
+        HelperFunctions.expectFunctionThrows(
+                SqlError.CONN_CLOSED,
+                () -> connection.setClientInfo(TEST_PROP));
     }
 
     @Test

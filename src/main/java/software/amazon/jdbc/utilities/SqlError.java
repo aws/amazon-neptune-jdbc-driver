@@ -167,19 +167,35 @@ public enum SqlError {
      * Create {@link SQLClientInfoException} of error and log the message with a {@link Logger}.
      *
      * @param logger     The {@link Logger} contains log info.
-     * @param key        Resource key for bundle provided to constructor.
      * @param map        A Map containing the property values that could not be set.
+     * @param key        Resource key for bundle provided to constructor.
      * @param formatArgs Any additional arguments to format the resource string with.
      * @return SQLClientInfoException with error message.
      */
     public static SQLClientInfoException createSQLClientInfoException(
             final Logger logger,
-            final SqlError key,
             final Map<String, ClientInfoStatus> map,
+            final SqlError key,
             final Object... formatArgs) {
         final String error = lookup(key, formatArgs);
         logger.error(error);
         return new SQLClientInfoException(error, map);
+    }
+
+    /**
+     * Create {@link SQLClientInfoException} of error and log the message with a {@link Logger}.
+     *
+     * @param logger     The {@link Logger} contains log info.
+     * @param map        A Map containing the property values that could not be set.
+     * @param e      The SQLException thrown by previous error handling.
+     * @return SQLClientInfoException with error message.
+     */
+    public static SQLClientInfoException createSQLClientInfoException(
+            final Logger logger,
+            final Map<String, ClientInfoStatus> map,
+            final SQLException e) {
+        logger.error(e.getMessage());
+        return new SQLClientInfoException(e.getMessage(), map);
     }
 }
 

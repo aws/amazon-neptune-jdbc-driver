@@ -21,14 +21,14 @@ import org.junit.jupiter.api.Test;
 import software.amazon.jdbc.helpers.HelperFunctions;
 import software.amazon.jdbc.mock.MockConnection;
 import software.amazon.jdbc.mock.MockPreparedStatement;
-import software.amazon.jdbc.utilities.ConnectionProperties;
+import software.amazon.neptune.opencypher.OpenCypherConnectionProperties;
+
 import java.io.InputStream;
 import java.io.Reader;
 import java.sql.Blob;
 import java.sql.Clob;
 import java.sql.NClob;
 import java.sql.SQLException;
-import java.util.Properties;
 
 /**
  * Test for abstract PreparedStatement Object.
@@ -39,7 +39,7 @@ public class PreparedStatementTest {
 
     @BeforeEach
     void initialize() throws SQLException {
-        connection = new MockConnection(new ConnectionProperties(new Properties()));
+        connection = new MockConnection(new OpenCypherConnectionProperties());
         preparedStatement = new MockPreparedStatement(connection, "");
     }
 

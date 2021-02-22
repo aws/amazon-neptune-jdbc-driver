@@ -18,8 +18,8 @@ package software.amazon.neptune.opencypher;
 
 import org.apache.log4j.Level;
 import software.amazon.jdbc.utilities.AuthScheme;
-import software.amazon.jdbc.utilities.ConnectionProperties;
 import software.amazon.neptune.NeptuneDriver;
+
 import javax.sql.PooledConnection;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -31,14 +31,14 @@ import java.sql.SQLException;
 public class OpenCypherDataSource extends software.amazon.jdbc.DataSource implements javax.sql.DataSource, javax.sql.ConnectionPoolDataSource {
     public static final String OPEN_CYPHER_PREFIX = NeptuneDriver.CONN_STRING_PREFIX + "opencypher://";
 
-    private final ConnectionProperties connectionProperties;
+    private final OpenCypherConnectionProperties connectionProperties;
 
     /**
      * OpenCypherDataSource constructor, initializes super class.
      */
     OpenCypherDataSource() throws SQLException {
         super();
-        this.connectionProperties = new ConnectionProperties();
+        this.connectionProperties = new OpenCypherConnectionProperties();
     }
 
     @Override
