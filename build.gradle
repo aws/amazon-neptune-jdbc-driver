@@ -173,7 +173,7 @@ ext {
     findBugsVersion = '3.0.1'
     awsSdkVersion = '1.11.932'
     gremlinVersion = '3.4.8'
-    slf4jVersion = '1.8.0-beta2'
+    slf4jVersion = '1.7.29'
     rdf4jVersion = '3.5.0'
     amazonSigv4SignerVersion = '2.1.1'
     nettyVersion = '4.1.52.Final'
@@ -208,9 +208,6 @@ dependencies {
     compile group: 'com.amazonaws', name: 'amazon-neptune-sigv4-signer', version: amazonSigv4SignerVersion
     compile group: 'com.amazonaws', name: 'amazon-neptune-gremlin-java-sigv4', version: amazonSigv4SignerVersion
     compile group: 'io.netty', name: 'netty-all', version: nettyVersion
-    compile group: 'org.slf4j', name: 'slf4j-simple', version: slf4jVersion
-    compile group: 'org.slf4j', name: 'jcl-over-slf4j', version: slf4jVersion
-    compile group: 'org.slf4j', name: 'slf4j-api', version: slf4jVersion
     compile group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.10.5'
     compile group: 'com.github.rvesse', name: 'airline', version: '2.8.0'
     compile group: 'com.amazonaws', name: 'aws-lambda-java-core', version: '1.2.1'
@@ -222,9 +219,7 @@ dependencies {
     compile group: 'com.amazonaws', name: 'amazon-neptune-gremlin-java-sigv4', version: '1.0'
 
     // Logging
-    implementation group: 'org.slf4j', name: 'slf4j-log4j12', version: '1.7.29'
-    implementation group: 'org.apache.logging.log4j', name: 'log4j-api', version: log4jVersion
-    implementation group: 'org.apache.logging.log4j', name: 'log4j-core', version: log4jVersion
+    implementation group: 'org.slf4j', name: 'slf4j-log4j12', version: slf4jVersion
 
     // Utilities
     compile group: 'com.google.code.gson', name: 'gson', version: '2.7'
