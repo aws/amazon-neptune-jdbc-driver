@@ -16,9 +16,7 @@
 
 package software.amazon.neptune.opencypher;
 
-import com.amazonaws.services.neptune.NeptuneExportBaseCommand;
 import com.amazonaws.services.neptune.NeptuneExportCli;
-import com.amazonaws.services.neptune.export.NeptuneExportEventHandler;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
@@ -56,7 +54,7 @@ public class OpenCypherSchemaHelper {
     public static List<OpenCypherResultSetGetColumns.NodeColumnInfo> getGraphSchema(final String endpoint,
                                                                                     final String nodes,
                                                                                     final boolean useIAM)
-            throws SQLException {
+            throws SQLException, IOException {
         // Create unique directory if doesn't exist
         // If does exist, delete current contents
         final String directory = createUniqueDirectoryForThread();
@@ -80,19 +78,11 @@ public class OpenCypherSchemaHelper {
     }
 
     @VisibleForTesting
-    static String createUniqueDirectoryForThread() throws SQLException {
+    static String createUniqueDirectoryForThread() throws SQLException, IOException {
         // Thread id is unique, so use it to create output directory.
         // Before output directory is created, check if it exists and delete contents if it does.
-        final Path path = Paths.get(String.format("%d", Thread.currentThread().getId())).toAbsolutePath();
+        final Path path = Files.createTempDirectory(String.format("%d", Thread.currentThread().getId()));// Paths.get(String.format("%d", Thread.currentThread().getId())).toAbsolutePath();
         LOGGER.info(String.format("Creating directory '%s'", path.toString()));
-        try {
-            deleteDirectoryIfExists(path);
-        } catch (IOException e) {
-            throw SqlError.createSQLException(
-                    LOGGER,
-                    SqlState.CONNECTION_FAILURE,
-                    SqlError.FAILED_TO_DELETE_DIRECTORY);
-        }
         final File outputDirectory = new File(path.toAbsolutePath().toString());
         if (!outputDirectory.exists()) {
             if (!outputDirectory.mkdirs()) {
@@ -163,15 +153,7 @@ public class OpenCypherSchemaHelper {
         }
 
         try {
-            final com.github.rvesse.airline.Cli<Runnable> cli =
-                    new com.github.rvesse.airline.Cli<>(NeptuneExportCli.class);
-            final Runnable cmd = cli.parse(arguments.toArray(new String[0]));
-            if (NeptuneExportBaseCommand.class.isAssignableFrom(cmd.getClass())) {
-                final NeptuneExportBaseCommand baseCommand = (NeptuneExportBaseCommand) cmd;
-                baseCommand.applyLogLevel();
-                baseCommand.setEventHandler(NeptuneExportEventHandler.NULL_EVENT_HANDLER);
-            }
-            cmd.run();
+            NeptuneExportCli.main(arguments.toArray(new String[0]));
             return getOutputFiles(outputPath);
         } catch (final Exception e) {
             throw SqlError.createSQLException(

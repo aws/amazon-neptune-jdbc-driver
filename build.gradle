@@ -1,3 +1,12 @@
+buildscript {
+    repositories {
+        jcenter()
+    }
+    dependencies {
+        classpath 'com.github.jengelman.gradle.plugins:shadow:5.2.0'
+    }
+}
+
 plugins {
     id 'java'
     id "com.github.spotbugs" version "4.5.1"
@@ -5,6 +14,8 @@ plugins {
     id 'jacoco'
 }
 
+apply plugin: 'java'
+apply plugin: 'com.github.johnrengelman.shadow'
 group 'software.amazon.neptune.jdbc'
 version '1.0-SNAPSHOT'
 description 'neptune-jdbc-driver'
@@ -12,6 +23,10 @@ description 'neptune-jdbc-driver'
 java {
     sourceCompatibility = JavaVersion.VERSION_1_8
     targetCompatibility = JavaVersion.VERSION_1_8
+}
+
+repositories {
+    jcenter()
 }
 
 // Silently agree to build scan terms.
@@ -160,6 +175,7 @@ repositories {
     mavenCentral()
     flatDir {
         dir 'amazon-neptune-tools/neptune-export/target'
+        dir 'amazon-neptune-tools/neptune-gremlin-client/gremlin-client/target'
     }
 }
 
@@ -173,7 +189,7 @@ ext {
     findBugsVersion = '3.0.1'
     awsSdkVersion = '1.11.932'
     gremlinVersion = '3.4.8'
-    slf4jVersion = '1.8.0-beta2'
+    slf4jVersion = '1.7.29'
     rdf4jVersion = '3.5.0'
     amazonSigv4SignerVersion = '2.1.1'
     nettyVersion = '4.1.52.Final'
@@ -190,7 +206,9 @@ subprojects {
 dependencies {
     // Local neptune-export library
     implementation('com.amazonaws:neptune-export:1.0-SNAPSHOT')
-    compile(':neptune-export:1.0-SNAPSHOT')
+    implementation(':neptune-export:1.0-SNAPSHOT')
+    implementation('com.amazonaws:gremlin-client:1.0-SNAPSHOT')
+    implementation(':gremlin-client:1.0-SNAPSHOT')
 
     // neptune-export dependencies
     compile group: 'com.github.rvesse', name: 'airline', version: '2.8.0'
@@ -203,14 +221,15 @@ dependencies {
     compile group: 'com.amazonaws', name: 'aws-java-sdk-neptune', version: awsSdkVersion
     compile group: 'com.amazonaws', name: 'aws-java-sdk-s3', version: awsSdkVersion
     compile group: 'com.amazonaws', name: 'aws-java-sdk-core', version: awsSdkVersion
-    compile group: 'org.apache.tinkerpop', name: 'gremlin-groovy', version: gremlinVersion
     compile group: 'com.amazonaws', name: 'amazon-neptune-sparql-java-sigv4', version: amazonSigv4SignerVersion
     compile group: 'com.amazonaws', name: 'amazon-neptune-sigv4-signer', version: amazonSigv4SignerVersion
     compile group: 'com.amazonaws', name: 'amazon-neptune-gremlin-java-sigv4', version: amazonSigv4SignerVersion
+
+    // Might need tinkerpop, also shade exclude for testing???
+    // compile group: 'org.apache.tinkerpop', name: 'gremlin-groovy', version: gremlinVersion
+    // implementation group: 'org.fusesource.jansi', name: 'jansi', version: '2.0.0'
+
     compile group: 'io.netty', name: 'netty-all', version: nettyVersion
-    compile group: 'org.slf4j', name: 'slf4j-simple', version: slf4jVersion
-    compile group: 'org.slf4j', name: 'jcl-over-slf4j', version: slf4jVersion
-    compile group: 'org.slf4j', name: 'slf4j-api', version: slf4jVersion
     compile group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.10.5'
     compile group: 'com.github.rvesse', name: 'airline', version: '2.8.0'
     compile group: 'com.amazonaws', name: 'aws-lambda-java-core', version: '1.2.1'
@@ -222,9 +241,9 @@ dependencies {
     compile group: 'com.amazonaws', name: 'amazon-neptune-gremlin-java-sigv4', version: '1.0'
 
     // Logging
-    implementation group: 'org.slf4j', name: 'slf4j-log4j12', version: '1.7.29'
-    implementation group: 'org.apache.logging.log4j', name: 'log4j-api', version: log4jVersion
-    implementation group: 'org.apache.logging.log4j', name: 'log4j-core', version: log4jVersion
+    compile group: 'org.slf4j', name: 'slf4j-log4j12', version: '1.7.29'
+    compile group: 'org.apache.logging.log4j', name: 'log4j-api', version: log4jVersion
+    compile group: 'org.apache.logging.log4j', name: 'log4j-core', version: log4jVersion
 
     // Utilities
     compile group: 'com.google.code.gson', name: 'gson', version: '2.7'
@@ -253,4 +272,15 @@ dependencies {
     testCompile group: 'org.neo4j.community', name: 'it-test-support', version: neo4jDBVersion
     testCompile group: 'org.neo4j', name: 'neo4j-kernel', version: neo4jDBVersion, classifier: "tests"
     testCompile group: 'org.neo4j', name: 'neo4j-io', version: neo4jDBVersion, classifier: "tests"
+}
+
+shadowJar {
+    baseName = rootProject.name
+    classifier = ''
+
+    // todo: exclude
+    dependencies {
+        exclude(dependency('org.slf4j:.*'))
+        // exclude(dependency('org.apache.logging.log4j:.*:.*'))
+    }
 }

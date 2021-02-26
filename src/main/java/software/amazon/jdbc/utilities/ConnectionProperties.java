@@ -241,11 +241,11 @@ public abstract class ConnectionProperties extends Properties {
         }
 
         // If there are any unresolved properties left, raise an error.
-        if (!inputPropertiesKeys.isEmpty()) {
-            // Take the first invalid property to display in the error message.
-            final Object key = inputPropertiesKeys.get(0);
-            final Object value = inputProperties.get(key);
-            throw invalidConnectionPropertyError(key, value);
+        if (!inputProperties.isEmpty()) {
+            // If there are any unresolved properties left, raise a warning.
+            for (final String property: inputProperties.stringPropertyNames()) {
+                LOGGER.warn(String.format("Error property '%s' is not supported.", property));
+            }
         }
 
         validateProperties();

@@ -112,12 +112,12 @@ public class OpenCypherQueryExecutor extends QueryExecutor {
     /**
      * Verify that connection to database is functional.
      *
-     * @param timeout Time in milliseconds to wait for the database operation used to validate the connection to complete.
+     * @param timeout Time in seconds to wait for the database operation used to validate the connection to complete.
      * @return true if the connection is valid, otherwise false.
      */
     public boolean isValid(final int timeout) {
         try {
-            final Config config = createConfigBuilder().withConnectionTimeout(timeout, TimeUnit.MILLISECONDS).build();
+            final Config config = createConfigBuilder().withConnectionTimeout(timeout, TimeUnit.SECONDS).build();
             final Driver tempDriver;
             synchronized (DRIVER_LOCK) {
                 tempDriver = getDriver(config, openCypherConnectionProperties, true);

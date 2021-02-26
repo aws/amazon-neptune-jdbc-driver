@@ -19,6 +19,8 @@ package software.amazon.neptune.opencypher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import software.amazon.jdbc.DatabaseMetaData;
+import software.amazon.neptune.opencypher.resultset.OpenCypherEmptyResultSet;
+
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
@@ -40,72 +42,74 @@ public class OpenCypherDatabaseMetadata extends DatabaseMetaData implements java
     // TODO: Go through and implement these functions
     @Override
     public String getURL() throws SQLException {
-        return null;
+        return "";
     }
 
     @Override
     public String getUserName() throws SQLException {
-        return null;
+        return "";
     }
 
     @Override
     public String getDatabaseProductName() throws SQLException {
-        return null;
+        // TODO: Is there a way to get this?
+        return "Neptune";
     }
 
     @Override
     public String getDatabaseProductVersion() throws SQLException {
-        return null;
+        // TODO: Is there a way to get this?
+        return "1.0";
     }
 
     @Override
     public String getDriverName() throws SQLException {
-        return null;
+        return "neptune:opencypher";
     }
 
     @Override
     public String getSQLKeywords() throws SQLException {
-        return null;
+        return "";
     }
 
     @Override
     public String getNumericFunctions() throws SQLException {
-        return null;
+        return "";
     }
 
     @Override
     public String getStringFunctions() throws SQLException {
-        return null;
+        return "";
     }
 
     @Override
     public String getSystemFunctions() throws SQLException {
-        return null;
+        return "";
     }
 
     @Override
     public String getTimeDateFunctions() throws SQLException {
-        return null;
+        return "";
     }
 
     @Override
     public String getSearchStringEscape() throws SQLException {
-        return null;
+        return "'";
     }
 
     @Override
     public String getExtraNameCharacters() throws SQLException {
-        return null;
+        return "";
     }
 
     @Override
     public String getCatalogTerm() throws SQLException {
-        return null;
+        return "graph";
     }
 
     @Override
     public String getCatalogSeparator() throws SQLException {
-        return null;
+        return ":-";
     }
 
     @Override
@@ -116,7 +120,7 @@ public class OpenCypherDatabaseMetadata extends DatabaseMetaData implements java
     @Override
     public ResultSet getProcedures(final String catalog, final String schemaPattern, final String procedureNamePattern)
             throws SQLException {
-        return null;
+        return new OpenCypherEmptyResultSet(getConnection().createStatement());
     }
 
     @Override
@@ -182,43 +186,43 @@ public class OpenCypherDatabaseMetadata extends DatabaseMetaData implements java
     public ResultSet getColumnPrivileges(final String catalog, final String schema, final String table,
                                          final String columnNamePattern)
             throws SQLException {
-        return null;
+        return new OpenCypherEmptyResultSet(getConnection().createStatement());
     }
 
     @Override
     public ResultSet getBestRowIdentifier(final String catalog, final String schema, final String table,
                                           final int scope, final boolean nullable)
             throws SQLException {
-        return null;
+        return new OpenCypherEmptyResultSet(getConnection().createStatement());
     }
 
     @Override
     public ResultSet getPrimaryKeys(final String catalog, final String schema, final String table) throws SQLException {
-        return null;
+        return new OpenCypherEmptyResultSet(getConnection().createStatement());
     }
 
     @Override
     public ResultSet getImportedKeys(final String catalog, final String schema, final String table)
             throws SQLException {
-        return null;
+        return new OpenCypherEmptyResultSet(getConnection().createStatement());
     }
 
     @Override
     public ResultSet getTypeInfo() throws SQLException {
-        return null;
+        return new OpenCypherEmptyResultSet(getConnection().createStatement());
     }
 
     @Override
     public ResultSet getIndexInfo(final String catalog, final String schema, final String table, final boolean unique,
                                   final boolean approximate)
             throws SQLException {
-        return null;
+        return new OpenCypherEmptyResultSet(getConnection().createStatement());
     }
 
     @Override
     public ResultSet getAttributes(final String catalog, final String schemaPattern, final String typeNamePattern,
                                    final String attributeNamePattern) throws SQLException {
-        return null;
+        return new OpenCypherEmptyResultSet(getConnection().createStatement());
     }
 
     @Override
@@ -233,17 +237,16 @@ public class OpenCypherDatabaseMetadata extends DatabaseMetaData implements java
 
     @Override
     public int getJDBCMajorVersion() throws SQLException {
-        return 0;
+        return 4;
     }
 
     @Override
     public int getJDBCMinorVersion() throws SQLException {
-        return 0;
+        return 2;
     }
 
     @Override
     public ResultSet getClientInfoProperties() throws SQLException {
-        // TODO
-        return null;
+        return new OpenCypherEmptyResultSet(getConnection().createStatement());
     }
 }
