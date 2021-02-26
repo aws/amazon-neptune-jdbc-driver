@@ -125,6 +125,5 @@ public abstract class NeptuneDriverTestBase {
         for (final String url : invalidUrls) {
             Assertions.assertThrows(java.sql.SQLException.class, () -> DriverManager.getDriver(url));
         }
-        Assertions.assertThrows(java.sql.SQLException.class, () -> DriverManager.getDriver(null));
     }
 }
