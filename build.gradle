@@ -241,9 +241,7 @@ dependencies {
     compile group: 'com.amazonaws', name: 'amazon-neptune-gremlin-java-sigv4', version: '1.0'
 
     // Logging
-    compile group: 'org.slf4j', name: 'slf4j-log4j12', version: '1.7.29'
-    compile group: 'org.apache.logging.log4j', name: 'log4j-api', version: log4jVersion
-    compile group: 'org.apache.logging.log4j', name: 'log4j-core', version: log4jVersion
+    implementation group: 'org.slf4j', name: 'slf4j-log4j12', version: slf4jVersion
 
     // Utilities
     compile group: 'com.google.code.gson', name: 'gson', version: '2.7'
