@@ -17,7 +17,10 @@
 package software.amazon.neptune.opencypher;
 
 import org.apache.log4j.Level;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import software.amazon.jdbc.utilities.AuthScheme;
+import software.amazon.jdbc.utilities.SqlError;
 import software.amazon.neptune.NeptuneDriver;
 
 import javax.sql.PooledConnection;
@@ -30,6 +33,7 @@ import java.sql.SQLException;
  */
 public class OpenCypherDataSource extends software.amazon.jdbc.DataSource implements javax.sql.DataSource, javax.sql.ConnectionPoolDataSource {
     public static final String OPEN_CYPHER_PREFIX = NeptuneDriver.CONN_STRING_PREFIX + "opencypher://";
+    private static final Logger LOGGER = LoggerFactory.getLogger(OpenCypherDataSource.class);
 
     private final OpenCypherConnectionProperties connectionProperties;
 
@@ -48,7 +52,7 @@ public class OpenCypherDataSource extends software.amazon.jdbc.DataSource implem
 
     @Override
     public Connection getConnection(final String username, final String password) throws SQLException {
-        return DriverManager.getConnection(OPEN_CYPHER_PREFIX, connectionProperties);
+        throw SqlError.createSQLFeatureNotSupportedException(LOGGER);
     }
 
     @Override
@@ -58,7 +62,7 @@ public class OpenCypherDataSource extends software.amazon.jdbc.DataSource implem
 
     @Override
     public PooledConnection getPooledConnection(final String user, final String password) throws SQLException {
-        return new OpenCypherPooledConnection(getConnection(user, password));
+        throw SqlError.createSQLFeatureNotSupportedException(LOGGER);
     }
 
     /**

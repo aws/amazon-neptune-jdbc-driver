@@ -18,6 +18,9 @@ package software.amazon.neptune;
 
 import com.google.common.collect.ImmutableList;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+import software.amazon.jdbc.helpers.HelperFunctions;
+import software.amazon.jdbc.utilities.SqlError;
 import software.amazon.neptune.opencypher.OpenCypherConnection;
 import software.amazon.neptune.opencypher.mock.MockOpenCypherDatabase;
 
@@ -113,6 +116,9 @@ public abstract class NeptuneDriverTestBase {
         for (final String url : invalidUrls) {
             Assertions.assertThrows(java.sql.SQLException.class, () -> DriverManager.getConnection(url));
         }
+        final String url = createValidUrl(useEncryption, languages.get(0), true) + ";;=";
+        final String invalidUrl = url + ";;=";
+        Assertions.assertThrows(java.sql.SQLException.class, () -> DriverManager.getConnection(invalidUrl));
     }
 
     void testDriverManagerGetDriver(final boolean useEncryption) throws SQLException {
@@ -125,5 +131,10 @@ public abstract class NeptuneDriverTestBase {
         for (final String url : invalidUrls) {
             Assertions.assertThrows(java.sql.SQLException.class, () -> DriverManager.getDriver(url));
         }
+    }
+
+    @Test
+    void testDriverProperties() {
+        HelperFunctions.expectFunctionThrows(SqlError.FEATURE_NOT_SUPPORTED, () -> driver.getParentLogger());
     }
 }
