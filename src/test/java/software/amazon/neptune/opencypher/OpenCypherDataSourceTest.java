@@ -67,8 +67,6 @@ class OpenCypherDataSourceTest {
 
     @Test
     void testGetConnectionFailure() throws SQLException {
-        dataSource.setEndpoint("");
-        Assertions.assertThrows(SQLException.class, () -> dataSource.getConnection());
         HelperFunctions.expectFunctionThrows(SqlError.FEATURE_NOT_SUPPORTED, () -> dataSource.getConnection("name", "psw"));
         HelperFunctions.expectFunctionThrows(SqlError.FEATURE_NOT_SUPPORTED, () -> dataSource.getPooledConnection("name", "psw"));
     }

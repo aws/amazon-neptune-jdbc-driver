@@ -116,9 +116,6 @@ public abstract class NeptuneDriverTestBase {
         for (final String url : invalidUrls) {
             Assertions.assertThrows(java.sql.SQLException.class, () -> DriverManager.getConnection(url));
         }
-        final String url = createValidUrl(useEncryption, languages.get(0), true) + ";;=";
-        final String invalidUrl = url + ";;=";
-        Assertions.assertThrows(java.sql.SQLException.class, () -> DriverManager.getConnection(invalidUrl));
     }
 
     void testDriverManagerGetDriver(final boolean useEncryption) throws SQLException {
