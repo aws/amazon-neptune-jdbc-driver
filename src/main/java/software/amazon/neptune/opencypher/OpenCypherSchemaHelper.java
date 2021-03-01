@@ -81,7 +81,7 @@ public class OpenCypherSchemaHelper {
     static String createUniqueDirectoryForThread() throws SQLException, IOException {
         // Thread id is unique, so use it to create output directory.
         // Before output directory is created, check if it exists and delete contents if it does.
-        final Path path = Files.createTempDirectory(String.format("%d", Thread.currentThread().getId()));// Paths.get(String.format("%d", Thread.currentThread().getId())).toAbsolutePath();
+        final Path path = Files.createTempDirectory(String.format("%d", Thread.currentThread().getId()));
         LOGGER.info(String.format("Creating directory '%s'", path.toString()));
         final File outputDirectory = new File(path.toAbsolutePath().toString());
         if (!outputDirectory.exists()) {
