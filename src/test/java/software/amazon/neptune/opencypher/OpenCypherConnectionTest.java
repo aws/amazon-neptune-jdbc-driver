@@ -39,7 +39,6 @@ import java.util.Properties;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static software.amazon.jdbc.utilities.ConnectionProperties.APPLICATION_NAME_KEY;
-import static software.amazon.neptune.opencypher.OpenCypherConnectionProperties.REGION_KEY;
 
 public class OpenCypherConnectionTest {
     private static final String HOSTNAME = "localhost";
@@ -51,8 +50,8 @@ public class OpenCypherConnectionTest {
 
     private static final String TEST_PROP_KEY_UNSUPPORTED = "unsupported";
     private static final String TEST_PROP_VAL_UNSUPPORTED = "unsupported";
-    private static final String TEST_PROP_KEY = REGION_KEY;
-    private static final String TEST_PROP_VAL = "region";
+    private static final String TEST_PROP_KEY = "ConnectionTimeout";
+    private static final String TEST_PROP_VAL = "1";
     private static final Properties TEST_PROP = new Properties();
     private static final Properties TEST_PROP_INITIAL = new Properties();
     private static final Properties TEST_PROP_MODIFIED = new Properties();

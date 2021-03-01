@@ -79,14 +79,7 @@ public class NeptuneDriver extends Driver implements java.sql.Driver {
             return null;
         }
 
-        final int retryCount = connectionProperties.getConnectionRetryCount();
-        for (int i = 0; i <= retryCount; i++) {
-            if (connection.isValid(connectionProperties.getConnectionTimeoutMillis())) {
-                return connection;
-            }
-        }
-        LOGGER.error("Failed to create connection after {} attempts.", retryCount);
-        return null;
+        return connection;
     }
 
     private ConnectionProperties connectionProperties(final String language, final Properties properties) throws SQLException {

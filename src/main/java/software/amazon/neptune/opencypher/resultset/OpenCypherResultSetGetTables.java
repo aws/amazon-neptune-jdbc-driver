@@ -54,15 +54,15 @@ public class OpenCypherResultSetGetTables extends OpenCypherResultSet implements
     private static final List<Type> ROW_TYPES = new ArrayList<>();
 
     static {
-        MAPPED_KEYS.put("TABLE_CAT", null);
-        MAPPED_KEYS.put("TABLE_SCHEM", null);
+        MAPPED_KEYS.put("TABLE_CAT", "catalog");
+        MAPPED_KEYS.put("TABLE_SCHEM", "schema");
         MAPPED_KEYS.put("TABLE_TYPE", "TABLE");
         MAPPED_KEYS.put("REMARKS", "");
-        MAPPED_KEYS.put("TYPE_CAT", null);
-        MAPPED_KEYS.put("TYPE_SCHEM", null);
-        MAPPED_KEYS.put("TYPE_NAME", null);
-        MAPPED_KEYS.put("SELF_REFERENCING_COL_NAME", null);
-        MAPPED_KEYS.put("REF_GENERATION", null);
+        MAPPED_KEYS.put("TYPE_CAT", "typecat");
+        MAPPED_KEYS.put("TYPE_SCHEM", "typeschem");
+        MAPPED_KEYS.put("TYPE_NAME", "typename");
+        MAPPED_KEYS.put("SELF_REFERENCING_COL_NAME", "selfreferencingcolname");
+        MAPPED_KEYS.put("REF_GENERATION", "selfgeneration");
 
         for (int i = 0; i < ORDERED_COLUMNS.size(); i++) {
             ROW_TYPES.add(InternalTypeSystem.TYPE_SYSTEM.STRING());

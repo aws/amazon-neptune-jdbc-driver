@@ -1,3 +1,12 @@
+buildscript {
+    repositories {
+        jcenter()
+    }
+    dependencies {
+        classpath 'com.github.jengelman.gradle.plugins:shadow:5.2.0'
+    }
+}
+
 plugins {
     id 'java'
     id "com.github.spotbugs" version "4.5.1"
@@ -5,6 +14,8 @@ plugins {
     id 'jacoco'
 }
 
+apply plugin: 'java'
+apply plugin: 'com.github.johnrengelman.shadow'
 group 'software.amazon.neptune.jdbc'
 version '1.0-SNAPSHOT'
 description 'neptune-jdbc-driver'
@@ -12,6 +23,10 @@ description 'neptune-jdbc-driver'
 java {
     sourceCompatibility = JavaVersion.VERSION_1_8
     targetCompatibility = JavaVersion.VERSION_1_8
+}
+
+repositories {
+    jcenter()
 }
 
 // Silently agree to build scan terms.
@@ -160,6 +175,7 @@ repositories {
     mavenCentral()
     flatDir {
         dir 'amazon-neptune-tools/neptune-export/target'
+        dir 'amazon-neptune-tools/neptune-gremlin-client/gremlin-client/target'
     }
 }
 
@@ -190,7 +206,9 @@ subprojects {
 dependencies {
     // Local neptune-export library
     implementation('com.amazonaws:neptune-export:1.0-SNAPSHOT')
-    compile(':neptune-export:1.0-SNAPSHOT')
+    implementation(':neptune-export:1.0-SNAPSHOT')
+    implementation('com.amazonaws:gremlin-client:1.0-SNAPSHOT')
+    implementation(':gremlin-client:1.0-SNAPSHOT')
 
     // neptune-export dependencies
     compile group: 'com.github.rvesse', name: 'airline', version: '2.8.0'
@@ -203,10 +221,14 @@ dependencies {
     compile group: 'com.amazonaws', name: 'aws-java-sdk-neptune', version: awsSdkVersion
     compile group: 'com.amazonaws', name: 'aws-java-sdk-s3', version: awsSdkVersion
     compile group: 'com.amazonaws', name: 'aws-java-sdk-core', version: awsSdkVersion
-    compile group: 'org.apache.tinkerpop', name: 'gremlin-groovy', version: gremlinVersion
     compile group: 'com.amazonaws', name: 'amazon-neptune-sparql-java-sigv4', version: amazonSigv4SignerVersion
     compile group: 'com.amazonaws', name: 'amazon-neptune-sigv4-signer', version: amazonSigv4SignerVersion
     compile group: 'com.amazonaws', name: 'amazon-neptune-gremlin-java-sigv4', version: amazonSigv4SignerVersion
+
+    // Might need tinkerpop, also shade exclude for testing???
+    // compile group: 'org.apache.tinkerpop', name: 'gremlin-groovy', version: gremlinVersion
+    // implementation group: 'org.fusesource.jansi', name: 'jansi', version: '2.0.0'
+
     compile group: 'io.netty', name: 'netty-all', version: nettyVersion
     compile group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.10.5'
     compile group: 'com.github.rvesse', name: 'airline', version: '2.8.0'
@@ -248,4 +270,15 @@ dependencies {
     testCompile group: 'org.neo4j.community', name: 'it-test-support', version: neo4jDBVersion
     testCompile group: 'org.neo4j', name: 'neo4j-kernel', version: neo4jDBVersion, classifier: "tests"
     testCompile group: 'org.neo4j', name: 'neo4j-io', version: neo4jDBVersion, classifier: "tests"
+}
+
+shadowJar {
+    baseName = rootProject.name
+    classifier = ''
+
+    // todo: exclude
+    dependencies {
+        exclude(dependency('org.slf4j:.*'))
+        // exclude(dependency('org.apache.logging.log4j:.*:.*'))
+    }
 }

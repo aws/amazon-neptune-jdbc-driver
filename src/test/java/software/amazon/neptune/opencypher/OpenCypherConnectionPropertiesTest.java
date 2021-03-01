@@ -166,7 +166,6 @@ class OpenCypherConnectionPropertiesTest {
             );
             // Set property through constructor.
             properties.put(OpenCypherConnectionProperties.AUTH_SCHEME_KEY, validValue);
-            properties.put(OpenCypherConnectionProperties.REGION_KEY, "region");
             Assertions.assertDoesNotThrow(() -> {
                 connectionProperties = new OpenCypherConnectionProperties(properties);
             });

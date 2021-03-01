@@ -27,6 +27,8 @@ on:
 
 jobs:
   build:
+    env:
+      SERVICE_REGION: us-east-1
 
     runs-on: ubuntu-latest
 

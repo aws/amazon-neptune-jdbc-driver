@@ -44,7 +44,7 @@ public abstract class QueryExecutor {
     /**
      * Verify that connection to database is functional.
      *
-     * @param timeout Time in milliseconds to wait for the database operation used to validate the connection to complete.
+     * @param timeout Time in seconds to wait for the database operation used to validate the connection to complete.
      * @return true if the connection is valid, otherwise false.
      */
     public abstract boolean isValid(final int timeout);

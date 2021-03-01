@@ -18,6 +18,7 @@ package software.amazon.neptune.opencypher.resultset;
 
 import lombok.Getter;
 import software.amazon.neptune.opencypher.OpenCypherSchemaHelper;
+import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -26,6 +27,7 @@ import java.util.List;
 public class OpenCypherMetadataCache {
     @Getter
     private static List<OpenCypherResultSetGetColumns.NodeColumnInfo> cachedNodeColumnInfos = null;
+    private static final Object LOCK = new Object();
 
     /**
      * Function to update the cache of the OpenCypherMetadata
@@ -38,7 +40,13 @@ public class OpenCypherMetadataCache {
     public static void updateCache(final String endpoint,
                                    final String nodes,
                                    final boolean useIAM) throws SQLException {
-        cachedNodeColumnInfos = OpenCypherSchemaHelper.getGraphSchema(endpoint, nodes, useIAM);
+        synchronized (LOCK) {
+            try {
+                cachedNodeColumnInfos = OpenCypherSchemaHelper.getGraphSchema(endpoint, nodes, useIAM);
+            } catch (IOException e) {
+                throw new SQLException(e.getMessage());
+            }
+        }
     }
 
     /**
@@ -47,7 +55,9 @@ public class OpenCypherMetadataCache {
      * @return True if cache is valid, false otherwise.
      */
     public static boolean isOpenCypherMetadataCached() {
-        return cachedNodeColumnInfos != null;
+        synchronized (LOCK) {
+            return cachedNodeColumnInfos != null;
+        }
     }
 
     /**
@@ -58,17 +68,19 @@ public class OpenCypherMetadataCache {
      */
     public static List<OpenCypherResultSetGetColumns.NodeColumnInfo> getFilteredCacheNodeColumnInfos(
             final String nodeFilter) {
-        final List<OpenCypherResultSetGetColumns.NodeColumnInfo> nodeColumnInfos = new ArrayList<>();
-        for (final OpenCypherResultSetGetColumns.NodeColumnInfo nodeColumnInfo : cachedNodeColumnInfos) {
-            if (nodeFilter != null) {
-                if (Arrays.stream(nodeFilter.split(":")).allMatch(node -> nodeColumnInfo.getLabels().contains(node))) {
+        synchronized (LOCK) {
+            final List<OpenCypherResultSetGetColumns.NodeColumnInfo> nodeColumnInfos = new ArrayList<>();
+            for (final OpenCypherResultSetGetColumns.NodeColumnInfo nodeColumnInfo : cachedNodeColumnInfos) {
+                if (nodeFilter != null && !"%".equals(nodeFilter)) {
+                    if (Arrays.stream(nodeFilter.split(":")).allMatch(node -> nodeColumnInfo.getLabels().contains(node))) {
+                        nodeColumnInfos.add(nodeColumnInfo);
+                    }
+                } else {
                     nodeColumnInfos.add(nodeColumnInfo);
                 }
-            } else {
-                nodeColumnInfos.add(nodeColumnInfo);
             }
+            return nodeColumnInfos;
         }
-        return nodeColumnInfos;
     }
 
     /**

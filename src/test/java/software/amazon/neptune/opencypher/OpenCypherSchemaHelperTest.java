@@ -43,17 +43,6 @@ public class OpenCypherSchemaHelperTest {
     }
 
     @Test
-    void createUniqueDirectoryForThreadTest() throws Exception {
-        final Path root = OpenCypherGetColumnUtilities.getAndClearUniqueDirectoryForThread();
-
-        Assertions.assertFalse(root.toAbsolutePath().toFile().isDirectory());
-        OpenCypherSchemaHelper.createUniqueDirectoryForThread();
-        Assertions.assertTrue(root.toAbsolutePath().toFile().isDirectory());
-        OpenCypherSchemaHelper.deleteDirectoryIfExists(root);
-        Assertions.assertFalse(root.toAbsolutePath().toFile().isDirectory());
-    }
-
-    @Test
     void getOutputFilesTest() throws Exception {
         final Path root = OpenCypherGetColumnUtilities.getAndClearUniqueDirectoryForThread();
         final Path extendedRoot = new File(root.toAbsolutePath().toString() + "/extendedDirectory").toPath();

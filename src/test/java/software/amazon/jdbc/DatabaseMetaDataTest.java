@@ -146,7 +146,7 @@ public class DatabaseMetaDataTest {
                 java.sql.ResultSet.CLOSE_CURSORS_AT_COMMIT);
         HelperFunctions.expectFunctionDoesntThrow(() -> databaseMetaData.getSQLStateType(),
                 java.sql.DatabaseMetaData.sqlStateSQL);
-        HelperFunctions.expectFunctionDoesntThrow(() -> databaseMetaData.getProcedureTerm(), null);
+        HelperFunctions.expectFunctionDoesntThrow(() -> databaseMetaData.getProcedureTerm(), "");
         HelperFunctions.expectFunctionDoesntThrow(() -> databaseMetaData.getSchemaTerm(), "");
         HelperFunctions.expectFunctionDoesntThrow(() -> databaseMetaData.getIdentifierQuoteString(), "\"");
         HelperFunctions.expectFunctionDoesntThrow(() -> databaseMetaData.getRowIdLifetime(), RowIdLifetime.ROWID_UNSUPPORTED);

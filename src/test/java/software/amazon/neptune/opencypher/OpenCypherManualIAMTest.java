@@ -65,7 +65,7 @@ public class OpenCypherManualIAMTest {
     @Test
     void testBasicIamAuth() throws Exception {
         final Connection connection = DriverManager.getConnection(CONNECTION_STRING);
-        Assertions.assertTrue(connection.isValid(1000));
+        Assertions.assertTrue(connection.isValid(1));
     }
 
     @Disabled
@@ -76,7 +76,7 @@ public class OpenCypherManualIAMTest {
         properties.put(OpenCypherConnectionProperties.AUTH_SCHEME_KEY, AUTH);
         properties.put(OpenCypherConnectionProperties.REGION_KEY, REGION);
         final Connection connection = new OpenCypherConnection(new OpenCypherConnectionProperties(properties));
-        Assertions.assertTrue(connection.isValid(1000));
+        Assertions.assertTrue(connection.isValid(1));
         final Statement statement = connection.createStatement();
         final Instant start = Instant.now();
         try {

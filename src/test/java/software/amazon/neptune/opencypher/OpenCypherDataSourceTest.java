@@ -59,10 +59,4 @@ class OpenCypherDataSourceTest {
         dataSource.setEndpoint(validEndpoint);
         Assertions.assertTrue(dataSource.getConnection() instanceof OpenCypherConnection);
     }
-
-    @Test
-    void testGetConnectionFailure() throws SQLException {
-        dataSource.setEndpoint("");
-        Assertions.assertThrows(SQLException.class, () -> dataSource.getConnection());
-    }
 }
