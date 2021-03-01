@@ -464,22 +464,22 @@ public abstract class ResultSet implements java.sql.ResultSet {
 
     @Override
     public Ref getRef(final String columnLabel) throws SQLException {
-        throw SqlError.createSQLFeatureNotSupportedException(LOGGER);
+        return getRef(findColumn(columnLabel));
     }
 
     @Override
     public Blob getBlob(final String columnLabel) throws SQLException {
-        throw SqlError.createSQLFeatureNotSupportedException(LOGGER);
+        return getBlob(findColumn(columnLabel));
     }
 
     @Override
     public Clob getClob(final String columnLabel) throws SQLException {
-        throw SqlError.createSQLFeatureNotSupportedException(LOGGER);
+        return getClob(findColumn(columnLabel));
     }
 
     @Override
     public Array getArray(final String columnLabel) throws SQLException {
-        throw SqlError.createSQLFeatureNotSupportedException(LOGGER);
+        return getArray(findColumn(columnLabel));
     }
 
     @Override
@@ -524,7 +524,7 @@ public abstract class ResultSet implements java.sql.ResultSet {
 
     @Override
     public BigDecimal getBigDecimal(final String columnLabel, final int scale) throws SQLException {
-        throw SqlError.createSQLFeatureNotSupportedException(LOGGER);
+        return getBigDecimal(findColumn(columnLabel));
     }
 
     @Override
@@ -549,17 +549,17 @@ public abstract class ResultSet implements java.sql.ResultSet {
 
     @Override
     public InputStream getAsciiStream(final String columnLabel) throws SQLException {
-        throw SqlError.createSQLFeatureNotSupportedException(LOGGER);
+        return getAsciiStream(findColumn(columnLabel));
     }
 
     @Override
     public InputStream getUnicodeStream(final String columnLabel) throws SQLException {
-        throw SqlError.createSQLFeatureNotSupportedException(LOGGER);
+        return getUnicodeStream(findColumn(columnLabel));
     }
 
     @Override
     public InputStream getBinaryStream(final String columnLabel) throws SQLException {
-        throw SqlError.createSQLFeatureNotSupportedException(LOGGER);
+        return getBinaryStream(findColumn(columnLabel));
     }
 
     @Override
@@ -569,42 +569,42 @@ public abstract class ResultSet implements java.sql.ResultSet {
 
     @Override
     public Reader getCharacterStream(final String columnLabel) throws SQLException {
-        throw SqlError.createSQLFeatureNotSupportedException(LOGGER);
+        return getCharacterStream(findColumn(columnLabel));
     }
 
     @Override
     public BigDecimal getBigDecimal(final String columnLabel) throws SQLException {
-        throw SqlError.createSQLFeatureNotSupportedException(LOGGER);
+        return getBigDecimal(findColumn(columnLabel));
     }
 
     @Override
     public SQLXML getSQLXML(final String columnLabel) throws SQLException {
-        throw SqlError.createSQLFeatureNotSupportedException(LOGGER);
+        return getSQLXML(findColumn(columnLabel));
     }
 
     @Override
     public URL getURL(final String columnLabel) throws SQLException {
-        throw SqlError.createSQLFeatureNotSupportedException(LOGGER);
+        return getURL(findColumn(columnLabel));
     }
 
     @Override
     public RowId getRowId(final String columnLabel) throws SQLException {
-        throw SqlError.createSQLFeatureNotSupportedException(LOGGER);
+        return getRowId(findColumn(columnLabel));
     }
 
     @Override
     public NClob getNClob(final String columnLabel) throws SQLException {
-        throw SqlError.createSQLFeatureNotSupportedException(LOGGER);
+        return getNClob(findColumn(columnLabel));
     }
 
     @Override
     public String getNString(final String columnLabel) throws SQLException {
-        throw SqlError.createSQLFeatureNotSupportedException(LOGGER);
+        return getNString(findColumn(columnLabel));
     }
 
     @Override
     public Reader getNCharacterStream(final String columnLabel) throws SQLException {
-        throw SqlError.createSQLFeatureNotSupportedException(LOGGER);
+        return getNCharacterStream(findColumn(columnLabel));
     }
 
     @Override
