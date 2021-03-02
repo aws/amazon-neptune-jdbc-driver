@@ -16,11 +16,15 @@
 
 package software.amazon.neptune.opencypher;
 
+import org.apache.log4j.Level;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import software.amazon.jdbc.helpers.HelperFunctions;
+import software.amazon.jdbc.utilities.AuthScheme;
+import software.amazon.jdbc.utilities.SqlError;
 import software.amazon.neptune.NeptuneDriverTestWithEncryption;
 import software.amazon.neptune.opencypher.mock.MockOpenCypherDatabase;
 
@@ -58,5 +62,45 @@ class OpenCypherDataSourceTest {
     void testGetConnectionSuccess() throws SQLException {
         dataSource.setEndpoint(validEndpoint);
         Assertions.assertTrue(dataSource.getConnection() instanceof OpenCypherConnection);
+        Assertions.assertTrue(dataSource.getPooledConnection() instanceof OpenCypherPooledConnection);
+    }
+
+    @Test
+    void testGetConnectionFailure() throws SQLException {
+        HelperFunctions.expectFunctionThrows(SqlError.FEATURE_NOT_SUPPORTED, () -> dataSource.getConnection("name", "psw"));
+        HelperFunctions.expectFunctionThrows(SqlError.FEATURE_NOT_SUPPORTED, () -> dataSource.getPooledConnection("name", "psw"));
+    }
+
+    @Test
+    void testSupportedProperties() throws SQLException {
+        Assertions.assertDoesNotThrow(() -> dataSource.setEndpoint(validEndpoint));
+        Assertions.assertEquals(validEndpoint, dataSource.getEndpoint());
+
+        Assertions.assertDoesNotThrow(() -> dataSource.setApplicationName("appName"));
+        Assertions.assertEquals("appName", dataSource.getApplicationName());
+
+        Assertions.assertDoesNotThrow(() -> dataSource.setAuthScheme(AuthScheme.None));
+        Assertions.assertEquals(AuthScheme.None, dataSource.getAuthScheme());
+
+        Assertions.assertDoesNotThrow(() -> dataSource.setAwsCredentialsProviderClass("aws"));
+        Assertions.assertEquals("aws", dataSource.getAwsCredentialsProviderClass());
+
+        Assertions.assertDoesNotThrow(() -> dataSource.setCustomCredentialsFilePath("path"));
+        Assertions.assertEquals("path", dataSource.getCustomCredentialsFilePath());
+
+        Assertions.assertDoesNotThrow(() -> dataSource.setConnectionRetryCount(5));
+        Assertions.assertEquals(5, dataSource.getConnectionRetryCount());
+
+        Assertions.assertDoesNotThrow(() -> dataSource.setConnectionTimeoutMillis(1000));
+        Assertions.assertEquals(1000, dataSource.getConnectionTimeoutMillis());
+
+        Assertions.assertDoesNotThrow(() -> dataSource.setLoginTimeout(50));
+        Assertions.assertEquals(50, dataSource.getLoginTimeout());
+
+        Assertions.assertDoesNotThrow(() -> dataSource.setLogLevel(Level.ERROR));
+        Assertions.assertEquals(Level.ERROR, dataSource.getLogLevel());
+
+        Assertions.assertDoesNotThrow(() -> dataSource.setUseEncryption(true));
+        Assertions.assertEquals(true, dataSource.getUseEncryption());
     }
 }
