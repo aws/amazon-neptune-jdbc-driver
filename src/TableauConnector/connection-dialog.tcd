@@ -1,0 +1,4 @@
+<connection-dialog class='neptunejdbc'>
+  <connection-config>
+  </connection-config>
+</connection-dialog>
