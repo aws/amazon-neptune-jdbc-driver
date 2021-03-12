@@ -42,7 +42,6 @@ public class OpenCypherConnectionProperties extends ConnectionProperties {
     public static final String AWS_CREDENTIALS_PROVIDER_CLASS_KEY = "AwsCredentialsProviderClass";
     public static final String CUSTOM_CREDENTIALS_FILE_PATH_KEY = "CustomCredentialsFilePath";
 
-    public static final int DEFAULT_LOGIN_TIMEOUT_SEC = 0;
     public static final int DEFAULT_CONNECTION_POOL_SIZE = 1000;
     public static final AuthScheme DEFAULT_AUTH_SCHEME = AuthScheme.None;
     public static final boolean DEFAULT_USE_ENCRYPTION = true;

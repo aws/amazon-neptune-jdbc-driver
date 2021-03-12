@@ -1,4 +1,12 @@
 <connection-dialog class='neptunejdbc'>
   <connection-config>
+    <authentication-mode value='ComboBoxIntegrated' />
+    <authentication-options>
+        <option name="None" default="false" value="NONE" />
+        <option name="Integrated" default="true" value="AWS_SIGV4" />
+    </authentication-options>
+    <port-prompt value="Port: " default="8182" />
+    <show-ssl-checkbox value="true" />
+    <vendor1-prompt value="Additional Options: " />
   </connection-config>
 </connection-dialog>

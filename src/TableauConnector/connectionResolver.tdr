@@ -8,6 +8,10 @@
       <required-attributes>
         <attribute-list>
           <attr>server</attr>
+          <attr>port</attr>
+          <attr>authentication</attr>
+          <attr>vendor1</attr>
+          <attr>sslmode</attr>
         </attribute-list>
       </required-attributes>
     </connection-normalizer>
