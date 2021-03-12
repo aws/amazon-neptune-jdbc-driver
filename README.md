@@ -1,4 +1,4 @@
-# Bolt Connector for Graph Databases
+# JDBC Driver for Amazon Neptune
 
 ## Connection Requirements
 
@@ -8,15 +8,15 @@ JDBC 4.2 Java 8 etc
 
 ## Using the Driver
 
-To integrate the connector into your server, please see the [integration instructions](./USAGE.md).
+To use the JDBC driver, please see the [usage instructions](./USAGE.md).
 
 ## Troubleshooting
 
-To troubleshoot or debug issues with the connector, please see the [troubleshooting instructions](./TROUBLESHOOTING.md).
+To troubleshoot or debug issues with the JDBC driver, please see the [troubleshooting instructions](./TROUBLESHOOTING.md).
 
 ## Contributing
 
-Because the connector is available as open source, contribution from the community is encouraged. If you are interested in improving performance, adding new features, or fixing bugs, please see our [contributing guidlines](./CONTRIBUTING.md).
+Because the JDBC driver is available as open source, contribution from the community is encouraged. If you are interested in improving performance, adding new features, or fixing bugs, please see our [contributing guidlines](./CONTRIBUTING.md).
 
 ## Building from source
 
