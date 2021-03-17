@@ -1,10 +1,14 @@
 # JDBC Driver for Amazon Neptune
 
+This driver provides JDBC connectivity for the Amazon Neptune service using OpenCypher queries.
+
 ## Connection Requirements
+
+To connect to Amazon Neptune using the JDBC driver, the Neptune instance must be available through an SSH tunnel, load balancer, or the JDBC driver must be deployed in an EC2 instance. 
 
 ## Specifications
 
-JDBC 4.2 Java 8 etc
+This driver is compatible with JDBC 4.2 and requires a minimum of Java 8.
 
 ## Using the Driver
 
@@ -20,7 +24,7 @@ Because the JDBC driver is available as open source, contribution from the commu
 
 ## Building from source
 
-If you wish to contribute, you will need to build the driver. The requirements to build the driver are very simple, you only need a Java 8 compiler and runtime environment and you can build and run the driver.
+If you wish to contribute, you will need to build the driver. The requirements to build the driver are very simple, you only need a Java 8 compiler and runtime environment and you can build and run the driver. This library depends on the neptune-export library, which depends on the gremlin-client library. So before building this library, build the gremlin-client, then the neptune-export library, which are both included in this repository.
 
 ## Testing
 
