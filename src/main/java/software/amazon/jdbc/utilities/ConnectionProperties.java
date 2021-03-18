@@ -21,11 +21,11 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
 import java.util.regex.Pattern;
 
 /**
@@ -219,7 +219,7 @@ public abstract class ConnectionProperties extends Properties {
      */
     private void resolveProperties(final Properties inputProperties) throws SQLException {
         // List of input properties keys used to keep track of unresolved properties.
-        final List<Object> inputPropertiesKeys = new ArrayList<>(inputProperties.keySet());
+        final Set<String> inputPropertiesKeys = new HashSet<>(inputProperties.stringPropertyNames());
 
         for (final String mapKey : PROPERTY_CONVERTER_MAP.keySet()) {
             for (final Map.Entry<Object, Object> entry : inputProperties.entrySet()) {
@@ -241,9 +241,9 @@ public abstract class ConnectionProperties extends Properties {
         }
 
         // If there are any unresolved properties left, raise an error.
-        if (!inputProperties.isEmpty()) {
+        if (!inputPropertiesKeys.isEmpty()) {
             // If there are any unresolved properties left, raise a warning.
-            for (final String property: inputProperties.stringPropertyNames()) {
+            for (final String property: inputPropertiesKeys) {
                 LOGGER.warn(String.format("Error property '%s' is not supported.", property));
             }
         }
