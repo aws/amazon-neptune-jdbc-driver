@@ -40,7 +40,7 @@ public class AuthenticationExamples {
         // https://docs.aws.amazon.com/neptune/latest/userguide/iam-auth-connecting-gremlin-java.html for more information.
 
         // On Windows this can be done by settings the AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, and SERVICE_REGION environment variables.
-        // On Mac a ~/.aws file can be created and populated with the credentials.
+        // On Linux or Mac, a ~/.aws file can be created and populated with the credentials.
 
         // If TFA is setup on the account, follow the appropriate steps to set the session token for your environment as well.
         final Connection connection = DriverManager.getConnection(ExampleConfigs.getConnectionString(), properties);

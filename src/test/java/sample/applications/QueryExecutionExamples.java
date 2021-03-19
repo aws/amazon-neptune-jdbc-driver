@@ -75,7 +75,6 @@ public class QueryExecutionExamples {
         // Value will be 1.
         final Integer value = resultSet.getInt(0);
         resultSet.close();
-
     }
 
     /**
@@ -145,7 +144,6 @@ public class QueryExecutionExamples {
         // Value will be the String "[Rel : {hello=world}]".
         final String value = resultSet.getString(0);
         resultSet.close();
-
     }
 
     /**

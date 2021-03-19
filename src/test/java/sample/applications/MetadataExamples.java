@@ -52,7 +52,6 @@ public class MetadataExamples {
             throw new SQLException("This graph contains no columns (properties on any nodes with distinct label sets).");
         }
 
-
         do {
             // Grab the table name, column name, and data type of column. Look here for more information:
             // https://docs.oracle.com/javase/7/docs/api/java/sql/DatabaseMetaData.html#getColumns(java.lang.String,%20java.lang.String,%20java.lang.String,%20java.lang.String)
