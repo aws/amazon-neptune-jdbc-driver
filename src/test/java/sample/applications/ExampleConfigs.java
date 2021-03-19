@@ -17,7 +17,7 @@ package sample.applications;
 
 public class ExampleConfigs {
     private static final String JDBC_OPENCYPHER_CONNECTION_STRING = "jdbc:neptune:opencypher://bolt://%s:%d";
-    private static final String URL = "example-url.com"; // TODO: Update this to some example name
+    private static final String URL = "example-url.com";
     private static final int PORT = 8182; // Typically Amazon Neptune communicates on 8182.
 
     public static String getConnectionString() {
