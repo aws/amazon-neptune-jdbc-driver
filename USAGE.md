@@ -68,7 +68,7 @@ void example() {
 }
 ```
 
-Refer to the connection string options for more information about configuring the connection.
+Refer to the connection string options for more information about configuring the connection. For more example applications, see the [sample applications](./src/test/java/sample/applications).
 
 ### Querying the Graph
 
