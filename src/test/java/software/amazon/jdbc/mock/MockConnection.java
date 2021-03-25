@@ -19,10 +19,9 @@ package software.amazon.jdbc.mock;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import software.amazon.jdbc.Connection;
 import software.amazon.jdbc.utilities.ConnectionProperties;
+import software.amazon.jdbc.utilities.QueryExecutor;
 import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.concurrent.Executor;
 
 /**
  * Mock implementation for Connection object so it can be instantiated and tested.
@@ -39,32 +38,16 @@ public class MockConnection extends Connection implements java.sql.Connection {
     }
 
     @Override
-    protected void doClose() {
+    protected QueryExecutor getQueryExecutor() {
+        return new MockQueryExecutor();
+    }
 
+    @Override
+    protected void doClose() {
     }
 
     @Override
     public DatabaseMetaData getMetaData() throws SQLException {
         return null;
-    }
-
-    @Override
-    public Statement createStatement(final int resultSetType, final int resultSetConcurrency) throws SQLException {
-        return null;
-    }
-
-    @Override
-    public boolean isValid(final int timeout) throws SQLException {
-        return false;
-    }
-
-    @Override
-    public void setNetworkTimeout(final Executor executor, final int milliseconds) throws SQLException {
-
-    }
-
-    @Override
-    public int getNetworkTimeout() throws SQLException {
-        return 0;
     }
 }

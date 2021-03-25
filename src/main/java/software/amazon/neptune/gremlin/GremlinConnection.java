@@ -14,49 +14,40 @@
  *
  */
 
-package software.amazon.neptune.opencypher;
+package software.amazon.neptune.gremlin;
 
-import lombok.Getter;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import software.amazon.jdbc.utilities.ConnectionProperties;
 import software.amazon.jdbc.utilities.QueryExecutor;
+
 import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
 
 /**
- * OpenCypher implementation of Connection.
+ * Gremlin implementation of Connection.
  */
-public class OpenCypherConnection extends software.amazon.jdbc.Connection implements java.sql.Connection {
-    @Getter
-    private final OpenCypherConnectionProperties openCypherConnectionProperties;
+public class GremlinConnection extends software.amazon.jdbc.Connection implements java.sql.Connection {
     /**
-     * OpenCypherConnection constructor, initializes super class.
+     * Gremlin constructor, initializes super class.
      *
      * @param connectionProperties ConnectionProperties Object.
      */
-    public OpenCypherConnection(@NonNull final ConnectionProperties connectionProperties) throws SQLException {
+    public GremlinConnection(@NonNull final ConnectionProperties connectionProperties) throws SQLException {
         super(connectionProperties);
-        openCypherConnectionProperties = new OpenCypherConnectionProperties(getConnectionProperties());
-    }
-
-    @Override
-    public boolean isValid(final int timeout) throws SQLException {
-        final OpenCypherQueryExecutor queryExecutor = new OpenCypherQueryExecutor(openCypherConnectionProperties);
-        return queryExecutor.isValid(timeout);
     }
 
     @Override
     public void doClose() {
-        OpenCypherQueryExecutor.close();
+        // TODO.
     }
 
     @Override
     public DatabaseMetaData getMetaData() {
-        return new OpenCypherDatabaseMetadata(this);
+        return new GremlinDatabaseMetadata(this);
     }
 
     @Override
     public QueryExecutor getQueryExecutor() {
-        return new OpenCypherQueryExecutor(getOpenCypherConnectionProperties());
+        return new GremlinQueryExecutor();
     }
 }

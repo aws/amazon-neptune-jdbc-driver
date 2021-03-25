@@ -139,7 +139,7 @@ public class QueryExecutionExamples {
      * @throws SQLException If {@link java.sql.Statement} creation or query execution fails.
      */
     void queryRelationshipExample() throws SQLException {
-        final String query = "\"CREATE (node1:Foo)-[rel:Rel {hello:'world'}]->(node2:Bar) RETURN rel\"";
+        final String query = "CREATE (node1:Foo)-[rel:Rel {hello:'world'}]->(node2:Bar) RETURN rel";
         final ResultSet resultSet = executeQuery(query);
         // Value will be the String "[Rel : {hello=world}]".
         final String value = resultSet.getString(0);

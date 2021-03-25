@@ -71,6 +71,18 @@ public class OpenCypherQueryExecutor extends QueryExecutor {
         return true;
     }
 
+    /**
+     * Function to close down the driver.
+     */
+    public static void close() {
+        synchronized (DRIVER_LOCK) {
+            if (driver != null) {
+                driver.close();
+                driver = null;
+            }
+        }
+    }
+
     private static Driver createDriver(final Config config,
                                        final OpenCypherConnectionProperties openCypherConnectionProperties)
             throws SQLException {

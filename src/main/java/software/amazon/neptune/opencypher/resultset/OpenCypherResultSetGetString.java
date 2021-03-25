@@ -30,9 +30,6 @@ import java.util.Map;
 
 public class OpenCypherResultSetGetString extends OpenCypherResultSet {
     private static final Logger LOGGER = LoggerFactory.getLogger(OpenCypherResultSetGetString.class);
-    /**
-     * TABLE_TYPE String => table type. Typical types are "TABLE", "VIEW", "SYSTEM TABLE", "GLOBAL TEMPORARY", "LOCAL TEMPORARY", "ALIAS", "SYNONYM".
-     */
     private final List<String> columns;
     private final List<Map<String, String>> constantReturns;
 

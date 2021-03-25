@@ -253,7 +253,7 @@ public class ResultSetTest {
         HelperFunctions.expectFunctionThrows(() -> resultSet.afterLast());
         resultSet = new MockResultSet(statement);
         HelperFunctions.expectFunctionDoesntThrow(() -> resultSet.next(), true);
-        HelperFunctions.expectFunctionDoesntThrow(() -> resultSet.getRow(), 0);
+        HelperFunctions.expectFunctionDoesntThrow(() -> resultSet.getRow(), 1);
         HelperFunctions.expectFunctionThrows(() -> resultSet.absolute(-1));
         HelperFunctions.expectFunctionThrows(() -> resultSet.absolute(0));
         resultSet = new MockResultSet(statement);

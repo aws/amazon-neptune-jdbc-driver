@@ -101,7 +101,7 @@ public class OpenCypherConnectionTest {
     void testOpenCypherConnectionPrepareStatementType() {
         final AtomicReference<PreparedStatement> statement = new AtomicReference<>();
         Assertions.assertDoesNotThrow(() -> statement.set(connection.prepareStatement(QUERY)));
-        Assertions.assertTrue(statement.get() instanceof OpenCypherPreparedStatement);
+        Assertions.assertTrue(statement.get() instanceof software.amazon.jdbc.PreparedStatement);
 
         final AtomicReference<ResultSet> openCypherResultSet = new AtomicReference<>();
         Assertions.assertDoesNotThrow(() -> openCypherResultSet.set(statement.get().executeQuery()));
@@ -112,7 +112,7 @@ public class OpenCypherConnectionTest {
     void testOpenCypherConnectionStatementType() {
         final AtomicReference<Statement> statement = new AtomicReference<>();
         Assertions.assertDoesNotThrow(() -> statement.set(connection.createStatement()));
-        Assertions.assertTrue(statement.get() instanceof OpenCypherStatement);
+        Assertions.assertTrue(statement.get() instanceof software.amazon.jdbc.Statement);
 
         final AtomicReference<ResultSet> openCypherResultSet = new AtomicReference<>();
         Assertions.assertDoesNotThrow(() -> openCypherResultSet.set(statement.get().executeQuery(QUERY)));

@@ -18,7 +18,6 @@ package software.amazon.jdbc.mock;
 
 import software.amazon.jdbc.Statement;
 import java.sql.Connection;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 
 /**
@@ -31,36 +30,11 @@ public class MockStatement extends Statement implements java.sql.Statement {
      * Constructor for MockStatement.
      * @param connection Connection to pass to Statement.
      */
-    public MockStatement(final Connection connection) {
-        super(connection);
+    public MockStatement(final Connection connection) throws SQLException {
+        super(connection, new MockQueryExecutor());
     }
 
     public void setResultSet(final java.sql.ResultSet resultSet) {
         this.resultSet = resultSet;
-    }
-
-    @Override
-    protected void cancelQuery() throws SQLException {
-
-    }
-
-    @Override
-    protected int getMaxFetchSize() throws SQLException {
-        return 0;
-    }
-
-    @Override
-    public ResultSet executeQuery(final String sql) throws SQLException {
-        return resultSet;
-    }
-
-    @Override
-    public int getQueryTimeout() throws SQLException {
-        return 0;
-    }
-
-    @Override
-    public void setQueryTimeout(final int seconds) throws SQLException {
-
     }
 }

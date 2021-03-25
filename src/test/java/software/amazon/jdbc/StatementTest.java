@@ -106,7 +106,7 @@ public class StatementTest {
 
     @Test
     void testMisc() {
-        HelperFunctions.expectFunctionDoesntThrow(() -> statement.cancel());
+        HelperFunctions.expectFunctionThrows(() -> statement.cancel());
         HelperFunctions.expectFunctionThrows(() -> statement.addBatch(""));
         HelperFunctions.expectFunctionThrows(() -> statement.clearBatch());
     }

@@ -212,7 +212,7 @@ public abstract class ResultSet implements java.sql.ResultSet {
 
     @Override
     public int getRow() throws SQLException {
-        return getRowIndex();
+        return getRowIndex() + 1;
     }
 
     @Override

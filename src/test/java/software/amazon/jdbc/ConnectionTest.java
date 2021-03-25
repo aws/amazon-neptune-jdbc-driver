@@ -100,14 +100,14 @@ public class ConnectionTest {
     @Test
     void testStatements() {
         // Statement without transaction.
-        HelperFunctions.expectFunctionDoesntThrow(() -> connection.createStatement(), null);
-        HelperFunctions.expectFunctionDoesntThrow(() -> connection.createStatement(0, 0), null);
+        HelperFunctions.expectFunctionDoesntThrow(() -> connection.createStatement());
+        HelperFunctions.expectFunctionDoesntThrow(() -> connection.createStatement(0, 0));
 
         // Statement with transaction.
         HelperFunctions.expectFunctionThrows(() -> connection.createStatement(0, 0, 0));
 
         // Prepared statements.
-        HelperFunctions.expectFunctionThrows(() -> connection.prepareStatement(null));
+        HelperFunctions.expectFunctionDoesntThrow(() -> connection.prepareStatement(null));
         HelperFunctions.expectFunctionThrows(() -> connection.prepareStatement(null, 0));
         HelperFunctions.expectFunctionThrows(() -> connection.prepareStatement(null, 0, 0));
         HelperFunctions.expectFunctionThrows(() -> connection.prepareStatement(null, 0, 0, 0));

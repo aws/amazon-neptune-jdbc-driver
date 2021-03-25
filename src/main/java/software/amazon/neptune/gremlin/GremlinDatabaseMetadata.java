@@ -14,7 +14,7 @@
  *
  */
 
-package software.amazon.neptune.opencypher;
+package software.amazon.neptune.gremlin;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,18 +27,16 @@ import java.sql.SQLException;
 /**
  * OpenCypher implementation of DatabaseMetaData.
  */
-public class OpenCypherDatabaseMetadata extends DatabaseMetaData implements java.sql.DatabaseMetaData {
-    private static final Logger LOGGER = LoggerFactory.getLogger(OpenCypherDatabaseMetadata.class);
-    private final OpenCypherConnection connection;
+public class GremlinDatabaseMetadata extends DatabaseMetaData implements java.sql.DatabaseMetaData {
+    private static final Logger LOGGER = LoggerFactory.getLogger(GremlinDatabaseMetadata.class);
 
     /**
      * OpenCypherDatabaseMetadata constructor, initializes super class.
      *
      * @param connection Connection Object.
      */
-    OpenCypherDatabaseMetadata(final java.sql.Connection connection) {
+    GremlinDatabaseMetadata(final java.sql.Connection connection) {
         super(connection);
-        this.connection = (OpenCypherConnection) connection;
     }
 
     // TODO: Go through and implement these functions
@@ -66,7 +64,7 @@ public class OpenCypherDatabaseMetadata extends DatabaseMetaData implements java
 
     @Override
     public String getDriverName() throws SQLException {
-        return "neptune:opencypher";
+        return "neptune:gremlin";
     }
 
     @Override
@@ -131,7 +129,7 @@ public class OpenCypherDatabaseMetadata extends DatabaseMetaData implements java
             throws SQLException {
         // Only tableNamePattern is supported as an exact node label semicolon delimited String.
         LOGGER.info("Getting database tables.");
-        final OpenCypherQueryExecutor openCypherQueryExecutor = new OpenCypherQueryExecutor(connection.getOpenCypherConnectionProperties());
+        final GremlinQueryExecutor openCypherQueryExecutor = new GremlinQueryExecutor();
         return openCypherQueryExecutor.executeGetTables(getConnection().createStatement(), tableNamePattern);
     }
 
@@ -144,21 +142,21 @@ public class OpenCypherDatabaseMetadata extends DatabaseMetaData implements java
     @Override
     public ResultSet getSchemas() throws SQLException {
         LOGGER.info("Getting database schemas.");
-        final OpenCypherQueryExecutor openCypherQueryExecutor = new OpenCypherQueryExecutor(connection.getOpenCypherConnectionProperties());
+        final GremlinQueryExecutor openCypherQueryExecutor = new GremlinQueryExecutor();
         return openCypherQueryExecutor.executeGetSchemas(getConnection().createStatement());
     }
 
     @Override
     public ResultSet getCatalogs() throws SQLException {
         LOGGER.info("Getting database catalogs.");
-        final OpenCypherQueryExecutor openCypherQueryExecutor = new OpenCypherQueryExecutor(connection.getOpenCypherConnectionProperties());
+        final GremlinQueryExecutor openCypherQueryExecutor = new GremlinQueryExecutor();
         return openCypherQueryExecutor.executeGetCatalogs(getConnection().createStatement());
     }
 
     @Override
     public ResultSet getTableTypes() throws SQLException {
         LOGGER.info("Getting database table types.");
-        final OpenCypherQueryExecutor openCypherQueryExecutor = new OpenCypherQueryExecutor(connection.getOpenCypherConnectionProperties());
+        final GremlinQueryExecutor openCypherQueryExecutor = new GremlinQueryExecutor();
         return openCypherQueryExecutor.executeGetTableTypes(getConnection().createStatement());
     }
 
@@ -175,7 +173,7 @@ public class OpenCypherDatabaseMetadata extends DatabaseMetaData implements java
         if (schemaPattern != null) {
             LOGGER.warn("SchemaPattern in getColumns is not supported, ignoring.");
         }
-        final OpenCypherQueryExecutor openCypherQueryExecutor = new OpenCypherQueryExecutor(connection.getOpenCypherConnectionProperties());
+        final GremlinQueryExecutor openCypherQueryExecutor = new GremlinQueryExecutor();
         return openCypherQueryExecutor.executeGetColumns(getConnection().createStatement(), tableNamePattern);
     }
 
