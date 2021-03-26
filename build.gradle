@@ -268,6 +268,11 @@ dependencies {
     testCompile group: 'org.neo4j.community', name: 'it-test-support', version: neo4jDBVersion
     testCompile group: 'org.neo4j', name: 'neo4j-kernel', version: neo4jDBVersion, classifier: "tests"
     testCompile group: 'org.neo4j', name: 'neo4j-io', version: neo4jDBVersion, classifier: "tests"
+
+    // Yaml file parsing
+    implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.12.0'
+    implementation group: 'com.fasterxml.jackson.dataformat', name: 'jackson-dataformat-yaml', version: '2.12.0'
+
 }
 
 shadowJar {
