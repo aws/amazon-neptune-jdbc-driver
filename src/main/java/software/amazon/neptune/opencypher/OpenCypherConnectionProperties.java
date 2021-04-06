@@ -32,8 +32,6 @@ import java.util.Properties;
  */
 public class OpenCypherConnectionProperties extends ConnectionProperties {
     public static final String ENDPOINT_KEY = "Endpoint";
-
-    public static final String AUTH_SCHEME_KEY = "AuthScheme";
     public static final String USE_ENCRYPTION_KEY = "UseEncryption";
     public static final String REGION_KEY = "Region";
     public static final String CONNECTION_POOL_SIZE_KEY = "ConnectionPoolSize";
@@ -43,7 +41,6 @@ public class OpenCypherConnectionProperties extends ConnectionProperties {
     public static final String CUSTOM_CREDENTIALS_FILE_PATH_KEY = "CustomCredentialsFilePath";
 
     public static final int DEFAULT_CONNECTION_POOL_SIZE = 1000;
-    public static final AuthScheme DEFAULT_AUTH_SCHEME = AuthScheme.None;
     public static final boolean DEFAULT_USE_ENCRYPTION = true;
 
     public static final Map<String, Object> DEFAULT_PROPERTIES_MAP = new HashMap<>();
@@ -54,7 +51,7 @@ public class OpenCypherConnectionProperties extends ConnectionProperties {
         PROPERTY_CONVERTER_MAP.put(AWS_CREDENTIALS_PROVIDER_CLASS_KEY, (key, value) -> value);
         PROPERTY_CONVERTER_MAP.put(CUSTOM_CREDENTIALS_FILE_PATH_KEY, (key, value) -> value);
         PROPERTY_CONVERTER_MAP.put(ENDPOINT_KEY, (key, value) -> value);
-        PROPERTY_CONVERTER_MAP.put(AUTH_SCHEME_KEY, OpenCypherConnectionProperties::toAuthScheme);
+        PROPERTY_CONVERTER_MAP.put(AUTH_SCHEME_KEY, ConnectionProperties::toAuthScheme);
         PROPERTY_CONVERTER_MAP.put(REGION_KEY, (key, value) -> value);
         PROPERTY_CONVERTER_MAP.put(USE_ENCRYPTION_KEY, ConnectionProperties::toBoolean);
         PROPERTY_CONVERTER_MAP.put(CONNECTION_POOL_SIZE_KEY, ConnectionProperties::toUnsigned);
@@ -72,7 +69,7 @@ public class OpenCypherConnectionProperties extends ConnectionProperties {
      * OpenCypherConnectionProperties constructor.
      */
     public OpenCypherConnectionProperties() throws SQLException {
-        super();
+        super(new Properties(), DEFAULT_PROPERTIES_MAP, PROPERTY_CONVERTER_MAP);
     }
 
     /**
@@ -98,7 +95,7 @@ public class OpenCypherConnectionProperties extends ConnectionProperties {
      * @param endpoint The connection endpoint.
      * @throws SQLException if value is invalid.
      */
-    public void setEndpoint(final String endpoint) throws SQLException {
+    public void setEndpoint(@NonNull final String endpoint) throws SQLException {
         setProperty(ENDPOINT_KEY,
                 (String) PROPERTY_CONVERTER_MAP.get(ENDPOINT_KEY).convert(ENDPOINT_KEY, endpoint));
     }
@@ -160,10 +157,7 @@ public class OpenCypherConnectionProperties extends ConnectionProperties {
      * @param authScheme The authentication scheme.
      * @throws SQLException if value is invalid.
      */
-    public void setAuthScheme(final AuthScheme authScheme) throws SQLException {
-        if (authScheme == null) {
-            throw invalidConnectionPropertyError(AUTH_SCHEME_KEY, authScheme);
-        }
+    public void setAuthScheme(@NonNull final AuthScheme authScheme) throws SQLException {
         put(AUTH_SCHEME_KEY, authScheme);
     }
 
@@ -230,6 +224,7 @@ public class OpenCypherConnectionProperties extends ConnectionProperties {
     /**
      * Validate the supported properties.
      */
+    @Override
     protected void validateProperties() throws SQLException {
         // If IAMSigV4 is specified, we need the region provided to us.
         if (getAuthScheme() != null && getAuthScheme().equals(AuthScheme.IAMSigV4)) {
@@ -252,17 +247,8 @@ public class OpenCypherConnectionProperties extends ConnectionProperties {
      * @param name The name of the property.
      * @return {@code true} if property is supported; {@code false} otherwise.
      */
+    @Override
     public boolean isSupportedProperty(final String name) {
         return containsKey(name);
-    }
-
-    private static AuthScheme toAuthScheme(@NonNull final String key, @NonNull final String value) throws SQLException {
-        if (isWhitespace(value)) {
-            return DEFAULT_AUTH_SCHEME;
-        }
-        if (AuthScheme.fromString(value) == null) {
-            throw invalidConnectionPropertyError(key, value);
-        }
-        return AuthScheme.fromString(value);
     }
 }

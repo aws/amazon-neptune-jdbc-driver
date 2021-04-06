@@ -33,10 +33,12 @@ import java.util.regex.Pattern;
  */
 public abstract class ConnectionProperties extends Properties {
     public static final String APPLICATION_NAME_KEY = "ApplicationName";
+    public static final String AUTH_SCHEME_KEY = "AuthScheme";
     public static final String CONNECTION_TIMEOUT_MILLIS_KEY = "ConnectionTimeout";
     public static final String CONNECTION_RETRY_COUNT_KEY = "ConnectionRetryCount";
     public static final String LOG_LEVEL_KEY = "LogLevel";
 
+    public static final AuthScheme DEFAULT_AUTH_SCHEME = AuthScheme.None;
     public static final int DEFAULT_CONNECTION_TIMEOUT_MILLIS = 5000;
     public static final int DEFAULT_CONNECTION_RETRY_COUNT = 3;
     public static final Level DEFAULT_LOG_LEVEL = Level.INFO;
@@ -104,9 +106,8 @@ public abstract class ConnectionProperties extends Properties {
      * @param applicationName The application name.
      * @throws SQLException if value is invalid.
      */
-    public void setApplicationName(final String applicationName) throws SQLException {
-        setProperty(APPLICATION_NAME_KEY,
-                (String) PROPERTY_CONVERTER_MAP.get(APPLICATION_NAME_KEY).convert(APPLICATION_NAME_KEY, applicationName));
+    public void setApplicationName(@NonNull final String applicationName) throws SQLException {
+        setProperty(APPLICATION_NAME_KEY, applicationName);
     }
 
     /**
@@ -168,10 +169,7 @@ public abstract class ConnectionProperties extends Properties {
      * @param logLevel The logging level.
      * @throws SQLException if value is invalid.
      */
-    public void setLogLevel(final Level logLevel) throws SQLException {
-        if (logLevel == null) {
-            throw invalidConnectionPropertyError(LOG_LEVEL_KEY, logLevel);
-        }
+    public void setLogLevel(@NonNull final Level logLevel) throws SQLException {
         put(LOG_LEVEL_KEY, logLevel);
     }
 
@@ -305,6 +303,16 @@ public abstract class ConnectionProperties extends Properties {
             throw invalidConnectionPropertyError(key, value);
         }
         return stringBooleanMap.get(value.toLowerCase());
+    }
+
+    protected static AuthScheme toAuthScheme(@NonNull final String key, @NonNull final String value) throws SQLException {
+        if (isWhitespace(value)) {
+            return DEFAULT_AUTH_SCHEME;
+        }
+        if (AuthScheme.fromString(value) == null) {
+            throw invalidConnectionPropertyError(key, value);
+        }
+        return AuthScheme.fromString(value);
     }
 
     protected static boolean isWhitespace(@NonNull final String value) {

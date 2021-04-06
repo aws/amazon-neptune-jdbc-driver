@@ -186,9 +186,6 @@ class OpenCypherConnectionPropertiesTest {
             properties.setProperty(OpenCypherConnectionProperties.AUTH_SCHEME_KEY, invalidValue);
             Assertions.assertThrows(SQLException.class,
                     () -> connectionProperties = new OpenCypherConnectionProperties(properties));
-            // Set property directly.
-            Assertions.assertThrows(SQLException.class,
-                    () -> connectionProperties.setAuthScheme(AuthScheme.fromString(invalidValue)));
         }
     }
 
