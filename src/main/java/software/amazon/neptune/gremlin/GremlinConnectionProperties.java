@@ -23,6 +23,7 @@ import org.apache.tinkerpop.gremlin.driver.MessageSerializer;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import software.amazon.jdbc.utilities.AuthScheme;
 import software.amazon.jdbc.utilities.ConnectionProperties;
 import software.amazon.neptune.opencypher.OpenCypherConnectionProperties;
 
@@ -993,6 +994,18 @@ public class GremlinConnectionProperties extends ConnectionProperties {
      */
     @Override
     protected void validateProperties() throws SQLException {
+        // If IAMSigV4 is specified, we need the region provided to us.
+        if (getAuthScheme() != null && getAuthScheme().equals(AuthScheme.IAMSigV4)) {
+            final String region = System.getenv().get("SERVICE_REGION");
+            if (region == null) {
+                throw missingConnectionPropertyError("A Region must be provided to use IAMSigV4 Authentication. Set the SERVICE_REGION environment variable to the appropriate region, such as 'us-east-1'.");
+            }
+
+            if (!getEnableSsl()) {
+                throw invalidConnectionPropertyValueError(ENABLE_SSL_KEY,
+                        "SSL encryption must be enabled if IAMSigV4 is used.");
+            }
+        }
     }
 
     /**
