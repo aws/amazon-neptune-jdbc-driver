@@ -51,7 +51,6 @@ public class OpenCypherConnectionProperties extends ConnectionProperties {
         PROPERTY_CONVERTER_MAP.put(AWS_CREDENTIALS_PROVIDER_CLASS_KEY, (key, value) -> value);
         PROPERTY_CONVERTER_MAP.put(CUSTOM_CREDENTIALS_FILE_PATH_KEY, (key, value) -> value);
         PROPERTY_CONVERTER_MAP.put(ENDPOINT_KEY, (key, value) -> value);
-        PROPERTY_CONVERTER_MAP.put(AUTH_SCHEME_KEY, ConnectionProperties::toAuthScheme);
         PROPERTY_CONVERTER_MAP.put(REGION_KEY, (key, value) -> value);
         PROPERTY_CONVERTER_MAP.put(USE_ENCRYPTION_KEY, ConnectionProperties::toBoolean);
         PROPERTY_CONVERTER_MAP.put(CONNECTION_POOL_SIZE_KEY, ConnectionProperties::toUnsigned);
@@ -59,7 +58,6 @@ public class OpenCypherConnectionProperties extends ConnectionProperties {
 
     static {
         DEFAULT_PROPERTIES_MAP.put(ENDPOINT_KEY, "");
-        DEFAULT_PROPERTIES_MAP.put(AUTH_SCHEME_KEY, DEFAULT_AUTH_SCHEME);
         DEFAULT_PROPERTIES_MAP.put(REGION_KEY, "");
         DEFAULT_PROPERTIES_MAP.put(USE_ENCRYPTION_KEY, DEFAULT_USE_ENCRYPTION);
         DEFAULT_PROPERTIES_MAP.put(CONNECTION_POOL_SIZE_KEY, DEFAULT_CONNECTION_POOL_SIZE);
@@ -140,25 +138,6 @@ public class OpenCypherConnectionProperties extends ConnectionProperties {
         setProperty(CUSTOM_CREDENTIALS_FILE_PATH_KEY,
                 (String) PROPERTY_CONVERTER_MAP.get(CUSTOM_CREDENTIALS_FILE_PATH_KEY)
                         .convert(CUSTOM_CREDENTIALS_FILE_PATH_KEY, customCredentialsFilePath));
-    }
-
-    /**
-     * Gets the authentication scheme.
-     *
-     * @return The authentication scheme.
-     */
-    public AuthScheme getAuthScheme() {
-        return (AuthScheme) get(AUTH_SCHEME_KEY);
-    }
-
-    /**
-     * Sets the authentication scheme.
-     *
-     * @param authScheme The authentication scheme.
-     * @throws SQLException if value is invalid.
-     */
-    public void setAuthScheme(@NonNull final AuthScheme authScheme) throws SQLException {
-        put(AUTH_SCHEME_KEY, authScheme);
     }
 
     /**

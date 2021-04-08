@@ -23,7 +23,6 @@ import org.apache.tinkerpop.gremlin.driver.MessageSerializer;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import software.amazon.jdbc.utilities.AuthScheme;
 import software.amazon.jdbc.utilities.ConnectionProperties;
 import software.amazon.neptune.opencypher.OpenCypherConnectionProperties;
 
@@ -113,15 +112,12 @@ public class GremlinConnectionProperties extends ConnectionProperties {
     public static final Map<String, Object> DEFAULT_PROPERTIES_MAP = new HashMap<>();
     private static final Map<String, ConnectionProperties.PropertyConverter<?>> PROPERTY_CONVERTER_MAP = new HashMap<>();
     private static final Logger LOGGER = LoggerFactory.getLogger(OpenCypherConnectionProperties.class);
-    private static final int FIRST_AVAIL_PORT = 1024;
-    private static final int LAST_AVAIL_PORT = 65353;
 
     static {
         PROPERTY_CONVERTER_MAP.put(CONTACT_POINT_KEY, (key, value) -> value);
         PROPERTY_CONVERTER_MAP.put(PATH_KEY, (key, value) -> value);
         PROPERTY_CONVERTER_MAP.put(PORT_KEY, ConnectionProperties::toUnsigned);
         PROPERTY_CONVERTER_MAP.put(ENABLE_SSL_KEY, ConnectionProperties::toBoolean);
-        PROPERTY_CONVERTER_MAP.put(AUTH_SCHEME_KEY, ConnectionProperties::toAuthScheme);
         PROPERTY_CONVERTER_MAP.put(NIO_POOL_SIZE_KEY, ConnectionProperties::toUnsigned);
         PROPERTY_CONVERTER_MAP.put(WORKER_POOL_SIZE_KEY, ConnectionProperties::toUnsigned);
         PROPERTY_CONVERTER_MAP.put(MAX_CONNECTION_POOL_SIZE_KEY, ConnectionProperties::toUnsigned);
@@ -145,7 +141,6 @@ public class GremlinConnectionProperties extends ConnectionProperties {
         DEFAULT_PROPERTIES_MAP.put(PORT_KEY, DEFAULT_PORT);
         DEFAULT_PROPERTIES_MAP.put(ENABLE_SSL_KEY, DEFAULT_ENABLE_SSL);
         DEFAULT_PROPERTIES_MAP.put(SSL_SKIP_VALIDATION_KEY, DEFAULT_SSL_SKIP_VALIDATION);
-        DEFAULT_PROPERTIES_MAP.put(AUTH_SCHEME_KEY, DEFAULT_AUTH_SCHEME);
     }
 
     /**
@@ -218,28 +213,61 @@ public class GremlinConnectionProperties extends ConnectionProperties {
      * @param port The port.
      */
     public void setPort(final int port) throws SQLException {
-        if (port < FIRST_AVAIL_PORT || port > LAST_AVAIL_PORT) {
-            throw invalidConnectionPropertyError(PORT_KEY, port);
-        }
         put(PORT_KEY, port);
     }
 
     /**
-     * Gets the MessageSerializer.
+     * Check whether the Serializer is an object.
      *
-     * @return The MessageSerializer.
+     * @return True if Serializer is an object, otherwise false.
      */
-    public MessageSerializer getSerializer() {
-        if (!contains(SERIALIZER_KEY)) {
+    public boolean isSerializerObject() {
+        if (!containsKey(SERIALIZER_KEY)) {
+            return false;
+        }
+        return (get(SERIALIZER_KEY) instanceof Class<?>);
+    }
+
+    /**
+     * Check whether the Serializer is a string.
+     *
+     * @return True if Serializer is a string, otherwise false.
+     */
+    public boolean isSerializerString() {
+        if (!containsKey(SERIALIZER_KEY)) {
+            return false;
+        }
+        return (get(SERIALIZER_KEY) instanceof String);
+    }
+
+    /**
+     * Gets the Serializer object to use.
+     *
+     * @return The Serializer object.
+     */
+    public MessageSerializer getSerializerObject() {
+        if (!containsKey(SERIALIZER_KEY)) {
             return null;
         }
         return (MessageSerializer) get(SERIALIZER_KEY);
     }
 
     /**
-     * Sets the MessageSerializer to use.
+     * Gets the Serializer class name.
      *
-     * @param serializer The MessageSerializer.
+     * @return The Serializer class name.
+     */
+    public String getSerializerString() {
+        if (!containsKey(SERIALIZER_KEY)) {
+            return null;
+        }
+        return (String) get(SERIALIZER_KEY);
+    }
+
+    /**
+     * Sets the MessageSerializer object to use.
+     *
+     * @param serializer The MessageSerializer object.
      * @throws SQLException if value is invalid.
      */
     public void setSerializer(@NonNull final MessageSerializer serializer) throws SQLException {
@@ -247,7 +275,7 @@ public class GremlinConnectionProperties extends ConnectionProperties {
     }
 
     /**
-     * Sets the MessageSerializer to use given the exact name of a Serializers enum.
+     * Sets the Serializer to use given the exact name of a Serializers enum.
      *
      * @param serializerMimeType The exact name of a Serializers enum.
      * @throws SQLException if value is invalid.
@@ -280,7 +308,7 @@ public class GremlinConnectionProperties extends ConnectionProperties {
      * @return The SslContext.
      */
     public SslContext getSslContext() {
-        if (!contains(SSL_CONTEXT_KEY)) {
+        if (!containsKey(SSL_CONTEXT_KEY)) {
             return null;
         }
         return (SslContext) get(SSL_CONTEXT_KEY);
@@ -302,7 +330,7 @@ public class GremlinConnectionProperties extends ConnectionProperties {
      * @return The list of enabled SSL protocols.
      */
     public List<?> getSslEnabledProtocols() {
-        if (!contains(SSL_ENABLED_PROTOCOLS_KEY)) {
+        if (!containsKey(SSL_ENABLED_PROTOCOLS_KEY)) {
             return null;
         }
         return (List<?>) get(SSL_ENABLED_PROTOCOLS_KEY);
@@ -324,7 +352,7 @@ public class GremlinConnectionProperties extends ConnectionProperties {
      * @return The list of enabled cipher suites.
      */
     public List<?> getSslCipherSuites() {
-        if (!contains(SSL_CIPHER_SUITES_KEY)) {
+        if (!containsKey(SSL_CIPHER_SUITES_KEY)) {
             return null;
         }
         return (List<?>) get(SSL_CIPHER_SUITES_KEY);
@@ -364,7 +392,7 @@ public class GremlinConnectionProperties extends ConnectionProperties {
      * @return The file location of the private key store, or null if not found.
      */
     public String getKeyStore() {
-        if (!contains(KEY_STORE_KEY)) {
+        if (!containsKey(KEY_STORE_KEY)) {
             return null;
         }
         return getProperty(KEY_STORE_KEY);
@@ -386,7 +414,7 @@ public class GremlinConnectionProperties extends ConnectionProperties {
      * @return The password of the keyStore, or null if it's not password-protected.
      */
     public String getKeyStorePassword() {
-        if (!contains(KEY_STORE_PASSWORD_KEY)) {
+        if (!containsKey(KEY_STORE_PASSWORD_KEY)) {
             return null;
         }
         return getProperty(KEY_STORE_PASSWORD_KEY);
@@ -412,7 +440,7 @@ public class GremlinConnectionProperties extends ConnectionProperties {
      * @return The format of the keyStore, or null if not found.
      */
     public String getKeyStoreType() {
-        if (!contains(KEY_STORE_TYPE_KEY)) {
+        if (!containsKey(KEY_STORE_TYPE_KEY)) {
             return null;
         }
         return getProperty(KEY_STORE_TYPE_KEY);
@@ -434,7 +462,7 @@ public class GremlinConnectionProperties extends ConnectionProperties {
      * @return The file location for a SSL Certificate Chain.
      */
     public String getTrustStore() {
-        if (!contains(TRUST_STORE_KEY)) {
+        if (!containsKey(TRUST_STORE_KEY)) {
             return null;
         }
         return getProperty(TRUST_STORE_KEY);
@@ -456,7 +484,7 @@ public class GremlinConnectionProperties extends ConnectionProperties {
      * @return The password of the trustStore, or null if it's not password-protected.
      */
     public String getTrustStorePassword() {
-        if (!contains(TRUST_STORE_PASSWORD_KEY)) {
+        if (!containsKey(TRUST_STORE_PASSWORD_KEY)) {
             return null;
         }
         return getProperty(TRUST_STORE_PASSWORD_KEY);
@@ -482,7 +510,7 @@ public class GremlinConnectionProperties extends ConnectionProperties {
      * @return The format of the trustStore, or null if not found.
      */
     public String getTrustStoreType() {
-        if (!contains(TRUST_STORE_TYPE_KEY)) {
+        if (!containsKey(TRUST_STORE_TYPE_KEY)) {
             return null;
         }
         return getProperty(TRUST_STORE_TYPE_KEY);
@@ -499,31 +527,12 @@ public class GremlinConnectionProperties extends ConnectionProperties {
     }
 
     /**
-     * Gets the authentication scheme.
-     *
-     * @return The authentication scheme.
-     */
-    public AuthScheme getAuthScheme() {
-        return (AuthScheme) get(AUTH_SCHEME_KEY);
-    }
-
-    /**
-     * Sets the authentication scheme.
-     *
-     * @param authScheme The authentication scheme.
-     * @throws SQLException if value is invalid.
-     */
-    public void setAuthScheme(@NonNull final AuthScheme authScheme) throws SQLException {
-        put(AUTH_SCHEME_KEY, authScheme);
-    }
-
-    /**
      * Gets the size of the pool for handling request/response operations.
      *
      * @return The size of the Nio pool.
      */
     public int getNioPoolSize() {
-        if (!contains(NIO_POOL_SIZE_KEY)) {
+        if (!containsKey(NIO_POOL_SIZE_KEY)) {
             return 0;
         }
         return (int) get(NIO_POOL_SIZE_KEY);
@@ -548,7 +557,7 @@ public class GremlinConnectionProperties extends ConnectionProperties {
      * @return The size of the worker pool.
      */
     public int getWorkerPoolSize() {
-        if (!contains(WORKER_POOL_SIZE_KEY)) {
+        if (!containsKey(WORKER_POOL_SIZE_KEY)) {
             return 0;
         }
         return (int) get(WORKER_POOL_SIZE_KEY);
@@ -573,7 +582,7 @@ public class GremlinConnectionProperties extends ConnectionProperties {
      * @return The maximum connection pool size.
      */
     public int getMaxConnectionPoolSize() {
-        if (!contains(MAX_CONNECTION_POOL_SIZE_KEY)) {
+        if (!containsKey(MAX_CONNECTION_POOL_SIZE_KEY)) {
             return 0;
         }
         return (int) get(MAX_CONNECTION_POOL_SIZE_KEY);
@@ -598,7 +607,7 @@ public class GremlinConnectionProperties extends ConnectionProperties {
      * @return The minimum connection pool size.
      */
     public int getMinConnectionPoolSize() {
-        if (!contains(MIN_CONNECTION_POOL_SIZE_KEY)) {
+        if (!containsKey(MIN_CONNECTION_POOL_SIZE_KEY)) {
             return 0;
         }
         return (int) get(MIN_CONNECTION_POOL_SIZE_KEY);
@@ -623,7 +632,7 @@ public class GremlinConnectionProperties extends ConnectionProperties {
      * @return The maximum in-flight requests per Connection.
      */
     public int getMaxInProcessPerConnection() {
-        if (!contains(MAX_IN_PROCESS_PER_CONNECTION_KEY)) {
+        if (!containsKey(MAX_IN_PROCESS_PER_CONNECTION_KEY)) {
             return 0;
         }
         return (int) get(MAX_IN_PROCESS_PER_CONNECTION_KEY);
@@ -648,7 +657,7 @@ public class GremlinConnectionProperties extends ConnectionProperties {
      * @return The minimum in-flight requests per Connection.
      */
     public int getMinInProcessPerConnection() {
-        if (!contains(MIN_IN_PROCESS_PER_CONNECTION_KEY)) {
+        if (!containsKey(MIN_IN_PROCESS_PER_CONNECTION_KEY)) {
             return 0;
         }
         return (int) get(MIN_IN_PROCESS_PER_CONNECTION_KEY);
@@ -673,7 +682,7 @@ public class GremlinConnectionProperties extends ConnectionProperties {
      * @return The maximum number of simultaneous usage per Connection.
      */
     public int getMaxSimultaneousUsagePerConnection() {
-        if (!contains(MAX_SIMULT_USAGE_PER_CONNECTION_KEY)) {
+        if (!containsKey(MAX_SIMULT_USAGE_PER_CONNECTION_KEY)) {
             return 0;
         }
         return (int) get(MAX_SIMULT_USAGE_PER_CONNECTION_KEY);
@@ -698,7 +707,7 @@ public class GremlinConnectionProperties extends ConnectionProperties {
      * @return The minimum number of simultaneous usage per Connection.
      */
     public int getMinSimultaneousUsagePerConnection() {
-        if (!contains(MIN_SIMULT_USAGE_PER_CONNECTION_KEY)) {
+        if (!containsKey(MIN_SIMULT_USAGE_PER_CONNECTION_KEY)) {
             return 0;
         }
         return (int) get(MIN_SIMULT_USAGE_PER_CONNECTION_KEY);
@@ -718,15 +727,51 @@ public class GremlinConnectionProperties extends ConnectionProperties {
     }
 
     /**
+     * Check whether the Channelizer is a class.
+     *
+     * @return True if Channelizer is a class, otherwise false.
+     */
+    public boolean isChannelizerGeneric() {
+        if (!containsKey(CHANNELIZER_KEY)) {
+            return false;
+        }
+        return (get(CHANNELIZER_KEY) instanceof Class<?>);
+    }
+
+    /**
+     * Check whether the Channelizer is a string.
+     *
+     * @return True if Channelizer is a string, otherwise false.
+     */
+    public boolean isChannelizerString() {
+        if (!containsKey(CHANNELIZER_KEY)) {
+            return false;
+        }
+        return (get(CHANNELIZER_KEY) instanceof String);
+    }
+
+    /**
      * Gets the Channelizer class.
      *
-     * @return The MessageSerializer.
+     * @return The Channelizer class.
      */
-    public Class<?> getChannelizer() {
-        if (!contains(CHANNELIZER_KEY)) {
+    public Class<?> getChannelizerGeneric() {
+        if (!containsKey(CHANNELIZER_KEY)) {
             return null;
         }
-        return get(CHANNELIZER_KEY).getClass();
+        return (Class<?>) get(CHANNELIZER_KEY);
+    }
+
+    /**
+     * Gets the Channelizer class name.
+     *
+     * @return The Channelizer class name.
+     */
+    public String getChannelizerString() {
+        if (!containsKey(CHANNELIZER_KEY)) {
+            return null;
+        }
+        return (String) get(CHANNELIZER_KEY);
     }
 
     /**
@@ -755,7 +800,7 @@ public class GremlinConnectionProperties extends ConnectionProperties {
      * @return The keep alive interval.
      */
     public int getKeepAliveInterval() {
-        if (!contains(KEEPALIVE_INTERVAL_KEY)) {
+        if (!containsKey(KEEPALIVE_INTERVAL_KEY)) {
             return 0;
         }
         return (int) get(KEEPALIVE_INTERVAL_KEY);
@@ -781,7 +826,7 @@ public class GremlinConnectionProperties extends ConnectionProperties {
      * @return The result iteration batch size.
      */
     public int getResultIterationBatchSize() {
-        if (!contains(RESULT_ITERATION_BATCH_SIZE_KEY)) {
+        if (!containsKey(RESULT_ITERATION_BATCH_SIZE_KEY)) {
             return 0;
         }
         return (int) get(RESULT_ITERATION_BATCH_SIZE_KEY);
@@ -805,7 +850,7 @@ public class GremlinConnectionProperties extends ConnectionProperties {
      * @return The maximum wait for Connection.
      */
     public int getMaxWaitForConnection() {
-        if (!contains(MAX_WAIT_FOR_CONNECTION_KEY)) {
+        if (!containsKey(MAX_WAIT_FOR_CONNECTION_KEY)) {
             return 0;
         }
         return (int) get(MAX_WAIT_FOR_CONNECTION_KEY);
@@ -830,7 +875,7 @@ public class GremlinConnectionProperties extends ConnectionProperties {
      * @return The maximum wait to close.
      */
     public int getMaxWaitForClose() {
-        if (!contains(MAX_WAIT_FOR_CLOSE_KEY)) {
+        if (!containsKey(MAX_WAIT_FOR_CLOSE_KEY)) {
             return 0;
         }
         return (int) get(MAX_WAIT_FOR_CLOSE_KEY);
@@ -855,7 +900,7 @@ public class GremlinConnectionProperties extends ConnectionProperties {
      * @return The maximum size in bytes.
      */
     public int getMaxContentLength() {
-        if (!contains(MAX_CONTENT_LENGTH_KEY)) {
+        if (!containsKey(MAX_CONTENT_LENGTH_KEY)) {
             return 0;
         }
         return (int) get(MAX_CONTENT_LENGTH_KEY);
@@ -880,7 +925,7 @@ public class GremlinConnectionProperties extends ConnectionProperties {
      * @return The Gremlin script.
      */
     public String getValidationRequest() {
-        if (!contains(VALIDATION_REQUEST_KEY)) {
+        if (!containsKey(VALIDATION_REQUEST_KEY)) {
             return null;
         }
         return getProperty(VALIDATION_REQUEST_KEY);
@@ -902,7 +947,7 @@ public class GremlinConnectionProperties extends ConnectionProperties {
      * @return The reconnect interval.
      */
     public int getReconnectInterval() {
-        if (!contains(RECONNECT_INTERVAL_KEY)) {
+        if (!containsKey(RECONNECT_INTERVAL_KEY)) {
             return 0;
         }
         return (int) get(RECONNECT_INTERVAL_KEY);
@@ -927,7 +972,7 @@ public class GremlinConnectionProperties extends ConnectionProperties {
      * @return The load balancing strategy.
      */
     public LoadBalancingStrategy getLoadBalancingStrategy() {
-        if (!contains(LOAD_BALANCING_STRATEGY_KEY)) {
+        if (!containsKey(LOAD_BALANCING_STRATEGY_KEY)) {
             return null;
         }
         return (LoadBalancingStrategy) get(LOAD_BALANCING_STRATEGY_KEY);

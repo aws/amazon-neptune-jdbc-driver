@@ -38,7 +38,7 @@ public abstract class ConnectionProperties extends Properties {
     public static final String CONNECTION_RETRY_COUNT_KEY = "ConnectionRetryCount";
     public static final String LOG_LEVEL_KEY = "LogLevel";
 
-    public static final AuthScheme DEFAULT_AUTH_SCHEME = AuthScheme.None;
+    public static final AuthScheme DEFAULT_AUTH_SCHEME = AuthScheme.IAMSigV4;
     public static final int DEFAULT_CONNECTION_TIMEOUT_MILLIS = 5000;
     public static final int DEFAULT_CONNECTION_RETRY_COUNT = 3;
     public static final Level DEFAULT_LOG_LEVEL = Level.INFO;
@@ -49,6 +49,7 @@ public abstract class ConnectionProperties extends Properties {
 
     static {
         PROPERTY_CONVERTER_MAP.put(APPLICATION_NAME_KEY, (key, value) -> value);
+        PROPERTY_CONVERTER_MAP.put(AUTH_SCHEME_KEY, ConnectionProperties::toAuthScheme);
         PROPERTY_CONVERTER_MAP.put(CONNECTION_TIMEOUT_MILLIS_KEY, ConnectionProperties::toUnsigned);
         PROPERTY_CONVERTER_MAP.put(CONNECTION_RETRY_COUNT_KEY, ConnectionProperties::toUnsigned);
         PROPERTY_CONVERTER_MAP.put(LOG_LEVEL_KEY, ConnectionProperties::toLogLevel);
@@ -57,6 +58,7 @@ public abstract class ConnectionProperties extends Properties {
     static {
         DEFAULT_PROPERTIES_MAP.put(CONNECTION_TIMEOUT_MILLIS_KEY, DEFAULT_CONNECTION_TIMEOUT_MILLIS);
         DEFAULT_PROPERTIES_MAP.put(CONNECTION_RETRY_COUNT_KEY, DEFAULT_CONNECTION_RETRY_COUNT);
+        DEFAULT_PROPERTIES_MAP.put(AUTH_SCHEME_KEY, DEFAULT_AUTH_SCHEME);
         DEFAULT_PROPERTIES_MAP.put(LOG_LEVEL_KEY, DEFAULT_LOG_LEVEL);
     }
 
@@ -108,6 +110,25 @@ public abstract class ConnectionProperties extends Properties {
      */
     public void setApplicationName(@NonNull final String applicationName) throws SQLException {
         setProperty(APPLICATION_NAME_KEY, applicationName);
+    }
+
+    /**
+     * Gets the authentication scheme.
+     *
+     * @return The authentication scheme.
+     */
+    public AuthScheme getAuthScheme() {
+        return (AuthScheme) get(AUTH_SCHEME_KEY);
+    }
+
+    /**
+     * Sets the authentication scheme.
+     *
+     * @param authScheme The authentication scheme.
+     * @throws SQLException if value is invalid.
+     */
+    public void setAuthScheme(@NonNull final AuthScheme authScheme) throws SQLException {
+        put(AUTH_SCHEME_KEY, authScheme);
     }
 
     /**

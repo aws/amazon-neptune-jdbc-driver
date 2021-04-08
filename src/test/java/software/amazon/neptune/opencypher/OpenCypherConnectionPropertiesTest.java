@@ -156,7 +156,7 @@ class OpenCypherConnectionPropertiesTest {
         Assertions.assertDoesNotThrow(() -> {
             connectionProperties = new OpenCypherConnectionProperties(properties);
         });
-        Assertions.assertEquals(AuthScheme.None, connectionProperties.getAuthScheme());
+        Assertions.assertEquals(AuthScheme.IAMSigV4, connectionProperties.getAuthScheme());
 
         // Verify valid property value is set.
         for (final String validValue : validAuthSchemes) {
@@ -212,9 +212,11 @@ class OpenCypherConnectionPropertiesTest {
         }
 
         // Verify valid FALSE property value is set.
+        // 'AuthScheme' must be NONE if UseEncryption is FALSE.
         for (final String validValue : validFalseValues) {
-            // Set property through constructor.
+            // Set properties through constructor.
             properties.put(OpenCypherConnectionProperties.USE_ENCRYPTION_KEY, validValue);
+            properties.put(OpenCypherConnectionProperties.AUTH_SCHEME_KEY, AuthScheme.None);
             Assertions.assertDoesNotThrow(() -> {
                 connectionProperties = new OpenCypherConnectionProperties(properties);
             });
