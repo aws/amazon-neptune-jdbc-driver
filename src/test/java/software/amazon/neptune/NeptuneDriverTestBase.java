@@ -20,6 +20,7 @@ import com.google.common.collect.ImmutableList;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import software.amazon.jdbc.helpers.HelperFunctions;
+import software.amazon.jdbc.utilities.AuthScheme;
 import software.amazon.jdbc.utilities.SqlError;
 import software.amazon.neptune.opencypher.OpenCypherConnection;
 import software.amazon.neptune.opencypher.mock.MockOpenCypherDatabase;
@@ -42,7 +43,9 @@ public abstract class NeptuneDriverTestBase {
     protected static String createValidUrl(final boolean useEncryption,
                                            final String language,
                                            final boolean trailingSemicolon) {
-        String url = String.format("jdbc:neptune:%s://%s;useEncryption=%s", language, validEndpoint, useEncryption);
+        final AuthScheme authScheme = useEncryption ? AuthScheme.IAMSigV4 : AuthScheme.None;
+        String url = String.format("jdbc:neptune:%s://%s;useEncryption=%s;authScheme=%s",
+                language, validEndpoint, useEncryption, authScheme.toString());
         if (trailingSemicolon) {
             url += ";";
         }
