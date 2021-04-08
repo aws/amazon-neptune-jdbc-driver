@@ -156,7 +156,7 @@ class OpenCypherConnectionPropertiesTest {
         Assertions.assertDoesNotThrow(() -> {
             connectionProperties = new OpenCypherConnectionProperties(properties);
         });
-        Assertions.assertEquals(AuthScheme.IAMSigV4, connectionProperties.getAuthScheme());
+        Assertions.assertEquals(AuthScheme.None, connectionProperties.getAuthScheme());
 
         // Verify valid property value is set.
         for (final String validValue : validAuthSchemes) {

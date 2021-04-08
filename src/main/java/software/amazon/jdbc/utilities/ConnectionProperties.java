@@ -38,7 +38,7 @@ public abstract class ConnectionProperties extends Properties {
     public static final String CONNECTION_RETRY_COUNT_KEY = "ConnectionRetryCount";
     public static final String LOG_LEVEL_KEY = "LogLevel";
 
-    public static final AuthScheme DEFAULT_AUTH_SCHEME = AuthScheme.IAMSigV4;
+    public static final AuthScheme DEFAULT_AUTH_SCHEME = AuthScheme.None;
     public static final int DEFAULT_CONNECTION_TIMEOUT_MILLIS = 5000;
     public static final int DEFAULT_CONNECTION_RETRY_COUNT = 3;
     public static final Level DEFAULT_LOG_LEVEL = Level.INFO;
