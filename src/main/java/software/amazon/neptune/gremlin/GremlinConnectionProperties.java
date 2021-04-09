@@ -1003,7 +1003,7 @@ public class GremlinConnectionProperties extends ConnectionProperties {
 
             if (!getEnableSsl()) {
                 throw invalidConnectionPropertyValueError(ENABLE_SSL_KEY,
-                        "SSL encryption must be enabled if IAMSigV4 is used.");
+                        "SSL encryption must be enabled if IAMSigV4 is used");
             }
         }
     }

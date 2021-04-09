@@ -215,7 +215,7 @@ public class OpenCypherConnectionProperties extends ConnectionProperties {
 
             if (!getUseEncryption()) {
                 throw invalidConnectionPropertyValueError(USE_ENCRYPTION_KEY,
-                        "Encryption must be enabled if IAMSigV4 is used.");
+                        "Encryption must be enabled if IAMSigV4 is used");
             }
         }
     }

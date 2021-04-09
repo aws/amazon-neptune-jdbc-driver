@@ -14,34 +14,32 @@
  *
  */
 
-package software.amazon.neptune.opencypher;
+package software.amazon.neptune.gremlin;
 
-import com.google.common.collect.ImmutableList;
 import org.apache.log4j.Level;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import software.amazon.jdbc.utilities.AuthScheme;
-import software.amazon.jdbc.utilities.ConnectionProperties;
 import software.amazon.neptune.ConnectionPropertiesTestBase;
 
 import java.sql.SQLException;
 import java.util.Properties;
 
 /**
- * Test for OpenCypherConnectionProperties.
+ * Test for GremlinConnectionProperties.
  */
-class OpenCypherConnectionPropertiesTest extends ConnectionPropertiesTestBase {
-    private OpenCypherConnectionProperties connectionProperties;
+class GremlinConnectionPropertiesTest extends ConnectionPropertiesTestBase {
+    private GremlinConnectionProperties connectionProperties;
 
     protected void assertDoesNotThrowOnNewConnectionProperties(final Properties properties) {
         Assertions.assertDoesNotThrow(() -> {
-            connectionProperties = new OpenCypherConnectionProperties(properties);
+            connectionProperties = new GremlinConnectionProperties(properties);
         });
     }
 
     protected void assertThrowsOnNewConnectionProperties(final Properties properties) {
         Assertions.assertThrows(SQLException.class,
-                () -> connectionProperties = new OpenCypherConnectionProperties(properties));
+                () -> connectionProperties = new GremlinConnectionProperties(properties));
     }
 
     protected <T> void assertPropertyValueEqualsToExpected(final String key, final T expectedValue) {
@@ -50,14 +48,15 @@ class OpenCypherConnectionPropertiesTest extends ConnectionPropertiesTestBase {
 
     @Test
     void testDefaultValues() throws SQLException {
-        connectionProperties = new OpenCypherConnectionProperties();
-        Assertions.assertEquals("", connectionProperties.getEndpoint());
-        Assertions.assertEquals(OpenCypherConnectionProperties.DEFAULT_LOG_LEVEL, connectionProperties.getLogLevel());
-        Assertions.assertEquals(OpenCypherConnectionProperties.DEFAULT_CONNECTION_TIMEOUT_MILLIS, connectionProperties.getConnectionTimeoutMillis());
-        Assertions.assertEquals(OpenCypherConnectionProperties.DEFAULT_CONNECTION_RETRY_COUNT, connectionProperties.getConnectionRetryCount());
-        Assertions.assertEquals(OpenCypherConnectionProperties.DEFAULT_AUTH_SCHEME, connectionProperties.getAuthScheme());
-        Assertions.assertEquals(OpenCypherConnectionProperties.DEFAULT_USE_ENCRYPTION, connectionProperties.getUseEncryption());
-        Assertions.assertEquals("", connectionProperties.getRegion());
+        connectionProperties = new GremlinConnectionProperties();
+        Assertions.assertEquals(GremlinConnectionProperties.DEFAULT_LOG_LEVEL, connectionProperties.getLogLevel());
+        Assertions.assertEquals(GremlinConnectionProperties.DEFAULT_CONNECTION_TIMEOUT_MILLIS, connectionProperties.getConnectionTimeoutMillis());
+        Assertions.assertEquals(GremlinConnectionProperties.DEFAULT_CONNECTION_RETRY_COUNT, connectionProperties.getConnectionRetryCount());
+        Assertions.assertEquals(GremlinConnectionProperties.DEFAULT_AUTH_SCHEME, connectionProperties.getAuthScheme());
+        Assertions.assertEquals("", connectionProperties.getContactPoint());
+        Assertions.assertEquals(GremlinConnectionProperties.DEFAULT_PATH, connectionProperties.getPath());
+        Assertions.assertEquals(GremlinConnectionProperties.DEFAULT_PORT, connectionProperties.getPort());
+        Assertions.assertEquals(GremlinConnectionProperties.DEFAULT_ENABLE_SSL, connectionProperties.getEnableSsl());
     }
 
     @Test
@@ -72,9 +71,8 @@ class OpenCypherConnectionPropertiesTest extends ConnectionPropertiesTestBase {
     @Test
     void testConnectionTimeout() throws SQLException {
         testIntegerPropertyViaConstructor(
-                OpenCypherConnectionProperties.CONNECTION_TIMEOUT_MILLIS_KEY,
-                OpenCypherConnectionProperties.DEFAULT_CONNECTION_TIMEOUT_MILLIS,
-                true);
+                GremlinConnectionProperties.CONNECTION_TIMEOUT_MILLIS_KEY,
+                GremlinConnectionProperties.DEFAULT_CONNECTION_TIMEOUT_MILLIS, true);
 
         assertDoesNotThrowOnNewConnectionProperties(new Properties());
         connectionProperties.setConnectionTimeoutMillis(10);
@@ -84,9 +82,8 @@ class OpenCypherConnectionPropertiesTest extends ConnectionPropertiesTestBase {
     @Test
     void testConnectionRetryCount() throws SQLException {
         testIntegerPropertyViaConstructor(
-                OpenCypherConnectionProperties.CONNECTION_RETRY_COUNT_KEY,
-                OpenCypherConnectionProperties.DEFAULT_CONNECTION_RETRY_COUNT,
-                true);
+                GremlinConnectionProperties.CONNECTION_RETRY_COUNT_KEY,
+                GremlinConnectionProperties.DEFAULT_CONNECTION_RETRY_COUNT, true);
 
         assertDoesNotThrowOnNewConnectionProperties(new Properties());
         connectionProperties.setConnectionRetryCount(10);
@@ -100,25 +97,5 @@ class OpenCypherConnectionPropertiesTest extends ConnectionPropertiesTestBase {
         assertDoesNotThrowOnNewConnectionProperties(new Properties());
         connectionProperties.setAuthScheme(AuthScheme.None);
         Assertions.assertEquals(AuthScheme.None, connectionProperties.getAuthScheme());
-    }
-
-    @Test
-    void testUseEncryption() throws SQLException {
-        Properties properties = new Properties();
-        properties.put(ConnectionProperties.AUTH_SCHEME_KEY, AuthScheme.None); // reset to None
-        testBooleanPropertyViaConstructor(
-                properties,
-                OpenCypherConnectionProperties.USE_ENCRYPTION_KEY,
-                OpenCypherConnectionProperties.DEFAULT_USE_ENCRYPTION, true);
-
-        // new set of properties
-        properties = new Properties();
-        properties.put(ConnectionProperties.AUTH_SCHEME_KEY, AuthScheme.None); // reset to None
-        assertDoesNotThrowOnNewConnectionProperties(properties);
-        final ImmutableList<Boolean> boolValues = ImmutableList.of(true, false);
-        for (final Boolean boolValue : boolValues) {
-            connectionProperties.setUseEncryption(boolValue);
-            Assertions.assertEquals(boolValue, connectionProperties.getUseEncryption());
-        }
     }
 }
