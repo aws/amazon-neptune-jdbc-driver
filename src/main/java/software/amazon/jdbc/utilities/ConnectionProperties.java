@@ -259,11 +259,10 @@ public abstract class ConnectionProperties extends Properties {
             }
         }
 
-        // If there are any unresolved properties left, raise an error.
+        // If there are any unresolved properties left, log a warning.
         if (!inputPropertiesKeys.isEmpty()) {
-            // If there are any unresolved properties left, raise a warning.
-            for (final String property: inputPropertiesKeys) {
-                LOGGER.warn(String.format("Error property '%s' is not supported.", property));
+            for (final String property : inputPropertiesKeys) {
+                LOGGER.warn(String.format("Property '%s' is not supported by the connection string.", property));
             }
         }
 

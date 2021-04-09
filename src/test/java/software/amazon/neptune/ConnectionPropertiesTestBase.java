@@ -30,10 +30,15 @@ public abstract class ConnectionPropertiesTestBase {
     protected abstract void assertThrowsOnNewConnectionProperties(final Properties properties);
     protected abstract <T> void assertPropertyValueEqualsToExpected(final String key, final T expectedValue);
 
+    protected static final boolean DEFAULT_FALSE = false;
+    protected static final String DEFAULT_EMPTY_STRING = "";
+
     protected static final int NO_DEFAULT_INT = 0;
     protected static final boolean NO_DEFAULT_BOOL = false;
+    protected static final String NO_DEFAULT_STRING = null;
 
     protected void testAuthSchemeViaConstructor()  {
+
         final List<String> emptyAuthSchemes = ImmutableList.of(
                 "", " ");
         final List<String> validAuthSchemes = ImmutableList.of(
@@ -56,7 +61,6 @@ public abstract class ConnectionPropertiesTestBase {
             Assertions.assertNotNull(
                     AuthScheme.fromString(validValue)
             );
-            // Set property through constructor.
             final Properties properties = new Properties();
             properties.put(ConnectionProperties.AUTH_SCHEME_KEY, validValue);
             assertDoesNotThrowOnNewConnectionProperties(properties);
@@ -66,11 +70,10 @@ public abstract class ConnectionPropertiesTestBase {
 
         // Verify invalid property value throws error.
         for (final String invalidValue : invalidAuthSchemes) {
-            // Test conversion of string to enum.
+            // Test failure to convert invalid string to enum.
             Assertions.assertNull(
                     AuthScheme.fromString(invalidValue)
             );
-            // Set property through constructor.
             final Properties properties = new Properties();
             properties.setProperty(OpenCypherConnectionProperties.AUTH_SCHEME_KEY, invalidValue);
             assertThrowsOnNewConnectionProperties(properties);
@@ -78,6 +81,7 @@ public abstract class ConnectionPropertiesTestBase {
     }
 
     protected void testLogLevelSettingViaConstructor() {
+
         final List<String> validLogLevels = ImmutableList.of(
                 "", "Off", "FATAL", "error", "InFo", "dEbug", "TRACE", "All");
         final List<String> invalidLogLevels = ImmutableList.of(
@@ -93,43 +97,95 @@ public abstract class ConnectionPropertiesTestBase {
 
         // Verify invalid property value throws error.
         for (final String invalidValue : invalidLogLevels) {
-            // Set property through constructor.
             final Properties properties = new Properties();
             properties.setProperty(ConnectionProperties.LOG_LEVEL_KEY, invalidValue);
             assertThrowsOnNewConnectionProperties(properties);
         }
     }
 
+    protected void testStringPropertyViaConstructor(
+            final String key) {
+        testStringPropertyViaConstructor(
+                new Properties(), key, NO_DEFAULT_STRING, false);
+    }
+
+    protected void testStringPropertyViaConstructor(
+            final String key,
+            final String defaultValue) {
+        testStringPropertyViaConstructor(
+                new Properties(), key, defaultValue);
+    }
+
+    protected void testStringPropertyViaConstructor(
+            final Properties initProperties,
+            final String key,
+            final String defaultValue) {
+        testStringPropertyViaConstructor(
+                initProperties, key, defaultValue, true);
+    }
+
+    private void testStringPropertyViaConstructor(
+            final Properties initProperties,
+            final String key,
+            final String defaultValue,
+            final boolean hasDefault) {
+
+        final List<String> testValues = ImmutableList.of("foo", "bar");
+
+        if (hasDefault) {
+            final Properties properties = new Properties();
+            properties.putAll(initProperties);
+            assertDoesNotThrowOnNewConnectionProperties(properties);
+            assertPropertyValueEqualsToExpected(key, defaultValue);
+        }
+
+        // Verify valid property value doesn't throw error.
+        for (final String value : testValues) {
+            final Properties properties = new Properties();
+            properties.putAll(initProperties);
+            properties.put(key, value);
+            assertDoesNotThrowOnNewConnectionProperties(properties);
+            assertPropertyValueEqualsToExpected(key, value);
+        }
+    }
+
+    protected void testIntegerPropertyViaConstructor(
+            final String key) {
+        testIntegerPropertyViaConstructor(
+                new Properties(), key, NO_DEFAULT_INT, false);
+    }
+
     protected void testIntegerPropertyViaConstructor(
             final String key,
-            final int defaultValue,
-            final boolean hasDefault) {
-        testIntegerPropertyViaConstructor(new Properties(), key, defaultValue, hasDefault);
+            final int defaultValue) {
+        testIntegerPropertyViaConstructor(
+                new Properties(), key, defaultValue);
     }
 
     protected void testIntegerPropertyViaConstructor(
             final Properties initProperties,
             final String key,
+            final int defaultValue) {
+        testIntegerPropertyViaConstructor(
+                initProperties, key, defaultValue, true);
+    }
+
+    private void testIntegerPropertyViaConstructor(
+            final Properties initProperties,
+            final String key,
             final int defaultValue,
             final boolean hasDefault) {
+
         final List<String> validValues = ImmutableList.of(
                 "0", "5", "10000");
         final List<String> invalidValues = ImmutableList.of(
                 "-1", "blah", String.valueOf((long)Integer.MAX_VALUE + 1000));
 
         if (hasDefault) {
-            // Verify empty string is converted to default value.
             final Properties properties = new Properties();
             properties.putAll(initProperties);
-            properties.put(key, "");
             assertDoesNotThrowOnNewConnectionProperties(properties);
             assertPropertyValueEqualsToExpected(key, defaultValue);
-        } else {
-            // Verify empty string fails to convert to default value.
-            final Properties properties = new Properties();
-            properties.putAll(initProperties);
-            properties.put(key, "");
-            assertThrowsOnNewConnectionProperties(properties);
         }
 
         // Verify valid property value doesn't throw error.
@@ -151,37 +207,44 @@ public abstract class ConnectionPropertiesTestBase {
     }
 
     protected void testBooleanPropertyViaConstructor(
+            final String key) {
+        testBooleanPropertyViaConstructor(
+                new Properties(), key, NO_DEFAULT_BOOL, false);
+    }
+
+    protected void testBooleanPropertyViaConstructor(
             final String key,
-            final boolean defaultValue,
-            final boolean hasDefault) {
-        testBooleanPropertyViaConstructor(new Properties(), key, defaultValue, hasDefault);
+            final boolean defaultValue) {
+        testBooleanPropertyViaConstructor(
+                new Properties(), key, defaultValue);
     }
 
     protected void testBooleanPropertyViaConstructor(
             final Properties initProperties,
             final String key,
+            final boolean defaultValue) {
+        testBooleanPropertyViaConstructor(
+                initProperties, key, defaultValue, true);
+    }
+
+    private void testBooleanPropertyViaConstructor(
+            final Properties initProperties,
+            final String key,
             final boolean defaultValue,
             final boolean hasDefault) {
+
         final List<String> validTrueValues = ImmutableList.of(
-                "", "   ", "1", "true", "TRUE", "tRue");
+                "1", "true", "TRUE", "tRue");
         final List<String> validFalseValues = ImmutableList.of(
                 "0", "false", "FALSE", "FaLSe");
         final List<String> invalidValues = ImmutableList.of(
                 "-1;", "100;", "46hj7;", "foo;");
 
         if (hasDefault) {
-            // Verify empty string is converted to default value.
             final Properties properties = new Properties();
             properties.putAll(initProperties);
-            properties.put(key, "");
             assertDoesNotThrowOnNewConnectionProperties(properties);
             assertPropertyValueEqualsToExpected(key, defaultValue);
-        } else {
-            // Verify empty string fails to convert to default value.
-            final Properties properties = new Properties();
-            properties.putAll(initProperties);
-            properties.put(key, "");
-            assertThrowsOnNewConnectionProperties(properties);
         }
 
         // Verify valid TRUE property value is set.
@@ -206,7 +269,7 @@ public abstract class ConnectionPropertiesTestBase {
         for (final String invalidValue : invalidValues) {
             final Properties properties = new Properties();
             properties.putAll(initProperties);
-            properties.setProperty(OpenCypherConnectionProperties.USE_ENCRYPTION_KEY, invalidValue);
+            properties.setProperty(key, invalidValue);
             assertThrowsOnNewConnectionProperties(properties);
         }
     }

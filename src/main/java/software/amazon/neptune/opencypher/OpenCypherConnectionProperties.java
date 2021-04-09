@@ -31,14 +31,14 @@ import java.util.Properties;
  * OpenCypher connection properties class.
  */
 public class OpenCypherConnectionProperties extends ConnectionProperties {
-    public static final String ENDPOINT_KEY = "Endpoint";
-    public static final String USE_ENCRYPTION_KEY = "UseEncryption";
-    public static final String REGION_KEY = "Region";
-    public static final String CONNECTION_POOL_SIZE_KEY = "ConnectionPoolSize";
+    public static final String ENDPOINT_KEY = "endpoint";
+    public static final String USE_ENCRYPTION_KEY = "useEncryption";
+    public static final String REGION_KEY = "region";
+    public static final String CONNECTION_POOL_SIZE_KEY = "connectionPoolSize";
 
     // TODO: Revisit. We should probably support these.
-    public static final String AWS_CREDENTIALS_PROVIDER_CLASS_KEY = "AwsCredentialsProviderClass";
-    public static final String CUSTOM_CREDENTIALS_FILE_PATH_KEY = "CustomCredentialsFilePath";
+    public static final String AWS_CREDENTIALS_PROVIDER_CLASS_KEY = "awsCredentialsProviderClass";
+    public static final String CUSTOM_CREDENTIALS_FILE_PATH_KEY = "customCredentialsFilePath";
 
     public static final int DEFAULT_CONNECTION_POOL_SIZE = 1000;
     public static final boolean DEFAULT_USE_ENCRYPTION = true;
@@ -104,6 +104,9 @@ public class OpenCypherConnectionProperties extends ConnectionProperties {
      * @return The AWS credentials provider class.
      */
     public String getAwsCredentialsProviderClass() {
+        if (!containsKey(AWS_CREDENTIALS_PROVIDER_CLASS_KEY)) {
+            return null;
+        }
         return getProperty(AWS_CREDENTIALS_PROVIDER_CLASS_KEY);
     }
 
@@ -113,7 +116,7 @@ public class OpenCypherConnectionProperties extends ConnectionProperties {
      * @param awsCredentialsProviderClass The AWS credentials provider class.
      * @throws SQLException if value is invalid.
      */
-    public void setAwsCredentialsProviderClass(final String awsCredentialsProviderClass) throws SQLException {
+    public void setAwsCredentialsProviderClass(@NonNull final String awsCredentialsProviderClass) throws SQLException {
         setProperty(AWS_CREDENTIALS_PROVIDER_CLASS_KEY,
                 (String) PROPERTY_CONVERTER_MAP.get(AWS_CREDENTIALS_PROVIDER_CLASS_KEY)
                         .convert(AWS_CREDENTIALS_PROVIDER_CLASS_KEY, awsCredentialsProviderClass));
@@ -125,6 +128,9 @@ public class OpenCypherConnectionProperties extends ConnectionProperties {
      * @return The custom credentials filepath.
      */
     public String getCustomCredentialsFilePath() {
+        if (!containsKey(CUSTOM_CREDENTIALS_FILE_PATH_KEY)) {
+            return null;
+        }
         return getProperty(CUSTOM_CREDENTIALS_FILE_PATH_KEY);
     }
 
@@ -134,7 +140,7 @@ public class OpenCypherConnectionProperties extends ConnectionProperties {
      * @param customCredentialsFilePath The custom credentials filepath.
      * @throws SQLException if value is invalid.
      */
-    public void setCustomCredentialsFilePath(final String customCredentialsFilePath) throws SQLException {
+    public void setCustomCredentialsFilePath(@NonNull final String customCredentialsFilePath) throws SQLException {
         setProperty(CUSTOM_CREDENTIALS_FILE_PATH_KEY,
                 (String) PROPERTY_CONVERTER_MAP.get(CUSTOM_CREDENTIALS_FILE_PATH_KEY)
                         .convert(CUSTOM_CREDENTIALS_FILE_PATH_KEY, customCredentialsFilePath));
