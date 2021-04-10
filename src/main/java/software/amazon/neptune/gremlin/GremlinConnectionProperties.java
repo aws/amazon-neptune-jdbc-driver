@@ -194,7 +194,7 @@ public class GremlinConnectionProperties extends ConnectionProperties {
      * @param path The path to the Gremlin service.
      * @throws SQLException if value is invalid.
      */
-    public void setPath(final String path) throws SQLException {
+    public void setPath(@NonNull final String path) throws SQLException {
         setProperty(PATH_KEY,
                 (String) PROPERTY_CONVERTER_MAP.get(PATH_KEY).convert(PATH_KEY, path));
     }
@@ -214,6 +214,9 @@ public class GremlinConnectionProperties extends ConnectionProperties {
      * @param port The port.
      */
     public void setPort(final int port) throws SQLException {
+        if (port < 0) {
+            throw invalidConnectionPropertyError(PORT_KEY, port);
+        }
         put(PORT_KEY, port);
     }
 
@@ -226,7 +229,7 @@ public class GremlinConnectionProperties extends ConnectionProperties {
         if (!containsKey(SERIALIZER_KEY)) {
             return false;
         }
-        return (get(SERIALIZER_KEY) instanceof Class<?>);
+        return (get(SERIALIZER_KEY) instanceof MessageSerializer);
     }
 
     /**
