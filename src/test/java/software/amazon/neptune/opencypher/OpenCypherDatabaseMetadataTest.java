@@ -22,6 +22,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import software.amazon.jdbc.utilities.AuthScheme;
 import software.amazon.neptune.opencypher.mock.MockOpenCypherDatabase;
 
 import java.sql.ResultSetMetaData;
@@ -66,6 +67,7 @@ public class OpenCypherDatabaseMetadataTest {
     @BeforeAll
     public static void initializeDatabase() throws SQLException {
         database = MockOpenCypherDatabase.builder(HOSTNAME, OpenCypherDatabaseMetadataTest.class.getName()).build();
+        PROPERTIES.put(OpenCypherConnectionProperties.AUTH_SCHEME_KEY, AuthScheme.None); // reverse default to None
         PROPERTIES.putIfAbsent(OpenCypherConnectionProperties.ENDPOINT_KEY,
                 String.format("bolt://%s:%d", HOSTNAME, database.getPort()));
         final java.sql.Connection connection = new OpenCypherConnection(new OpenCypherConnectionProperties(PROPERTIES));
