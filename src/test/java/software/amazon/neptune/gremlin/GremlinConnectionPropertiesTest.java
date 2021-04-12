@@ -22,7 +22,9 @@ import org.apache.log4j.Level;
 import org.apache.tinkerpop.gremlin.driver.LoadBalancingStrategy;
 import org.apache.tinkerpop.gremlin.driver.MessageSerializer;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import software.amazon.jdbc.helpers.HelperFunctions;
 import software.amazon.jdbc.utilities.AuthScheme;
 import software.amazon.jdbc.utilities.ConnectionProperties;
 import software.amazon.neptune.ConnectionPropertiesTestBase;
@@ -38,6 +40,7 @@ import static org.mockito.Mockito.mock;
  */
 class GremlinConnectionPropertiesTest extends ConnectionPropertiesTestBase {
     private GremlinConnectionProperties connectionProperties;
+    private int randomIntValue;
 
     protected void assertDoesNotThrowOnNewConnectionProperties(final Properties properties) {
         Assertions.assertDoesNotThrow(() -> {
@@ -52,6 +55,11 @@ class GremlinConnectionPropertiesTest extends ConnectionPropertiesTestBase {
 
     protected <T> void assertPropertyValueEqualsToExpected(final String key, final T expectedValue) {
         Assertions.assertEquals(expectedValue, connectionProperties.get(key));
+    }
+
+    @BeforeEach
+    void beforeEach() {
+        randomIntValue = HelperFunctions.randomPositiveIntValue(1000);
     }
 
     @Test
@@ -93,10 +101,9 @@ class GremlinConnectionPropertiesTest extends ConnectionPropertiesTestBase {
                 GremlinConnectionProperties.CONNECTION_TIMEOUT_MILLIS_KEY,
                 GremlinConnectionProperties.DEFAULT_CONNECTION_TIMEOUT_MILLIS);
 
-        final int testValue = 10;
         connectionProperties = new GremlinConnectionProperties();
-        connectionProperties.setConnectionTimeoutMillis(testValue);
-        Assertions.assertEquals(testValue, connectionProperties.getConnectionTimeoutMillis());
+        connectionProperties.setConnectionTimeoutMillis(randomIntValue);
+        Assertions.assertEquals(randomIntValue, connectionProperties.getConnectionTimeoutMillis());
     }
 
     @Test
@@ -105,10 +112,9 @@ class GremlinConnectionPropertiesTest extends ConnectionPropertiesTestBase {
                 GremlinConnectionProperties.CONNECTION_RETRY_COUNT_KEY,
                 GremlinConnectionProperties.DEFAULT_CONNECTION_RETRY_COUNT);
 
-        final int testValue = 10;
         connectionProperties = new GremlinConnectionProperties();
-        connectionProperties.setConnectionRetryCount(testValue);
-        Assertions.assertEquals(testValue, connectionProperties.getConnectionRetryCount());
+        connectionProperties.setConnectionRetryCount(randomIntValue);
+        Assertions.assertEquals(randomIntValue, connectionProperties.getConnectionRetryCount());
     }
 
     @Test
@@ -320,74 +326,66 @@ class GremlinConnectionPropertiesTest extends ConnectionPropertiesTestBase {
 
     @Test
     void testNioPoolSize() throws SQLException {
-        final int testValue = 10;
         connectionProperties = new GremlinConnectionProperties();
         Assertions.assertEquals(NO_DEFAULT_INT, connectionProperties.getNioPoolSize());
-        connectionProperties.setNioPoolSize(testValue);
-        Assertions.assertEquals(testValue, connectionProperties.getNioPoolSize());
+        connectionProperties.setNioPoolSize(randomIntValue);
+        Assertions.assertEquals(randomIntValue, connectionProperties.getNioPoolSize());
     }
 
     @Test
     void testWorkerPoolSize() throws SQLException {
-        final int testValue = 10;
         connectionProperties = new GremlinConnectionProperties();
         Assertions.assertEquals(NO_DEFAULT_INT, connectionProperties.getWorkerPoolSize());
-        connectionProperties.setWorkerPoolSize(testValue);
-        Assertions.assertEquals(testValue, connectionProperties.getWorkerPoolSize());
+        connectionProperties.setWorkerPoolSize(randomIntValue);
+        Assertions.assertEquals(randomIntValue, connectionProperties.getWorkerPoolSize());
     }
 
     @Test
     void testMaxConnectionPoolSize() throws SQLException {
-        final int testValue = 10;
         connectionProperties = new GremlinConnectionProperties();
         Assertions.assertEquals(NO_DEFAULT_INT, connectionProperties.getMaxConnectionPoolSize());
-        connectionProperties.setMaxConnectionPoolSize(testValue);
-        Assertions.assertEquals(testValue, connectionProperties.getMaxConnectionPoolSize());
+        connectionProperties.setMaxConnectionPoolSize(randomIntValue);
+        Assertions.assertEquals(randomIntValue, connectionProperties.getMaxConnectionPoolSize());
     }
 
     @Test
     void testMinConnectionPoolSize() throws SQLException {
-        final int testValue = 10;
         connectionProperties = new GremlinConnectionProperties();
         Assertions.assertEquals(NO_DEFAULT_INT, connectionProperties.getMinConnectionPoolSize());
-        connectionProperties.setMinConnectionPoolSize(testValue);
-        Assertions.assertEquals(testValue, connectionProperties.getMinConnectionPoolSize());
+        connectionProperties.setMinConnectionPoolSize(randomIntValue);
+        Assertions.assertEquals(randomIntValue, connectionProperties.getMinConnectionPoolSize());
     }
 
     @Test
     void testMaxInProcessPerConnection() throws SQLException {
-        final int testValue = 10;
         connectionProperties = new GremlinConnectionProperties();
         Assertions.assertEquals(NO_DEFAULT_INT, connectionProperties.getMaxInProcessPerConnection());
-        connectionProperties.setMaxInProcessPerConnection(testValue);
-        Assertions.assertEquals(testValue, connectionProperties.getMaxInProcessPerConnection());
+        connectionProperties.setMaxInProcessPerConnection(randomIntValue);
+        Assertions.assertEquals(randomIntValue, connectionProperties.getMaxInProcessPerConnection());
     }
 
     @Test
     void testMinInProcessPerConnection() throws SQLException {
-        final int testValue = 10;
         connectionProperties = new GremlinConnectionProperties();
         Assertions.assertEquals(NO_DEFAULT_INT, connectionProperties.getMinInProcessPerConnection());
-        connectionProperties.setMinInProcessPerConnection(testValue);
-        Assertions.assertEquals(testValue, connectionProperties.getMinInProcessPerConnection());
+        connectionProperties.setMinInProcessPerConnection(randomIntValue);
+        Assertions.assertEquals(randomIntValue, connectionProperties.getMinInProcessPerConnection());
     }
 
     @Test
     void testMaxSimultaneousUsagePerConnection() throws SQLException {
-        final int testValue = 10;
         connectionProperties = new GremlinConnectionProperties();
         Assertions.assertEquals(NO_DEFAULT_INT, connectionProperties.getMaxSimultaneousUsagePerConnection());
-        connectionProperties.setMaxSimultaneousUsagePerConnection(testValue);
-        Assertions.assertEquals(testValue, connectionProperties.getMaxSimultaneousUsagePerConnection());
+        connectionProperties.setMaxSimultaneousUsagePerConnection(randomIntValue);
+        Assertions.assertEquals(randomIntValue, connectionProperties.getMaxSimultaneousUsagePerConnection());
     }
 
     @Test
     void testMinSimultaneousUsagePerConnection() throws SQLException {
-        final int testValue = 10;
         connectionProperties = new GremlinConnectionProperties();
         Assertions.assertEquals(NO_DEFAULT_INT, connectionProperties.getMinSimultaneousUsagePerConnection());
-        connectionProperties.setMinSimultaneousUsagePerConnection(testValue);
-        Assertions.assertEquals(testValue, connectionProperties.getMinSimultaneousUsagePerConnection());
+        connectionProperties.setMinSimultaneousUsagePerConnection(randomIntValue);
+        Assertions.assertEquals(randomIntValue, connectionProperties.getMinSimultaneousUsagePerConnection());
     }
 
     @Test
@@ -420,47 +418,42 @@ class GremlinConnectionPropertiesTest extends ConnectionPropertiesTestBase {
 
     @Test
     void testKeepAliveInterval() throws SQLException {
-        final int testValue = 10;
         connectionProperties = new GremlinConnectionProperties();
         Assertions.assertEquals(NO_DEFAULT_INT, connectionProperties.getKeepAliveInterval());
-        connectionProperties.setKeepAliveInterval(testValue);
-        Assertions.assertEquals(testValue, connectionProperties.getKeepAliveInterval());
+        connectionProperties.setKeepAliveInterval(randomIntValue);
+        Assertions.assertEquals(randomIntValue, connectionProperties.getKeepAliveInterval());
     }
 
     @Test
     void testResultIterationBatchSize() throws SQLException {
-        final int testValue = 10;
         connectionProperties = new GremlinConnectionProperties();
         Assertions.assertEquals(NO_DEFAULT_INT, connectionProperties.getResultIterationBatchSize());
-        connectionProperties.setResultIterationBatchSize(testValue);
-        Assertions.assertEquals(testValue, connectionProperties.getResultIterationBatchSize());
+        connectionProperties.setResultIterationBatchSize(randomIntValue);
+        Assertions.assertEquals(randomIntValue, connectionProperties.getResultIterationBatchSize());
     }
 
     @Test
     void testMaxWaitForConnection() throws SQLException {
-        final int testValue = 10;
         connectionProperties = new GremlinConnectionProperties();
         Assertions.assertEquals(NO_DEFAULT_INT, connectionProperties.getMaxWaitForConnection());
-        connectionProperties.setMaxWaitForConnection(testValue);
-        Assertions.assertEquals(testValue, connectionProperties.getMaxWaitForConnection());
+        connectionProperties.setMaxWaitForConnection(randomIntValue);
+        Assertions.assertEquals(randomIntValue, connectionProperties.getMaxWaitForConnection());
     }
 
     @Test
     void testMaxWaitForClose() throws SQLException {
-        final int testValue = 10;
         connectionProperties = new GremlinConnectionProperties();
         Assertions.assertEquals(NO_DEFAULT_INT, connectionProperties.getMaxWaitForClose());
-        connectionProperties.setMaxWaitForClose(testValue);
-        Assertions.assertEquals(testValue, connectionProperties.getMaxWaitForClose());
+        connectionProperties.setMaxWaitForClose(randomIntValue);
+        Assertions.assertEquals(randomIntValue, connectionProperties.getMaxWaitForClose());
     }
 
     @Test
     void testMaxContentLength() throws SQLException {
-        final int testValue = 10;
         connectionProperties = new GremlinConnectionProperties();
         Assertions.assertEquals(NO_DEFAULT_INT, connectionProperties.getMaxContentLength());
-        connectionProperties.setMaxContentLength(testValue);
-        Assertions.assertEquals(testValue, connectionProperties.getMaxContentLength());
+        connectionProperties.setMaxContentLength(randomIntValue);
+        Assertions.assertEquals(randomIntValue, connectionProperties.getMaxContentLength());
     }
 
     @Test
@@ -475,11 +468,10 @@ class GremlinConnectionPropertiesTest extends ConnectionPropertiesTestBase {
 
     @Test
     void testReconnectInterval() throws SQLException {
-        final int testValue = 10;
         connectionProperties = new GremlinConnectionProperties();
         Assertions.assertEquals(NO_DEFAULT_INT, connectionProperties.getReconnectInterval());
-        connectionProperties.setReconnectInterval(testValue);
-        Assertions.assertEquals(testValue, connectionProperties.getReconnectInterval());
+        connectionProperties.setReconnectInterval(randomIntValue);
+        Assertions.assertEquals(randomIntValue, connectionProperties.getReconnectInterval());
     }
 
     @Test

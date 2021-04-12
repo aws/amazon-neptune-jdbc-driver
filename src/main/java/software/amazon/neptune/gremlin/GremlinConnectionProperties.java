@@ -25,7 +25,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import software.amazon.jdbc.utilities.AuthScheme;
 import software.amazon.jdbc.utilities.ConnectionProperties;
-import software.amazon.neptune.opencypher.OpenCypherConnectionProperties;
 
 import java.sql.SQLException;
 import java.util.HashMap;
@@ -112,7 +111,7 @@ public class GremlinConnectionProperties extends ConnectionProperties {
 
     public static final Map<String, Object> DEFAULT_PROPERTIES_MAP = new HashMap<>();
     private static final Map<String, ConnectionProperties.PropertyConverter<?>> PROPERTY_CONVERTER_MAP = new HashMap<>();
-    private static final Logger LOGGER = LoggerFactory.getLogger(OpenCypherConnectionProperties.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(GremlinConnectionProperties.class);
 
     static {
         PROPERTY_CONVERTER_MAP.put(CONTACT_POINT_KEY, (key, value) -> value);
