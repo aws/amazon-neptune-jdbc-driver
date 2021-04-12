@@ -22,6 +22,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import software.amazon.jdbc.helpers.HelperFunctions;
+import software.amazon.jdbc.utilities.AuthScheme;
 import software.amazon.jdbc.utilities.SqlError;
 import software.amazon.neptune.opencypher.mock.MockOpenCypherDatabase;
 
@@ -48,6 +49,7 @@ public class OpenCypherPreparedStatementTest extends OpenCypherStatementTestBase
     @BeforeAll
     public static void initializeDatabase() throws SQLException {
         database = MockOpenCypherDatabase.builder(HOSTNAME, OpenCypherPreparedStatementTest.class.getName()).build();
+        PROPERTIES.put(OpenCypherConnectionProperties.AUTH_SCHEME_KEY, AuthScheme.None); // reverse default to None
         PROPERTIES.putIfAbsent(OpenCypherConnectionProperties.ENDPOINT_KEY,
                 String.format("bolt://%s:%d", HOSTNAME, database.getPort()));
     }

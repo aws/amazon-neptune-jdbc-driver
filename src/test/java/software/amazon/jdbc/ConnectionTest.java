@@ -23,6 +23,7 @@ import org.junit.jupiter.api.Test;
 import software.amazon.jdbc.helpers.HelperFunctions;
 import software.amazon.jdbc.mock.MockConnection;
 import software.amazon.jdbc.mock.MockStatement;
+import software.amazon.jdbc.utilities.AuthScheme;
 import software.amazon.jdbc.utilities.ConnectionProperties;
 import software.amazon.jdbc.utilities.SqlError;
 import software.amazon.neptune.opencypher.OpenCypherConnectionProperties;
@@ -42,7 +43,7 @@ import static software.amazon.jdbc.utilities.ConnectionProperties.LOG_LEVEL_KEY;
  */
 public class ConnectionTest {
     private java.sql.Connection connection;
-
+    private static final Properties PROPERTIES = new Properties();
     private static final String TEST_SCHEMA = "schema";
     private static final String TEST_CATALOG = "catalog";
     private static final String TEST_NATIVE_SQL = "native sql";
@@ -59,10 +60,13 @@ public class ConnectionTest {
 
     @BeforeEach
     void initialize() throws SQLException {
-        connection = new MockConnection(new OpenCypherConnectionProperties());
+        PROPERTIES.put(ConnectionProperties.AUTH_SCHEME_KEY, AuthScheme.None); // set default to None
+        connection = new MockConnection(new OpenCypherConnectionProperties(PROPERTIES));
+
         TEST_PROP.put(TEST_PROP_KEY, TEST_PROP_VAL);
         TEST_PROP_INITIAL.put(APPLICATION_NAME_KEY, Driver.APPLICATION_NAME);
         TEST_PROP_INITIAL.putAll(ConnectionProperties.DEFAULT_PROPERTIES_MAP);
+        TEST_PROP_INITIAL.putAll(PROPERTIES);
         TEST_PROP_MODIFIED.putAll(TEST_PROP_INITIAL);
         TEST_PROP_MODIFIED.remove(TEST_PROP_KEY);
     }

@@ -33,10 +33,12 @@ import java.util.regex.Pattern;
  */
 public abstract class ConnectionProperties extends Properties {
     public static final String APPLICATION_NAME_KEY = "ApplicationName";
+    public static final String AUTH_SCHEME_KEY = "AuthScheme";
     public static final String CONNECTION_TIMEOUT_MILLIS_KEY = "ConnectionTimeout";
     public static final String CONNECTION_RETRY_COUNT_KEY = "ConnectionRetryCount";
     public static final String LOG_LEVEL_KEY = "LogLevel";
 
+    public static final AuthScheme DEFAULT_AUTH_SCHEME = AuthScheme.IAMSigV4;
     public static final int DEFAULT_CONNECTION_TIMEOUT_MILLIS = 5000;
     public static final int DEFAULT_CONNECTION_RETRY_COUNT = 3;
     public static final Level DEFAULT_LOG_LEVEL = Level.INFO;
@@ -47,6 +49,7 @@ public abstract class ConnectionProperties extends Properties {
 
     static {
         PROPERTY_CONVERTER_MAP.put(APPLICATION_NAME_KEY, (key, value) -> value);
+        PROPERTY_CONVERTER_MAP.put(AUTH_SCHEME_KEY, ConnectionProperties::toAuthScheme);
         PROPERTY_CONVERTER_MAP.put(CONNECTION_TIMEOUT_MILLIS_KEY, ConnectionProperties::toUnsigned);
         PROPERTY_CONVERTER_MAP.put(CONNECTION_RETRY_COUNT_KEY, ConnectionProperties::toUnsigned);
         PROPERTY_CONVERTER_MAP.put(LOG_LEVEL_KEY, ConnectionProperties::toLogLevel);
@@ -55,6 +58,7 @@ public abstract class ConnectionProperties extends Properties {
     static {
         DEFAULT_PROPERTIES_MAP.put(CONNECTION_TIMEOUT_MILLIS_KEY, DEFAULT_CONNECTION_TIMEOUT_MILLIS);
         DEFAULT_PROPERTIES_MAP.put(CONNECTION_RETRY_COUNT_KEY, DEFAULT_CONNECTION_RETRY_COUNT);
+        DEFAULT_PROPERTIES_MAP.put(AUTH_SCHEME_KEY, DEFAULT_AUTH_SCHEME);
         DEFAULT_PROPERTIES_MAP.put(LOG_LEVEL_KEY, DEFAULT_LOG_LEVEL);
     }
 
@@ -104,9 +108,27 @@ public abstract class ConnectionProperties extends Properties {
      * @param applicationName The application name.
      * @throws SQLException if value is invalid.
      */
-    public void setApplicationName(final String applicationName) throws SQLException {
-        setProperty(APPLICATION_NAME_KEY,
-                (String) PROPERTY_CONVERTER_MAP.get(APPLICATION_NAME_KEY).convert(APPLICATION_NAME_KEY, applicationName));
+    public void setApplicationName(@NonNull final String applicationName) throws SQLException {
+        setProperty(APPLICATION_NAME_KEY, applicationName);
+    }
+
+    /**
+     * Gets the authentication scheme.
+     *
+     * @return The authentication scheme.
+     */
+    public AuthScheme getAuthScheme() {
+        return (AuthScheme) get(AUTH_SCHEME_KEY);
+    }
+
+    /**
+     * Sets the authentication scheme.
+     *
+     * @param authScheme The authentication scheme.
+     * @throws SQLException if value is invalid.
+     */
+    public void setAuthScheme(@NonNull final AuthScheme authScheme) throws SQLException {
+        put(AUTH_SCHEME_KEY, authScheme);
     }
 
     /**
@@ -168,10 +190,7 @@ public abstract class ConnectionProperties extends Properties {
      * @param logLevel The logging level.
      * @throws SQLException if value is invalid.
      */
-    public void setLogLevel(final Level logLevel) throws SQLException {
-        if (logLevel == null) {
-            throw invalidConnectionPropertyError(LOG_LEVEL_KEY, logLevel);
-        }
+    public void setLogLevel(@NonNull final Level logLevel) throws SQLException {
         put(LOG_LEVEL_KEY, logLevel);
     }
 
@@ -240,11 +259,10 @@ public abstract class ConnectionProperties extends Properties {
             }
         }
 
-        // If there are any unresolved properties left, raise an error.
+        // If there are any unresolved properties left, log a warning.
         if (!inputPropertiesKeys.isEmpty()) {
-            // If there are any unresolved properties left, raise a warning.
-            for (final String property: inputPropertiesKeys) {
-                LOGGER.warn(String.format("Error property '%s' is not supported.", property));
+            for (final String property : inputPropertiesKeys) {
+                LOGGER.warn(String.format("Property '%s' is not supported by the connection string.", property));
             }
         }
 
@@ -305,6 +323,16 @@ public abstract class ConnectionProperties extends Properties {
             throw invalidConnectionPropertyError(key, value);
         }
         return stringBooleanMap.get(value.toLowerCase());
+    }
+
+    protected static AuthScheme toAuthScheme(@NonNull final String key, @NonNull final String value) throws SQLException {
+        if (isWhitespace(value)) {
+            return DEFAULT_AUTH_SCHEME;
+        }
+        if (AuthScheme.fromString(value) == null) {
+            throw invalidConnectionPropertyError(key, value);
+        }
+        return AuthScheme.fromString(value);
     }
 
     protected static boolean isWhitespace(@NonNull final String value) {
