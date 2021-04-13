@@ -79,7 +79,7 @@ public class OpenCypherConnectionProperties extends ConnectionProperties {
         super(properties, DEFAULT_PROPERTIES_MAP, PROPERTY_CONVERTER_MAP);
     }
 
-    private static AuthScheme toAuthScheme(@NonNull final String key, @NonNull final String value) throws SQLException {
+    protected static AuthScheme toAuthScheme(@NonNull final String key, @NonNull final String value) throws SQLException {
         if (isWhitespace(value)) {
             return DEFAULT_AUTH_SCHEME;
         }
