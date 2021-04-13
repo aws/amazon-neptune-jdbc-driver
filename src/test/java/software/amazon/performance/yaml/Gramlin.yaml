@@ -1,0 +1,13 @@
+---
+description: Gramlin for Amazon Neptune test
+#connection_type: "neptune:gramlin"
+connection_type: "neptune:opencypher"
+server: "bolt://test-jdbc-3.cluster-cdubgfjknn5r.us-east-1.neptune.amazonaws.com:8182"
+repeats: 10
+concurrency_config:
+  parallel_connections: 100
+  query_1: "select 1"
+latency_config:
+  query_1: "select 1"
+load_config:
+  query_1: "select 1"

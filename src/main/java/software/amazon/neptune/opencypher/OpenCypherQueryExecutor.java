@@ -29,9 +29,9 @@ import software.amazon.jdbc.utilities.AuthScheme;
 import software.amazon.jdbc.utilities.QueryExecutor;
 import software.amazon.jdbc.utilities.SqlError;
 import software.amazon.jdbc.utilities.SqlState;
-import software.amazon.neptune.common.gremlindatamodel.OpenCypherMetadataCache;
-import software.amazon.neptune.common.gremlindatamodel.OpenCypherResultSetGetTables;
-import software.amazon.neptune.common.gremlindatamodel.ResultSetGetColumnsGremlinDataModel;
+import software.amazon.neptune.common.gremlindatamodel.MetadataCache;
+import software.amazon.neptune.common.gremlindatamodel.ResultSetGetTables;
+import software.amazon.neptune.common.gremlindatamodel.ResultSetGetColumns;
 import software.amazon.neptune.opencypher.resultset.OpenCypherResultSet;
 import software.amazon.neptune.opencypher.resultset.OpenCypherResultSetGetCatalogs;
 import software.amazon.neptune.opencypher.resultset.OpenCypherResultSetGetColumns;
@@ -197,15 +197,15 @@ public class OpenCypherQueryExecutor extends QueryExecutor {
     @Override
     public java.sql.ResultSet executeGetTables(final java.sql.Statement statement, final String tableName)
             throws SQLException {
-        if (!OpenCypherMetadataCache.isOpenCypherMetadataCached()) {
-            OpenCypherMetadataCache.updateCache(openCypherConnectionProperties.getEndpoint(), null,
+        if (!MetadataCache.isOpenCypherMetadataCached()) {
+            MetadataCache.updateCache(openCypherConnectionProperties.getEndpoint(), null,
                     (openCypherConnectionProperties.getAuthScheme() == AuthScheme.IAMSigV4));
         }
 
-        final List<ResultSetGetColumnsGremlinDataModel.NodeColumnInfo> nodeColumnInfoList =
-                OpenCypherMetadataCache.getFilteredCacheNodeColumnInfos(tableName);
-        return new OpenCypherResultSetGetTables(statement, nodeColumnInfoList,
-                OpenCypherMetadataCache.getFilteredResultSetInfoWithoutRowsForTables(tableName));
+        final List<ResultSetGetColumns.NodeColumnInfo> nodeColumnInfoList =
+                MetadataCache.getFilteredCacheNodeColumnInfos(tableName);
+        return new ResultSetGetTables(statement, nodeColumnInfoList,
+                MetadataCache.getFilteredResultSetInfoWithoutRowsForTables(tableName));
     }
 
     /**
@@ -253,15 +253,15 @@ public class OpenCypherQueryExecutor extends QueryExecutor {
     @Override
     public java.sql.ResultSet executeGetColumns(final java.sql.Statement statement, final String nodes)
             throws SQLException {
-        if (!OpenCypherMetadataCache.isOpenCypherMetadataCached()) {
-            OpenCypherMetadataCache.updateCache(openCypherConnectionProperties.getEndpoint(), null,
+        if (!MetadataCache.isOpenCypherMetadataCached()) {
+            MetadataCache.updateCache(openCypherConnectionProperties.getEndpoint(), null,
                     (openCypherConnectionProperties.getAuthScheme() == AuthScheme.IAMSigV4));
         }
 
-        final List<ResultSetGetColumnsGremlinDataModel.NodeColumnInfo> nodeColumnInfoList =
-                OpenCypherMetadataCache.getFilteredCacheNodeColumnInfos(nodes);
+        final List<ResultSetGetColumns.NodeColumnInfo> nodeColumnInfoList =
+                MetadataCache.getFilteredCacheNodeColumnInfos(nodes);
         return new OpenCypherResultSetGetColumns(statement, nodeColumnInfoList,
-                OpenCypherMetadataCache.getFilteredResultSetInfoWithoutRowsForColumns(nodes));
+                MetadataCache.getFilteredResultSetInfoWithoutRowsForColumns(nodes));
     }
 
     @Override

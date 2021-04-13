@@ -35,9 +35,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
-public abstract class ResultSetGetColumnsGremlinDataModel extends software.amazon.jdbc.ResultSet
+public abstract class ResultSetGetColumns extends software.amazon.jdbc.ResultSet
         implements java.sql.ResultSet {
-    private static final Logger LOGGER = LoggerFactory.getLogger(ResultSetGetColumnsGremlinDataModel.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ResultSetGetColumns.class);
     /**
      * TABLE_CAT String => table catalog (may be null)
      * TABLE_SCHEM String => table schema (may be null)
@@ -131,8 +131,8 @@ public abstract class ResultSetGetColumnsGremlinDataModel extends software.amazo
      * @param nodeColumnInfos          List of NodeColumnInfo Objects.
      * @param resultSetInfoWithoutRows ResultSetInfoWithoutRows Object.
      */
-    public ResultSetGetColumnsGremlinDataModel(final Statement statement, final List<NodeColumnInfo> nodeColumnInfos,
-                                               final ResultSetInfoWithoutRows resultSetInfoWithoutRows)
+    public ResultSetGetColumns(final Statement statement, final List<NodeColumnInfo> nodeColumnInfos,
+                               final ResultSetInfoWithoutRows resultSetInfoWithoutRows)
             throws SQLException {
         super(statement, resultSetInfoWithoutRows.getColumns(), resultSetInfoWithoutRows.getRowCount());
         for (final NodeColumnInfo nodeColumnInfo : nodeColumnInfos) {
@@ -142,7 +142,7 @@ public abstract class ResultSetGetColumnsGremlinDataModel extends software.amazo
                 final Map<String, Object> map = new HashMap<>(CONVERSION_MAP);
 
                 // Set table name.
-                map.put("TABLE_NAME", OpenCypherResultSetGetTables.nodeListToString(nodeColumnInfo.labels));
+                map.put("TABLE_NAME", ResultSetGetTables.nodeListToString(nodeColumnInfo.labels));
 
                 // Get column type.
                 final String dataType = property.get("dataType").toString();

@@ -34,8 +34,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class OpenCypherResultSetGetTables extends OpenCypherResultSet implements java.sql.ResultSet {
-    private static final Logger LOGGER = LoggerFactory.getLogger(OpenCypherResultSetGetTables.class);
+public class ResultSetGetTables extends OpenCypherResultSet implements java.sql.ResultSet {
+    private static final Logger LOGGER = LoggerFactory.getLogger(ResultSetGetTables.class);
     /**
      * TABLE_CAT String => table catalog (may be null)
      * TABLE_SCHEM String => table schema (may be null)
@@ -81,11 +81,11 @@ public class OpenCypherResultSetGetTables extends OpenCypherResultSet implements
      * @param nodeColumnInfos          List of NodeColumnInfo Objects.
      * @param resultSetInfoWithoutRows ResultSetInfoWithoutRows Object.
      */
-    public OpenCypherResultSetGetTables(final Statement statement,
-                                        final List<ResultSetGetColumnsGremlinDataModel.NodeColumnInfo> nodeColumnInfos,
-                                        final ResultSetInfoWithoutRows resultSetInfoWithoutRows) {
+    public ResultSetGetTables(final Statement statement,
+                              final List<ResultSetGetColumns.NodeColumnInfo> nodeColumnInfos,
+                              final ResultSetInfoWithoutRows resultSetInfoWithoutRows) {
         super(statement, resultSetInfoWithoutRows);
-        for (final ResultSetGetColumnsGremlinDataModel.NodeColumnInfo nodeColumnInfo : nodeColumnInfos) {
+        for (final ResultSetGetColumns.NodeColumnInfo nodeColumnInfo : nodeColumnInfos) {
             // Add defaults, table name, and push into List.
             final Map<String, Object> map = new HashMap<>(MAPPED_KEYS);
             map.put(TABLE_NAME, nodeListToString(nodeColumnInfo.getLabels()));

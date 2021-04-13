@@ -3,7 +3,7 @@ package software.amazon.neptune.opencypher.resultset;
 import org.neo4j.driver.internal.types.InternalTypeSystem;
 import org.neo4j.driver.types.Type;
 import software.amazon.neptune.common.ResultSetInfoWithoutRows;
-import software.amazon.neptune.common.gremlindatamodel.ResultSetGetColumnsGremlinDataModel;
+import software.amazon.neptune.common.gremlindatamodel.ResultSetGetColumns;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -12,7 +12,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class OpenCypherResultSetGetColumns extends ResultSetGetColumnsGremlinDataModel implements java.sql.ResultSet {
+public class OpenCypherResultSetGetColumns extends ResultSetGetColumns implements java.sql.ResultSet {
     private static final Map<String, Type> COLUMN_TYPE_MAP = new HashMap<>();
 
     static {

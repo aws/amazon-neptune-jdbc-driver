@@ -21,6 +21,7 @@ import software.amazon.jdbc.utilities.SqlError;
 import software.amazon.jdbc.utilities.Warning;
 import java.sql.SQLException;
 import java.sql.SQLWarning;
+import java.util.Random;
 import java.util.concurrent.atomic.AtomicReference;
 import static software.amazon.jdbc.utilities.SqlError.lookup;
 
@@ -102,6 +103,23 @@ public class HelperFunctions {
 
     public static SQLWarning getNewWarning2() {
         return new SQLWarning(TEST_WARNING_REASON_2, TEST_WARNING_STATE);
+    }
+
+    /**
+     * Generates random positive integer value.
+     *
+     * @param maxValue Maximum integer value.
+     * @return Random integer value.
+     */
+    public static int randomPositiveIntValue(final int maxValue) {
+        final Random random = new Random();
+        int randomValue = 0;
+        while (randomValue == 0) {
+            final int nextInt = random.nextInt(maxValue);
+            randomValue = nextInt < 0 ? (-1) * nextInt : nextInt;
+        }
+
+        return randomValue;
     }
 
     /**

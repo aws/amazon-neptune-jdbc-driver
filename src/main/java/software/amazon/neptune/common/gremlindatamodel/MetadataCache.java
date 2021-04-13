@@ -24,10 +24,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public class OpenCypherMetadataCache {
+public class MetadataCache {
     private static final Object LOCK = new Object();
     @Getter
-    private static List<ResultSetGetColumnsGremlinDataModel.NodeColumnInfo> cachedNodeColumnInfos = null;
+    private static List<ResultSetGetColumns.NodeColumnInfo> cachedNodeColumnInfos = null;
 
     /**
      * Function to update the cache of the OpenCypherMetadata
@@ -66,11 +66,11 @@ public class OpenCypherMetadataCache {
      * @param nodeFilter Filter to apply.
      * @return Filtered NodeColumnInfo List.
      */
-    public static List<ResultSetGetColumnsGremlinDataModel.NodeColumnInfo> getFilteredCacheNodeColumnInfos(
+    public static List<ResultSetGetColumns.NodeColumnInfo> getFilteredCacheNodeColumnInfos(
             final String nodeFilter) {
         synchronized (LOCK) {
-            final List<ResultSetGetColumnsGremlinDataModel.NodeColumnInfo> nodeColumnInfos = new ArrayList<>();
-            for (final ResultSetGetColumnsGremlinDataModel.NodeColumnInfo nodeColumnInfo : cachedNodeColumnInfos) {
+            final List<ResultSetGetColumns.NodeColumnInfo> nodeColumnInfos = new ArrayList<>();
+            for (final ResultSetGetColumns.NodeColumnInfo nodeColumnInfo : cachedNodeColumnInfos) {
                 if (nodeFilter != null && !"%".equals(nodeFilter)) {
                     if (Arrays.stream(nodeFilter.split(":"))
                             .allMatch(node -> nodeColumnInfo.getLabels().contains(node))) {
@@ -94,7 +94,7 @@ public class OpenCypherMetadataCache {
             final String nodeFilter) {
         return new ResultSetInfoWithoutRows(
                 getFilteredCacheNodeColumnInfos(nodeFilter).stream().mapToInt(node -> node.getProperties().size())
-                        .sum(), ResultSetGetColumnsGremlinDataModel.getColumns());
+                        .sum(), ResultSetGetColumns.getColumns());
     }
 
     /**
@@ -106,6 +106,6 @@ public class OpenCypherMetadataCache {
     public static ResultSetInfoWithoutRows getFilteredResultSetInfoWithoutRowsForTables(
             final String nodeFilter) {
         return new ResultSetInfoWithoutRows(
-                getFilteredCacheNodeColumnInfos(nodeFilter).size(), OpenCypherResultSetGetTables.getColumns());
+                getFilteredCacheNodeColumnInfos(nodeFilter).size(), ResultSetGetTables.getColumns());
     }
 }

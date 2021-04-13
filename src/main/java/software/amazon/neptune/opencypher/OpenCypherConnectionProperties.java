@@ -30,19 +30,16 @@ import java.util.Properties;
  * OpenCypher connection properties class.
  */
 public class OpenCypherConnectionProperties extends ConnectionProperties {
-    public static final String ENDPOINT_KEY = "Endpoint";
-
-    public static final String AUTH_SCHEME_KEY = "AuthScheme";
-    public static final String USE_ENCRYPTION_KEY = "UseEncryption";
-    public static final String REGION_KEY = "Region";
-    public static final String CONNECTION_POOL_SIZE_KEY = "ConnectionPoolSize";
+    public static final String ENDPOINT_KEY = "endpoint";
+    public static final String USE_ENCRYPTION_KEY = "useEncryption";
+    public static final String REGION_KEY = "region";
+    public static final String CONNECTION_POOL_SIZE_KEY = "connectionPoolSize";
 
     // TODO: Revisit. We should probably support these.
-    public static final String AWS_CREDENTIALS_PROVIDER_CLASS_KEY = "AwsCredentialsProviderClass";
-    public static final String CUSTOM_CREDENTIALS_FILE_PATH_KEY = "CustomCredentialsFilePath";
+    public static final String AWS_CREDENTIALS_PROVIDER_CLASS_KEY = "awsCredentialsProviderClass";
+    public static final String CUSTOM_CREDENTIALS_FILE_PATH_KEY = "customCredentialsFilePath";
 
     public static final int DEFAULT_CONNECTION_POOL_SIZE = 1000;
-    public static final AuthScheme DEFAULT_AUTH_SCHEME = AuthScheme.None;
     public static final boolean DEFAULT_USE_ENCRYPTION = true;
 
     public static final Map<String, Object> DEFAULT_PROPERTIES_MAP = new HashMap<>();
@@ -54,7 +51,6 @@ public class OpenCypherConnectionProperties extends ConnectionProperties {
         PROPERTY_CONVERTER_MAP.put(AWS_CREDENTIALS_PROVIDER_CLASS_KEY, (key, value) -> value);
         PROPERTY_CONVERTER_MAP.put(CUSTOM_CREDENTIALS_FILE_PATH_KEY, (key, value) -> value);
         PROPERTY_CONVERTER_MAP.put(ENDPOINT_KEY, (key, value) -> value);
-        PROPERTY_CONVERTER_MAP.put(AUTH_SCHEME_KEY, OpenCypherConnectionProperties::toAuthScheme);
         PROPERTY_CONVERTER_MAP.put(REGION_KEY, (key, value) -> value);
         PROPERTY_CONVERTER_MAP.put(USE_ENCRYPTION_KEY, ConnectionProperties::toBoolean);
         PROPERTY_CONVERTER_MAP.put(CONNECTION_POOL_SIZE_KEY, ConnectionProperties::toUnsigned);
@@ -62,7 +58,6 @@ public class OpenCypherConnectionProperties extends ConnectionProperties {
 
     static {
         DEFAULT_PROPERTIES_MAP.put(ENDPOINT_KEY, "");
-        DEFAULT_PROPERTIES_MAP.put(AUTH_SCHEME_KEY, DEFAULT_AUTH_SCHEME);
         DEFAULT_PROPERTIES_MAP.put(REGION_KEY, "");
         DEFAULT_PROPERTIES_MAP.put(USE_ENCRYPTION_KEY, DEFAULT_USE_ENCRYPTION);
         DEFAULT_PROPERTIES_MAP.put(CONNECTION_POOL_SIZE_KEY, DEFAULT_CONNECTION_POOL_SIZE);
@@ -72,7 +67,7 @@ public class OpenCypherConnectionProperties extends ConnectionProperties {
      * OpenCypherConnectionProperties constructor.
      */
     public OpenCypherConnectionProperties() throws SQLException {
-        super();
+        super(new Properties(), DEFAULT_PROPERTIES_MAP, PROPERTY_CONVERTER_MAP);
     }
 
     /**
@@ -109,7 +104,7 @@ public class OpenCypherConnectionProperties extends ConnectionProperties {
      * @param endpoint The connection endpoint.
      * @throws SQLException if value is invalid.
      */
-    public void setEndpoint(final String endpoint) throws SQLException {
+    public void setEndpoint(@NonNull final String endpoint) throws SQLException {
         setProperty(ENDPOINT_KEY,
                 (String) PROPERTY_CONVERTER_MAP.get(ENDPOINT_KEY).convert(ENDPOINT_KEY, endpoint));
     }
@@ -120,6 +115,9 @@ public class OpenCypherConnectionProperties extends ConnectionProperties {
      * @return The AWS credentials provider class.
      */
     public String getAwsCredentialsProviderClass() {
+        if (!containsKey(AWS_CREDENTIALS_PROVIDER_CLASS_KEY)) {
+            return null;
+        }
         return getProperty(AWS_CREDENTIALS_PROVIDER_CLASS_KEY);
     }
 
@@ -129,7 +127,7 @@ public class OpenCypherConnectionProperties extends ConnectionProperties {
      * @param awsCredentialsProviderClass The AWS credentials provider class.
      * @throws SQLException if value is invalid.
      */
-    public void setAwsCredentialsProviderClass(final String awsCredentialsProviderClass) throws SQLException {
+    public void setAwsCredentialsProviderClass(@NonNull final String awsCredentialsProviderClass) throws SQLException {
         setProperty(AWS_CREDENTIALS_PROVIDER_CLASS_KEY,
                 (String) PROPERTY_CONVERTER_MAP.get(AWS_CREDENTIALS_PROVIDER_CLASS_KEY)
                         .convert(AWS_CREDENTIALS_PROVIDER_CLASS_KEY, awsCredentialsProviderClass));
@@ -141,6 +139,9 @@ public class OpenCypherConnectionProperties extends ConnectionProperties {
      * @return The custom credentials filepath.
      */
     public String getCustomCredentialsFilePath() {
+        if (!containsKey(CUSTOM_CREDENTIALS_FILE_PATH_KEY)) {
+            return null;
+        }
         return getProperty(CUSTOM_CREDENTIALS_FILE_PATH_KEY);
     }
 
@@ -150,32 +151,10 @@ public class OpenCypherConnectionProperties extends ConnectionProperties {
      * @param customCredentialsFilePath The custom credentials filepath.
      * @throws SQLException if value is invalid.
      */
-    public void setCustomCredentialsFilePath(final String customCredentialsFilePath) throws SQLException {
+    public void setCustomCredentialsFilePath(@NonNull final String customCredentialsFilePath) throws SQLException {
         setProperty(CUSTOM_CREDENTIALS_FILE_PATH_KEY,
                 (String) PROPERTY_CONVERTER_MAP.get(CUSTOM_CREDENTIALS_FILE_PATH_KEY)
                         .convert(CUSTOM_CREDENTIALS_FILE_PATH_KEY, customCredentialsFilePath));
-    }
-
-    /**
-     * Gets the authentication scheme.
-     *
-     * @return The authentication scheme.
-     */
-    public AuthScheme getAuthScheme() {
-        return (AuthScheme) get(AUTH_SCHEME_KEY);
-    }
-
-    /**
-     * Sets the authentication scheme.
-     *
-     * @param authScheme The authentication scheme.
-     * @throws SQLException if value is invalid.
-     */
-    public void setAuthScheme(final AuthScheme authScheme) throws SQLException {
-        if (authScheme == null) {
-            throw invalidConnectionPropertyError(AUTH_SCHEME_KEY, authScheme);
-        }
-        put(AUTH_SCHEME_KEY, authScheme);
     }
 
     /**
@@ -241,6 +220,7 @@ public class OpenCypherConnectionProperties extends ConnectionProperties {
     /**
      * Validate the supported properties.
      */
+    @Override
     protected void validateProperties() throws SQLException {
         // If IAMSigV4 is specified, we need the region provided to us.
         if (getAuthScheme() != null && getAuthScheme().equals(AuthScheme.IAMSigV4)) {
@@ -253,7 +233,7 @@ public class OpenCypherConnectionProperties extends ConnectionProperties {
 
             if (!getUseEncryption()) {
                 throw invalidConnectionPropertyValueError(USE_ENCRYPTION_KEY,
-                        "Encryption must be enabled if IAMSigV4 is used.");
+                        "Encryption must be enabled if IAMSigV4 is used");
             }
         }
     }
@@ -264,6 +244,7 @@ public class OpenCypherConnectionProperties extends ConnectionProperties {
      * @param name The name of the property.
      * @return {@code true} if property is supported; {@code false} otherwise.
      */
+    @Override
     public boolean isSupportedProperty(final String name) {
         return containsKey(name);
     }

@@ -110,8 +110,8 @@ public class GremlinDataSource extends software.amazon.jdbc.DataSource
      *
      * @return The connection endpoint.
      */
-    public String getEndpoint() {
-        return connectionProperties.getEndpoint();
+    public String getContactPoint() {
+        return connectionProperties.getContactPoint();
     }
 
     /**
@@ -120,8 +120,8 @@ public class GremlinDataSource extends software.amazon.jdbc.DataSource
      * @param endpoint The connection endpoint.
      * @throws SQLException if value is invalid.
      */
-    public void setEndpoint(final String endpoint) throws SQLException {
-        connectionProperties.setEndpoint(endpoint);
+    public void setContactPoint(final String endpoint) throws SQLException {
+        connectionProperties.setContactPoint(endpoint);
     }
 
     /**
@@ -205,8 +205,8 @@ public class GremlinDataSource extends software.amazon.jdbc.DataSource
      *
      * @return The use encryption.
      */
-    public boolean getUseEncryption() {
-        return (connectionProperties.getUseEncryption());
+    public boolean getEnableSsl() {
+        return (connectionProperties.getEnableSsl());
     }
 
     /**
@@ -214,7 +214,7 @@ public class GremlinDataSource extends software.amazon.jdbc.DataSource
      *
      * @param useEncryption The use encryption.
      */
-    public void setUseEncryption(final boolean useEncryption) {
-        connectionProperties.setUseEncryption(useEncryption);
+    public void setEnableSsl(final boolean useEncryption) {
+        connectionProperties.setEnableSsl(useEncryption);
     }
 }

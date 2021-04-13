@@ -25,6 +25,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import software.amazon.jdbc.Driver;
 import software.amazon.jdbc.helpers.HelperFunctions;
+import software.amazon.jdbc.utilities.AuthScheme;
 import software.amazon.jdbc.utilities.ConnectionProperties;
 import software.amazon.jdbc.utilities.SqlError;
 import software.amazon.neptune.opencypher.mock.MockOpenCypherDatabase;
@@ -83,6 +84,7 @@ public class OpenCypherConnectionTest {
 
     @BeforeEach
     void initialize() throws SQLException {
+        PROPERTIES.put(ConnectionProperties.AUTH_SCHEME_KEY, AuthScheme.None); // set default to None
         connection = new OpenCypherConnection(new OpenCypherConnectionProperties(PROPERTIES));
 
         TEST_PROP.put(TEST_PROP_KEY, TEST_PROP_VAL);
