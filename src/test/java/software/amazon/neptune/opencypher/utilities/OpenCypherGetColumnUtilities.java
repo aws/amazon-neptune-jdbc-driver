@@ -3,7 +3,7 @@ package software.amazon.neptune.opencypher.utilities;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import org.junit.jupiter.api.Assertions;
-import software.amazon.neptune.opencypher.resultset.OpenCypherResultSetGetColumns;
+import software.amazon.neptune.common.gremlindatamodel.ResultSetGetColumnsGremlinDataModel;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -45,8 +45,8 @@ public class OpenCypherGetColumnUtilities {
             "    } ]\n" +
             "  } ]\n" +
             "}";
-    public static final List<OpenCypherResultSetGetColumns.NodeColumnInfo> NODE_COLUMN_INFOS = ImmutableList.of(
-            new OpenCypherResultSetGetColumns.NodeColumnInfo(
+    public static final List<ResultSetGetColumnsGremlinDataModel.NodeColumnInfo> NODE_COLUMN_INFOS = ImmutableList.of(
+            new ResultSetGetColumnsGremlinDataModel.NodeColumnInfo(
                     ImmutableList.of("A", "B", "C"), ImmutableList.of(
                     ImmutableMap.of(
                             "property", "name",
@@ -60,7 +60,7 @@ public class OpenCypherGetColumnUtilities {
                             "isNullable", false)
             )
             ),
-            new OpenCypherResultSetGetColumns.NodeColumnInfo(
+            new ResultSetGetColumnsGremlinDataModel.NodeColumnInfo(
                     ImmutableList.of("A", "B", "C", "D"), ImmutableList.of(
                     ImmutableMap.of(
                             "property", "age",

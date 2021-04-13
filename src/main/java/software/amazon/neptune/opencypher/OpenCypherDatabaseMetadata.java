@@ -20,7 +20,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import software.amazon.jdbc.DatabaseMetaData;
 import software.amazon.neptune.common.EmptyResultSet;
-
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
@@ -131,7 +130,8 @@ public class OpenCypherDatabaseMetadata extends DatabaseMetaData implements java
             throws SQLException {
         // Only tableNamePattern is supported as an exact node label semicolon delimited String.
         LOGGER.info("Getting database tables.");
-        final OpenCypherQueryExecutor openCypherQueryExecutor = new OpenCypherQueryExecutor(connection.getOpenCypherConnectionProperties());
+        final OpenCypherQueryExecutor openCypherQueryExecutor =
+                new OpenCypherQueryExecutor(connection.getOpenCypherConnectionProperties());
         return openCypherQueryExecutor.executeGetTables(getConnection().createStatement(), tableNamePattern);
     }
 
@@ -144,21 +144,24 @@ public class OpenCypherDatabaseMetadata extends DatabaseMetaData implements java
     @Override
     public ResultSet getSchemas() throws SQLException {
         LOGGER.info("Getting database schemas.");
-        final OpenCypherQueryExecutor openCypherQueryExecutor = new OpenCypherQueryExecutor(connection.getOpenCypherConnectionProperties());
+        final OpenCypherQueryExecutor openCypherQueryExecutor =
+                new OpenCypherQueryExecutor(connection.getOpenCypherConnectionProperties());
         return openCypherQueryExecutor.executeGetSchemas(getConnection().createStatement());
     }
 
     @Override
     public ResultSet getCatalogs() throws SQLException {
         LOGGER.info("Getting database catalogs.");
-        final OpenCypherQueryExecutor openCypherQueryExecutor = new OpenCypherQueryExecutor(connection.getOpenCypherConnectionProperties());
+        final OpenCypherQueryExecutor openCypherQueryExecutor =
+                new OpenCypherQueryExecutor(connection.getOpenCypherConnectionProperties());
         return openCypherQueryExecutor.executeGetCatalogs(getConnection().createStatement());
     }
 
     @Override
     public ResultSet getTableTypes() throws SQLException {
         LOGGER.info("Getting database table types.");
-        final OpenCypherQueryExecutor openCypherQueryExecutor = new OpenCypherQueryExecutor(connection.getOpenCypherConnectionProperties());
+        final OpenCypherQueryExecutor openCypherQueryExecutor =
+                new OpenCypherQueryExecutor(connection.getOpenCypherConnectionProperties());
         return openCypherQueryExecutor.executeGetTableTypes(getConnection().createStatement());
     }
 
@@ -175,7 +178,8 @@ public class OpenCypherDatabaseMetadata extends DatabaseMetaData implements java
         if (schemaPattern != null) {
             LOGGER.warn("SchemaPattern in getColumns is not supported, ignoring.");
         }
-        final OpenCypherQueryExecutor openCypherQueryExecutor = new OpenCypherQueryExecutor(connection.getOpenCypherConnectionProperties());
+        final OpenCypherQueryExecutor openCypherQueryExecutor =
+                new OpenCypherQueryExecutor(connection.getOpenCypherConnectionProperties());
         return openCypherQueryExecutor.executeGetColumns(getConnection().createStatement(), tableNamePattern);
     }
 

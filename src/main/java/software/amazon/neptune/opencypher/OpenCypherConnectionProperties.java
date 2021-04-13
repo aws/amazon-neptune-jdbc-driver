@@ -16,12 +16,11 @@
 
 package software.amazon.neptune.opencypher;
 
-import org.checkerframework.checker.nullness.qual.NonNull;
+import lombok.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import software.amazon.jdbc.utilities.AuthScheme;
 import software.amazon.jdbc.utilities.ConnectionProperties;
-
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
@@ -47,7 +46,8 @@ public class OpenCypherConnectionProperties extends ConnectionProperties {
     public static final boolean DEFAULT_USE_ENCRYPTION = true;
 
     public static final Map<String, Object> DEFAULT_PROPERTIES_MAP = new HashMap<>();
-    private static final Map<String, ConnectionProperties.PropertyConverter<?>> PROPERTY_CONVERTER_MAP = new HashMap<>();
+    private static final Map<String, ConnectionProperties.PropertyConverter<?>> PROPERTY_CONVERTER_MAP =
+            new HashMap<>();
     private static final Logger LOGGER = LoggerFactory.getLogger(OpenCypherConnectionProperties.class);
 
     static {
@@ -77,10 +77,21 @@ public class OpenCypherConnectionProperties extends ConnectionProperties {
 
     /**
      * OpenCypherConnectionProperties constructor.
+     *
      * @param properties Properties to examine and extract key details from.
      */
     public OpenCypherConnectionProperties(final Properties properties) throws SQLException {
         super(properties, DEFAULT_PROPERTIES_MAP, PROPERTY_CONVERTER_MAP);
+    }
+
+    private static AuthScheme toAuthScheme(@NonNull final String key, @NonNull final String value) throws SQLException {
+        if (isWhitespace(value)) {
+            return DEFAULT_AUTH_SCHEME;
+        }
+        if (AuthScheme.fromString(value) == null) {
+            throw invalidConnectionPropertyError(key, value);
+        }
+        return AuthScheme.fromString(value);
     }
 
     /**
@@ -235,7 +246,8 @@ public class OpenCypherConnectionProperties extends ConnectionProperties {
         if (getAuthScheme() != null && getAuthScheme().equals(AuthScheme.IAMSigV4)) {
             final String region = System.getenv().get("SERVICE_REGION");
             if (region == null) {
-                throw missingConnectionPropertyError("A Region must be provided to use IAMSigV4 Authentication. Set the SERVICE_REGION environment variable to the appropriate region, such as 'us-east-1'.");
+                throw missingConnectionPropertyError(
+                        "A Region must be provided to use IAMSigV4 Authentication. Set the SERVICE_REGION environment variable to the appropriate region, such as 'us-east-1'.");
             }
             setRegion(region);
 
@@ -254,15 +266,5 @@ public class OpenCypherConnectionProperties extends ConnectionProperties {
      */
     public boolean isSupportedProperty(final String name) {
         return containsKey(name);
-    }
-
-    private static AuthScheme toAuthScheme(@NonNull final String key, @NonNull final String value) throws SQLException {
-        if (isWhitespace(value)) {
-            return DEFAULT_AUTH_SCHEME;
-        }
-        if (AuthScheme.fromString(value) == null) {
-            throw invalidConnectionPropertyError(key, value);
-        }
-        return AuthScheme.fromString(value);
     }
 }

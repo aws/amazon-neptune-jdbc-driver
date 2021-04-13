@@ -16,10 +16,9 @@
 
 package software.amazon.neptune.gremlin;
 
-import org.checkerframework.checker.nullness.qual.NonNull;
+import lombok.NonNull;
 import software.amazon.jdbc.utilities.ConnectionProperties;
 import software.amazon.jdbc.utilities.QueryExecutor;
-
 import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
 

@@ -27,7 +27,6 @@ import org.neo4j.harness.junit.Neo4jRule;
 import org.neo4j.kernel.configuration.BoltConnector;
 import org.neo4j.kernel.configuration.Settings;
 import software.amazon.neptune.opencypher.OpenCypherConnectionProperties;
-
 import java.io.File;
 import java.io.IOException;
 import java.net.ServerSocket;
@@ -36,7 +35,6 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-
 import static org.neo4j.helpers.ListenSocketAddress.listenAddress;
 import static org.neo4j.kernel.configuration.BoltConnector.EncryptionLevel.DISABLED;
 import static org.neo4j.kernel.configuration.BoltConnector.EncryptionLevel.REQUIRED;
@@ -49,23 +47,23 @@ public final class MockOpenCypherDatabase {
     private static final String DB_PATH = "target/neo4j-test/";
     @ClassRule
     private static final Neo4jRule NEO4J_RULE = new Neo4jRule();
+    // Need lock to make sure we don't have port grab collisions (need to wait for binding).
+    private static final Object LOCK = new Object();
     private final GraphDatabaseService graphDb;
     @Getter
     private final String host;
     @Getter
     private final int port;
 
-    // Need lock to make sure we don't have port grab collisions (need to wait for binding).
-    private static final Object LOCK = new Object();
-
     /**
      * OpenCypherDatabase constructor.
      *
-     * @param host Host to initialize with.
-     * @param port Port to initialize with.
+     * @param host          Host to initialize with.
+     * @param port          Port to initialize with.
      * @param useEncryption Encryption usage to initialize with.
      */
-    private MockOpenCypherDatabase(final String host, final int port, final String path, final boolean useEncryption) throws IOException {
+    private MockOpenCypherDatabase(final String host, final int port, final String path, final boolean useEncryption)
+            throws IOException {
         this.host = host;
         this.port = port;
         final File dbPath = new File(DB_PATH + path);
@@ -79,7 +77,8 @@ public final class MockOpenCypherDatabase {
                 .newGraphDatabase();
     }
 
-    private static GraphDatabaseBuilder graphDbBuilder(final File dbPath, final String host, final int port, final boolean useEncryption) {
+    private static GraphDatabaseBuilder graphDbBuilder(final File dbPath, final String host, final int port,
+                                                       final boolean useEncryption) {
         final GraphDatabaseBuilder dbBuilder = new GraphDatabaseFactory().newEmbeddedDatabaseBuilder(dbPath);
         final BoltConnector boltConnector = new BoltConnector("bolt");
         dbBuilder.setConfig(Settings.setting("dbms.directories.import", STRING, "data"), "../../data");
@@ -98,7 +97,7 @@ public final class MockOpenCypherDatabase {
     /**
      * Function to initiate builder for MockOpenCypherDatabase
      *
-     * @param host Host to use.
+     * @param host         Host to use.
      * @param callingClass Class calling builder (used for unique path).
      * @return Builder pattern for MockOpenCypherDatabase.
      */
@@ -110,13 +109,14 @@ public final class MockOpenCypherDatabase {
     /**
      * Function to initiate builder for MockOpenCypherDatabase
      *
-     * @param host Host to use.
-     * @param callingClass Class calling builder (used for unique path).
+     * @param host          Host to use.
+     * @param callingClass  Class calling builder (used for unique path).
      * @param useEncryption Indicates whether to use encryption.
      * @return Builder pattern for MockOpenCypherDatabase.
      */
     @SneakyThrows
-    public static MockOpenCypherDatabaseBuilder builder(final String host, final String callingClass, final boolean useEncryption) {
+    public static MockOpenCypherDatabaseBuilder builder(final String host, final String callingClass,
+                                                        final boolean useEncryption) {
         synchronized (LOCK) {
             // Get random unassigned port.
             final ServerSocket socket = new ServerSocket(0);

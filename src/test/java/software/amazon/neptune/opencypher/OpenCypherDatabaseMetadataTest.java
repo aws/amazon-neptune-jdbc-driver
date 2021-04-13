@@ -23,7 +23,6 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import software.amazon.neptune.opencypher.mock.MockOpenCypherDatabase;
-
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.Arrays;

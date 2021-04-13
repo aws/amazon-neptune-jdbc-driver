@@ -48,20 +48,20 @@ import java.util.Calendar;
 public class PreparedStatement extends software.amazon.jdbc.Statement implements java.sql.PreparedStatement {
     private static final Logger LOGGER = LoggerFactory.getLogger(software.amazon.jdbc.Connection.class);
     private final String sql;
-    private ResultSet resultSet;
-
     @Getter
     private final QueryExecutor queryExecutor;
+    private ResultSet resultSet;
 
     /**
      * Constructor for seeding the prepared statement with the parent connection.
      *
-     * @param connection The parent connection.
-     * @param sql        The sql query.
+     * @param connection    The parent connection.
+     * @param sql           The sql query.
      * @param queryExecutor The query executor.
      * @throws SQLException if error occurs when get type map of connection.
      */
-    public PreparedStatement(final Connection connection, final String sql, final QueryExecutor queryExecutor) throws SQLException {
+    public PreparedStatement(final Connection connection, final String sql, final QueryExecutor queryExecutor)
+            throws SQLException {
         super(connection, queryExecutor);
         this.sql = sql;
         this.queryExecutor = queryExecutor;

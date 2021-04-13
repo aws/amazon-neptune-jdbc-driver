@@ -14,10 +14,10 @@
  *
  */
 
-package software.amazon.neptune.opencypher.resultset;
+package software.amazon.neptune.common.gremlindatamodel;
 
 import lombok.Getter;
-import software.amazon.neptune.opencypher.OpenCypherSchemaHelper;
+import software.amazon.neptune.common.ResultSetInfoWithoutRows;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -25,9 +25,9 @@ import java.util.Arrays;
 import java.util.List;
 
 public class OpenCypherMetadataCache {
-    @Getter
-    private static List<OpenCypherResultSetGetColumns.NodeColumnInfo> cachedNodeColumnInfos = null;
     private static final Object LOCK = new Object();
+    @Getter
+    private static List<ResultSetGetColumnsGremlinDataModel.NodeColumnInfo> cachedNodeColumnInfos = null;
 
     /**
      * Function to update the cache of the OpenCypherMetadata
@@ -42,8 +42,8 @@ public class OpenCypherMetadataCache {
                                    final boolean useIAM) throws SQLException {
         synchronized (LOCK) {
             try {
-                cachedNodeColumnInfos = OpenCypherSchemaHelper.getGraphSchema(endpoint, nodes, useIAM);
-            } catch (IOException e) {
+                cachedNodeColumnInfos = SchemaHelperGremlinDataModel.getGraphSchema(endpoint, nodes, useIAM);
+            } catch (final IOException e) {
                 throw new SQLException(e.getMessage());
             }
         }
@@ -66,13 +66,14 @@ public class OpenCypherMetadataCache {
      * @param nodeFilter Filter to apply.
      * @return Filtered NodeColumnInfo List.
      */
-    public static List<OpenCypherResultSetGetColumns.NodeColumnInfo> getFilteredCacheNodeColumnInfos(
+    public static List<ResultSetGetColumnsGremlinDataModel.NodeColumnInfo> getFilteredCacheNodeColumnInfos(
             final String nodeFilter) {
         synchronized (LOCK) {
-            final List<OpenCypherResultSetGetColumns.NodeColumnInfo> nodeColumnInfos = new ArrayList<>();
-            for (final OpenCypherResultSetGetColumns.NodeColumnInfo nodeColumnInfo : cachedNodeColumnInfos) {
+            final List<ResultSetGetColumnsGremlinDataModel.NodeColumnInfo> nodeColumnInfos = new ArrayList<>();
+            for (final ResultSetGetColumnsGremlinDataModel.NodeColumnInfo nodeColumnInfo : cachedNodeColumnInfos) {
                 if (nodeFilter != null && !"%".equals(nodeFilter)) {
-                    if (Arrays.stream(nodeFilter.split(":")).allMatch(node -> nodeColumnInfo.getLabels().contains(node))) {
+                    if (Arrays.stream(nodeFilter.split(":"))
+                            .allMatch(node -> nodeColumnInfo.getLabels().contains(node))) {
                         nodeColumnInfos.add(nodeColumnInfo);
                     }
                 } else {
@@ -89,11 +90,11 @@ public class OpenCypherMetadataCache {
      * @param nodeFilter Filter to apply.
      * @return Filtered ResultSetInfoWithoutRows Object.
      */
-    public static OpenCypherResultSet.ResultSetInfoWithoutRows getFilteredResultSetInfoWithoutRowsForColumns(
+    public static ResultSetInfoWithoutRows getFilteredResultSetInfoWithoutRowsForColumns(
             final String nodeFilter) {
-        return new OpenCypherResultSet.ResultSetInfoWithoutRows(null, null,
+        return new ResultSetInfoWithoutRows(
                 getFilteredCacheNodeColumnInfos(nodeFilter).stream().mapToInt(node -> node.getProperties().size())
-                        .sum(), OpenCypherResultSetGetColumns.getColumns());
+                        .sum(), ResultSetGetColumnsGremlinDataModel.getColumns());
     }
 
     /**
@@ -102,9 +103,9 @@ public class OpenCypherMetadataCache {
      * @param nodeFilter Filter to apply.
      * @return Filtered ResultSetInfoWithoutRows Object.
      */
-    public static OpenCypherResultSet.ResultSetInfoWithoutRows getFilteredResultSetInfoWithoutRowsForTables(
+    public static ResultSetInfoWithoutRows getFilteredResultSetInfoWithoutRowsForTables(
             final String nodeFilter) {
-        return new OpenCypherResultSet.ResultSetInfoWithoutRows(null, null,
+        return new ResultSetInfoWithoutRows(
                 getFilteredCacheNodeColumnInfos(nodeFilter).size(), OpenCypherResultSetGetTables.getColumns());
     }
 }

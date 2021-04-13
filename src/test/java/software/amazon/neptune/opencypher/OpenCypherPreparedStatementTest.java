@@ -24,7 +24,6 @@ import org.junit.jupiter.api.Test;
 import software.amazon.jdbc.helpers.HelperFunctions;
 import software.amazon.jdbc.utilities.SqlError;
 import software.amazon.neptune.opencypher.mock.MockOpenCypherDatabase;
-
 import java.io.InputStream;
 import java.io.Reader;
 import java.sql.Blob;

@@ -26,6 +26,7 @@ import java.sql.SQLException;
 public class MockPreparedStatement extends PreparedStatement implements java.sql.PreparedStatement {
     /**
      * Constructor for seeding the prepared statement with the parent connection.
+     *
      * @param connection The parent connection.
      * @param sql        The sql query.
      * @throws SQLException if error occurs when get type map of connection.

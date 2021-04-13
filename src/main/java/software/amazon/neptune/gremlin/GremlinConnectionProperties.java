@@ -16,10 +16,9 @@
 
 package software.amazon.neptune.gremlin;
 
-import org.checkerframework.checker.nullness.qual.NonNull;
+import lombok.NonNull;
 import software.amazon.jdbc.utilities.AuthScheme;
 import software.amazon.jdbc.utilities.ConnectionProperties;
-
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
@@ -73,6 +72,16 @@ public class GremlinConnectionProperties extends ConnectionProperties {
      */
     public GremlinConnectionProperties(final Properties properties) throws SQLException {
         super(properties, DEFAULT_PROPERTIES_MAP, PROPERTY_CONVERTER_MAP);
+    }
+
+    private static AuthScheme toAuthScheme(@NonNull final String key, @NonNull final String value) throws SQLException {
+        if (isWhitespace(value)) {
+            return DEFAULT_AUTH_SCHEME;
+        }
+        if (AuthScheme.fromString(value) == null) {
+            throw invalidConnectionPropertyError(key, value);
+        }
+        return AuthScheme.fromString(value);
     }
 
     /**
@@ -185,7 +194,8 @@ public class GremlinConnectionProperties extends ConnectionProperties {
         if (getAuthScheme() != null && getAuthScheme().equals(AuthScheme.IAMSigV4)) {
             final String region = System.getenv().get("SERVICE_REGION");
             if (region == null) {
-                throw missingConnectionPropertyError("A Region must be provided to use IAMSigV4 Authentication. Set the SERVICE_REGION environment variable to the appropriate region, such as 'us-east-1'.");
+                throw missingConnectionPropertyError(
+                        "A Region must be provided to use IAMSigV4 Authentication. Set the SERVICE_REGION environment variable to the appropriate region, such as 'us-east-1'.");
             }
             setRegion(region);
 
@@ -204,15 +214,5 @@ public class GremlinConnectionProperties extends ConnectionProperties {
      */
     public boolean isSupportedProperty(final String name) {
         return containsKey(name);
-    }
-
-    private static AuthScheme toAuthScheme(@NonNull final String key, @NonNull final String value) throws SQLException {
-        if (isWhitespace(value)) {
-            return DEFAULT_AUTH_SCHEME;
-        }
-        if (AuthScheme.fromString(value) == null) {
-            throw invalidConnectionPropertyError(key, value);
-        }
-        return AuthScheme.fromString(value);
     }
 }

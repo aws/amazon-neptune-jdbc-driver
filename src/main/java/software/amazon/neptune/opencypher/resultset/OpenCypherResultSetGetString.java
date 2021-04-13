@@ -21,6 +21,7 @@ import org.neo4j.driver.types.Type;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import software.amazon.jdbc.utilities.SqlError;
+import software.amazon.neptune.common.ResultSetInfoWithoutRows;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -40,7 +41,8 @@ public class OpenCypherResultSetGetString extends OpenCypherResultSet {
      * @param resultSetInfoWithoutRows ResultSetInfoWithoutRows Object.
      * @param constantReturns          Map of return values for given keys.
      */
-    public OpenCypherResultSetGetString(final Statement statement, final ResultSetInfoWithoutRows resultSetInfoWithoutRows,
+    public OpenCypherResultSetGetString(final Statement statement,
+                                        final ResultSetInfoWithoutRows resultSetInfoWithoutRows,
                                         final List<Map<String, String>> constantReturns) {
         super(statement, resultSetInfoWithoutRows);
         this.columns = resultSetInfoWithoutRows.getColumns();
@@ -48,7 +50,7 @@ public class OpenCypherResultSetGetString extends OpenCypherResultSet {
     }
 
     @Override
-    protected ResultSetMetaData getOpenCypherMetadata() throws SQLException {
+    protected ResultSetMetaData getResultMetadata() throws SQLException {
         final List<Type> rowTypes = new ArrayList<>();
         for (int i = 0; i < columns.size(); i++) {
             rowTypes.add(InternalTypeSystem.TYPE_SYSTEM.STRING());
@@ -61,7 +63,7 @@ public class OpenCypherResultSetGetString extends OpenCypherResultSet {
         verifyOpen();
         final int index = getRowIndex();
         if ((index >= constantReturns.size()) || (index < 0)
-            || ((columnIndex > columns.size()) || (columnIndex <= 0))) {
+                || ((columnIndex > columns.size()) || (columnIndex <= 0))) {
             throw SqlError.createSQLFeatureNotSupportedException(LOGGER);
         }
         final String key = columns.get(columnIndex - 1);

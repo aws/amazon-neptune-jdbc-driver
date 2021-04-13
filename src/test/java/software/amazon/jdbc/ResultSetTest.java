@@ -23,7 +23,6 @@ import software.amazon.jdbc.mock.MockConnection;
 import software.amazon.jdbc.mock.MockResultSet;
 import software.amazon.jdbc.mock.MockStatement;
 import software.amazon.neptune.opencypher.OpenCypherConnectionProperties;
-
 import java.io.InputStream;
 import java.io.Reader;
 import java.sql.Blob;
@@ -62,8 +61,8 @@ public class ResultSetTest {
         HelperFunctions.expectFunctionThrows(() -> resultSet.getBlob(""));
         HelperFunctions.expectFunctionDoesntThrow(() -> resultSet.getBoolean(0), false);
         HelperFunctions.expectFunctionDoesntThrow(() -> resultSet.getBoolean(""), false);
-        HelperFunctions.expectFunctionDoesntThrow(() -> resultSet.getByte(0), (byte)0);
-        HelperFunctions.expectFunctionDoesntThrow(() -> resultSet.getByte(""), (byte)0);
+        HelperFunctions.expectFunctionDoesntThrow(() -> resultSet.getByte(0), (byte) 0);
+        HelperFunctions.expectFunctionDoesntThrow(() -> resultSet.getByte(""), (byte) 0);
         HelperFunctions.expectFunctionDoesntThrow(() -> resultSet.getBytes(0), null);
         HelperFunctions.expectFunctionDoesntThrow(() -> resultSet.getBytes(""), null);
         HelperFunctions.expectFunctionThrows(() -> resultSet.getCharacterStream(0));
@@ -90,17 +89,17 @@ public class ResultSetTest {
         HelperFunctions.expectFunctionThrows(() -> resultSet.getNString(""));
         HelperFunctions.expectFunctionDoesntThrow(() -> resultSet.getObject(0), null);
         HelperFunctions.expectFunctionDoesntThrow(() -> resultSet.getObject(""), null);
-        HelperFunctions.expectFunctionThrows(() -> resultSet.getObject(0, (Class<?>)null));
-        HelperFunctions.expectFunctionThrows(() -> resultSet.getObject("", (Class<?>)null));
-        HelperFunctions.expectFunctionThrows(() -> resultSet.getObject(0, (Map<String, Class<?>>)null));
-        HelperFunctions.expectFunctionThrows(() -> resultSet.getObject("", (Map<String, Class<?>>)null));
+        HelperFunctions.expectFunctionThrows(() -> resultSet.getObject(0, (Class<?>) null));
+        HelperFunctions.expectFunctionThrows(() -> resultSet.getObject("", (Class<?>) null));
+        HelperFunctions.expectFunctionThrows(() -> resultSet.getObject(0, (Map<String, Class<?>>) null));
+        HelperFunctions.expectFunctionThrows(() -> resultSet.getObject("", (Map<String, Class<?>>) null));
         HelperFunctions.expectFunctionDoesntThrow(() -> resultSet.getObject(""), null);
         HelperFunctions.expectFunctionThrows(() -> resultSet.getRef(0));
         HelperFunctions.expectFunctionThrows(() -> resultSet.getRef(""));
         HelperFunctions.expectFunctionThrows(() -> resultSet.getRowId(0));
         HelperFunctions.expectFunctionThrows(() -> resultSet.getRowId(""));
-        HelperFunctions.expectFunctionDoesntThrow(() -> resultSet.getShort(0), (short)0);
-        HelperFunctions.expectFunctionDoesntThrow(() -> resultSet.getShort(""), (short)0);
+        HelperFunctions.expectFunctionDoesntThrow(() -> resultSet.getShort(0), (short) 0);
+        HelperFunctions.expectFunctionDoesntThrow(() -> resultSet.getShort(""), (short) 0);
         HelperFunctions.expectFunctionThrows(() -> resultSet.getSQLXML(0));
         HelperFunctions.expectFunctionThrows(() -> resultSet.getSQLXML(""));
         HelperFunctions.expectFunctionDoesntThrow(() -> resultSet.getString(0), null);
@@ -123,44 +122,44 @@ public class ResultSetTest {
     void testUpdate() {
         HelperFunctions.expectFunctionThrows(() -> resultSet.updateArray(0, null));
         HelperFunctions.expectFunctionThrows(() -> resultSet.updateArray("", null));
-        HelperFunctions.expectFunctionThrows(() -> resultSet.updateAsciiStream(0, null, (long)0));
-        HelperFunctions.expectFunctionThrows(() -> resultSet.updateAsciiStream("", null, (long)0));
-        HelperFunctions.expectFunctionThrows(() -> resultSet.updateAsciiStream(0, null, (int)0));
-        HelperFunctions.expectFunctionThrows(() -> resultSet.updateAsciiStream("", null, (int)0));
+        HelperFunctions.expectFunctionThrows(() -> resultSet.updateAsciiStream(0, null, (long) 0));
+        HelperFunctions.expectFunctionThrows(() -> resultSet.updateAsciiStream("", null, (long) 0));
+        HelperFunctions.expectFunctionThrows(() -> resultSet.updateAsciiStream(0, null, 0));
+        HelperFunctions.expectFunctionThrows(() -> resultSet.updateAsciiStream("", null, 0));
         HelperFunctions.expectFunctionThrows(() -> resultSet.updateAsciiStream(0, null));
         HelperFunctions.expectFunctionThrows(() -> resultSet.updateAsciiStream("", null));
         HelperFunctions.expectFunctionThrows(() -> resultSet.updateBigDecimal(0, null));
         HelperFunctions.expectFunctionThrows(() -> resultSet.updateBigDecimal("", null));
-        HelperFunctions.expectFunctionThrows(() -> resultSet.updateBinaryStream(0, null,  (long)0));
-        HelperFunctions.expectFunctionThrows(() -> resultSet.updateBinaryStream("", null,  (long)0));
-        HelperFunctions.expectFunctionThrows(() -> resultSet.updateBinaryStream(0, null, (int)0));
-        HelperFunctions.expectFunctionThrows(() -> resultSet.updateBinaryStream("", null, (int)0));
+        HelperFunctions.expectFunctionThrows(() -> resultSet.updateBinaryStream(0, null, (long) 0));
+        HelperFunctions.expectFunctionThrows(() -> resultSet.updateBinaryStream("", null, (long) 0));
+        HelperFunctions.expectFunctionThrows(() -> resultSet.updateBinaryStream(0, null, 0));
+        HelperFunctions.expectFunctionThrows(() -> resultSet.updateBinaryStream("", null, 0));
         HelperFunctions.expectFunctionThrows(() -> resultSet.updateBinaryStream(0, null));
         HelperFunctions.expectFunctionThrows(() -> resultSet.updateBinaryStream("", null));
-        HelperFunctions.expectFunctionThrows(() -> resultSet.updateBlob(0, (Blob)null));
-        HelperFunctions.expectFunctionThrows(() -> resultSet.updateBlob("", (Blob)null));
+        HelperFunctions.expectFunctionThrows(() -> resultSet.updateBlob(0, (Blob) null));
+        HelperFunctions.expectFunctionThrows(() -> resultSet.updateBlob("", (Blob) null));
         HelperFunctions.expectFunctionThrows(() -> resultSet.updateBlob(0, null, 0));
         HelperFunctions.expectFunctionThrows(() -> resultSet.updateBlob("", null, 0));
-        HelperFunctions.expectFunctionThrows(() -> resultSet.updateBlob(0, (InputStream)null));
-        HelperFunctions.expectFunctionThrows(() -> resultSet.updateBlob("", (InputStream)null));
+        HelperFunctions.expectFunctionThrows(() -> resultSet.updateBlob(0, (InputStream) null));
+        HelperFunctions.expectFunctionThrows(() -> resultSet.updateBlob("", (InputStream) null));
         HelperFunctions.expectFunctionThrows(() -> resultSet.updateBoolean(0, false));
         HelperFunctions.expectFunctionThrows(() -> resultSet.updateBoolean("", false));
-        HelperFunctions.expectFunctionThrows(() -> resultSet.updateByte(0, (byte)0));
-        HelperFunctions.expectFunctionThrows(() -> resultSet.updateByte("", (byte)0));
+        HelperFunctions.expectFunctionThrows(() -> resultSet.updateByte(0, (byte) 0));
+        HelperFunctions.expectFunctionThrows(() -> resultSet.updateByte("", (byte) 0));
         HelperFunctions.expectFunctionThrows(() -> resultSet.updateBytes(0, null));
         HelperFunctions.expectFunctionThrows(() -> resultSet.updateBytes("", null));
-        HelperFunctions.expectFunctionThrows(() -> resultSet.updateCharacterStream(0, null, (long)0));
-        HelperFunctions.expectFunctionThrows(() -> resultSet.updateCharacterStream("", null, (long)0));
-        HelperFunctions.expectFunctionThrows(() -> resultSet.updateCharacterStream(0, null, (int)0));
-        HelperFunctions.expectFunctionThrows(() -> resultSet.updateCharacterStream("", null, (int)0));
+        HelperFunctions.expectFunctionThrows(() -> resultSet.updateCharacterStream(0, null, (long) 0));
+        HelperFunctions.expectFunctionThrows(() -> resultSet.updateCharacterStream("", null, (long) 0));
+        HelperFunctions.expectFunctionThrows(() -> resultSet.updateCharacterStream(0, null, 0));
+        HelperFunctions.expectFunctionThrows(() -> resultSet.updateCharacterStream("", null, 0));
         HelperFunctions.expectFunctionThrows(() -> resultSet.updateCharacterStream(0, null));
         HelperFunctions.expectFunctionThrows(() -> resultSet.updateCharacterStream("", null));
-        HelperFunctions.expectFunctionThrows(() -> resultSet.updateClob(0, (Clob)null));
-        HelperFunctions.expectFunctionThrows(() -> resultSet.updateClob("", (Clob)null));
+        HelperFunctions.expectFunctionThrows(() -> resultSet.updateClob(0, (Clob) null));
+        HelperFunctions.expectFunctionThrows(() -> resultSet.updateClob("", (Clob) null));
         HelperFunctions.expectFunctionThrows(() -> resultSet.updateClob(0, null, 0));
         HelperFunctions.expectFunctionThrows(() -> resultSet.updateClob("", null, 0));
-        HelperFunctions.expectFunctionThrows(() -> resultSet.updateClob(0, (Reader)null));
-        HelperFunctions.expectFunctionThrows(() -> resultSet.updateClob("", (Reader)null));
+        HelperFunctions.expectFunctionThrows(() -> resultSet.updateClob(0, (Reader) null));
+        HelperFunctions.expectFunctionThrows(() -> resultSet.updateClob("", (Reader) null));
         HelperFunctions.expectFunctionThrows(() -> resultSet.updateDate(0, null));
         HelperFunctions.expectFunctionThrows(() -> resultSet.updateDate("", null));
         HelperFunctions.expectFunctionThrows(() -> resultSet.updateDouble(0, 0));
@@ -175,12 +174,12 @@ public class ResultSetTest {
         HelperFunctions.expectFunctionThrows(() -> resultSet.updateNCharacterStream("", null, 0));
         HelperFunctions.expectFunctionThrows(() -> resultSet.updateNCharacterStream(0, null));
         HelperFunctions.expectFunctionThrows(() -> resultSet.updateNCharacterStream("", null));
-        HelperFunctions.expectFunctionThrows(() -> resultSet.updateNClob(0, (NClob)null));
-        HelperFunctions.expectFunctionThrows(() -> resultSet.updateNClob("", (NClob)null));
+        HelperFunctions.expectFunctionThrows(() -> resultSet.updateNClob(0, (NClob) null));
+        HelperFunctions.expectFunctionThrows(() -> resultSet.updateNClob("", (NClob) null));
         HelperFunctions.expectFunctionThrows(() -> resultSet.updateNClob(0, null, 0));
         HelperFunctions.expectFunctionThrows(() -> resultSet.updateNClob("", null, 0));
-        HelperFunctions.expectFunctionThrows(() -> resultSet.updateNClob(0, (Reader)null));
-        HelperFunctions.expectFunctionThrows(() -> resultSet.updateNClob("", (Reader)null));
+        HelperFunctions.expectFunctionThrows(() -> resultSet.updateNClob(0, (Reader) null));
+        HelperFunctions.expectFunctionThrows(() -> resultSet.updateNClob("", (Reader) null));
         HelperFunctions.expectFunctionThrows(() -> resultSet.updateNString(0, null));
         HelperFunctions.expectFunctionThrows(() -> resultSet.updateNString("", null));
         HelperFunctions.expectFunctionThrows(() -> resultSet.updateNull(0));
@@ -273,9 +272,11 @@ public class ResultSetTest {
         HelperFunctions.expectFunctionDoesntThrow(() -> resultSet.setFetchDirection(java.sql.ResultSet.FETCH_FORWARD));
         HelperFunctions.expectFunctionThrows(() -> resultSet.setFetchDirection(java.sql.ResultSet.FETCH_REVERSE));
         HelperFunctions.expectFunctionThrows(() -> resultSet.setFetchDirection(java.sql.ResultSet.FETCH_UNKNOWN));
-        HelperFunctions.expectFunctionDoesntThrow(() -> resultSet.getFetchDirection(), java.sql.ResultSet.FETCH_FORWARD);
+        HelperFunctions
+                .expectFunctionDoesntThrow(() -> resultSet.getFetchDirection(), java.sql.ResultSet.FETCH_FORWARD);
         HelperFunctions.expectFunctionDoesntThrow(() -> resultSet.getType(), java.sql.ResultSet.TYPE_FORWARD_ONLY);
-        HelperFunctions.expectFunctionDoesntThrow(() -> resultSet.getConcurrency(), java.sql.ResultSet.CONCUR_READ_ONLY);
+        HelperFunctions
+                .expectFunctionDoesntThrow(() -> resultSet.getConcurrency(), java.sql.ResultSet.CONCUR_READ_ONLY);
         HelperFunctions.expectFunctionThrows(() -> resultSet.getCursorName());
         HelperFunctions.expectFunctionDoesntThrow(() -> resultSet.getFetchSize(), 0);
         HelperFunctions.expectFunctionThrows(() -> resultSet.setFetchSize(-1));
@@ -302,7 +303,7 @@ public class ResultSetTest {
         HelperFunctions.expectFunctionDoesntThrow(() -> resultSet.isClosed(), false);
         HelperFunctions.expectFunctionDoesntThrow(() -> resultSet.close());
         HelperFunctions.expectFunctionDoesntThrow(() -> resultSet.isClosed(), true);
-        HelperFunctions.expectFunctionThrows(() -> ((ResultSet)resultSet).verifyOpen());
+        HelperFunctions.expectFunctionThrows(() -> ((ResultSet) resultSet).verifyOpen());
         HelperFunctions.expectFunctionDoesntThrow(() -> resultSet.close());
     }
 
@@ -312,11 +313,13 @@ public class ResultSetTest {
         HelperFunctions.expectFunctionDoesntThrow(() -> resultSet.clearWarnings());
         HelperFunctions.expectFunctionDoesntThrow(() -> resultSet.getWarnings(), null);
 
-        HelperFunctions.expectFunctionDoesntThrow(() -> ((ResultSet)resultSet).addWarning(HelperFunctions.getNewWarning1()));
+        HelperFunctions
+                .expectFunctionDoesntThrow(() -> ((ResultSet) resultSet).addWarning(HelperFunctions.getNewWarning1()));
         final SQLWarning warning = HelperFunctions.getNewWarning1();
         HelperFunctions.expectFunctionDoesntThrow(() -> resultSet.getWarnings(), warning);
         warning.setNextWarning(HelperFunctions.getNewWarning2());
-        HelperFunctions.expectFunctionDoesntThrow(() -> ((ResultSet)resultSet).addWarning(HelperFunctions.getNewWarning2()));
+        HelperFunctions
+                .expectFunctionDoesntThrow(() -> ((ResultSet) resultSet).addWarning(HelperFunctions.getNewWarning2()));
         HelperFunctions.expectFunctionDoesntThrow(() -> resultSet.getWarnings(), warning);
 
         HelperFunctions.expectFunctionDoesntThrow(() -> resultSet.clearWarnings());

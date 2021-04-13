@@ -33,6 +33,7 @@ import java.sql.Clob;
 import java.sql.Date;
 import java.sql.NClob;
 import java.sql.Ref;
+import java.sql.ResultSetMetaData;
 import java.sql.RowId;
 import java.sql.SQLException;
 import java.sql.SQLWarning;
@@ -72,6 +73,8 @@ public abstract class ResultSet implements java.sql.ResultSet {
     protected abstract void setDriverFetchSize(int rows);
 
     protected abstract Object getConvertedValue(int columnIndex) throws SQLException;
+
+    protected abstract ResultSetMetaData getResultMetadata() throws SQLException;
 
     /**
      * Verify the result set is open.
@@ -1139,13 +1142,19 @@ public abstract class ResultSet implements java.sql.ResultSet {
 
     protected void validateRowColumn(final int columnIndex) throws SQLException {
         if ((getRowIndex() < 0) || (getRowIndex() >= rowCount)) {
-            throw SqlError.createSQLException(LOGGER, SqlState.DATA_EXCEPTION, SqlError.INVALID_INDEX, getRowIndex() + 1,
-                    rowCount);
+            throw SqlError
+                    .createSQLException(LOGGER, SqlState.DATA_EXCEPTION, SqlError.INVALID_INDEX, getRowIndex() + 1,
+                            rowCount);
         }
         if ((columnIndex <= 0) || (columnIndex > columns.size())) {
             throw SqlError
                     .createSQLException(LOGGER, SqlState.DATA_EXCEPTION, SqlError.INVALID_COLUMN_INDEX, columnIndex,
                             columns.size());
         }
+    }
+
+    @Override
+    public java.sql.ResultSetMetaData getMetaData() throws SQLException {
+        return getResultMetadata();
     }
 }

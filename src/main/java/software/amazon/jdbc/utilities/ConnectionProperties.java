@@ -16,8 +16,8 @@
 package software.amazon.jdbc.utilities;
 
 import com.google.common.collect.ImmutableMap;
+import lombok.NonNull;
 import org.apache.log4j.Level;
-import org.checkerframework.checker.nullness.qual.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import java.sql.SQLException;
@@ -42,7 +42,8 @@ public abstract class ConnectionProperties extends Properties {
     public static final Level DEFAULT_LOG_LEVEL = Level.INFO;
 
     public static final Map<String, Object> DEFAULT_PROPERTIES_MAP = new HashMap<>();
-    private static final Map<String, ConnectionProperties.PropertyConverter<?>> PROPERTY_CONVERTER_MAP = new HashMap<>();
+    private static final Map<String, ConnectionProperties.PropertyConverter<?>> PROPERTY_CONVERTER_MAP =
+            new HashMap<>();
     private static final Logger LOGGER = LoggerFactory.getLogger(ConnectionProperties.class);
 
     static {
@@ -89,6 +90,87 @@ public abstract class ConnectionProperties extends Properties {
         resolveProperties(properties);
     }
 
+    protected static Level toLogLevel(@NonNull final String key, @NonNull final String value) throws SQLException {
+        if (isWhitespace(value)) {
+            return DEFAULT_LOG_LEVEL;
+        }
+        final Map<String, Level> logLevelsMap = ImmutableMap.<String, Level>builder()
+                .put("OFF", Level.OFF)
+                .put("FATAL", Level.FATAL)
+                .put("ERROR", Level.ERROR)
+                .put("WARN", Level.WARN)
+                .put("INFO", Level.INFO)
+                .put("DEBUG", Level.DEBUG)
+                .put("TRACE", Level.TRACE)
+                .put("ALL", Level.ALL)
+                .build();
+        if (!logLevelsMap.containsKey(value.toUpperCase())) {
+            throw invalidConnectionPropertyError(key, value);
+        }
+        return logLevelsMap.get(value.toUpperCase());
+    }
+
+    protected static int toUnsigned(@NonNull final String key, @NonNull final String value) throws SQLException {
+        if (isWhitespace(value)) {
+            if (DEFAULT_PROPERTIES_MAP.containsKey(key)) {
+                return (int) DEFAULT_PROPERTIES_MAP.get(key);
+            } else {
+                throw invalidConnectionPropertyError(key, value);
+            }
+        }
+        try {
+            final int intValue = Integer.parseUnsignedInt(value);
+            if (intValue < 0) {
+                throw invalidConnectionPropertyError(key, value);
+            }
+            return intValue;
+        } catch (final NumberFormatException | SQLException e) {
+            throw invalidConnectionPropertyError(key, value);
+        }
+    }
+
+    protected static boolean toBoolean(@NonNull final String key, @NonNull final String value) throws SQLException {
+        if (isWhitespace(value)) {
+            if (DEFAULT_PROPERTIES_MAP.containsKey(key)) {
+                return (boolean) DEFAULT_PROPERTIES_MAP.get(key);
+            } else {
+                throw invalidConnectionPropertyError(key, value);
+            }
+        }
+        final Map<String, Boolean> stringBooleanMap = ImmutableMap.of(
+                "1", true, "true", true,
+                "0", false, "false", false);
+        if (!stringBooleanMap.containsKey(value.toLowerCase())) {
+            throw invalidConnectionPropertyError(key, value);
+        }
+        return stringBooleanMap.get(value.toLowerCase());
+    }
+
+    protected static boolean isWhitespace(@NonNull final String value) {
+        return Pattern.matches("^\\s*$", value);
+    }
+
+    protected static SQLException invalidConnectionPropertyError(final Object key, final Object value) {
+        return SqlError.createSQLException(
+                LOGGER,
+                SqlState.CONNECTION_EXCEPTION,
+                SqlError.INVALID_CONNECTION_PROPERTY, key, value);
+    }
+
+    protected static SQLException missingConnectionPropertyError(final String reason) {
+        return SqlError.createSQLException(
+                LOGGER,
+                SqlState.CONNECTION_EXCEPTION,
+                SqlError.MISSING_CONNECTION_PROPERTY, reason);
+    }
+
+    protected static SQLException invalidConnectionPropertyValueError(final String key, final String reason) {
+        return SqlError.createSQLException(
+                LOGGER,
+                SqlState.CONNECTION_EXCEPTION,
+                SqlError.INVALID_VALUE_CONNECTION_PROPERTY, key, reason);
+    }
+
     /**
      * Gets the application name.
      *
@@ -106,7 +188,8 @@ public abstract class ConnectionProperties extends Properties {
      */
     public void setApplicationName(final String applicationName) throws SQLException {
         setProperty(APPLICATION_NAME_KEY,
-                (String) PROPERTY_CONVERTER_MAP.get(APPLICATION_NAME_KEY).convert(APPLICATION_NAME_KEY, applicationName));
+                (String) PROPERTY_CONVERTER_MAP.get(APPLICATION_NAME_KEY)
+                        .convert(APPLICATION_NAME_KEY, applicationName));
     }
 
     /**
@@ -190,6 +273,7 @@ public abstract class ConnectionProperties extends Properties {
 
     /**
      * Gets the entire set of properties.
+     *
      * @return The entire set of properties.
      */
     public Properties getProperties() {
@@ -201,7 +285,7 @@ public abstract class ConnectionProperties extends Properties {
     /**
      * Resolves a property and sets its value.
      *
-     * @param name The name of the property.
+     * @param name  The name of the property.
      * @param value The value of the property.
      * @throws SQLException If the property name or value is invalid.
      */
@@ -243,93 +327,12 @@ public abstract class ConnectionProperties extends Properties {
         // If there are any unresolved properties left, raise an error.
         if (!inputPropertiesKeys.isEmpty()) {
             // If there are any unresolved properties left, raise a warning.
-            for (final String property: inputPropertiesKeys) {
+            for (final String property : inputPropertiesKeys) {
                 LOGGER.warn(String.format("Error property '%s' is not supported.", property));
             }
         }
 
         validateProperties();
-    }
-
-    protected static Level toLogLevel(@NonNull final String key, @NonNull final String value) throws SQLException {
-        if (isWhitespace(value)) {
-            return DEFAULT_LOG_LEVEL;
-        }
-        final Map<String, Level> logLevelsMap = ImmutableMap.<String, Level>builder()
-                .put("OFF", Level.OFF)
-                .put("FATAL", Level.FATAL)
-                .put("ERROR", Level.ERROR)
-                .put("WARN", Level.WARN)
-                .put("INFO", Level.INFO)
-                .put("DEBUG", Level.DEBUG)
-                .put("TRACE", Level.TRACE)
-                .put("ALL", Level.ALL)
-                .build();
-        if (!logLevelsMap.containsKey(value.toUpperCase())) {
-            throw invalidConnectionPropertyError(key, value);
-        }
-        return logLevelsMap.get(value.toUpperCase());
-    }
-
-    protected static int toUnsigned(@NonNull final String key, @NonNull final String value) throws SQLException {
-        if (isWhitespace(value)) {
-            if (DEFAULT_PROPERTIES_MAP.containsKey(key)) {
-                return (int) DEFAULT_PROPERTIES_MAP.get(key);
-            } else {
-                throw invalidConnectionPropertyError(key, value);
-            }
-        }
-        try {
-            final int intValue = Integer.parseUnsignedInt(value);
-            if (intValue < 0) {
-                throw invalidConnectionPropertyError(key, value);
-            }
-            return intValue;
-        } catch (final NumberFormatException | SQLException e) {
-            throw invalidConnectionPropertyError(key, value);
-        }
-    }
-
-    protected static boolean toBoolean(@NonNull final String key, @NonNull final String value) throws SQLException {
-        if (isWhitespace(value)) {
-            if (DEFAULT_PROPERTIES_MAP.containsKey(key)) {
-                return (boolean) DEFAULT_PROPERTIES_MAP.get(key);
-            } else {
-                throw invalidConnectionPropertyError(key, value);
-            }
-        }
-        final Map<String, Boolean> stringBooleanMap = ImmutableMap.of(
-                "1", true, "true", true,
-                "0", false, "false", false);
-        if (!stringBooleanMap.containsKey(value.toLowerCase())) {
-            throw invalidConnectionPropertyError(key, value);
-        }
-        return stringBooleanMap.get(value.toLowerCase());
-    }
-
-    protected static boolean isWhitespace(@NonNull final String value) {
-        return Pattern.matches("^\\s*$", value);
-    }
-
-    protected static SQLException invalidConnectionPropertyError(final Object key, final Object value) {
-        return SqlError.createSQLException(
-                LOGGER,
-                SqlState.CONNECTION_EXCEPTION,
-                SqlError.INVALID_CONNECTION_PROPERTY, key, value);
-    }
-
-    protected static SQLException missingConnectionPropertyError(final String reason) {
-        return SqlError.createSQLException(
-                LOGGER,
-                SqlState.CONNECTION_EXCEPTION,
-                SqlError.MISSING_CONNECTION_PROPERTY, reason);
-    }
-
-    protected static SQLException invalidConnectionPropertyValueError(final String key, final String reason) {
-        return SqlError.createSQLException(
-                LOGGER,
-                SqlState.CONNECTION_EXCEPTION,
-                SqlError.INVALID_VALUE_CONNECTION_PROPERTY, key, reason);
     }
 
     /**

@@ -17,7 +17,6 @@
 package software.amazon.neptune.opencypher;
 
 import software.amazon.jdbc.PooledConnection;
-
 import java.sql.SQLException;
 
 /**
@@ -27,6 +26,7 @@ public class OpenCypherPooledConnection extends PooledConnection implements java
 
     /**
      * OpenCypherPooledConnection constructor, initializes super class.
+     *
      * @param connection Connection Object.
      */
     public OpenCypherPooledConnection(final java.sql.Connection connection) {

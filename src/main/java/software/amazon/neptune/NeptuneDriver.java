@@ -23,7 +23,6 @@ import software.amazon.jdbc.Driver;
 import software.amazon.jdbc.utilities.ConnectionProperties;
 import software.amazon.neptune.opencypher.OpenCypherConnection;
 import software.amazon.neptune.opencypher.OpenCypherConnectionProperties;
-
 import javax.annotation.Nullable;
 import java.sql.DriverManager;
 import java.sql.SQLException;
@@ -32,14 +31,14 @@ import java.util.Properties;
 import java.util.regex.Pattern;
 
 public class NeptuneDriver extends Driver implements java.sql.Driver {
-    private static final Logger LOGGER = LoggerFactory.getLogger(NeptuneDriver.class);
     public static final String CONN_STRING_PREFIX = "jdbc:neptune:";
+    private static final Logger LOGGER = LoggerFactory.getLogger(NeptuneDriver.class);
     private static final Pattern CONN_STRING_PATTERN = Pattern.compile(CONN_STRING_PREFIX + "(\\w+)://(.*)");
 
     static {
         try {
             DriverManager.registerDriver(new NeptuneDriver());
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
             LOGGER.error("Error registering driver: " + e.getMessage());
         }
     }
@@ -82,7 +81,8 @@ public class NeptuneDriver extends Driver implements java.sql.Driver {
         return connection;
     }
 
-    private ConnectionProperties connectionProperties(final String language, final Properties properties) throws SQLException {
+    private ConnectionProperties connectionProperties(final String language, final Properties properties)
+            throws SQLException {
         if ("opencypher".equalsIgnoreCase(language)) {
             return new OpenCypherConnectionProperties(properties);
         }

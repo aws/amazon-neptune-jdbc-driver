@@ -23,7 +23,6 @@ import software.amazon.jdbc.mock.MockConnection;
 import software.amazon.jdbc.mock.MockResultSet;
 import software.amazon.jdbc.mock.MockStatement;
 import software.amazon.neptune.opencypher.OpenCypherConnectionProperties;
-
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.SQLWarning;
@@ -57,15 +56,16 @@ public class StatementTest {
         HelperFunctions.expectFunctionThrows(() -> statement.setMaxRows(-1));
         HelperFunctions.expectFunctionDoesntThrow(() -> statement.setMaxRows(1));
         HelperFunctions.expectFunctionDoesntThrow(() -> statement.getConnection(), connection);
-        HelperFunctions.expectFunctionDoesntThrow(() -> statement.getFetchDirection(), java.sql.ResultSet.FETCH_FORWARD);
+        HelperFunctions
+                .expectFunctionDoesntThrow(() -> statement.getFetchDirection(), java.sql.ResultSet.FETCH_FORWARD);
         HelperFunctions.expectFunctionDoesntThrow(() -> statement.getFetchSize(), 0);
         HelperFunctions.expectFunctionThrows(() -> statement.getGeneratedKeys());
-        HelperFunctions.expectFunctionDoesntThrow(() -> statement.getLargeMaxRows(), (long)1);
+        HelperFunctions.expectFunctionDoesntThrow(() -> statement.getLargeMaxRows(), (long) 1);
         HelperFunctions.expectFunctionDoesntThrow(() -> statement.getMaxFieldSize(), 1);
-        HelperFunctions.expectFunctionDoesntThrow(() -> statement.getLargeUpdateCount(), (long)-1);
+        HelperFunctions.expectFunctionDoesntThrow(() -> statement.getLargeUpdateCount(), (long) -1);
         HelperFunctions.expectFunctionDoesntThrow(() -> statement.getMaxRows(), 1);
         HelperFunctions.expectFunctionDoesntThrow(() -> statement.getMoreResults(), false);
-        ((MockStatement)statement).setResultSet(new MockResultSet(statement));
+        ((MockStatement) statement).setResultSet(new MockResultSet(statement));
         HelperFunctions.expectFunctionDoesntThrow(() -> statement.execute(""));
         HelperFunctions.expectFunctionDoesntThrow(() -> statement.getMoreResults(
                 java.sql.Statement.CLOSE_CURRENT_RESULT), false);
@@ -89,18 +89,18 @@ public class StatementTest {
     void testExecute() {
         HelperFunctions.expectFunctionDoesntThrow(() -> statement.execute(""), true);
         HelperFunctions.expectFunctionDoesntThrow(() -> statement.execute("", 0), true);
-        HelperFunctions.expectFunctionDoesntThrow(() -> statement.execute("", new int[]{}), true);
-        HelperFunctions.expectFunctionDoesntThrow(() -> statement.execute("", new String[]{}), true);
+        HelperFunctions.expectFunctionDoesntThrow(() -> statement.execute("", new int[] {}), true);
+        HelperFunctions.expectFunctionDoesntThrow(() -> statement.execute("", new String[] {}), true);
         HelperFunctions.expectFunctionThrows(() -> statement.executeBatch());
         HelperFunctions.expectFunctionThrows(() -> statement.executeLargeBatch());
         HelperFunctions.expectFunctionThrows(() -> statement.executeLargeUpdate(""));
         HelperFunctions.expectFunctionThrows(() -> statement.executeLargeUpdate("", 0));
-        HelperFunctions.expectFunctionThrows(() -> statement.executeLargeUpdate("", new int[]{}));
-        HelperFunctions.expectFunctionThrows(() -> statement.executeLargeUpdate("", new String[]{}));
+        HelperFunctions.expectFunctionThrows(() -> statement.executeLargeUpdate("", new int[] {}));
+        HelperFunctions.expectFunctionThrows(() -> statement.executeLargeUpdate("", new String[] {}));
         HelperFunctions.expectFunctionThrows(() -> statement.executeUpdate(""));
         HelperFunctions.expectFunctionThrows(() -> statement.executeUpdate("", 0));
-        HelperFunctions.expectFunctionThrows(() -> statement.executeUpdate("", new int[]{}));
-        HelperFunctions.expectFunctionThrows(() -> statement.executeUpdate("", new String[]{}));
+        HelperFunctions.expectFunctionThrows(() -> statement.executeUpdate("", new int[] {}));
+        HelperFunctions.expectFunctionThrows(() -> statement.executeUpdate("", new String[] {}));
         HelperFunctions.expectFunctionThrows(() -> statement.executeBatch());
     }
 
@@ -116,18 +116,18 @@ public class StatementTest {
         HelperFunctions.expectFunctionDoesntThrow(() -> statement.isClosed(), false);
         HelperFunctions.expectFunctionDoesntThrow(() -> statement.close());
         HelperFunctions.expectFunctionDoesntThrow(() -> statement.isClosed(), true);
-        HelperFunctions.expectFunctionThrows(() -> ((Statement)statement).verifyOpen());
+        HelperFunctions.expectFunctionThrows(() -> ((Statement) statement).verifyOpen());
         HelperFunctions.expectFunctionDoesntThrow(() -> statement.close());
     }
 
     @Test
     void testResultSetClose() {
         HelperFunctions.expectFunctionDoesntThrow(() -> statement.isClosed(), false);
-        ((MockStatement)statement).setResultSet(new MockResultSet(statement));
+        ((MockStatement) statement).setResultSet(new MockResultSet(statement));
         HelperFunctions.expectFunctionDoesntThrow(() -> statement.execute(""));
         HelperFunctions.expectFunctionDoesntThrow(() -> statement.close());
         HelperFunctions.expectFunctionDoesntThrow(() -> statement.isClosed(), true);
-        HelperFunctions.expectFunctionThrows(() -> ((Statement)statement).verifyOpen());
+        HelperFunctions.expectFunctionThrows(() -> ((Statement) statement).verifyOpen());
         HelperFunctions.expectFunctionDoesntThrow(() -> statement.close());
     }
 
@@ -146,11 +146,13 @@ public class StatementTest {
         HelperFunctions.expectFunctionDoesntThrow(() -> statement.clearWarnings());
         HelperFunctions.expectFunctionDoesntThrow(() -> statement.getWarnings(), null);
 
-        HelperFunctions.expectFunctionDoesntThrow(() -> ((Statement)statement).addWarning(HelperFunctions.getNewWarning1()));
+        HelperFunctions
+                .expectFunctionDoesntThrow(() -> ((Statement) statement).addWarning(HelperFunctions.getNewWarning1()));
         final SQLWarning warning = HelperFunctions.getNewWarning1();
         HelperFunctions.expectFunctionDoesntThrow(() -> statement.getWarnings(), warning);
         warning.setNextWarning(HelperFunctions.getNewWarning2());
-        HelperFunctions.expectFunctionDoesntThrow(() -> ((Statement)statement).addWarning(HelperFunctions.getNewWarning2()));
+        HelperFunctions
+                .expectFunctionDoesntThrow(() -> ((Statement) statement).addWarning(HelperFunctions.getNewWarning2()));
         HelperFunctions.expectFunctionDoesntThrow(() -> statement.getWarnings(), warning);
 
         HelperFunctions.expectFunctionDoesntThrow(() -> statement.clearWarnings());

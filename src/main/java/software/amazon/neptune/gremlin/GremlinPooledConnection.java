@@ -17,7 +17,6 @@
 package software.amazon.neptune.gremlin;
 
 import software.amazon.jdbc.PooledConnection;
-
 import java.sql.SQLException;
 
 /**
@@ -27,6 +26,7 @@ public class GremlinPooledConnection extends PooledConnection implements javax.s
 
     /**
      * OpenCypherPooledConnection constructor, initializes super class.
+     *
      * @param connection Connection Object.
      */
     public GremlinPooledConnection(final java.sql.Connection connection) {

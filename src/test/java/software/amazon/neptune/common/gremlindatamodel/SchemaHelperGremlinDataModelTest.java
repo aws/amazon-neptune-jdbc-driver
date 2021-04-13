@@ -14,14 +14,12 @@
  *
  */
 
-package software.amazon.neptune.opencypher;
+package software.amazon.neptune.common.gremlindatamodel;
 
 import com.google.common.collect.ImmutableList;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import software.amazon.neptune.opencypher.resultset.OpenCypherResultSetGetColumns;
 import software.amazon.neptune.opencypher.utilities.OpenCypherGetColumnUtilities;
-
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
@@ -30,7 +28,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class OpenCypherSchemaHelperTest {
+public class SchemaHelperGremlinDataModelTest {
 
     @Test
     void deleteDirectoryIfExistsTest() throws IOException {
@@ -38,7 +36,7 @@ public class OpenCypherSchemaHelperTest {
         OpenCypherGetColumnUtilities.createFiles(root, ImmutableList.of("testFile.json"));
 
         Assertions.assertTrue(root.toAbsolutePath().toFile().isDirectory());
-        OpenCypherSchemaHelper.deleteDirectoryIfExists(root);
+        SchemaHelperGremlinDataModel.deleteDirectoryIfExists(root);
         Assertions.assertFalse(root.toAbsolutePath().toFile().isDirectory());
     }
 
@@ -55,7 +53,8 @@ public class OpenCypherSchemaHelperTest {
         testFiles.forEach(tf -> testFilesFullPath.add(extendedRoot.toAbsolutePath().toString() + "/" + tf));
         OpenCypherGetColumnUtilities.createFiles(extendedRoot, testFiles);
 
-        final List<String> outputFiles = OpenCypherSchemaHelper.getOutputFiles(root.toAbsolutePath().toString());
+        final List<String> outputFiles = SchemaHelperGremlinDataModel
+                .getOutputFiles(root.toAbsolutePath().toString());
         Assertions.assertEquals(new HashSet<>(testFilesFullPath.stream().map(p -> p.replace("/", "\\")).collect(
                 Collectors.toSet())), new HashSet<>(outputFiles.stream().map(p -> p.replace("/", "\\")).collect(
                 Collectors.toSet())));
@@ -73,11 +72,12 @@ public class OpenCypherSchemaHelperTest {
         testFiles.forEach(tf -> testFilesFullPath.add(extendedRoot.toAbsolutePath().toString() + "/" + tf));
         OpenCypherGetColumnUtilities.createFiles(extendedRoot, testFiles);
 
-        final List<OpenCypherResultSetGetColumns.NodeColumnInfo> nodeColumnInfoList = new ArrayList<>();
+        final List<ResultSetGetColumnsGremlinDataModel.NodeColumnInfo> nodeColumnInfoList = new ArrayList<>();
         testFilesFullPath
-                .forEach(testFileFullPath -> OpenCypherSchemaHelper.parseFile(testFileFullPath, nodeColumnInfoList));
+                .forEach(testFileFullPath -> SchemaHelperGremlinDataModel
+                        .parseFile(testFileFullPath, nodeColumnInfoList));
         Assertions.assertEquals(nodeColumnInfoList.size(), OpenCypherGetColumnUtilities.NODE_COLUMN_INFOS.size());
-        for (final OpenCypherResultSetGetColumns.NodeColumnInfo nodeColumnInfo : nodeColumnInfoList) {
+        for (final ResultSetGetColumnsGremlinDataModel.NodeColumnInfo nodeColumnInfo : nodeColumnInfoList) {
             Assertions.assertTrue(OpenCypherGetColumnUtilities.NODE_COLUMN_INFOS.contains(nodeColumnInfo));
         }
     }

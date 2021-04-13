@@ -23,7 +23,6 @@ import org.neo4j.driver.types.Point;
 import org.neo4j.driver.types.Relationship;
 import org.neo4j.driver.types.Type;
 import software.amazon.jdbc.utilities.JdbcType;
-
 import java.sql.Date;
 import java.sql.Time;
 import java.util.HashMap;

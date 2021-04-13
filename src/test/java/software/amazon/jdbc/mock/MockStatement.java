@@ -28,6 +28,7 @@ public class MockStatement extends Statement implements java.sql.Statement {
 
     /**
      * Constructor for MockStatement.
+     *
      * @param connection Connection to pass to Statement.
      */
     public MockStatement(final Connection connection) throws SQLException {

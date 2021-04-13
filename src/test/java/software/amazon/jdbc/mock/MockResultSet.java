@@ -26,12 +26,13 @@ import java.util.ArrayList;
  * Mock implementation for ResultSet object so it can be instantiated and tested.
  */
 public class MockResultSet extends ResultSet implements java.sql.ResultSet {
-    private int rowIndex = 0;
     private static final int ROW_COUNT = 10;
     private static final int COL_COUNT = 10;
+    private int rowIndex = 0;
 
     /**
      * Constructor for MockResultSet.
+     *
      * @param statement Statement Object.
      */
     public MockResultSet(final Statement statement) {
@@ -57,7 +58,7 @@ public class MockResultSet extends ResultSet implements java.sql.ResultSet {
     }
 
     @Override
-    public ResultSetMetaData getMetaData() throws SQLException {
+    protected ResultSetMetaData getResultMetadata() throws SQLException {
         return null;
     }
 

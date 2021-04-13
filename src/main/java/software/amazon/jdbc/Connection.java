@@ -17,9 +17,9 @@
 package software.amazon.jdbc;
 
 
+import lombok.NonNull;
 import lombok.SneakyThrows;
 import org.apache.log4j.LogManager;
-import org.checkerframework.checker.nullness.qual.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import software.amazon.jdbc.utilities.CastHelper;
@@ -27,7 +27,6 @@ import software.amazon.jdbc.utilities.ConnectionProperties;
 import software.amazon.jdbc.utilities.QueryExecutor;
 import software.amazon.jdbc.utilities.SqlError;
 import software.amazon.jdbc.utilities.SqlState;
-
 import java.sql.Array;
 import java.sql.ClientInfoStatus;
 import java.sql.ResultSet;
@@ -48,10 +47,9 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * Abstract implementation of Connection for JDBC Driver.
  */
 public abstract class Connection implements java.sql.Connection {
-    private final AtomicBoolean isClosed = new AtomicBoolean(false);
-
     private static final Logger LOGGER = LoggerFactory.getLogger(Connection.class);
-    private ConnectionProperties connectionProperties;
+    private final AtomicBoolean isClosed = new AtomicBoolean(false);
+    private final ConnectionProperties connectionProperties;
     private Map<String, Class<?>> typeMap = new HashMap<>();
     private SQLWarning warnings = null;
 
@@ -153,7 +151,7 @@ public abstract class Connection implements java.sql.Connection {
                 connectionProperties.remove(name);
                 LOGGER.debug("Successfully removed client info with name '{}'", name);
             }
-        } catch (SQLException ex) {
+        } catch (final SQLException ex) {
             throw SqlError.createSQLClientInfoException(
                     LOGGER,
                     getFailures(name, value),

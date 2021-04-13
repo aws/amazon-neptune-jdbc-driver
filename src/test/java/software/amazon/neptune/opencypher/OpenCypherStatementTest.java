@@ -23,7 +23,6 @@ import org.junit.jupiter.api.Test;
 import software.amazon.jdbc.helpers.HelperFunctions;
 import software.amazon.jdbc.utilities.SqlError;
 import software.amazon.neptune.opencypher.mock.MockOpenCypherDatabase;
-
 import java.sql.SQLException;
 
 public class OpenCypherStatementTest extends OpenCypherStatementTestBase {

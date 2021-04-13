@@ -14,7 +14,7 @@
  *
  */
 
-package software.amazon.neptune.opencypher.resultset;
+package software.amazon.neptune.common.gremlindatamodel;
 
 import com.google.common.collect.ImmutableList;
 import org.neo4j.driver.internal.types.InternalTypeSystem;
@@ -23,6 +23,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import software.amazon.jdbc.utilities.SqlError;
 import software.amazon.jdbc.utilities.SqlState;
+import software.amazon.neptune.common.ResultSetInfoWithoutRows;
+import software.amazon.neptune.opencypher.resultset.OpenCypherResultSet;
+import software.amazon.neptune.opencypher.resultset.OpenCypherResultSetMetadata;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -79,10 +82,10 @@ public class OpenCypherResultSetGetTables extends OpenCypherResultSet implements
      * @param resultSetInfoWithoutRows ResultSetInfoWithoutRows Object.
      */
     public OpenCypherResultSetGetTables(final Statement statement,
-                                        final List<OpenCypherResultSetGetColumns.NodeColumnInfo> nodeColumnInfos,
+                                        final List<ResultSetGetColumnsGremlinDataModel.NodeColumnInfo> nodeColumnInfos,
                                         final ResultSetInfoWithoutRows resultSetInfoWithoutRows) {
         super(statement, resultSetInfoWithoutRows);
-        for (final OpenCypherResultSetGetColumns.NodeColumnInfo nodeColumnInfo : nodeColumnInfos) {
+        for (final ResultSetGetColumnsGremlinDataModel.NodeColumnInfo nodeColumnInfo : nodeColumnInfos) {
             // Add defaults, table name, and push into List.
             final Map<String, Object> map = new HashMap<>(MAPPED_KEYS);
             map.put(TABLE_NAME, nodeListToString(nodeColumnInfo.getLabels()));
@@ -110,7 +113,7 @@ public class OpenCypherResultSetGetTables extends OpenCypherResultSet implements
     }
 
     @Override
-    protected ResultSetMetaData getOpenCypherMetadata() {
+    protected ResultSetMetaData getResultMetadata() {
         return new OpenCypherResultSetMetadata(ORDERED_COLUMNS, ROW_TYPES);
     }
 
@@ -119,10 +122,13 @@ public class OpenCypherResultSetGetTables extends OpenCypherResultSet implements
         verifyOpen();
         final int index = getRowIndex();
         if ((index < 0) || (index >= rows.size())) {
-            throw SqlError.createSQLException(LOGGER, SqlState.DATA_EXCEPTION, SqlError.INVALID_INDEX, index + 1, rows.size());
+            throw SqlError.createSQLException(LOGGER, SqlState.DATA_EXCEPTION, SqlError.INVALID_INDEX, index + 1,
+                    rows.size());
         }
         if ((columnIndex <= 0) || (columnIndex > ORDERED_COLUMNS.size())) {
-            throw SqlError.createSQLException(LOGGER, SqlState.DATA_EXCEPTION, SqlError.INVALID_COLUMN_INDEX, columnIndex, ORDERED_COLUMNS.size());
+            throw SqlError
+                    .createSQLException(LOGGER, SqlState.DATA_EXCEPTION, SqlError.INVALID_COLUMN_INDEX, columnIndex,
+                            ORDERED_COLUMNS.size());
         }
 
         final String key = ORDERED_COLUMNS.get(columnIndex - 1);

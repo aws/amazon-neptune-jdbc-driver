@@ -23,7 +23,6 @@ import software.amazon.jdbc.helpers.HelperFunctions;
 import software.amazon.jdbc.utilities.SqlError;
 import software.amazon.neptune.opencypher.OpenCypherConnection;
 import software.amazon.neptune.opencypher.mock.MockOpenCypherDatabase;
-
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.List;

@@ -16,7 +16,6 @@
 package software.amazon.neptune.gremlin;
 
 import software.amazon.jdbc.utilities.QueryExecutor;
-
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;

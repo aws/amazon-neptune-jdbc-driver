@@ -25,13 +25,11 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.neo4j.driver.internal.types.InternalTypeSystem;
 import software.amazon.neptune.opencypher.mock.MockOpenCypherDatabase;
-
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Types;
 import java.util.List;
 import java.util.Properties;
-
 import static software.amazon.neptune.opencypher.mock.OpenCypherQueryLiterals.DATE;
 import static software.amazon.neptune.opencypher.mock.OpenCypherQueryLiterals.DATE_TIME;
 import static software.amazon.neptune.opencypher.mock.OpenCypherQueryLiterals.DURATION;

@@ -22,7 +22,6 @@ import software.amazon.jdbc.utilities.Warning;
 import java.sql.SQLException;
 import java.sql.SQLWarning;
 import java.util.concurrent.atomic.AtomicReference;
-
 import static software.amazon.jdbc.utilities.SqlError.lookup;
 
 public class HelperFunctions {
@@ -34,31 +33,8 @@ public class HelperFunctions {
             new SQLWarning(Warning.lookup(Warning.UNSUPPORTED_PROPERTY, TEST_WARNING_UNSUPPORTED));
 
     /**
-     * Simple interface to pass to functions below.
-     * @param <R> Template type.
-     */
-    public interface VerifyValueInterface<R> {
-        /**
-         * Function to execute.
-         * @return Template type.
-         * @throws SQLException Exception thrown.
-         */
-        R function() throws SQLException;
-    }
-
-    /**
-     * Simple interface to pass to functions below.
-     */
-    public interface VerifyThrowInterface {
-        /**
-         * Function to execute.
-         * @throws SQLException Exception thrown.
-         */
-        void function() throws SQLException;
-    }
-
-    /**
      * Function to verify that function passed in throws an exception.
+     *
      * @param f function to check.
      */
     public static void expectFunctionThrows(final VerifyThrowInterface f) {
@@ -67,25 +43,28 @@ public class HelperFunctions {
 
     /**
      * Function to verify that function passed in throws an exception with specified error message.
+     *
      * @param error specific error message.
-     * @param f function to check.
+     * @param f     function to check.
      */
     public static void expectFunctionThrows(final String error, final VerifyThrowInterface f) {
-        final Exception exception =  Assertions.assertThrows(SQLException.class, f::function);
+        final Exception exception = Assertions.assertThrows(SQLException.class, f::function);
         Assertions.assertEquals(error, exception.getMessage());
     }
 
     /**
      * Function to verify that function passed in throws an exception with specified error key. Error arguments are not supported.
+     *
      * @param key specific error code.
-     * @param f function to check.
+     * @param f   function to check.
      */
     public static void expectFunctionThrows(final SqlError key, final VerifyThrowInterface f) {
-        expectFunctionThrows(lookup(key),f);
+        expectFunctionThrows(lookup(key), f);
     }
 
     /**
      * Function to verify that function passed in doesn't throw an exception.
+     *
      * @param f function to check.
      */
     public static void expectFunctionDoesntThrow(final VerifyThrowInterface f) {
@@ -94,7 +73,8 @@ public class HelperFunctions {
 
     /**
      * Function to verify that function passed in doesn't throw an exception and has correct output value.
-     * @param f function to check.
+     *
+     * @param f        function to check.
      * @param expected expected value.
      */
     public static void expectFunctionDoesntThrow(final VerifyValueInterface<?> f, final Object expected) {
@@ -122,5 +102,32 @@ public class HelperFunctions {
 
     public static SQLWarning getNewWarning2() {
         return new SQLWarning(TEST_WARNING_REASON_2, TEST_WARNING_STATE);
+    }
+
+    /**
+     * Simple interface to pass to functions below.
+     *
+     * @param <R> Template type.
+     */
+    public interface VerifyValueInterface<R> {
+        /**
+         * Function to execute.
+         *
+         * @return Template type.
+         * @throws SQLException Exception thrown.
+         */
+        R function() throws SQLException;
+    }
+
+    /**
+     * Simple interface to pass to functions below.
+     */
+    public interface VerifyThrowInterface {
+        /**
+         * Function to execute.
+         *
+         * @throws SQLException Exception thrown.
+         */
+        void function() throws SQLException;
     }
 }

@@ -54,12 +54,12 @@ public class EmptyResultSet extends software.amazon.jdbc.ResultSet implements ja
     }
 
     @Override
-    public boolean wasNull() throws SQLException {
-        return false;
+    protected ResultSetMetaData getResultMetadata() throws SQLException {
+        return new EmptyResultSetMetadata(new ArrayList<>(), new ArrayList<>());
     }
 
     @Override
-    public ResultSetMetaData getMetaData() throws SQLException {
-        return new EmptyResultSetMetadata(new ArrayList<>(), new ArrayList<>());
+    public boolean wasNull() throws SQLException {
+        return false;
     }
 }

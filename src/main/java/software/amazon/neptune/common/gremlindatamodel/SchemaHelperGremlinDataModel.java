@@ -14,7 +14,7 @@
  *
  */
 
-package software.amazon.neptune.opencypher;
+package software.amazon.neptune.common.gremlindatamodel;
 
 import com.amazonaws.services.neptune.NeptuneExportCli;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -25,7 +25,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import software.amazon.jdbc.utilities.SqlError;
 import software.amazon.jdbc.utilities.SqlState;
-import software.amazon.neptune.opencypher.resultset.OpenCypherResultSetGetColumns;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -40,8 +39,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-public class OpenCypherSchemaHelper {
-    private static final Logger LOGGER = LoggerFactory.getLogger(OpenCypherSchemaHelper.class);
+public class SchemaHelperGremlinDataModel {
+    private static final Logger LOGGER = LoggerFactory.getLogger(SchemaHelperGremlinDataModel.class);
 
     /**
      * Function to get graph schema and return list of NodeColumnInfo describing it.
@@ -51,9 +50,9 @@ public class OpenCypherSchemaHelper {
      * @return List of NodeColumnInfo.
      * @throws SQLException Thrown if an error is encountered.
      */
-    public static List<OpenCypherResultSetGetColumns.NodeColumnInfo> getGraphSchema(final String endpoint,
-                                                                                    final String nodes,
-                                                                                    final boolean useIAM)
+    public static List<ResultSetGetColumnsGremlinDataModel.NodeColumnInfo> getGraphSchema(final String endpoint,
+                                                                                          final String nodes,
+                                                                                          final boolean useIAM)
             throws SQLException, IOException {
         // Create unique directory if doesn't exist
         // If does exist, delete current contents
@@ -63,7 +62,7 @@ public class OpenCypherSchemaHelper {
         final List<String> outputFiles = runGremlinSchemaGrabber(endpoint, nodes, directory, useIAM);
 
         // Validate to see if files are json
-        final List<OpenCypherResultSetGetColumns.NodeColumnInfo> nodeColumnInfoList = new ArrayList<>();
+        final List<ResultSetGetColumnsGremlinDataModel.NodeColumnInfo> nodeColumnInfoList = new ArrayList<>();
         for (final String file : outputFiles) {
             parseFile(file, nodeColumnInfoList);
         }
@@ -165,7 +164,7 @@ public class OpenCypherSchemaHelper {
 
     @VisibleForTesting
     static void parseFile(final String filePath,
-                          final List<OpenCypherResultSetGetColumns.NodeColumnInfo> nodeColumnInfoList) {
+                          final List<ResultSetGetColumnsGremlinDataModel.NodeColumnInfo> nodeColumnInfoList) {
         LOGGER.info(String.format("Parsing file '%s'", filePath));
         try {
             final String jsonString = new String(Files.readAllBytes(Paths.get(filePath).toAbsolutePath()));
@@ -197,7 +196,7 @@ public class OpenCypherSchemaHelper {
                                 "Properties does not contain 'property', 'dataType', 'isMultiValue', and/or 'isNullable' keys");
                     }
                 }
-                nodeColumnInfoList.add(new OpenCypherResultSetGetColumns.NodeColumnInfo(labels, properties));
+                nodeColumnInfoList.add(new ResultSetGetColumnsGremlinDataModel.NodeColumnInfo(labels, properties));
             }
         } catch (final Exception e) {
             LOGGER.error(e.getMessage());

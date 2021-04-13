@@ -20,7 +20,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import software.amazon.jdbc.DatabaseMetaData;
 import software.amazon.neptune.common.EmptyResultSet;
-
 import java.sql.ResultSet;
 import java.sql.SQLException;
 

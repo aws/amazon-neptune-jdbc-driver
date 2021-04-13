@@ -23,7 +23,6 @@ import software.amazon.jdbc.helpers.HelperFunctions;
 import software.amazon.jdbc.mock.MockConnection;
 import software.amazon.jdbc.mock.MockPooledConnection;
 import software.amazon.neptune.opencypher.OpenCypherConnectionProperties;
-
 import javax.sql.ConnectionEvent;
 import javax.sql.ConnectionEventListener;
 import java.sql.SQLException;
@@ -36,7 +35,7 @@ public class PooledConnectionTest {
     private boolean isClosed;
     private boolean isError;
 
-    private ConnectionEventListener listener = new ConnectionEventListener() {
+    private final ConnectionEventListener listener = new ConnectionEventListener() {
         @Override
         public void connectionClosed(final ConnectionEvent event) {
             isClosed = true;

@@ -22,7 +22,6 @@ import org.slf4j.LoggerFactory;
 import software.amazon.jdbc.utilities.AuthScheme;
 import software.amazon.jdbc.utilities.SqlError;
 import software.amazon.neptune.NeptuneDriver;
-
 import javax.sql.PooledConnection;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -31,7 +30,8 @@ import java.sql.SQLException;
 /**
  * Gremlin implementation of DataSource.
  */
-public class GremlinDataSource extends software.amazon.jdbc.DataSource implements javax.sql.DataSource, javax.sql.ConnectionPoolDataSource {
+public class GremlinDataSource extends software.amazon.jdbc.DataSource
+        implements javax.sql.DataSource, javax.sql.ConnectionPoolDataSource {
     public static final String OPEN_CYPHER_PREFIX = NeptuneDriver.CONN_STRING_PREFIX + "gremlin://";
     private static final Logger LOGGER = LoggerFactory.getLogger(GremlinDataSource.class);
 
@@ -67,6 +67,17 @@ public class GremlinDataSource extends software.amazon.jdbc.DataSource implement
 
     /**
      * Sets the timeout for opening a connection.
+     *
+     * @return the connection timeout in seconds.
+     */
+    @Override
+    public int getLoginTimeout() throws SQLException {
+        return connectionProperties.getConnectionTimeoutMillis();
+    }
+
+    /**
+     * Sets the timeout for opening a connection.
+     *
      * @param seconds The connection timeout in seconds.
      * @throws SQLException if timeout is negative.
      */
@@ -76,16 +87,17 @@ public class GremlinDataSource extends software.amazon.jdbc.DataSource implement
     }
 
     /**
-     * Sets the timeout for opening a connection.
-     * @return the connection timeout in seconds.
+     * Gets the application name.
+     *
+     * @return The application name.
      */
-    @Override
-    public int getLoginTimeout() throws SQLException {
-        return connectionProperties.getConnectionTimeoutMillis();
+    public String getApplicationName() {
+        return connectionProperties.getApplicationName();
     }
 
     /**
      * Sets the application name.
+     *
      * @param applicationName The application name.
      * @throws SQLException if value is invalid.
      */
@@ -94,15 +106,17 @@ public class GremlinDataSource extends software.amazon.jdbc.DataSource implement
     }
 
     /**
-     * Gets the application name.
-     * @return The application name.
+     * Gets the connection endpoint.
+     *
+     * @return The connection endpoint.
      */
-    public String getApplicationName() {
-        return connectionProperties.getApplicationName();
+    public String getEndpoint() {
+        return connectionProperties.getEndpoint();
     }
 
     /**
      * Sets the connection endpoint.
+     *
      * @param endpoint The connection endpoint.
      * @throws SQLException if value is invalid.
      */
@@ -111,15 +125,17 @@ public class GremlinDataSource extends software.amazon.jdbc.DataSource implement
     }
 
     /**
-     * Gets the connection endpoint.
-     * @return The connection endpoint.
+     * Gets the logging level.
+     *
+     * @return The logging level.
      */
-    public String getEndpoint() {
-        return connectionProperties.getEndpoint();
+    public Level getLogLevel() {
+        return connectionProperties.getLogLevel();
     }
 
     /**
      * Sets the logging level.
+     *
      * @param logLevel The logging level.
      * @throws SQLException if value is invalid.
      */
@@ -128,15 +144,17 @@ public class GremlinDataSource extends software.amazon.jdbc.DataSource implement
     }
 
     /**
-     * Gets the logging level.
-     * @return The logging level.
+     * Gets the connection timeout in milliseconds.
+     *
+     * @return The connection timeout in milliseconds.
      */
-    public Level getLogLevel() {
-        return connectionProperties.getLogLevel();
+    public int getConnectionTimeoutMillis() {
+        return connectionProperties.getConnectionTimeoutMillis();
     }
 
     /**
      * Sets the connection timeout in milliseconds.
+     *
      * @param timeoutMillis The connection timeout in milliseconds.
      * @throws SQLException if value is invalid.
      */
@@ -145,15 +163,17 @@ public class GremlinDataSource extends software.amazon.jdbc.DataSource implement
     }
 
     /**
-     * Gets the connection timeout in milliseconds.
-     * @return The connection timeout in milliseconds.
+     * Gets the connection retry count.
+     *
+     * @return The connection retry count.
      */
-    public int getConnectionTimeoutMillis() {
-        return connectionProperties.getConnectionTimeoutMillis();
+    public int getConnectionRetryCount() {
+        return connectionProperties.getConnectionRetryCount();
     }
 
     /**
      * Sets the connection retry count.
+     *
      * @param retryCount The connection retry count.
      * @throws SQLException if value is invalid.
      */
@@ -162,15 +182,17 @@ public class GremlinDataSource extends software.amazon.jdbc.DataSource implement
     }
 
     /**
-     * Gets the connection retry count.
-     * @return The connection retry count.
+     * Gets the authentication scheme.
+     *
+     * @return The authentication scheme.
      */
-    public int getConnectionRetryCount() {
-        return connectionProperties.getConnectionRetryCount();
+    public AuthScheme getAuthScheme() {
+        return connectionProperties.getAuthScheme();
     }
 
     /**
      * Sets the authentication scheme.
+     *
      * @param authScheme The authentication scheme.
      * @throws SQLException if value is invalid.
      */
@@ -179,26 +201,20 @@ public class GremlinDataSource extends software.amazon.jdbc.DataSource implement
     }
 
     /**
-     * Gets the authentication scheme.
-     * @return The authentication scheme.
-     */
-    public AuthScheme getAuthScheme() {
-        return connectionProperties.getAuthScheme();
-    }
-
-    /**
-     * Sets the use encryption.
-     * @param useEncryption The use encryption.
-     */
-    public void setUseEncryption(final boolean useEncryption) {
-        connectionProperties.setUseEncryption(useEncryption);
-    }
-
-    /**
      * Gets the use encryption.
+     *
      * @return The use encryption.
      */
     public boolean getUseEncryption() {
         return (connectionProperties.getUseEncryption());
+    }
+
+    /**
+     * Sets the use encryption.
+     *
+     * @param useEncryption The use encryption.
+     */
+    public void setUseEncryption(final boolean useEncryption) {
+        connectionProperties.setUseEncryption(useEncryption);
     }
 }

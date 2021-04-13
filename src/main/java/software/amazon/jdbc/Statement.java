@@ -44,12 +44,12 @@ public class Statement implements java.sql.Statement {
     private ResultSet resultSet;
 
     @Getter
-    private QueryExecutor queryExecutor;
+    private final QueryExecutor queryExecutor;
 
     /**
      * Constructor for seeding the statement with the parent connection.
      *
-     * @param connection The parent connection.
+     * @param connection    The parent connection.
      * @param queryExecutor The query executor.
      * @throws SQLException if error occurs when get type map of connection.
      */
@@ -89,7 +89,7 @@ public class Statement implements java.sql.Statement {
             LOGGER.debug("Cancel any running queries.");
             try {
                 queryExecutor.cancelQuery();
-            } catch (SQLException ignored) {
+            } catch (final SQLException ignored) {
             }
 
             if (this.resultSet != null) {

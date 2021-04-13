@@ -153,7 +153,7 @@ public enum SqlError {
     /**
      * Create {@link SQLFeatureNotSupportedException} of error and log the message with a {@link Logger}.
      *
-     * @param logger     The {@link Logger} contains log info.
+     * @param logger The {@link Logger} contains log info.
      * @return SQLFeatureNotSupportedException with error message.
      */
     public static SQLFeatureNotSupportedException createSQLFeatureNotSupportedException(
@@ -185,8 +185,8 @@ public enum SqlError {
     /**
      * Create {@link SQLClientInfoException} of error and log the message with a {@link Logger}.
      *
-     * @param logger     The {@link Logger} contains log info.
-     * @param map        A Map containing the property values that could not be set.
+     * @param logger The {@link Logger} contains log info.
+     * @param map    A Map containing the property values that could not be set.
      * @param e      The SQLException thrown by previous error handling.
      * @return SQLClientInfoException with error message.
      */

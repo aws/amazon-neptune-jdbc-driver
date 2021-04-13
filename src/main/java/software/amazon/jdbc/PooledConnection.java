@@ -34,6 +34,7 @@ public abstract class PooledConnection implements javax.sql.PooledConnection {
 
     /**
      * PooledConnection constructor.
+     *
      * @param connection Connection Object.
      */
     public PooledConnection(final java.sql.Connection connection) {

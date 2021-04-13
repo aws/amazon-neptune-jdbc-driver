@@ -20,7 +20,6 @@ import com.google.common.collect.ImmutableList;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import software.amazon.jdbc.utilities.AuthScheme;
-
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Properties;
@@ -36,10 +35,14 @@ class OpenCypherConnectionPropertiesTest {
         connectionProperties = new OpenCypherConnectionProperties();
         Assertions.assertEquals("", connectionProperties.getEndpoint());
         Assertions.assertEquals(OpenCypherConnectionProperties.DEFAULT_LOG_LEVEL, connectionProperties.getLogLevel());
-        Assertions.assertEquals(OpenCypherConnectionProperties.DEFAULT_CONNECTION_TIMEOUT_MILLIS, connectionProperties.getConnectionTimeoutMillis());
-        Assertions.assertEquals(OpenCypherConnectionProperties.DEFAULT_CONNECTION_RETRY_COUNT, connectionProperties.getConnectionRetryCount());
-        Assertions.assertEquals(OpenCypherConnectionProperties.DEFAULT_AUTH_SCHEME, connectionProperties.getAuthScheme());
-        Assertions.assertEquals(OpenCypherConnectionProperties.DEFAULT_USE_ENCRYPTION, connectionProperties.getUseEncryption());
+        Assertions.assertEquals(OpenCypherConnectionProperties.DEFAULT_CONNECTION_TIMEOUT_MILLIS,
+                connectionProperties.getConnectionTimeoutMillis());
+        Assertions.assertEquals(OpenCypherConnectionProperties.DEFAULT_CONNECTION_RETRY_COUNT,
+                connectionProperties.getConnectionRetryCount());
+        Assertions
+                .assertEquals(OpenCypherConnectionProperties.DEFAULT_AUTH_SCHEME, connectionProperties.getAuthScheme());
+        Assertions.assertEquals(OpenCypherConnectionProperties.DEFAULT_USE_ENCRYPTION,
+                connectionProperties.getUseEncryption());
         Assertions.assertEquals("", connectionProperties.getRegion());
     }
 
@@ -75,7 +78,7 @@ class OpenCypherConnectionPropertiesTest {
         final List<String> validConnectionTimeouts = ImmutableList.of(
                 "0", "5", "10000");
         final List<String> invalidConnectionTimeouts = ImmutableList.of(
-                "-1", "blah", String.valueOf((long)Integer.MAX_VALUE + 1000));
+                "-1", "blah", String.valueOf((long) Integer.MAX_VALUE + 1000));
 
         final Properties properties = new Properties();
 
@@ -111,7 +114,7 @@ class OpenCypherConnectionPropertiesTest {
         final List<String> validConnectionTimeouts = ImmutableList.of(
                 "0", "5", "10000");
         final List<String> invalidConnectionTimeouts = ImmutableList.of(
-                "-1", "blah", String.valueOf((long)Integer.MAX_VALUE + 1000));
+                "-1", "blah", String.valueOf((long) Integer.MAX_VALUE + 1000));
 
         final Properties properties = new Properties();
 

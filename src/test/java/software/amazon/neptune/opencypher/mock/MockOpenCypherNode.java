@@ -20,12 +20,14 @@ public interface MockOpenCypherNode {
     /**
      * Info for CREATE functions.
      * Example: NodeType {node_param: 'node_value'}
+     *
      * @return Info for CREATE functions.
      */
     String getInfo();
 
     /**
      * Annotation for CREATE functions.
+     *
      * @return Annotation for CREATE functions.
      */
     String getAnnotation();
@@ -33,6 +35,7 @@ public interface MockOpenCypherNode {
     /**
      * Index for CREATE INDEX functions.
      * Example: NodeType (node_param)
+     *
      * @return Index for CREATE INDEX functions.
      */
     String getIndex();

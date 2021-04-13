@@ -17,7 +17,7 @@
 package software.amazon.neptune.opencypher;
 
 import lombok.Getter;
-import org.checkerframework.checker.nullness.qual.NonNull;
+import lombok.NonNull;
 import software.amazon.jdbc.utilities.ConnectionProperties;
 import software.amazon.jdbc.utilities.QueryExecutor;
 import java.sql.DatabaseMetaData;
@@ -29,6 +29,7 @@ import java.sql.SQLException;
 public class OpenCypherConnection extends software.amazon.jdbc.Connection implements java.sql.Connection {
     @Getter
     private final OpenCypherConnectionProperties openCypherConnectionProperties;
+
     /**
      * OpenCypherConnection constructor, initializes super class.
      *
