@@ -50,7 +50,7 @@ public class SchemaHelperGremlinDataModel {
      * @return List of NodeColumnInfo.
      * @throws SQLException Thrown if an error is encountered.
      */
-    public static List<ResultSetGetColumns.NodeColumnInfo> getGraphSchema(final String endpoint,
+    public static List<NodeColumnInfo> getGraphSchema(final String endpoint,
                                                                           final String nodes,
                                                                           final boolean useIAM)
             throws SQLException, IOException {
@@ -62,7 +62,7 @@ public class SchemaHelperGremlinDataModel {
         final List<String> outputFiles = runGremlinSchemaGrabber(endpoint, nodes, directory, useIAM);
 
         // Validate to see if files are json
-        final List<ResultSetGetColumns.NodeColumnInfo> nodeColumnInfoList = new ArrayList<>();
+        final List<NodeColumnInfo> nodeColumnInfoList = new ArrayList<>();
         for (final String file : outputFiles) {
             parseFile(file, nodeColumnInfoList);
         }
@@ -164,7 +164,7 @@ public class SchemaHelperGremlinDataModel {
 
     @VisibleForTesting
     static void parseFile(final String filePath,
-                          final List<ResultSetGetColumns.NodeColumnInfo> nodeColumnInfoList) {
+                          final List<NodeColumnInfo> nodeColumnInfoList) {
         LOGGER.info(String.format("Parsing file '%s'", filePath));
         try {
             final String jsonString = new String(Files.readAllBytes(Paths.get(filePath).toAbsolutePath()));
@@ -196,7 +196,7 @@ public class SchemaHelperGremlinDataModel {
                                 "Properties does not contain 'property', 'dataType', 'isMultiValue', and/or 'isNullable' keys");
                     }
                 }
-                nodeColumnInfoList.add(new ResultSetGetColumns.NodeColumnInfo(labels, properties));
+                nodeColumnInfoList.add(new NodeColumnInfo(labels, properties));
             }
         } catch (final Exception e) {
             LOGGER.error(e.getMessage());

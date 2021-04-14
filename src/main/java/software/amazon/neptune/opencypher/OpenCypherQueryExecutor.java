@@ -30,13 +30,13 @@ import software.amazon.jdbc.utilities.QueryExecutor;
 import software.amazon.jdbc.utilities.SqlError;
 import software.amazon.jdbc.utilities.SqlState;
 import software.amazon.neptune.common.gremlindatamodel.MetadataCache;
-import software.amazon.neptune.common.gremlindatamodel.ResultSetGetColumns;
-import software.amazon.neptune.common.gremlindatamodel.ResultSetGetTables;
+import software.amazon.neptune.common.gremlindatamodel.NodeColumnInfo;
 import software.amazon.neptune.opencypher.resultset.OpenCypherResultSet;
 import software.amazon.neptune.opencypher.resultset.OpenCypherResultSetGetCatalogs;
 import software.amazon.neptune.opencypher.resultset.OpenCypherResultSetGetColumns;
 import software.amazon.neptune.opencypher.resultset.OpenCypherResultSetGetSchemas;
 import software.amazon.neptune.opencypher.resultset.OpenCypherResultSetGetTableTypes;
+import software.amazon.neptune.opencypher.resultset.OpenCypherResultSetGetTables;
 import java.lang.reflect.Constructor;
 import java.sql.SQLException;
 import java.util.List;
@@ -202,9 +202,9 @@ public class OpenCypherQueryExecutor extends QueryExecutor {
                     (openCypherConnectionProperties.getAuthScheme() == AuthScheme.IAMSigV4));
         }
 
-        final List<ResultSetGetColumns.NodeColumnInfo> nodeColumnInfoList =
+        final List<NodeColumnInfo> nodeColumnInfoList =
                 MetadataCache.getFilteredCacheNodeColumnInfos(tableName);
-        return new ResultSetGetTables(statement, nodeColumnInfoList,
+        return new OpenCypherResultSetGetTables(statement, nodeColumnInfoList,
                 MetadataCache.getFilteredResultSetInfoWithoutRowsForTables(tableName));
     }
 
@@ -258,7 +258,7 @@ public class OpenCypherQueryExecutor extends QueryExecutor {
                     (openCypherConnectionProperties.getAuthScheme() == AuthScheme.IAMSigV4));
         }
 
-        final List<ResultSetGetColumns.NodeColumnInfo> nodeColumnInfoList =
+        final List<NodeColumnInfo> nodeColumnInfoList =
                 MetadataCache.getFilteredCacheNodeColumnInfos(nodes);
         return new OpenCypherResultSetGetColumns(statement, nodeColumnInfoList,
                 MetadataCache.getFilteredResultSetInfoWithoutRowsForColumns(nodes));

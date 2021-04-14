@@ -16,7 +16,6 @@
 
 package software.amazon.jdbc;
 
-
 import lombok.NonNull;
 import lombok.SneakyThrows;
 import org.apache.log4j.LogManager;

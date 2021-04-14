@@ -27,7 +27,7 @@ import java.util.List;
 public class MetadataCache {
     private static final Object LOCK = new Object();
     @Getter
-    private static List<ResultSetGetColumns.NodeColumnInfo> cachedNodeColumnInfos = null;
+    private static List<NodeColumnInfo> cachedNodeColumnInfos = null;
 
     /**
      * Function to update the cache of the OpenCypherMetadata
@@ -66,11 +66,11 @@ public class MetadataCache {
      * @param nodeFilter Filter to apply.
      * @return Filtered NodeColumnInfo List.
      */
-    public static List<ResultSetGetColumns.NodeColumnInfo> getFilteredCacheNodeColumnInfos(
+    public static List<NodeColumnInfo> getFilteredCacheNodeColumnInfos(
             final String nodeFilter) {
         synchronized (LOCK) {
-            final List<ResultSetGetColumns.NodeColumnInfo> nodeColumnInfos = new ArrayList<>();
-            for (final ResultSetGetColumns.NodeColumnInfo nodeColumnInfo : cachedNodeColumnInfos) {
+            final List<NodeColumnInfo> nodeColumnInfos = new ArrayList<>();
+            for (final NodeColumnInfo nodeColumnInfo : cachedNodeColumnInfos) {
                 if (nodeFilter != null && !"%".equals(nodeFilter)) {
                     if (Arrays.stream(nodeFilter.split(":"))
                             .allMatch(node -> nodeColumnInfo.getLabels().contains(node))) {

@@ -3,7 +3,7 @@ package software.amazon.neptune.opencypher.utilities;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import org.junit.jupiter.api.Assertions;
-import software.amazon.neptune.common.gremlindatamodel.ResultSetGetColumns;
+import software.amazon.neptune.common.gremlindatamodel.NodeColumnInfo;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -45,8 +45,8 @@ public class OpenCypherGetColumnUtilities {
             "    } ]\n" +
             "  } ]\n" +
             "}";
-    public static final List<ResultSetGetColumns.NodeColumnInfo> NODE_COLUMN_INFOS = ImmutableList.of(
-            new ResultSetGetColumns.NodeColumnInfo(
+    public static final List<NodeColumnInfo> NODE_COLUMN_INFOS = ImmutableList.of(
+            new NodeColumnInfo(
                     ImmutableList.of("A", "B", "C"), ImmutableList.of(
                     ImmutableMap.of(
                             "property", "name",
@@ -60,7 +60,7 @@ public class OpenCypherGetColumnUtilities {
                             "isNullable", false)
             )
             ),
-            new ResultSetGetColumns.NodeColumnInfo(
+            new NodeColumnInfo(
                     ImmutableList.of("A", "B", "C", "D"), ImmutableList.of(
                     ImmutableMap.of(
                             "property", "age",

@@ -32,7 +32,7 @@ import java.sql.SQLException;
  */
 public class GremlinDataSource extends software.amazon.jdbc.DataSource
         implements javax.sql.DataSource, javax.sql.ConnectionPoolDataSource {
-    public static final String OPEN_CYPHER_PREFIX = NeptuneDriver.CONN_STRING_PREFIX + "gremlin://";
+    public static final String GREMLIN_PREFIX = NeptuneDriver.CONN_STRING_PREFIX + "gremlin://";
     private static final Logger LOGGER = LoggerFactory.getLogger(GremlinDataSource.class);
 
     private final GremlinConnectionProperties connectionProperties;
@@ -47,7 +47,7 @@ public class GremlinDataSource extends software.amazon.jdbc.DataSource
 
     @Override
     public Connection getConnection() throws SQLException {
-        return DriverManager.getConnection(OPEN_CYPHER_PREFIX, connectionProperties);
+        return DriverManager.getConnection(GREMLIN_PREFIX, connectionProperties);
     }
 
     @Override

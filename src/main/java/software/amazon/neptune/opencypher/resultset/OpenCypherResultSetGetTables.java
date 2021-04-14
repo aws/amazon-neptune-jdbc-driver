@@ -20,7 +20,7 @@ import org.neo4j.driver.internal.types.InternalTypeSystem;
 import org.neo4j.driver.types.Type;
 import software.amazon.neptune.common.ResultSetInfoWithoutRows;
 import software.amazon.neptune.common.gremlindatamodel.NodeColumnInfo;
-import software.amazon.neptune.common.gremlindatamodel.ResultSetGetColumns;
+import software.amazon.neptune.common.gremlindatamodel.ResultSetGetTables;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -29,7 +29,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class OpenCypherResultSetGetColumns extends ResultSetGetColumns implements java.sql.ResultSet {
+public class OpenCypherResultSetGetTables extends ResultSetGetTables implements java.sql.ResultSet {
     private static final Map<String, Type> COLUMN_TYPE_MAP = new HashMap<>();
 
     static {
@@ -66,9 +66,9 @@ public class OpenCypherResultSetGetColumns extends ResultSetGetColumns implement
      * @param nodeColumnInfos          List of NodeColumnInfo Objects.
      * @param resultSetInfoWithoutRows ResultSetInfoWithoutRows Object.
      */
-    public OpenCypherResultSetGetColumns(final Statement statement,
-                                         final List<NodeColumnInfo> nodeColumnInfos,
-                                         final ResultSetInfoWithoutRows resultSetInfoWithoutRows)
+    public OpenCypherResultSetGetTables(final Statement statement,
+                                        final List<NodeColumnInfo> nodeColumnInfos,
+                                        final ResultSetInfoWithoutRows resultSetInfoWithoutRows)
             throws SQLException {
         super(statement, nodeColumnInfos, resultSetInfoWithoutRows);
     }
@@ -77,8 +77,8 @@ public class OpenCypherResultSetGetColumns extends ResultSetGetColumns implement
     protected ResultSetMetaData getResultMetadata() {
         final List<String> orderedColumns = getColumns();
         final List<Type> rowTypes = new ArrayList<>();
-        for (final String column : orderedColumns) {
-            rowTypes.add(COLUMN_TYPE_MAP.get(column));
+        for (int i = 0; i < orderedColumns.size(); i++) {
+            rowTypes.add(InternalTypeSystem.TYPE_SYSTEM.STRING());
         }
         return new OpenCypherResultSetMetadata(orderedColumns, rowTypes);
     }

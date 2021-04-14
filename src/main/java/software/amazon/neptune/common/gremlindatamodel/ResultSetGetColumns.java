@@ -16,8 +16,6 @@
 
 package software.amazon.neptune.common.gremlindatamodel;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import software.amazon.jdbc.utilities.JavaToJdbcTypeConverter;
@@ -137,12 +135,12 @@ public abstract class ResultSetGetColumns extends software.amazon.jdbc.ResultSet
         super(statement, resultSetInfoWithoutRows.getColumns(), resultSetInfoWithoutRows.getRowCount());
         for (final NodeColumnInfo nodeColumnInfo : nodeColumnInfos) {
             int i = 1;
-            for (final Map<String, Object> property : nodeColumnInfo.properties) {
+            for (final Map<String, Object> property : nodeColumnInfo.getProperties()) {
                 // Add defaults.
                 final Map<String, Object> map = new HashMap<>(CONVERSION_MAP);
 
                 // Set table name.
-                map.put("TABLE_NAME", ResultSetGetTables.nodeListToString(nodeColumnInfo.labels));
+                map.put("TABLE_NAME", ResultSetGetTables.nodeListToString(nodeColumnInfo.getLabels()));
 
                 // Get column type.
                 final String dataType = property.get("dataType").toString();
@@ -226,22 +224,5 @@ public abstract class ResultSetGetColumns extends software.amazon.jdbc.ResultSet
 
     @Override
     protected void setDriverFetchSize(final int rows) {
-    }
-
-    @AllArgsConstructor
-    public static class NodeColumnInfo {
-        @Getter
-        private final List<String> labels;
-        @Getter
-        private final List<Map<String, Object>> properties;
-
-        @Override
-        public boolean equals(final Object nodeColumnInfo) {
-            if (!(nodeColumnInfo instanceof NodeColumnInfo)) {
-                return false;
-            }
-            final NodeColumnInfo nodeInfo = (NodeColumnInfo) (nodeColumnInfo);
-            return nodeInfo.labels.equals(this.labels) && nodeInfo.properties.equals(this.properties);
-        }
     }
 }

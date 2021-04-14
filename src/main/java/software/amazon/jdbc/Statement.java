@@ -36,15 +36,14 @@ public class Statement implements java.sql.Statement {
     private static final Logger LOGGER = LoggerFactory.getLogger(Statement.class);
     private final java.sql.Connection connection;
     private final AtomicBoolean isClosed = new AtomicBoolean(false);
+    @Getter
+    private final QueryExecutor queryExecutor;
     private int maxFieldSize = 0;
     private long largeMaxRows = 0;
     private boolean shouldCloseOnCompletion = false;
     private SQLWarning warnings;
     private int fetchSize = 0;
     private ResultSet resultSet;
-
-    @Getter
-    private final QueryExecutor queryExecutor;
 
     /**
      * Constructor for seeding the statement with the parent connection.
@@ -86,14 +85,16 @@ public class Statement implements java.sql.Statement {
     @Override
     public void close() throws SQLException {
         if (!this.isClosed.getAndSet(true)) {
-            LOGGER.debug("Cancel any running queries.");
+            LOGGER.debug("Cancelling running queries.");
             try {
                 queryExecutor.cancelQuery();
-            } catch (final SQLException ignored) {
+            } catch (final SQLException e) {
+                LOGGER.warn("Error occurred while closing Statement. Failed to cancel running query: '"
+                        + e.getMessage() + "'");
             }
 
             if (this.resultSet != null) {
-                LOGGER.debug("Close open result set.");
+                LOGGER.debug("Closing ResultSet, which was left open in Statement.");
                 this.resultSet.close();
             }
         }

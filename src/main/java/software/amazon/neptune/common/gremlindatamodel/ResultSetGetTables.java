@@ -17,16 +17,12 @@
 package software.amazon.neptune.common.gremlindatamodel;
 
 import com.google.common.collect.ImmutableList;
-import org.neo4j.driver.internal.types.InternalTypeSystem;
-import org.neo4j.driver.types.Type;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import software.amazon.jdbc.utilities.SqlError;
 import software.amazon.jdbc.utilities.SqlState;
 import software.amazon.neptune.common.ResultSetInfoWithoutRows;
 import software.amazon.neptune.opencypher.resultset.OpenCypherResultSet;
-import software.amazon.neptune.opencypher.resultset.OpenCypherResultSetMetadata;
-import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
@@ -34,7 +30,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class ResultSetGetTables extends OpenCypherResultSet implements java.sql.ResultSet {
+public abstract class ResultSetGetTables extends OpenCypherResultSet implements java.sql.ResultSet {
     private static final Logger LOGGER = LoggerFactory.getLogger(ResultSetGetTables.class);
     /**
      * TABLE_CAT String => table catalog (may be null)
@@ -54,7 +50,6 @@ public class ResultSetGetTables extends OpenCypherResultSet implements java.sql.
             "SELF_REFERENCING_COL_NAME", "REF_GENERATION");
     private static final Map<String, Object> MAPPED_KEYS = new HashMap<>();
     private static final String TABLE_NAME = "TABLE_NAME";
-    private static final List<Type> ROW_TYPES = new ArrayList<>();
 
     static {
         MAPPED_KEYS.put("TABLE_CAT", "catalog");
@@ -66,10 +61,6 @@ public class ResultSetGetTables extends OpenCypherResultSet implements java.sql.
         MAPPED_KEYS.put("TYPE_NAME", "typename");
         MAPPED_KEYS.put("SELF_REFERENCING_COL_NAME", "selfreferencingcolname");
         MAPPED_KEYS.put("REF_GENERATION", "selfgeneration");
-
-        for (int i = 0; i < ORDERED_COLUMNS.size(); i++) {
-            ROW_TYPES.add(InternalTypeSystem.TYPE_SYSTEM.STRING());
-        }
     }
 
     private final List<Map<String, Object>> rows = new ArrayList<>();
@@ -82,10 +73,10 @@ public class ResultSetGetTables extends OpenCypherResultSet implements java.sql.
      * @param resultSetInfoWithoutRows ResultSetInfoWithoutRows Object.
      */
     public ResultSetGetTables(final Statement statement,
-                              final List<ResultSetGetColumns.NodeColumnInfo> nodeColumnInfos,
+                              final List<NodeColumnInfo> nodeColumnInfos,
                               final ResultSetInfoWithoutRows resultSetInfoWithoutRows) {
         super(statement, resultSetInfoWithoutRows);
-        for (final ResultSetGetColumns.NodeColumnInfo nodeColumnInfo : nodeColumnInfos) {
+        for (final NodeColumnInfo nodeColumnInfo : nodeColumnInfos) {
             // Add defaults, table name, and push into List.
             final Map<String, Object> map = new HashMap<>(MAPPED_KEYS);
             map.put(TABLE_NAME, nodeListToString(nodeColumnInfo.getLabels()));
@@ -113,11 +104,6 @@ public class ResultSetGetTables extends OpenCypherResultSet implements java.sql.
     }
 
     @Override
-    protected ResultSetMetaData getResultMetadata() {
-        return new OpenCypherResultSetMetadata(ORDERED_COLUMNS, ROW_TYPES);
-    }
-
-    @Override
     protected Object getConvertedValue(final int columnIndex) throws SQLException {
         verifyOpen();
         final int index = getRowIndex();
@@ -137,5 +123,23 @@ public class ResultSetGetTables extends OpenCypherResultSet implements java.sql.
         } else {
             throw SqlError.createSQLFeatureNotSupportedException(LOGGER);
         }
+    }
+
+    @Override
+    public boolean wasNull() throws SQLException {
+        return false;
+    }
+
+    @Override
+    protected void doClose() throws SQLException {
+    }
+
+    @Override
+    protected int getDriverFetchSize() throws SQLException {
+        return 0;
+    }
+
+    @Override
+    protected void setDriverFetchSize(final int rows) {
     }
 }
