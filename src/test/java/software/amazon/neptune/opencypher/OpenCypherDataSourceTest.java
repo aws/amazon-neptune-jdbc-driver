@@ -27,7 +27,6 @@ import software.amazon.jdbc.utilities.AuthScheme;
 import software.amazon.jdbc.utilities.SqlError;
 import software.amazon.neptune.NeptuneDriverTestWithEncryption;
 import software.amazon.neptune.opencypher.mock.MockOpenCypherDatabase;
-
 import java.sql.SQLException;
 
 class OpenCypherDataSourceTest {
@@ -67,8 +66,10 @@ class OpenCypherDataSourceTest {
 
     @Test
     void testGetConnectionFailure() throws SQLException {
-        HelperFunctions.expectFunctionThrows(SqlError.FEATURE_NOT_SUPPORTED, () -> dataSource.getConnection("name", "psw"));
-        HelperFunctions.expectFunctionThrows(SqlError.FEATURE_NOT_SUPPORTED, () -> dataSource.getPooledConnection("name", "psw"));
+        HelperFunctions
+                .expectFunctionThrows(SqlError.FEATURE_NOT_SUPPORTED, () -> dataSource.getConnection("name", "psw"));
+        HelperFunctions.expectFunctionThrows(SqlError.FEATURE_NOT_SUPPORTED,
+                () -> dataSource.getPooledConnection("name", "psw"));
     }
 
     @Test

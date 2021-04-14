@@ -16,16 +16,20 @@
 
 package software.amazon.neptune.opencypher;
 
-import org.checkerframework.checker.nullness.qual.NonNull;
+import lombok.Getter;
+import lombok.NonNull;
 import software.amazon.jdbc.utilities.ConnectionProperties;
+import software.amazon.jdbc.utilities.QueryExecutor;
 import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
-import java.util.concurrent.Executor;
 
 /**
  * OpenCypher implementation of Connection.
  */
 public class OpenCypherConnection extends software.amazon.jdbc.Connection implements java.sql.Connection {
+    @Getter
+    private final OpenCypherConnectionProperties openCypherConnectionProperties;
+
     /**
      * OpenCypherConnection constructor, initializes super class.
      *
@@ -33,18 +37,18 @@ public class OpenCypherConnection extends software.amazon.jdbc.Connection implem
      */
     public OpenCypherConnection(@NonNull final ConnectionProperties connectionProperties) throws SQLException {
         super(connectionProperties);
+        openCypherConnectionProperties = new OpenCypherConnectionProperties(getConnectionProperties());
     }
 
     @Override
     public boolean isValid(final int timeout) throws SQLException {
-        final OpenCypherQueryExecutor queryExecutor =
-                new OpenCypherQueryExecutor(new OpenCypherConnectionProperties(getConnectionProperties()));
+        final OpenCypherQueryExecutor queryExecutor = new OpenCypherQueryExecutor(openCypherConnectionProperties);
         return queryExecutor.isValid(timeout);
     }
 
     @Override
     public void doClose() {
-        // TODO.
+        OpenCypherQueryExecutor.close();
     }
 
     @Override
@@ -53,24 +57,7 @@ public class OpenCypherConnection extends software.amazon.jdbc.Connection implem
     }
 
     @Override
-    public int getNetworkTimeout() {
-        // TODO.
-        return 0;
-    }
-
-    @Override
-    public void setNetworkTimeout(final Executor executor, final int milliseconds) {
-        // TODO.
-    }
-
-    @Override
-    public java.sql.Statement createStatement(final int resultSetType, final int resultSetConcurrency)
-            throws SQLException {
-        return new OpenCypherStatement(this);
-    }
-
-    @Override
-    public java.sql.PreparedStatement prepareStatement(final String sql) throws SQLException {
-        return new OpenCypherPreparedStatement(this, sql);
+    public QueryExecutor getQueryExecutor() {
+        return new OpenCypherQueryExecutor(getOpenCypherConnectionProperties());
     }
 }

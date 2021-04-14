@@ -49,7 +49,8 @@ public class MetadataExamples {
     public void getColumnsMetadataExample() throws SQLException {
         final ResultSet getColumnsResultSet = databaseMetaData.getColumns(null, null, null, null);
         if (!getColumnsResultSet.next()) {
-            throw new SQLException("This graph contains no columns (properties on any nodes with distinct label sets).");
+            throw new SQLException(
+                    "This graph contains no columns (properties on any nodes with distinct label sets).");
         }
 
         do {

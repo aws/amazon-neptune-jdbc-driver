@@ -22,11 +22,10 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import software.amazon.jdbc.utilities.AuthScheme;
-import software.amazon.neptune.opencypher.resultset.OpenCypherResultSet;
+import software.amazon.neptune.common.ResultSetInfoWithoutRows;
+import software.amazon.neptune.common.gremlindatamodel.ResultSetGetTables;
 import software.amazon.neptune.opencypher.resultset.OpenCypherResultSetGetColumns;
-import software.amazon.neptune.opencypher.resultset.OpenCypherResultSetGetTables;
 import software.amazon.neptune.opencypher.utilities.OpenCypherGetColumnUtilities;
-
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
@@ -41,7 +40,7 @@ public class OpenCypherResultSetGetColumnsTest {
     private static java.sql.Statement statement;
 
     static {
-        COLUMNS.put(OpenCypherResultSetGetTables.nodeListToString(ImmutableList.of("A", "B", "C")),
+        COLUMNS.put(ResultSetGetTables.nodeListToString(ImmutableList.of("A", "B", "C")),
                 ImmutableMap.of(
                         "name", ImmutableMap.of(
                                 "dataType", "String",
@@ -51,7 +50,7 @@ public class OpenCypherResultSetGetColumnsTest {
                                 "dataType", "String",
                                 "isMultiValue", false,
                                 "isNullable", false)));
-        COLUMNS.put(OpenCypherResultSetGetTables.nodeListToString(ImmutableList.of("A", "B", "C", "D")),
+        COLUMNS.put(ResultSetGetTables.nodeListToString(ImmutableList.of("A", "B", "C", "D")),
                 ImmutableMap.of(
                         "age", ImmutableMap.of(
                                 "dataType", "Integer",
@@ -72,7 +71,8 @@ public class OpenCypherResultSetGetColumnsTest {
     public static void initialize() throws SQLException {
         PROPERTIES.put(OpenCypherConnectionProperties.AUTH_SCHEME_KEY, AuthScheme.None); // reverse default to None
         // Make up fake endpoint since we aren't actually connection.
-        PROPERTIES.putIfAbsent(OpenCypherConnectionProperties.ENDPOINT_KEY, String.format("bolt://%s:%d", "localhost", 123));
+        PROPERTIES.putIfAbsent(OpenCypherConnectionProperties.ENDPOINT_KEY,
+                String.format("bolt://%s:%d", "localhost", 123));
         final java.sql.Connection connection = new OpenCypherConnection(new OpenCypherConnectionProperties(PROPERTIES));
         statement = connection.createStatement();
     }
@@ -81,8 +81,7 @@ public class OpenCypherResultSetGetColumnsTest {
     void generateOpenCypherResultSetGetColumnsManuallyTest() throws Exception {
         final ResultSet resultSet =
                 new OpenCypherResultSetGetColumns(statement, OpenCypherGetColumnUtilities.NODE_COLUMN_INFOS,
-                        new OpenCypherResultSet.ResultSetInfoWithoutRows(null, null,
-                                OpenCypherGetColumnUtilities.NODE_COLUMN_INFOS.size(),
+                        new ResultSetInfoWithoutRows(OpenCypherGetColumnUtilities.NODE_COLUMN_INFOS.size(),
                                 OpenCypherResultSetGetColumns.getColumns()));
         final ResultSetMetaData resultSetMetaData = resultSet.getMetaData();
         verifyResultSetMetadata(resultSetMetaData);

@@ -21,23 +21,23 @@ import org.junit.jupiter.api.Assertions;
 import software.amazon.jdbc.utilities.AuthScheme;
 import software.amazon.jdbc.utilities.ConnectionProperties;
 import software.amazon.neptune.opencypher.OpenCypherConnectionProperties;
-
 import java.util.List;
 import java.util.Properties;
 
 public abstract class ConnectionPropertiesTestBase {
-    protected abstract void assertDoesNotThrowOnNewConnectionProperties(final Properties properties);
-    protected abstract void assertThrowsOnNewConnectionProperties(final Properties properties);
-    protected abstract <T> void assertPropertyValueEqualsToExpected(final String key, final T expectedValue);
-
     protected static final boolean DEFAULT_FALSE = false;
     protected static final String DEFAULT_EMPTY_STRING = "";
-
     protected static final int NO_DEFAULT_INT = 0;
     protected static final boolean NO_DEFAULT_BOOL = false;
     protected static final String NO_DEFAULT_STRING = null;
 
-    protected void testAuthSchemeViaConstructor()  {
+    protected abstract void assertDoesNotThrowOnNewConnectionProperties(final Properties properties);
+
+    protected abstract void assertThrowsOnNewConnectionProperties(final Properties properties);
+
+    protected abstract <T> void assertPropertyValueEqualsToExpected(final String key, final T expectedValue);
+
+    protected void testAuthSchemeViaConstructor() {
 
         final List<String> emptyAuthSchemes = ImmutableList.of(
                 "", " ");
@@ -179,7 +179,7 @@ public abstract class ConnectionPropertiesTestBase {
         final List<String> validValues = ImmutableList.of(
                 "0", "5", "10000");
         final List<String> invalidValues = ImmutableList.of(
-                "-1", "blah", String.valueOf((long)Integer.MAX_VALUE + 1000));
+                "-1", "blah", String.valueOf((long) Integer.MAX_VALUE + 1000));
 
         if (hasDefault) {
             final Properties properties = new Properties();

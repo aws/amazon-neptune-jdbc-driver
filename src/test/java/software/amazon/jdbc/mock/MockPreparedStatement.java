@@ -18,8 +18,6 @@ package software.amazon.jdbc.mock;
 
 import software.amazon.jdbc.PreparedStatement;
 import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 
 /**
@@ -28,41 +26,12 @@ import java.sql.SQLException;
 public class MockPreparedStatement extends PreparedStatement implements java.sql.PreparedStatement {
     /**
      * Constructor for seeding the prepared statement with the parent connection.
+     *
      * @param connection The parent connection.
      * @param sql        The sql query.
      * @throws SQLException if error occurs when get type map of connection.
      */
-    public MockPreparedStatement(final Connection connection, final String sql) {
-        super(connection, sql);
-    }
-
-    @Override
-    public ResultSet executeQuery() throws SQLException {
-        return null;
-    }
-
-    @Override
-    public ResultSetMetaData getMetaData() throws SQLException {
-        return null;
-    }
-
-    @Override
-    protected void cancelQuery() throws SQLException {
-
-    }
-
-    @Override
-    protected int getMaxFetchSize() throws SQLException {
-        return 0;
-    }
-
-    @Override
-    public int getQueryTimeout() throws SQLException {
-        return 0;
-    }
-
-    @Override
-    public void setQueryTimeout(final int seconds) throws SQLException {
-
+    public MockPreparedStatement(final Connection connection, final String sql) throws SQLException {
+        super(connection, sql, new MockQueryExecutor());
     }
 }

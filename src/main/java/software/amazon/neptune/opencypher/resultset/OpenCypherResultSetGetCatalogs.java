@@ -17,6 +17,7 @@
 package software.amazon.neptune.opencypher.resultset;
 
 import com.google.common.collect.ImmutableList;
+import software.amazon.neptune.common.ResultSetInfoWithoutRows;
 import java.sql.Statement;
 import java.util.HashMap;
 import java.util.List;
@@ -29,7 +30,7 @@ public class OpenCypherResultSetGetCatalogs extends OpenCypherResultSetGetString
     private static final List<String> COLUMNS = ImmutableList.of("TABLE_CAT");
     private static final Map<String, String> CONVERSION_MAP = new HashMap<>();
     private static final ResultSetInfoWithoutRows RESULT_SET_INFO_WITHOUT_ROWS =
-            new ResultSetInfoWithoutRows(null, null, 0, COLUMNS);
+            new ResultSetInfoWithoutRows(0, COLUMNS);
 
     static {
         CONVERSION_MAP.put("TABLE_CAT", null);

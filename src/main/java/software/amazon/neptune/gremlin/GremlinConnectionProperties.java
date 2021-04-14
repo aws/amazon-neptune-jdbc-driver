@@ -18,14 +18,13 @@ package software.amazon.neptune.gremlin;
 
 import com.google.common.collect.ImmutableList;
 import io.netty.handler.ssl.SslContext;
+import lombok.NonNull;
 import org.apache.tinkerpop.gremlin.driver.LoadBalancingStrategy;
 import org.apache.tinkerpop.gremlin.driver.MessageSerializer;
-import org.checkerframework.checker.nullness.qual.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import software.amazon.jdbc.utilities.AuthScheme;
 import software.amazon.jdbc.utilities.ConnectionProperties;
-
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.List;

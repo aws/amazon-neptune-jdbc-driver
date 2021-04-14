@@ -38,6 +38,7 @@ public enum SqlState {
 
     /**
      * SqlState constructor.
+     *
      * @param sqlState The SQLSTATE code associated with this sql state.
      */
     SqlState(final String sqlState) {

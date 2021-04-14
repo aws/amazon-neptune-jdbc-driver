@@ -15,7 +15,8 @@
 
 package software.amazon.jdbc.utilities;
 
-import org.checkerframework.checker.nullness.qual.NonNull;
+
+import lombok.NonNull;
 
 /**
  * Auth Scheme enum.
@@ -33,6 +34,7 @@ public enum AuthScheme {
 
     /**
      * Converts case-insensitive string to enum value.
+     *
      * @param in The case-insensitive string to be converted to enum.
      * @return The enum value if string is recognized as a valid value, otherwise null.
      */

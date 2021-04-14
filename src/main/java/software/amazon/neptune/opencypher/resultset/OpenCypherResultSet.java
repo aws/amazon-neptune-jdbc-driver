@@ -28,6 +28,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import software.amazon.jdbc.utilities.SqlError;
 import software.amazon.jdbc.utilities.SqlState;
+import software.amazon.neptune.common.ResultSetInfoWithoutRows;
 import software.amazon.neptune.opencypher.OpenCypherTypeMapping;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
@@ -43,6 +44,7 @@ public class OpenCypherResultSet extends software.amazon.jdbc.ResultSet implemen
     private final Session session;
     private boolean wasNull = false;
 
+    // TODO: Separate the result set without info to a common result set that this can use.
     /**
      * OpenCypherResultSet constructor, initializes super class.
      *
@@ -65,8 +67,8 @@ public class OpenCypherResultSet extends software.amazon.jdbc.ResultSet implemen
      */
     public OpenCypherResultSet(final java.sql.Statement statement, final ResultSetInfoWithoutRows resultSetInfo) {
         super(statement, resultSetInfo.getColumns(), resultSetInfo.getRowCount());
-        this.session = resultSetInfo.getSession();
-        this.result = resultSetInfo.getResult();
+        this.session = null;
+        this.result = null;
         this.columns = resultSetInfo.getColumns();
         this.rows = null;
     }
@@ -98,11 +100,7 @@ public class OpenCypherResultSet extends software.amazon.jdbc.ResultSet implemen
     }
 
     @Override
-    public ResultSetMetaData getMetaData() throws SQLException {
-        return getOpenCypherMetadata();
-    }
-
-    protected ResultSetMetaData getOpenCypherMetadata() throws SQLException {
+    protected ResultSetMetaData getResultMetadata() throws SQLException {
         final List<Type> rowTypes = new ArrayList<>();
         if (rows == null) {
             for (int i = 0; i < columns.size(); i++) {
@@ -155,15 +153,6 @@ public class OpenCypherResultSet extends software.amazon.jdbc.ResultSet implemen
         private final Session session;
         private final Result result;
         private final List<Record> rows;
-        private final List<String> columns;
-    }
-
-    @AllArgsConstructor
-    @Getter
-    public static class ResultSetInfoWithoutRows {
-        private final Session session;
-        private final Result result;
-        private final int rowCount;
         private final List<String> columns;
     }
 }

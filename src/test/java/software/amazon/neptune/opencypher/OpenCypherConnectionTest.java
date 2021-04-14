@@ -31,14 +31,12 @@ import software.amazon.jdbc.utilities.SqlError;
 import software.amazon.neptune.opencypher.mock.MockOpenCypherDatabase;
 import software.amazon.neptune.opencypher.mock.MockOpenCypherNodes;
 import software.amazon.neptune.opencypher.resultset.OpenCypherResultSet;
-
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Properties;
 import java.util.concurrent.atomic.AtomicReference;
-
 import static software.amazon.jdbc.utilities.ConnectionProperties.APPLICATION_NAME_KEY;
 
 public class OpenCypherConnectionTest {
@@ -46,9 +44,6 @@ public class OpenCypherConnectionTest {
     private static final String QUERY =
             "MATCH (p1:Person)-[:KNOWS]->(p2:Person)-[:GIVES_PETS_TO]->(k:Kitty) WHERE k.name = 'tootsie' RETURN p1, p2, k";
     private static final Properties PROPERTIES = new Properties();
-    private static MockOpenCypherDatabase database;
-    private java.sql.Connection connection;
-
     private static final String TEST_PROP_KEY_UNSUPPORTED = "unsupported";
     private static final String TEST_PROP_VAL_UNSUPPORTED = "unsupported";
     private static final String TEST_PROP_KEY = "ConnectionTimeout";
@@ -56,6 +51,8 @@ public class OpenCypherConnectionTest {
     private static final Properties TEST_PROP = new Properties();
     private static final Properties TEST_PROP_INITIAL = new Properties();
     private static final Properties TEST_PROP_MODIFIED = new Properties();
+    private static MockOpenCypherDatabase database;
+    private java.sql.Connection connection;
 
     /**
      * Function to get a random available port and initialize database before testing.
@@ -103,7 +100,7 @@ public class OpenCypherConnectionTest {
     void testOpenCypherConnectionPrepareStatementType() {
         final AtomicReference<PreparedStatement> statement = new AtomicReference<>();
         Assertions.assertDoesNotThrow(() -> statement.set(connection.prepareStatement(QUERY)));
-        Assertions.assertTrue(statement.get() instanceof OpenCypherPreparedStatement);
+        Assertions.assertTrue(statement.get() instanceof software.amazon.jdbc.PreparedStatement);
 
         final AtomicReference<ResultSet> openCypherResultSet = new AtomicReference<>();
         Assertions.assertDoesNotThrow(() -> openCypherResultSet.set(statement.get().executeQuery()));
@@ -114,7 +111,7 @@ public class OpenCypherConnectionTest {
     void testOpenCypherConnectionStatementType() {
         final AtomicReference<Statement> statement = new AtomicReference<>();
         Assertions.assertDoesNotThrow(() -> statement.set(connection.createStatement()));
-        Assertions.assertTrue(statement.get() instanceof OpenCypherStatement);
+        Assertions.assertTrue(statement.get() instanceof software.amazon.jdbc.Statement);
 
         final AtomicReference<ResultSet> openCypherResultSet = new AtomicReference<>();
         Assertions.assertDoesNotThrow(() -> openCypherResultSet.set(statement.get().executeQuery(QUERY)));
@@ -123,7 +120,8 @@ public class OpenCypherConnectionTest {
 
     @Test
     void testLogLevelChanged() throws SQLException {
-        Assertions.assertEquals(OpenCypherConnectionProperties.DEFAULT_LOG_LEVEL, LogManager.getRootLogger().getLevel());
+        Assertions
+                .assertEquals(OpenCypherConnectionProperties.DEFAULT_LOG_LEVEL, LogManager.getRootLogger().getLevel());
 
         final Properties properties = new Properties();
         properties.putAll(PROPERTIES);

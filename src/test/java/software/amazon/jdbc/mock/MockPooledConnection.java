@@ -27,6 +27,7 @@ public class MockPooledConnection extends PooledConnection implements javax.sql.
 
     /**
      * MockPooledConnection constructor.
+     *
      * @param connection Connection Object.
      */
     public MockPooledConnection(final Connection connection) {

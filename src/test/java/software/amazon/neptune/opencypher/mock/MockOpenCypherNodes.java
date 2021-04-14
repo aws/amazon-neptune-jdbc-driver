@@ -32,8 +32,9 @@ public class MockOpenCypherNodes {
 
     /**
      * Function to get a Person Node with the provided parameters.
+     *
      * @param firstName First name.
-     * @param lastName Last name.
+     * @param lastName  Last name.
      * @return Person Node.
      */
     public static MockOpenCypherNode getPerson(final String firstName, final String lastName) {
@@ -42,6 +43,7 @@ public class MockOpenCypherNodes {
 
     /**
      * Function to get a Kitty Node with the provided parameters.
+     *
      * @param name Name.
      * @return Kitty Node.
      */

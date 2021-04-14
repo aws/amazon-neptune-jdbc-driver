@@ -22,7 +22,6 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import software.amazon.jdbc.utilities.AuthScheme;
 import software.amazon.neptune.opencypher.utilities.OpenCypherGetColumnUtilities;
-
 import java.sql.SQLException;
 import java.util.Properties;
 

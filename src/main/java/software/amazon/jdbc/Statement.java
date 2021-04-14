@@ -16,9 +16,11 @@
 
 package software.amazon.jdbc;
 
+import lombok.Getter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import software.amazon.jdbc.utilities.CastHelper;
+import software.amazon.jdbc.utilities.QueryExecutor;
 import software.amazon.jdbc.utilities.SqlError;
 import software.amazon.jdbc.utilities.SqlState;
 import software.amazon.jdbc.utilities.Warning;
@@ -28,13 +30,14 @@ import java.sql.SQLWarning;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
- * Abstract implementation of Statement for JDBC Driver.
+ * Implementation of Statement for JDBC Driver.
  */
-public abstract class Statement implements java.sql.Statement {
+public class Statement implements java.sql.Statement {
     private static final Logger LOGGER = LoggerFactory.getLogger(Statement.class);
-
     private final java.sql.Connection connection;
     private final AtomicBoolean isClosed = new AtomicBoolean(false);
+    @Getter
+    private final QueryExecutor queryExecutor;
     private int maxFieldSize = 0;
     private long largeMaxRows = 0;
     private boolean shouldCloseOnCompletion = false;
@@ -45,12 +48,14 @@ public abstract class Statement implements java.sql.Statement {
     /**
      * Constructor for seeding the statement with the parent connection.
      *
-     * @param connection The parent connection.
+     * @param connection    The parent connection.
+     * @param queryExecutor The query executor.
      * @throws SQLException if error occurs when get type map of connection.
      */
-    protected Statement(final java.sql.Connection connection) {
+    public Statement(final java.sql.Connection connection, final QueryExecutor queryExecutor) throws SQLException {
         this.connection = connection;
         this.warnings = null;
+        this.queryExecutor = queryExecutor;
     }
 
     @Override
@@ -62,7 +67,7 @@ public abstract class Statement implements java.sql.Statement {
     @Override
     public void cancel() throws SQLException {
         verifyOpen();
-        cancelQuery();
+        queryExecutor.cancelQuery();
     }
 
     @Override
@@ -80,11 +85,16 @@ public abstract class Statement implements java.sql.Statement {
     @Override
     public void close() throws SQLException {
         if (!this.isClosed.getAndSet(true)) {
-            LOGGER.debug("Cancel any running queries.");
-            cancelQuery();
+            LOGGER.debug("Cancelling running queries.");
+            try {
+                queryExecutor.cancelQuery();
+            } catch (final SQLException e) {
+                LOGGER.warn("Error occurred while closing Statement. Failed to cancel running query: '"
+                        + e.getMessage() + "'");
+            }
 
             if (this.resultSet != null) {
-                LOGGER.debug("Close opened result set.");
+                LOGGER.debug("Closing ResultSet, which was left open in Statement.");
                 this.resultSet.close();
             }
         }
@@ -219,7 +229,7 @@ public abstract class Statement implements java.sql.Statement {
         }
 
         // Silently truncate to the maximum number of rows that can be retrieved at a time.
-        this.fetchSize = Math.min(rows, getMaxFetchSize());
+        this.fetchSize = Math.min(rows, queryExecutor.getMaxFetchSize());
     }
 
     @Override
@@ -419,7 +429,20 @@ public abstract class Statement implements java.sql.Statement {
         }
     }
 
-    protected abstract void cancelQuery() throws SQLException;
+    @Override
+    public java.sql.ResultSet executeQuery(final String sql) throws SQLException {
+        return queryExecutor.executeQuery(sql, this);
+    }
 
-    protected abstract int getMaxFetchSize() throws SQLException;
+    @Override
+    public int getQueryTimeout() throws SQLException {
+        verifyOpen();
+        return queryExecutor.getQueryTimeout();
+    }
+
+    @Override
+    public void setQueryTimeout(final int seconds) throws SQLException {
+        verifyOpen();
+        queryExecutor.setQueryTimeout(seconds);
+    }
 }

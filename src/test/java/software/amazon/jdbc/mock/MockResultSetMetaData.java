@@ -23,6 +23,14 @@ import java.sql.SQLException;
  * Mock implementation for ResultSetMetaData object so it can be instantiated and tested.
  */
 public class MockResultSetMetaData extends ResultSetMetaData implements java.sql.ResultSetMetaData {
+
+    /**
+     * Constructor for MockResultSetMetadata.
+     */
+    public MockResultSetMetaData() {
+        super(null);
+    }
+
     @Override
     public int getColumnCount() throws SQLException {
         return 0;

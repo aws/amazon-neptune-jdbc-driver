@@ -23,7 +23,6 @@ import software.amazon.jdbc.mock.MockConnection;
 import software.amazon.jdbc.mock.MockDatabaseMetadata;
 import software.amazon.jdbc.mock.MockStatement;
 import software.amazon.neptune.opencypher.OpenCypherConnectionProperties;
-
 import java.sql.RowIdLifetime;
 import java.sql.SQLException;
 
@@ -49,7 +48,8 @@ public class DatabaseMetaDataTest {
         HelperFunctions.expectFunctionDoesntThrow(() -> databaseMetaData.supportsBatchUpdates(), false);
         HelperFunctions.expectFunctionDoesntThrow(() -> databaseMetaData.supportsCatalogsInDataManipulation(), false);
         HelperFunctions.expectFunctionDoesntThrow(() -> databaseMetaData.supportsCatalogsInIndexDefinitions(), false);
-        HelperFunctions.expectFunctionDoesntThrow(() -> databaseMetaData.supportsCatalogsInPrivilegeDefinitions(), false);
+        HelperFunctions
+                .expectFunctionDoesntThrow(() -> databaseMetaData.supportsCatalogsInPrivilegeDefinitions(), false);
         HelperFunctions.expectFunctionDoesntThrow(() -> databaseMetaData.supportsCatalogsInProcedureCalls(), false);
         HelperFunctions.expectFunctionDoesntThrow(() -> databaseMetaData.supportsCatalogsInTableDefinitions(), false);
         HelperFunctions.expectFunctionDoesntThrow(() -> databaseMetaData.supportsColumnAliasing(), true);
@@ -57,9 +57,12 @@ public class DatabaseMetaDataTest {
         HelperFunctions.expectFunctionDoesntThrow(() -> databaseMetaData.supportsConvert(0, 0), false);
         HelperFunctions.expectFunctionDoesntThrow(() -> databaseMetaData.supportsCoreSQLGrammar(), true);
         HelperFunctions.expectFunctionDoesntThrow(() -> databaseMetaData.supportsCorrelatedSubqueries(), true);
-        HelperFunctions.expectFunctionDoesntThrow(() -> databaseMetaData.supportsDataDefinitionAndDataManipulationTransactions(), false);
-        HelperFunctions.expectFunctionDoesntThrow(() -> databaseMetaData.supportsDataManipulationTransactionsOnly(), false);
-        HelperFunctions.expectFunctionDoesntThrow(() -> databaseMetaData.supportsDifferentTableCorrelationNames(), false);
+        HelperFunctions.expectFunctionDoesntThrow(
+                () -> databaseMetaData.supportsDataDefinitionAndDataManipulationTransactions(), false);
+        HelperFunctions
+                .expectFunctionDoesntThrow(() -> databaseMetaData.supportsDataManipulationTransactionsOnly(), false);
+        HelperFunctions
+                .expectFunctionDoesntThrow(() -> databaseMetaData.supportsDifferentTableCorrelationNames(), false);
         HelperFunctions.expectFunctionDoesntThrow(() -> databaseMetaData.supportsExpressionsInOrderBy(), true);
         HelperFunctions.expectFunctionDoesntThrow(() -> databaseMetaData.supportsExtendedSQLGrammar(), true);
         HelperFunctions.expectFunctionDoesntThrow(() -> databaseMetaData.supportsFullOuterJoins(), true);
@@ -90,12 +93,14 @@ public class DatabaseMetaDataTest {
         HelperFunctions.expectFunctionDoesntThrow(() -> databaseMetaData.supportsSavepoints(), false);
         HelperFunctions.expectFunctionDoesntThrow(() -> databaseMetaData.supportsSchemasInDataManipulation(), false);
         HelperFunctions.expectFunctionDoesntThrow(() -> databaseMetaData.supportsSchemasInIndexDefinitions(), false);
-        HelperFunctions.expectFunctionDoesntThrow(() -> databaseMetaData.supportsSchemasInPrivilegeDefinitions(), false);
+        HelperFunctions
+                .expectFunctionDoesntThrow(() -> databaseMetaData.supportsSchemasInPrivilegeDefinitions(), false);
         HelperFunctions.expectFunctionDoesntThrow(() -> databaseMetaData.supportsSchemasInProcedureCalls(), false);
         HelperFunctions.expectFunctionDoesntThrow(() -> databaseMetaData.supportsSchemasInTableDefinitions(), false);
         HelperFunctions.expectFunctionDoesntThrow(() -> databaseMetaData.supportsSelectForUpdate(), false);
         HelperFunctions.expectFunctionDoesntThrow(() -> databaseMetaData.supportsStatementPooling(), false);
-        HelperFunctions.expectFunctionDoesntThrow(() -> databaseMetaData.supportsStoredFunctionsUsingCallSyntax(), false);
+        HelperFunctions
+                .expectFunctionDoesntThrow(() -> databaseMetaData.supportsStoredFunctionsUsingCallSyntax(), false);
         HelperFunctions.expectFunctionDoesntThrow(() -> databaseMetaData.supportsStoredProcedures(), false);
         HelperFunctions.expectFunctionDoesntThrow(() -> databaseMetaData.supportsSubqueriesInComparisons(), false);
         HelperFunctions.expectFunctionDoesntThrow(() -> databaseMetaData.supportsSubqueriesInExists(), false);
@@ -149,7 +154,8 @@ public class DatabaseMetaDataTest {
         HelperFunctions.expectFunctionDoesntThrow(() -> databaseMetaData.getProcedureTerm(), "");
         HelperFunctions.expectFunctionDoesntThrow(() -> databaseMetaData.getSchemaTerm(), "");
         HelperFunctions.expectFunctionDoesntThrow(() -> databaseMetaData.getIdentifierQuoteString(), "\"");
-        HelperFunctions.expectFunctionDoesntThrow(() -> databaseMetaData.getRowIdLifetime(), RowIdLifetime.ROWID_UNSUPPORTED);
+        HelperFunctions
+                .expectFunctionDoesntThrow(() -> databaseMetaData.getRowIdLifetime(), RowIdLifetime.ROWID_UNSUPPORTED);
 
         HelperFunctions.expectFunctionThrows(() -> databaseMetaData.getCrossReference("", "", "", "", "", ""));
         HelperFunctions.expectFunctionThrows(() -> databaseMetaData.getExportedKeys("", "", ""));
@@ -158,7 +164,7 @@ public class DatabaseMetaDataTest {
         HelperFunctions.expectFunctionThrows(() -> databaseMetaData.getProcedureColumns("", "", "", ""));
         HelperFunctions.expectFunctionThrows(() -> databaseMetaData.getPseudoColumns("", "", "", ""));
         HelperFunctions.expectFunctionThrows(() -> databaseMetaData.getTablePrivileges("", "", ""));
-        HelperFunctions.expectFunctionThrows(() -> databaseMetaData.getUDTs("", "", "", new int[]{}));
+        HelperFunctions.expectFunctionThrows(() -> databaseMetaData.getUDTs("", "", "", new int[] {}));
         HelperFunctions.expectFunctionThrows(() -> databaseMetaData.getVersionColumns("", "", ""));
         HelperFunctions.expectFunctionThrows(() -> databaseMetaData.getSuperTables("", "", ""));
         HelperFunctions.expectFunctionThrows(() -> databaseMetaData.getSuperTypes("", "", ""));
@@ -171,17 +177,21 @@ public class DatabaseMetaDataTest {
 
     @Test
     void testWrap() {
-        HelperFunctions.expectFunctionDoesntThrow(() -> databaseMetaData.isWrapperFor(MockDatabaseMetadata.class), true);
+        HelperFunctions
+                .expectFunctionDoesntThrow(() -> databaseMetaData.isWrapperFor(MockDatabaseMetadata.class), true);
         HelperFunctions.expectFunctionDoesntThrow(() -> databaseMetaData.isWrapperFor(MockStatement.class), false);
         HelperFunctions.expectFunctionDoesntThrow(() -> databaseMetaData.isWrapperFor(null), false);
-        HelperFunctions.expectFunctionDoesntThrow(() -> databaseMetaData.unwrap(MockDatabaseMetadata.class), databaseMetaData);
+        HelperFunctions
+                .expectFunctionDoesntThrow(() -> databaseMetaData.unwrap(MockDatabaseMetadata.class), databaseMetaData);
         HelperFunctions.expectFunctionThrows(() -> databaseMetaData.unwrap(MockStatement.class));
     }
 
     @Test
     void testDriverVersion() {
-        HelperFunctions.expectFunctionDoesntThrow(() -> databaseMetaData.getDriverMajorVersion(), Driver.DRIVER_MAJOR_VERSION);
-        HelperFunctions.expectFunctionDoesntThrow(() -> databaseMetaData.getDriverMinorVersion(), Driver.DRIVER_MINOR_VERSION);
+        HelperFunctions
+                .expectFunctionDoesntThrow(() -> databaseMetaData.getDriverMajorVersion(), Driver.DRIVER_MAJOR_VERSION);
+        HelperFunctions
+                .expectFunctionDoesntThrow(() -> databaseMetaData.getDriverMinorVersion(), Driver.DRIVER_MINOR_VERSION);
         HelperFunctions.expectFunctionDoesntThrow(() -> databaseMetaData.getDriverVersion(), Driver.DRIVER_VERSION);
     }
 
@@ -200,7 +210,8 @@ public class DatabaseMetaDataTest {
 
     @Test
     void testDataDefinition() {
-        HelperFunctions.expectFunctionDoesntThrow(() -> databaseMetaData.dataDefinitionCausesTransactionCommit(), false);
+        HelperFunctions
+                .expectFunctionDoesntThrow(() -> databaseMetaData.dataDefinitionCausesTransactionCommit(), false);
         HelperFunctions.expectFunctionDoesntThrow(() -> databaseMetaData.dataDefinitionIgnoredInTransactions(), false);
     }
 

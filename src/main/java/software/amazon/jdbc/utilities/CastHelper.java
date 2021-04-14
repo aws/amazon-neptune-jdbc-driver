@@ -23,14 +23,15 @@ public class CastHelper {
     /**
      * Generic unwrap function implementation.
      *
-     * @param iface Class Object passed in.
-     * @param logger Logger for errors.
+     * @param iface        Class Object passed in.
+     * @param logger       Logger for errors.
      * @param callingClass Calling class of function (should be this).
-     * @param <T> Template type of iface.
+     * @param <T>          Template type of iface.
      * @return Casted Object.
      * @throws SQLException Thrown if it cannot be casted.
      */
-    public static <T> T unwrap(final Class<T> iface, final Logger logger, final Object callingClass) throws SQLException {
+    public static <T> T unwrap(final Class<T> iface, final Logger logger, final Object callingClass)
+            throws SQLException {
         if (iface.isAssignableFrom(callingClass.getClass())) {
             return iface.cast(callingClass);
         }
@@ -45,7 +46,7 @@ public class CastHelper {
     /**
      * Generic isWrapperFor implementation.
      *
-     * @param iface Class Object passed in.
+     * @param iface        Class Object passed in.
      * @param callingClass Calling class of function (should be this).
      * @return Whether or not it is assignable.
      */

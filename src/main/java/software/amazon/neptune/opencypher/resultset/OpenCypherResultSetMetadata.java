@@ -16,44 +16,27 @@
 
 package software.amazon.neptune.opencypher.resultset;
 
-import lombok.AllArgsConstructor;
 import org.neo4j.driver.types.Type;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import software.amazon.jdbc.ResultSetMetaData;
-import software.amazon.jdbc.utilities.SqlError;
-import software.amazon.jdbc.utilities.SqlState;
 import software.amazon.neptune.opencypher.OpenCypherTypeMapping;
 import java.sql.SQLException;
-import java.sql.Types;
 import java.util.List;
-
-// TODO: When implementing next steps, abstract minimal information into an interface and implement it.
 
 /**
  * OpenCypher implementation of ResultSetMetadata.
  */
-@AllArgsConstructor
-public class OpenCypherResultSetMetadata extends ResultSetMetaData implements java.sql.ResultSetMetaData {
-    private static final Logger LOGGER = LoggerFactory.getLogger(OpenCypherResultSetMetadata.class);
-    private final List<String> columns;
+public class OpenCypherResultSetMetadata extends software.amazon.jdbc.ResultSetMetaData
+        implements java.sql.ResultSetMetaData {
     private final List<Type> columnTypes;
 
     /**
-     * Verify if the given column index is valid.
+     * OpenCypherResultSetMetadata constructor.
      *
-     * @param column the 1-based column index.
-     * @throws SQLException if the column index is not valid for this result.
+     * @param columns     List of column names.
+     * @param columnTypes List of column types.
      */
-    private void verifyColumnIndex(final int column) throws SQLException {
-        if ((column <= 0) || (column > columns.size())) {
-            throw SqlError.createSQLException(
-                    LOGGER,
-                    SqlState.DATA_EXCEPTION,
-                    SqlError.INVALID_INDEX,
-                    column,
-                    columns.size());
-        }
+    public OpenCypherResultSetMetadata(final List<String> columns, final List<Type> columnTypes) {
+        super(columns);
+        this.columnTypes = columnTypes;
     }
 
     /**
@@ -65,145 +48,6 @@ public class OpenCypherResultSetMetadata extends ResultSetMetaData implements ja
     protected Type getColumnBoltType(final int column) {
         // TODO: Loop rows to find common type and cache it.
         return columnTypes.get(column - 1);
-    }
-
-    @Override
-    public int getColumnCount() throws SQLException {
-        return columns.size();
-    }
-
-    @Override
-    public int getColumnDisplaySize(final int column) throws SQLException {
-        verifyColumnIndex(column);
-
-        final int type = getColumnType(column);
-        if (type == Types.BIT) {
-            return 1;
-        } else if (type == Types.VARCHAR) {
-            return 0;
-        } else if (type == Types.DOUBLE || type == Types.REAL) {
-            return 25;
-        } else if (type == Types.DATE) {
-            return 24;
-        } else if (type == Types.TIME) {
-            return 24;
-        } else if (type == Types.TIMESTAMP) {
-            return 24;
-        } else if (type == Types.BIGINT || type == Types.INTEGER || type == Types.SMALLINT || type == Types.TINYINT) {
-            return 20;
-        } else if (type == Types.NULL) {
-            return 0;
-        } else {
-            LOGGER.warn(String.format("Unsupported data type for getColumnDisplaySize(%d).", type));
-            return 0;
-        }
-    }
-
-    @Override
-    public int getPrecision(final int column) throws SQLException {
-        verifyColumnIndex(column);
-
-        final int type = getColumnType(column);
-        if (type == Types.BIT) {
-            return 1;
-        } else if (type == Types.VARCHAR) {
-            return 256;
-        } else if (type == Types.DOUBLE || type == Types.REAL) {
-            return 15;
-        } else if (type == Types.DATE) {
-            return 24;
-        } else if (type == Types.TIME) {
-            return 24;
-        } else if (type == Types.TIMESTAMP) {
-            return 24;
-        } else if (type == Types.BIGINT || type == Types.INTEGER || type == Types.SMALLINT || type == Types.TINYINT) {
-            return 19;
-        } else if (type == Types.NULL) {
-            return 0;
-        } else {
-            LOGGER.warn(String.format("Unsupported data type for getPrecision(%d).", type));
-            return 0;
-        }
-    }
-
-    @Override
-    public int getScale(final int column) throws SQLException {
-        verifyColumnIndex(column);
-
-        final int columnType = getColumnType(column);
-        if ((columnType == Types.DOUBLE) || (columnType == Types.REAL)) {
-            // 15 significant digits after decimal.
-            return 15;
-        } else if (columnType == Types.FLOAT) {
-            // 6 Sig significant digits after decimal.
-            return 6;
-        }
-        return 0;
-    }
-
-    @Override
-    public boolean isAutoIncrement(final int column) throws SQLException {
-        verifyColumnIndex(column);
-
-        // Concept doesn't exist.
-        return false;
-    }
-
-    @Override
-    public boolean isCaseSensitive(final int column) throws SQLException {
-        verifyColumnIndex(column);
-        return (getColumnClassName(column).equals(String.class.getName()));
-    }
-
-    @Override
-    public boolean isSearchable(final int column) throws SQLException {
-        verifyColumnIndex(column);
-
-        // We don't support WHERE clauses in the typical SQL way, so not searchable.
-        return false;
-    }
-
-    @Override
-    public boolean isCurrency(final int column) throws SQLException {
-        verifyColumnIndex(column);
-
-        // If it is currency, there's no way to know.
-        return false;
-    }
-
-    @Override
-    public int isNullable(final int column) throws SQLException {
-        verifyColumnIndex(column);
-        return java.sql.ResultSetMetaData.columnNullableUnknown;
-    }
-
-    @Override
-    public boolean isSigned(final int column) throws SQLException {
-        verifyColumnIndex(column);
-
-        final int type = getColumnType(column);
-        return ((type == Types.INTEGER) ||
-                (type == Types.BIGINT) ||
-                (type == Types.DOUBLE) ||
-                (type == Types.FLOAT) ||
-                (type == Types.REAL) ||
-                (type == Types.SMALLINT) ||
-                (type == Types.TINYINT) ||
-                (type == Types.DECIMAL));
-    }
-
-    @Override
-    public String getColumnLabel(final int column) throws SQLException {
-        verifyColumnIndex(column);
-
-        // Label is same as name.
-        return getColumnName(column);
-    }
-
-    @Override
-    public String getColumnName(final int column) throws SQLException {
-        verifyColumnIndex(column);
-        return columns.get(column - 1);
     }
 
     @Override
@@ -222,53 +66,5 @@ public class OpenCypherResultSetMetadata extends ResultSetMetaData implements ja
     public String getColumnClassName(final int column) throws SQLException {
         verifyColumnIndex(column);
         return OpenCypherTypeMapping.BOLT_TO_JAVA_TYPE_MAP.get(getColumnBoltType(column)).getName();
-    }
-
-    @Override
-    public boolean isReadOnly(final int column) throws SQLException {
-        verifyColumnIndex(column);
-
-        // Read only driver.
-        return true;
-    }
-
-    @Override
-    public boolean isWritable(final int column) throws SQLException {
-        verifyColumnIndex(column);
-
-        // Read only driver.
-        return false;
-    }
-
-    @Override
-    public boolean isDefinitelyWritable(final int column) throws SQLException {
-        verifyColumnIndex(column);
-
-        // Read only driver.
-        return false;
-    }
-
-    @Override
-    public String getTableName(final int column) throws SQLException {
-        verifyColumnIndex(column);
-
-        // Doesn't have the concept of tables.
-        return "";
-    }
-
-    @Override
-    public String getSchemaName(final int column) throws SQLException {
-        verifyColumnIndex(column);
-
-        // Doesn't have the concept of schema.
-        return "";
-    }
-
-    @Override
-    public String getCatalogName(final int column) throws SQLException {
-        verifyColumnIndex(column);
-
-        // Doesn't have the concept of catalog.
-        return "";
     }
 }

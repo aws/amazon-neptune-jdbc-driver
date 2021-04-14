@@ -12,6 +12,7 @@ public class MockDatabaseMetadata extends DatabaseMetaData implements java.sql.D
 
     /**
      * MockDatabaseMetadata constructor.
+     *
      * @param connection Connection Object.
      */
     public MockDatabaseMetadata(final Connection connection) {

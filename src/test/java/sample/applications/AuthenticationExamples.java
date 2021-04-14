@@ -48,7 +48,8 @@ public class AuthenticationExamples {
         // Validate the connection with a timeout of 5 seconds.
         // If this line fails, create a {@link java.sql.Statement} and execute a literal query to check the error reported there.
         if (!connection.isValid(5)) {
-            throw new SQLException("Connection is not valid, verify that the url, port, and credentials are set correctly.");
+            throw new SQLException(
+                    "Connection is not valid, verify that the url, port, and credentials are set correctly.");
         }
         return connection;
     }

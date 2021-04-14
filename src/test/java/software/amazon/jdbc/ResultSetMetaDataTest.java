@@ -35,10 +35,12 @@ public class ResultSetMetaDataTest {
 
     @Test
     void testWrap() {
-        HelperFunctions.expectFunctionDoesntThrow(() -> resultSetMetaData.isWrapperFor(MockResultSetMetaData.class), true);
+        HelperFunctions
+                .expectFunctionDoesntThrow(() -> resultSetMetaData.isWrapperFor(MockResultSetMetaData.class), true);
         HelperFunctions.expectFunctionDoesntThrow(() -> resultSetMetaData.isWrapperFor(MockStatement.class), false);
         HelperFunctions.expectFunctionDoesntThrow(() -> resultSetMetaData.isWrapperFor(null), false);
-        HelperFunctions.expectFunctionDoesntThrow(() -> resultSetMetaData.unwrap(MockResultSetMetaData.class), resultSetMetaData);
+        HelperFunctions.expectFunctionDoesntThrow(() -> resultSetMetaData.unwrap(MockResultSetMetaData.class),
+                resultSetMetaData);
         HelperFunctions.expectFunctionThrows(() -> resultSetMetaData.unwrap(MockStatement.class));
     }
 }

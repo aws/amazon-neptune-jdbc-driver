@@ -27,14 +27,12 @@ import software.amazon.jdbc.utilities.AuthScheme;
 import software.amazon.jdbc.utilities.ConnectionProperties;
 import software.amazon.jdbc.utilities.SqlError;
 import software.amazon.neptune.opencypher.OpenCypherConnectionProperties;
-
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.SQLWarning;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
-
 import static software.amazon.jdbc.utilities.ConnectionProperties.APPLICATION_NAME_KEY;
 import static software.amazon.jdbc.utilities.ConnectionProperties.LOG_LEVEL_KEY;
 
@@ -42,7 +40,6 @@ import static software.amazon.jdbc.utilities.ConnectionProperties.LOG_LEVEL_KEY;
  * Test for abstract Connection Object.
  */
 public class ConnectionTest {
-    private java.sql.Connection connection;
     private static final Properties PROPERTIES = new Properties();
     private static final String TEST_SCHEMA = "schema";
     private static final String TEST_CATALOG = "catalog";
@@ -54,9 +51,9 @@ public class ConnectionTest {
     private static final Properties TEST_PROP = new Properties();
     private static final Properties TEST_PROP_INITIAL = new Properties();
     private static final Properties TEST_PROP_MODIFIED = new Properties();
-
     private static final Map<String, Class<?>> TEST_TYPE_MAP =
             new ImmutableMap.Builder<String, Class<?>>().put("String", String.class).build();
+    private java.sql.Connection connection;
 
     @BeforeEach
     void initialize() throws SQLException {
@@ -74,12 +71,18 @@ public class ConnectionTest {
     @Test
     void testTransactions() {
         // Transaction isolation.
-        HelperFunctions.expectFunctionDoesntThrow(() -> connection.setTransactionIsolation(Connection.TRANSACTION_NONE));
-        HelperFunctions.expectFunctionThrows(() -> connection.setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED));
-        HelperFunctions.expectFunctionThrows(() -> connection.setTransactionIsolation(Connection.TRANSACTION_READ_UNCOMMITTED));
-        HelperFunctions.expectFunctionThrows(() -> connection.setTransactionIsolation(Connection.TRANSACTION_REPEATABLE_READ));
-        HelperFunctions.expectFunctionThrows(() -> connection.setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE));
-        HelperFunctions.expectFunctionDoesntThrow(() -> connection.getTransactionIsolation(), Connection.TRANSACTION_NONE);
+        HelperFunctions
+                .expectFunctionDoesntThrow(() -> connection.setTransactionIsolation(Connection.TRANSACTION_NONE));
+        HelperFunctions
+                .expectFunctionThrows(() -> connection.setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED));
+        HelperFunctions.expectFunctionThrows(
+                () -> connection.setTransactionIsolation(Connection.TRANSACTION_READ_UNCOMMITTED));
+        HelperFunctions
+                .expectFunctionThrows(() -> connection.setTransactionIsolation(Connection.TRANSACTION_REPEATABLE_READ));
+        HelperFunctions
+                .expectFunctionThrows(() -> connection.setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE));
+        HelperFunctions
+                .expectFunctionDoesntThrow(() -> connection.getTransactionIsolation(), Connection.TRANSACTION_NONE);
 
         // Savepoint.
         HelperFunctions.expectFunctionThrows(() -> connection.setSavepoint());
@@ -104,14 +107,14 @@ public class ConnectionTest {
     @Test
     void testStatements() {
         // Statement without transaction.
-        HelperFunctions.expectFunctionDoesntThrow(() -> connection.createStatement(), null);
-        HelperFunctions.expectFunctionDoesntThrow(() -> connection.createStatement(0, 0), null);
+        HelperFunctions.expectFunctionDoesntThrow(() -> connection.createStatement());
+        HelperFunctions.expectFunctionDoesntThrow(() -> connection.createStatement(0, 0));
 
         // Statement with transaction.
         HelperFunctions.expectFunctionThrows(() -> connection.createStatement(0, 0, 0));
 
         // Prepared statements.
-        HelperFunctions.expectFunctionThrows(() -> connection.prepareStatement(null));
+        HelperFunctions.expectFunctionDoesntThrow(() -> connection.prepareStatement(null));
         HelperFunctions.expectFunctionThrows(() -> connection.prepareStatement(null, 0));
         HelperFunctions.expectFunctionThrows(() -> connection.prepareStatement(null, 0, 0));
         HelperFunctions.expectFunctionThrows(() -> connection.prepareStatement(null, 0, 0, 0));
@@ -134,14 +137,17 @@ public class ConnectionTest {
 
         HelperFunctions.expectFunctionDoesntThrow(() -> connection.getClientInfo(), TEST_PROP_INITIAL);
 
-        HelperFunctions.expectFunctionDoesntThrow(() -> connection.setClientInfo(TEST_PROP_KEY, String.valueOf(TEST_PROP_VAL)));
-        HelperFunctions.expectFunctionDoesntThrow(() -> connection.getClientInfo(TEST_PROP_KEY), String.valueOf(TEST_PROP_VAL));
+        HelperFunctions.expectFunctionDoesntThrow(
+                () -> connection.setClientInfo(TEST_PROP_KEY, String.valueOf(TEST_PROP_VAL)));
+        HelperFunctions.expectFunctionDoesntThrow(() -> connection.getClientInfo(TEST_PROP_KEY),
+                String.valueOf(TEST_PROP_VAL));
 
         HelperFunctions.expectFunctionDoesntThrow(() -> connection.setClientInfo(TEST_PROP_KEY, ""));
         HelperFunctions.expectFunctionDoesntThrow(() -> connection.getClientInfo(), TEST_PROP_INITIAL);
 
         HelperFunctions.expectFunctionDoesntThrow(() -> connection.setClientInfo(TEST_PROP));
-        HelperFunctions.expectFunctionDoesntThrow(() -> connection.getClientInfo(TEST_PROP_KEY), String.valueOf(TEST_PROP_VAL));
+        HelperFunctions.expectFunctionDoesntThrow(() -> connection.getClientInfo(TEST_PROP_KEY),
+                String.valueOf(TEST_PROP_VAL));
 
         HelperFunctions.expectFunctionDoesntThrow(() -> connection.setClientInfo(TEST_PROP_KEY, null));
         HelperFunctions.expectFunctionDoesntThrow(() -> connection.getClientInfo(), TEST_PROP_MODIFIED);
@@ -168,8 +174,8 @@ public class ConnectionTest {
         HelperFunctions.expectFunctionThrows(() -> connection.createClob());
         HelperFunctions.expectFunctionThrows(() -> connection.createNClob());
         HelperFunctions.expectFunctionThrows(() -> connection.createSQLXML());
-        HelperFunctions.expectFunctionThrows(() -> connection.createArrayOf(null, new Object[]{}));
-        HelperFunctions.expectFunctionThrows(() -> connection.createStruct(null, new Object[]{}));
+        HelperFunctions.expectFunctionThrows(() -> connection.createArrayOf(null, new Object[] {}));
+        HelperFunctions.expectFunctionThrows(() -> connection.createStruct(null, new Object[] {}));
     }
 
     @Test
@@ -193,11 +199,13 @@ public class ConnectionTest {
         HelperFunctions.expectFunctionDoesntThrow(() -> connection.clearWarnings());
         HelperFunctions.expectFunctionDoesntThrow(() -> connection.getWarnings(), null);
 
-        HelperFunctions.expectFunctionDoesntThrow(() -> ((Connection)connection).addWarning(HelperFunctions.getNewWarning1()));
+        HelperFunctions.expectFunctionDoesntThrow(
+                () -> ((Connection) connection).addWarning(HelperFunctions.getNewWarning1()));
         final SQLWarning warning = HelperFunctions.getNewWarning1();
         HelperFunctions.expectFunctionDoesntThrow(() -> connection.getWarnings(), warning);
         warning.setNextWarning(HelperFunctions.getNewWarning2());
-        HelperFunctions.expectFunctionDoesntThrow(() -> ((Connection)connection).addWarning(HelperFunctions.getNewWarning2()));
+        HelperFunctions.expectFunctionDoesntThrow(
+                () -> ((Connection) connection).addWarning(HelperFunctions.getNewWarning2()));
         HelperFunctions.expectFunctionDoesntThrow(() -> connection.getWarnings(), warning);
 
         HelperFunctions.expectFunctionDoesntThrow(() -> connection.clearWarnings());
@@ -223,7 +231,7 @@ public class ConnectionTest {
         HelperFunctions.expectFunctionDoesntThrow(() -> connection.isClosed(), false);
         HelperFunctions.expectFunctionDoesntThrow(() -> connection.close());
         HelperFunctions.expectFunctionDoesntThrow(() -> connection.isClosed(), true);
-        HelperFunctions.expectFunctionThrows(() -> ((Connection)connection).verifyOpen());
+        HelperFunctions.expectFunctionThrows(() -> ((Connection) connection).verifyOpen());
         HelperFunctions.expectFunctionDoesntThrow(() -> connection.close());
     }
 

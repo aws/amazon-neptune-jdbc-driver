@@ -23,7 +23,6 @@ import org.junit.jupiter.api.Test;
 import software.amazon.jdbc.utilities.AuthScheme;
 import software.amazon.jdbc.utilities.ConnectionProperties;
 import software.amazon.neptune.ConnectionPropertiesTestBase;
-
 import java.sql.SQLException;
 import java.util.Properties;
 
@@ -53,11 +52,16 @@ class OpenCypherConnectionPropertiesTest extends ConnectionPropertiesTestBase {
         connectionProperties = new OpenCypherConnectionProperties();
         Assertions.assertEquals("", connectionProperties.getEndpoint());
         Assertions.assertEquals(OpenCypherConnectionProperties.DEFAULT_LOG_LEVEL, connectionProperties.getLogLevel());
-        Assertions.assertEquals(OpenCypherConnectionProperties.DEFAULT_CONNECTION_TIMEOUT_MILLIS, connectionProperties.getConnectionTimeoutMillis());
-        Assertions.assertEquals(OpenCypherConnectionProperties.DEFAULT_CONNECTION_RETRY_COUNT, connectionProperties.getConnectionRetryCount());
-        Assertions.assertEquals(OpenCypherConnectionProperties.DEFAULT_CONNECTION_POOL_SIZE, connectionProperties.getConnectionPoolSize());
-        Assertions.assertEquals(OpenCypherConnectionProperties.DEFAULT_AUTH_SCHEME, connectionProperties.getAuthScheme());
-        Assertions.assertEquals(OpenCypherConnectionProperties.DEFAULT_USE_ENCRYPTION, connectionProperties.getUseEncryption());
+        Assertions.assertEquals(OpenCypherConnectionProperties.DEFAULT_CONNECTION_TIMEOUT_MILLIS,
+                connectionProperties.getConnectionTimeoutMillis());
+        Assertions.assertEquals(OpenCypherConnectionProperties.DEFAULT_CONNECTION_RETRY_COUNT,
+                connectionProperties.getConnectionRetryCount());
+        Assertions.assertEquals(OpenCypherConnectionProperties.DEFAULT_CONNECTION_POOL_SIZE,
+                connectionProperties.getConnectionPoolSize());
+        Assertions
+                .assertEquals(OpenCypherConnectionProperties.DEFAULT_AUTH_SCHEME, connectionProperties.getAuthScheme());
+        Assertions.assertEquals(OpenCypherConnectionProperties.DEFAULT_USE_ENCRYPTION,
+                connectionProperties.getUseEncryption());
         Assertions.assertEquals("", connectionProperties.getRegion());
     }
 

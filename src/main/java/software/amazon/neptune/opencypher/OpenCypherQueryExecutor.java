@@ -29,7 +29,8 @@ import software.amazon.jdbc.utilities.AuthScheme;
 import software.amazon.jdbc.utilities.QueryExecutor;
 import software.amazon.jdbc.utilities.SqlError;
 import software.amazon.jdbc.utilities.SqlState;
-import software.amazon.neptune.opencypher.resultset.OpenCypherMetadataCache;
+import software.amazon.neptune.common.gremlindatamodel.MetadataCache;
+import software.amazon.neptune.common.gremlindatamodel.NodeColumnInfo;
 import software.amazon.neptune.opencypher.resultset.OpenCypherResultSet;
 import software.amazon.neptune.opencypher.resultset.OpenCypherResultSetGetCatalogs;
 import software.amazon.neptune.opencypher.resultset.OpenCypherResultSetGetColumns;
@@ -69,6 +70,18 @@ public class OpenCypherQueryExecutor extends QueryExecutor {
             }
         }
         return true;
+    }
+
+    /**
+     * Function to close down the driver.
+     */
+    public static void close() {
+        synchronized (DRIVER_LOCK) {
+            if (driver != null) {
+                driver.close();
+                driver = null;
+            }
+        }
     }
 
     private static Driver createDriver(final Config config,
@@ -143,7 +156,8 @@ public class OpenCypherQueryExecutor extends QueryExecutor {
         }
         configBuilder.withMaxConnectionPoolSize(openCypherConnectionProperties.getConnectionPoolSize());
         configBuilder
-                .withConnectionTimeout(openCypherConnectionProperties.getConnectionTimeoutMillis(), TimeUnit.MILLISECONDS);
+                .withConnectionTimeout(openCypherConnectionProperties.getConnectionTimeoutMillis(),
+                        TimeUnit.MILLISECONDS);
 
         return configBuilder;
     }
@@ -183,15 +197,15 @@ public class OpenCypherQueryExecutor extends QueryExecutor {
     @Override
     public java.sql.ResultSet executeGetTables(final java.sql.Statement statement, final String tableName)
             throws SQLException {
-        if (!OpenCypherMetadataCache.isOpenCypherMetadataCached()) {
-            OpenCypherMetadataCache.updateCache(openCypherConnectionProperties.getEndpoint(), null,
+        if (!MetadataCache.isOpenCypherMetadataCached()) {
+            MetadataCache.updateCache(openCypherConnectionProperties.getEndpoint(), null,
                     (openCypherConnectionProperties.getAuthScheme() == AuthScheme.IAMSigV4));
         }
 
-        final List<OpenCypherResultSetGetColumns.NodeColumnInfo> nodeColumnInfoList =
-                OpenCypherMetadataCache.getFilteredCacheNodeColumnInfos(tableName);
+        final List<NodeColumnInfo> nodeColumnInfoList =
+                MetadataCache.getFilteredCacheNodeColumnInfos(tableName);
         return new OpenCypherResultSetGetTables(statement, nodeColumnInfoList,
-                OpenCypherMetadataCache.getFilteredResultSetInfoWithoutRowsForTables(tableName));
+                MetadataCache.getFilteredResultSetInfoWithoutRowsForTables(tableName));
     }
 
     /**
@@ -239,15 +253,15 @@ public class OpenCypherQueryExecutor extends QueryExecutor {
     @Override
     public java.sql.ResultSet executeGetColumns(final java.sql.Statement statement, final String nodes)
             throws SQLException {
-        if (!OpenCypherMetadataCache.isOpenCypherMetadataCached()) {
-            OpenCypherMetadataCache.updateCache(openCypherConnectionProperties.getEndpoint(), null,
+        if (!MetadataCache.isOpenCypherMetadataCached()) {
+            MetadataCache.updateCache(openCypherConnectionProperties.getEndpoint(), null,
                     (openCypherConnectionProperties.getAuthScheme() == AuthScheme.IAMSigV4));
         }
 
-        final List<OpenCypherResultSetGetColumns.NodeColumnInfo> nodeColumnInfoList =
-                OpenCypherMetadataCache.getFilteredCacheNodeColumnInfos(nodes);
+        final List<NodeColumnInfo> nodeColumnInfoList =
+                MetadataCache.getFilteredCacheNodeColumnInfos(nodes);
         return new OpenCypherResultSetGetColumns(statement, nodeColumnInfoList,
-                OpenCypherMetadataCache.getFilteredResultSetInfoWithoutRowsForColumns(nodes));
+                MetadataCache.getFilteredResultSetInfoWithoutRowsForColumns(nodes));
     }
 
     @Override
