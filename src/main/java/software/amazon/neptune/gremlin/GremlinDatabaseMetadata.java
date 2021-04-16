@@ -28,6 +28,7 @@ import java.sql.SQLException;
  */
 public class GremlinDatabaseMetadata extends DatabaseMetaData implements java.sql.DatabaseMetaData {
     private static final Logger LOGGER = LoggerFactory.getLogger(GremlinDatabaseMetadata.class);
+    private final GremlinConnection connection;
 
     /**
      * OpenCypherDatabaseMetadata constructor, initializes super class.
@@ -36,6 +37,7 @@ public class GremlinDatabaseMetadata extends DatabaseMetaData implements java.sq
      */
     GremlinDatabaseMetadata(final java.sql.Connection connection) {
         super(connection);
+        this.connection = (GremlinConnection) connection;
     }
 
     // TODO: Go through and implement these functions
@@ -128,7 +130,8 @@ public class GremlinDatabaseMetadata extends DatabaseMetaData implements java.sq
             throws SQLException {
         // Only tableNamePattern is supported as an exact node label semicolon delimited String.
         LOGGER.info("Getting database tables.");
-        final GremlinQueryExecutor openCypherQueryExecutor = new GremlinQueryExecutor();
+        final GremlinQueryExecutor openCypherQueryExecutor =
+                new GremlinQueryExecutor(connection.getGremlinConnectionProperties());
         return openCypherQueryExecutor.executeGetTables(getConnection().createStatement(), tableNamePattern);
     }
 
@@ -141,21 +144,24 @@ public class GremlinDatabaseMetadata extends DatabaseMetaData implements java.sq
     @Override
     public ResultSet getSchemas() throws SQLException {
         LOGGER.info("Getting database schemas.");
-        final GremlinQueryExecutor openCypherQueryExecutor = new GremlinQueryExecutor();
+        final GremlinQueryExecutor openCypherQueryExecutor =
+                new GremlinQueryExecutor(connection.getGremlinConnectionProperties());
         return openCypherQueryExecutor.executeGetSchemas(getConnection().createStatement());
     }
 
     @Override
     public ResultSet getCatalogs() throws SQLException {
         LOGGER.info("Getting database catalogs.");
-        final GremlinQueryExecutor openCypherQueryExecutor = new GremlinQueryExecutor();
+        final GremlinQueryExecutor openCypherQueryExecutor =
+                new GremlinQueryExecutor(connection.getGremlinConnectionProperties());
         return openCypherQueryExecutor.executeGetCatalogs(getConnection().createStatement());
     }
 
     @Override
     public ResultSet getTableTypes() throws SQLException {
         LOGGER.info("Getting database table types.");
-        final GremlinQueryExecutor openCypherQueryExecutor = new GremlinQueryExecutor();
+        final GremlinQueryExecutor openCypherQueryExecutor =
+                new GremlinQueryExecutor(connection.getGremlinConnectionProperties());
         return openCypherQueryExecutor.executeGetTableTypes(getConnection().createStatement());
     }
 
@@ -172,7 +178,8 @@ public class GremlinDatabaseMetadata extends DatabaseMetaData implements java.sq
         if (schemaPattern != null) {
             LOGGER.warn("SchemaPattern in getColumns is not supported, ignoring.");
         }
-        final GremlinQueryExecutor openCypherQueryExecutor = new GremlinQueryExecutor();
+        final GremlinQueryExecutor openCypherQueryExecutor =
+                new GremlinQueryExecutor(connection.getGremlinConnectionProperties());
         return openCypherQueryExecutor.executeGetColumns(getConnection().createStatement(), tableNamePattern);
     }
 
