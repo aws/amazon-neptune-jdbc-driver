@@ -21,6 +21,8 @@ import org.apache.tinkerpop.gremlin.driver.Result;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import software.amazon.jdbc.utilities.QueryExecutor;
+import software.amazon.jdbc.utilities.SqlError;
+import software.amazon.jdbc.utilities.SqlState;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -267,10 +269,20 @@ public class GremlinQueryExecutor extends QueryExecutor {
              completableFuture = client.submitAsync(query);
         }
 
+        synchronized (completableFutureLock) {
+            if (completableFuture.isCancelled()) {
+                completableFuture = null;
+                throw SqlError.createSQLException(
+                        LOGGER,
+                        SqlState.OPERATION_CANCELED,
+                        SqlError.QUERY_CANCELED);
+            }
+        }
+
         final Iterator<Result> resultIterator;
         try {
             resultIterator = completableFuture.get().stream().iterator();
-        } catch (InterruptedException | ExecutionException e) {
+        } catch (final InterruptedException | ExecutionException e) {
             throw new SQLException(e.getMessage());
         }
 
@@ -291,7 +303,7 @@ public class GremlinQueryExecutor extends QueryExecutor {
     @Override
     protected void performCancel() throws SQLException {
         synchronized (completableFutureLock) {
-            if (completableFuture != null) {
+            if (completableFuture != null && !completableFuture.isDone()) {
                 completableFuture.cancel(true);
             }
         }
