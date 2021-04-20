@@ -62,7 +62,7 @@ public class GremlinQueryExecutor extends QueryExecutor {
     @Override
     public ResultSet executeGetColumns(final Statement statement, final String nodes) throws SQLException {
         return null;
-    }asdfasdf
+    }
 
     @Override
     protected <T> T runQuery(final String query) throws SQLException {
