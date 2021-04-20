@@ -14,7 +14,7 @@
  *
  */
 
-package software.amazon.neptune.opencypher.resultset;
+package software.amazon.neptune.gremlin.resultset;
 
 import org.neo4j.driver.internal.types.InternalTypeSystem;
 import org.neo4j.driver.types.Type;
@@ -29,7 +29,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class OpenCypherResultSetGetColumns extends ResultSetGetColumns implements java.sql.ResultSet {
+public class GremlinResultSetGetColumns extends ResultSetGetColumns implements java.sql.ResultSet {
     private static final Map<String, Type> COLUMN_TYPE_MAP = new HashMap<>();
 
     static {
@@ -66,9 +66,9 @@ public class OpenCypherResultSetGetColumns extends ResultSetGetColumns implement
      * @param nodeColumnInfos          List of NodeColumnInfo Objects.
      * @param resultSetInfoWithoutRows ResultSetInfoWithoutRows Object.
      */
-    public OpenCypherResultSetGetColumns(final Statement statement,
-                                         final List<NodeColumnInfo> nodeColumnInfos,
-                                         final ResultSetInfoWithoutRows resultSetInfoWithoutRows)
+    public GremlinResultSetGetColumns(final Statement statement,
+                                      final List<NodeColumnInfo> nodeColumnInfos,
+                                      final ResultSetInfoWithoutRows resultSetInfoWithoutRows)
             throws SQLException {
         super(statement, nodeColumnInfos, resultSetInfoWithoutRows);
     }
@@ -80,6 +80,6 @@ public class OpenCypherResultSetGetColumns extends ResultSetGetColumns implement
         for (final String column : orderedColumns) {
             rowTypes.add(COLUMN_TYPE_MAP.get(column));
         }
-        return new OpenCypherResultSetMetadata(orderedColumns, rowTypes);
+        return new GremlinResultSetMetadata(orderedColumns, rowTypes);
     }
 }

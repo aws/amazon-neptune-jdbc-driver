@@ -14,7 +14,7 @@
  *
  */
 
-package software.amazon.neptune.common.gremlindatamodel;
+package software.amazon.neptune.common.gremlindatamodel.resultset;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,6 +23,7 @@ import software.amazon.jdbc.utilities.JdbcType;
 import software.amazon.jdbc.utilities.SqlError;
 import software.amazon.jdbc.utilities.SqlState;
 import software.amazon.neptune.common.ResultSetInfoWithoutRows;
+import software.amazon.neptune.common.gremlindatamodel.NodeColumnInfo;
 import software.amazon.neptune.opencypher.OpenCypherTypeMapping;
 import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
@@ -123,7 +124,7 @@ public abstract class ResultSetGetColumns extends software.amazon.jdbc.ResultSet
     private final List<Map<String, Object>> rows = new ArrayList<>();
 
     /**
-     * OpenCypherResultSetGetColumns constructor, initializes super class.
+     * ResultSetGetColumns constructor, initializes super class.
      *
      * @param statement                Statement Object.
      * @param nodeColumnInfos          List of NodeColumnInfo Objects.

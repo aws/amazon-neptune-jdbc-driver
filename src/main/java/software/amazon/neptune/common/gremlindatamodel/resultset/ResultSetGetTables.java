@@ -14,7 +14,7 @@
  *
  */
 
-package software.amazon.neptune.common.gremlindatamodel;
+package software.amazon.neptune.common.gremlindatamodel.resultset;
 
 import com.google.common.collect.ImmutableList;
 import org.slf4j.Logger;
@@ -22,7 +22,7 @@ import org.slf4j.LoggerFactory;
 import software.amazon.jdbc.utilities.SqlError;
 import software.amazon.jdbc.utilities.SqlState;
 import software.amazon.neptune.common.ResultSetInfoWithoutRows;
-import software.amazon.neptune.opencypher.resultset.OpenCypherResultSet;
+import software.amazon.neptune.common.gremlindatamodel.NodeColumnInfo;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
@@ -30,7 +30,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public abstract class ResultSetGetTables extends OpenCypherResultSet implements java.sql.ResultSet {
+public abstract class ResultSetGetTables extends GenericResultSet implements java.sql.ResultSet {
     private static final Logger LOGGER = LoggerFactory.getLogger(ResultSetGetTables.class);
     /**
      * TABLE_CAT String => table catalog (may be null)
@@ -66,7 +66,7 @@ public abstract class ResultSetGetTables extends OpenCypherResultSet implements 
     private final List<Map<String, Object>> rows = new ArrayList<>();
 
     /**
-     * OpenCypherResultSetGetTables constructor, initializes super class.
+     * ResultSetGetTables constructor, initializes super class.
      *
      * @param statement                Statement Object.
      * @param nodeColumnInfos          List of NodeColumnInfo Objects.
@@ -75,7 +75,7 @@ public abstract class ResultSetGetTables extends OpenCypherResultSet implements 
     public ResultSetGetTables(final Statement statement,
                               final List<NodeColumnInfo> nodeColumnInfos,
                               final ResultSetInfoWithoutRows resultSetInfoWithoutRows) {
-        super(statement, resultSetInfoWithoutRows);
+        super(statement, resultSetInfoWithoutRows.getColumns(), resultSetInfoWithoutRows.getRowCount());
         for (final NodeColumnInfo nodeColumnInfo : nodeColumnInfos) {
             // Add defaults, table name, and push into List.
             final Map<String, Object> map = new HashMap<>(MAPPED_KEYS);
@@ -131,11 +131,11 @@ public abstract class ResultSetGetTables extends OpenCypherResultSet implements 
     }
 
     @Override
-    protected void doClose() throws SQLException {
+    protected void doClose() {
     }
 
     @Override
-    protected int getDriverFetchSize() throws SQLException {
+    protected int getDriverFetchSize() {
         return 0;
     }
 

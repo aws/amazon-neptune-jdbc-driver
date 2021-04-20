@@ -18,6 +18,8 @@ package software.amazon.neptune.common.gremlindatamodel;
 
 import lombok.Getter;
 import software.amazon.neptune.common.ResultSetInfoWithoutRows;
+import software.amazon.neptune.common.gremlindatamodel.resultset.ResultSetGetColumns;
+import software.amazon.neptune.common.gremlindatamodel.resultset.ResultSetGetTables;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;

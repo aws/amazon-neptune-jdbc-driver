@@ -14,7 +14,7 @@
  *
  */
 
-package software.amazon.neptune.opencypher.resultset;
+package software.amazon.neptune.common.gremlindatamodel.resultset;
 
 import com.google.common.collect.ImmutableList;
 import software.amazon.neptune.common.ResultSetInfoWithoutRows;
@@ -23,25 +23,26 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class OpenCypherResultSetGetTableTypes extends OpenCypherResultSetGetString {
+public class ResultSetGetCatalogs extends ResultSetGetString {
     /**
-     * TABLE_TYPE String => table type. Typical types are "TABLE", "VIEW", "SYSTEM TABLE", "GLOBAL TEMPORARY", "LOCAL TEMPORARY", "ALIAS", "SYNONYM".
+     * TABLE_CAT String => catalog name
      */
-    private static final List<String> COLUMNS = ImmutableList.of("TABLE_TYPE");
-    private static final ResultSetInfoWithoutRows RESULT_SET_INFO_WITHOUT_ROWS =
-            new ResultSetInfoWithoutRows(1, COLUMNS);
+    private static final List<String> COLUMNS = ImmutableList.of("TABLE_CAT");
     private static final Map<String, String> CONVERSION_MAP = new HashMap<>();
+    private static final ResultSetInfoWithoutRows RESULT_SET_INFO_WITHOUT_ROWS =
+            new ResultSetInfoWithoutRows(0, COLUMNS);
 
     static {
-        CONVERSION_MAP.put("TABLE_TYPE", "TABLE");
+        CONVERSION_MAP.put("TABLE_CAT", null);
     }
 
     /**
-     * OpenCypherResultSet constructor, initializes super class.
+     * OpenCypherResultSetGetCatalogs constructor, initializes super class.
      *
      * @param statement Statement Object.
      */
-    public OpenCypherResultSetGetTableTypes(final Statement statement) {
-        super(statement, RESULT_SET_INFO_WITHOUT_ROWS, ImmutableList.of(CONVERSION_MAP));
+    public ResultSetGetCatalogs(final Statement statement) {
+        super(statement, RESULT_SET_INFO_WITHOUT_ROWS.getColumns(), RESULT_SET_INFO_WITHOUT_ROWS.getRowCount(),
+                ImmutableList.of(CONVERSION_MAP));
     }
 }

@@ -20,7 +20,7 @@ import org.neo4j.driver.internal.types.InternalTypeSystem;
 import org.neo4j.driver.types.Type;
 import software.amazon.neptune.common.ResultSetInfoWithoutRows;
 import software.amazon.neptune.common.gremlindatamodel.NodeColumnInfo;
-import software.amazon.neptune.common.gremlindatamodel.ResultSetGetTables;
+import software.amazon.neptune.common.gremlindatamodel.resultset.ResultSetGetTables;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
