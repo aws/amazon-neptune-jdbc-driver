@@ -50,12 +50,15 @@ jobs:
     - name: Build with Gradle
       run: ./gradlew build
     - name: Copy Build
+      if: always()
       run: |
         mkdir output
         mkdir output/jarfile
         mkdir output/reports
+        mkdir output/testresults
         cp build/libs/*.jar output/jarfile
         cp -R build/reports output/reports
+        cp build/test-results/test/*.xml output/testresults
     - name: Upload Build
       uses: actions/upload-artifact@v1
       with:
