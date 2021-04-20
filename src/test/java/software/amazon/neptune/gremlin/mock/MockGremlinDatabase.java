@@ -20,6 +20,7 @@ import org.apache.commons.lang3.SystemUtils;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.time.Instant;
 
 public class MockGremlinDatabase {
     private static final String WINDOWS_EXT = ".bat";
@@ -44,7 +45,9 @@ public class MockGremlinDatabase {
             stopGraph();
             startGraph();
         }
-        Thread.sleep(2000);
+        System.out.println("Time1: " + Instant.now().toEpochMilli());
+        Thread.sleep(5000);
+        System.out.println("Time2: " + Instant.now().toEpochMilli());
     }
 
     /**
