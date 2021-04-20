@@ -59,11 +59,12 @@ public class MockGremlinDatabase {
         runCommand(STOP_COMMAND);
     }
 
-    private static String runCommand(final String command) throws IOException {
+    private static void runCommand(final String command) throws IOException {
         final Process p = Runtime.getRuntime().exec(command);
         final BufferedReader input = new BufferedReader(new InputStreamReader(p.getInputStream()));
-        final String line = input.readLine();
-        System.out.println("Server output: '" + line + "'.");
-        return line;
+        String line;
+        while ((line = input.readLine())!= null) {
+            System.out.println("Server output: '" + line + "'.");
+        }
     }
 }
