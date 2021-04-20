@@ -31,6 +31,13 @@ public class MockGremlinDatabase {
     private static final String START_COMMAND = String.format("%s start", SERVER_COMMAND);
     private static final String STOP_COMMAND = String.format("%s stop", SERVER_COMMAND);
 
+
+    /**
+     * Simple function to start the database.
+     *
+     * @throws IOException thrown if command fails.
+     * @throws InterruptedException thrown if command fails.
+     */
     public static void startGraph() throws IOException, InterruptedException {
         final String output = runCommand(START_COMMAND);
         if (output.startsWith("Server already running with PID")) {
@@ -40,6 +47,11 @@ public class MockGremlinDatabase {
         Thread.sleep(2000);
     }
 
+    /**
+     * Simple function to shut the database down.
+     *
+     * @throws IOException thrown if command fails.
+     */
     public static void stopGraph() throws IOException {
         runCommand(STOP_COMMAND);
     }

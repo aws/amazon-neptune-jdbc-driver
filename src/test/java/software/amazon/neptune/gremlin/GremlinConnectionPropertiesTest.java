@@ -20,7 +20,6 @@ import com.google.common.collect.ImmutableList;
 import io.netty.handler.ssl.SslContext;
 import org.apache.log4j.Level;
 import org.apache.tinkerpop.gremlin.driver.LoadBalancingStrategy;
-import org.apache.tinkerpop.gremlin.driver.MessageSerializer;
 import org.apache.tinkerpop.gremlin.driver.ser.Serializers;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -166,7 +165,7 @@ class GremlinConnectionPropertiesTest extends ConnectionPropertiesTestBase {
     @Test
     void testSerializerObject() throws SQLException {
         connectionProperties = new GremlinConnectionProperties();
-        Assertions.assertNull(connectionProperties.getSerializerObject());
+        Assertions.assertNotNull(connectionProperties.getSerializerObject());
 
         final Serializers serializer = Serializers.GRAPHBINARY_V1D0;
         Assertions.assertDoesNotThrow(
@@ -180,12 +179,11 @@ class GremlinConnectionPropertiesTest extends ConnectionPropertiesTestBase {
     @Test
     void testSerializerString() throws SQLException {
         connectionProperties = new GremlinConnectionProperties();
-        Assertions.assertNull(connectionProperties.getSerializerString());
-
         final String serializer = "test serializer";
         Assertions.assertDoesNotThrow(
                 () -> connectionProperties.setSerializer(serializer)
         );
+
         Assertions.assertTrue(connectionProperties.isSerializerString());
         Assertions.assertFalse(connectionProperties.isSerializerObject());
         Assertions.assertEquals(serializer, connectionProperties.getSerializerString());

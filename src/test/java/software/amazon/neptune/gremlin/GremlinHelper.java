@@ -25,6 +25,13 @@ import static software.amazon.neptune.gremlin.GremlinConnectionProperties.PORT_K
 import static software.amazon.neptune.gremlin.GremlinConnectionProperties.SSL_SKIP_VALIDATION_KEY;
 
 public class GremlinHelper {
+    /**
+     * Function to get properties for Gremlin connection.
+     *
+     * @param hostname hostname for properties.
+     * @param port port number for properties.
+     * @return Properties for Gremlin connection.
+     */
     public static Properties getProperties(final String hostname, final int port) {
         final Properties properties = new Properties();
         properties.put(ConnectionProperties.AUTH_SCHEME_KEY, AuthScheme.None); // set default to None
