@@ -15,21 +15,19 @@
 
 package software.amazon.neptune.gremlin;
 
+import lombok.SneakyThrows;
 import org.apache.tinkerpop.gremlin.driver.Client;
 import org.apache.tinkerpop.gremlin.driver.Cluster;
 import org.apache.tinkerpop.gremlin.driver.Result;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import software.amazon.jdbc.utilities.QueryExecutor;
-import software.amazon.jdbc.utilities.SqlError;
-import software.amazon.jdbc.utilities.SqlState;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Iterator;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
 
 /**
  * Implementation of QueryExecutor for Gremlin.
@@ -261,6 +259,7 @@ public class GremlinQueryExecutor extends QueryExecutor {
         return null;
     }
 
+    @SneakyThrows
     @Override
     protected <T> T runQuery(final String query) throws SQLException {
         final Client client = getClient(gremlinConnectionProperties);
@@ -269,29 +268,9 @@ public class GremlinQueryExecutor extends QueryExecutor {
              completableFuture = client.submitAsync(query);
         }
 
-        synchronized (completableFutureLock) {
-            if (completableFuture.isCancelled()) {
-                completableFuture = null;
-                throw SqlError.createSQLException(
-                        LOGGER,
-                        SqlState.OPERATION_CANCELED,
-                        SqlError.QUERY_CANCELED);
-            }
-        }
-
-        final Iterator<Result> resultIterator;
-        try {
-            resultIterator = completableFuture.get().stream().iterator();
-        } catch (final InterruptedException | ExecutionException e) {
-            throw new SQLException(e.getMessage());
-        }
-
+        final Iterator<Result> resultIterator = completableFuture.get().stream().iterator();
         while (resultIterator.hasNext()) {
             final Result result = resultIterator.next();
-        }
-
-        synchronized (completableFutureLock) {
-            completableFuture = null;
         }
 
         client.close();
