@@ -60,6 +60,7 @@ jobs:
         cp -R build/reports output/reports
         cp build/test-results/test/*.xml output/testresults
     - name: Upload Build
+      if: always()
       uses: actions/upload-artifact@v1
       with:
         name: output
