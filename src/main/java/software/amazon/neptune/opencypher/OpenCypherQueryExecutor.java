@@ -40,7 +40,6 @@ import software.amazon.neptune.opencypher.resultset.OpenCypherResultSetGetTables
 import java.lang.reflect.Constructor;
 import java.sql.SQLException;
 import java.util.List;
-import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 
 public class OpenCypherQueryExecutor extends QueryExecutor {
@@ -54,22 +53,6 @@ public class OpenCypherQueryExecutor extends QueryExecutor {
 
     OpenCypherQueryExecutor(final OpenCypherConnectionProperties openCypherConnectionProperties) {
         this.openCypherConnectionProperties = openCypherConnectionProperties;
-    }
-
-    private static boolean propertiesEqual(
-            final OpenCypherConnectionProperties openCypherConnectionProperties1,
-            final OpenCypherConnectionProperties openCypherConnectionProperties2) {
-        final Properties properties1 = openCypherConnectionProperties1.getProperties();
-        final Properties properties2 = openCypherConnectionProperties2.getProperties();
-        if (!properties1.keySet().equals(properties2.keySet())) {
-            return false;
-        }
-        for (final Object key : properties1.keySet()) {
-            if (!properties1.get(key).equals(properties2.get(key))) {
-                return false;
-            }
-        }
-        return true;
     }
 
     /**

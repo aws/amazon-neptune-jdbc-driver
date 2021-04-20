@@ -24,18 +24,20 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 /**
- * OpenCypher implementation of DatabaseMetaData.
+ * Gremlin implementation of DatabaseMetaData.
  */
 public class GremlinDatabaseMetadata extends DatabaseMetaData implements java.sql.DatabaseMetaData {
     private static final Logger LOGGER = LoggerFactory.getLogger(GremlinDatabaseMetadata.class);
+    private final GremlinConnection connection;
 
     /**
-     * OpenCypherDatabaseMetadata constructor, initializes super class.
+     * GremlinDatabaseMetadata constructor, initializes super class.
      *
      * @param connection Connection Object.
      */
     GremlinDatabaseMetadata(final java.sql.Connection connection) {
         super(connection);
+        this.connection = (GremlinConnection) connection;
     }
 
     // TODO: Go through and implement these functions
@@ -128,8 +130,9 @@ public class GremlinDatabaseMetadata extends DatabaseMetaData implements java.sq
             throws SQLException {
         // Only tableNamePattern is supported as an exact node label semicolon delimited String.
         LOGGER.info("Getting database tables.");
-        final GremlinQueryExecutor openCypherQueryExecutor = new GremlinQueryExecutor();
-        return openCypherQueryExecutor.executeGetTables(getConnection().createStatement(), tableNamePattern);
+        final GremlinQueryExecutor gremlinQueryExecutor =
+                new GremlinQueryExecutor(connection.getGremlinConnectionProperties());
+        return gremlinQueryExecutor.executeGetTables(getConnection().createStatement(), tableNamePattern);
     }
 
     @Override
@@ -141,22 +144,25 @@ public class GremlinDatabaseMetadata extends DatabaseMetaData implements java.sq
     @Override
     public ResultSet getSchemas() throws SQLException {
         LOGGER.info("Getting database schemas.");
-        final GremlinQueryExecutor openCypherQueryExecutor = new GremlinQueryExecutor();
-        return openCypherQueryExecutor.executeGetSchemas(getConnection().createStatement());
+        final GremlinQueryExecutor gremlinQueryExecutor =
+                new GremlinQueryExecutor(connection.getGremlinConnectionProperties());
+        return gremlinQueryExecutor.executeGetSchemas(getConnection().createStatement());
     }
 
     @Override
     public ResultSet getCatalogs() throws SQLException {
         LOGGER.info("Getting database catalogs.");
-        final GremlinQueryExecutor openCypherQueryExecutor = new GremlinQueryExecutor();
-        return openCypherQueryExecutor.executeGetCatalogs(getConnection().createStatement());
+        final GremlinQueryExecutor gremlinQueryExecutor =
+                new GremlinQueryExecutor(connection.getGremlinConnectionProperties());
+        return gremlinQueryExecutor.executeGetCatalogs(getConnection().createStatement());
     }
 
     @Override
     public ResultSet getTableTypes() throws SQLException {
         LOGGER.info("Getting database table types.");
-        final GremlinQueryExecutor openCypherQueryExecutor = new GremlinQueryExecutor();
-        return openCypherQueryExecutor.executeGetTableTypes(getConnection().createStatement());
+        final GremlinQueryExecutor gremlinQueryExecutor =
+                new GremlinQueryExecutor(connection.getGremlinConnectionProperties());
+        return gremlinQueryExecutor.executeGetTableTypes(getConnection().createStatement());
     }
 
     @Override
@@ -172,8 +178,9 @@ public class GremlinDatabaseMetadata extends DatabaseMetaData implements java.sq
         if (schemaPattern != null) {
             LOGGER.warn("SchemaPattern in getColumns is not supported, ignoring.");
         }
-        final GremlinQueryExecutor openCypherQueryExecutor = new GremlinQueryExecutor();
-        return openCypherQueryExecutor.executeGetColumns(getConnection().createStatement(), tableNamePattern);
+        final GremlinQueryExecutor gremlinQueryExecutor =
+                new GremlinQueryExecutor(connection.getGremlinConnectionProperties());
+        return gremlinQueryExecutor.executeGetColumns(getConnection().createStatement(), tableNamePattern);
     }
 
     @Override

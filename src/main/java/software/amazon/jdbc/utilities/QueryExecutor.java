@@ -22,6 +22,7 @@ import org.slf4j.LoggerFactory;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.sql.SQLException;
+import java.util.Properties;
 
 public abstract class QueryExecutor {
     private static final Logger LOGGER = LoggerFactory.getLogger(QueryExecutor.class);
@@ -33,6 +34,22 @@ public abstract class QueryExecutor {
     @Getter
     private int fetchSize = Integer.MAX_VALUE;
     private QueryState queryState = QueryState.NOT_STARTED;
+
+    protected static boolean propertiesEqual(
+            final ConnectionProperties connectionProperties1,
+            final ConnectionProperties connectionProperties2) {
+        final Properties properties1 = connectionProperties1.getProperties();
+        final Properties properties2 = connectionProperties2.getProperties();
+        if (!properties1.keySet().equals(properties2.keySet())) {
+            return false;
+        }
+        for (final Object key : properties1.keySet()) {
+            if (!properties1.get(key).equals(properties2.get(key))) {
+                return false;
+            }
+        }
+        return true;
+    }
 
     /**
      * Function to get max fetch size for driver.

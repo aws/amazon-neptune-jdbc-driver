@@ -331,11 +331,12 @@ public class GremlinConnectionProperties extends ConnectionProperties {
      *
      * @return The list of enabled SSL protocols.
      */
-    public List<?> getSslEnabledProtocols() {
+    @SuppressWarnings("unchecked")
+    public List<String> getSslEnabledProtocols() {
         if (!containsKey(SSL_ENABLED_PROTOCOLS_KEY)) {
             return null;
         }
-        return (List<?>) get(SSL_ENABLED_PROTOCOLS_KEY);
+        return (List<String>) get(SSL_ENABLED_PROTOCOLS_KEY);
     }
 
     /**
@@ -353,11 +354,12 @@ public class GremlinConnectionProperties extends ConnectionProperties {
      *
      * @return The list of enabled cipher suites.
      */
-    public List<?> getSslCipherSuites() {
+    @SuppressWarnings("unchecked")
+    public List<String> getSslCipherSuites() {
         if (!containsKey(SSL_CIPHER_SUITES_KEY)) {
             return null;
         }
-        return (List<?>) get(SSL_CIPHER_SUITES_KEY);
+        return (List<String>) get(SSL_CIPHER_SUITES_KEY);
     }
 
     /**
