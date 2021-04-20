@@ -353,6 +353,12 @@ public abstract class ConnectionProperties extends Properties {
             }
         }
 
+        for (final String key : DEFAULT_PROPERTIES_MAP.keySet()) {
+            if (get(key) == null) {
+                put(key,DEFAULT_PROPERTIES_MAP.get(key));
+            }
+        }
+
         // If there are any unresolved properties left, log a warning.
         if (!inputPropertiesKeys.isEmpty()) {
             for (final String property : inputPropertiesKeys) {

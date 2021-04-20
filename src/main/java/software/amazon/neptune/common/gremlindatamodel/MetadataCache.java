@@ -30,7 +30,7 @@ public class MetadataCache {
     private static List<NodeColumnInfo> cachedNodeColumnInfos = null;
 
     /**
-     * Function to update the cache of the OpenCypherMetadata
+     * Function to update the cache of the metadata.
      *
      * @param endpoint Endpoint of target database.
      * @param nodes    Node list to use if any.
@@ -54,7 +54,7 @@ public class MetadataCache {
      *
      * @return True if cache is valid, false otherwise.
      */
-    public static boolean isOpenCypherMetadataCached() {
+    public static boolean isMetadataCached() {
         synchronized (LOCK) {
             return cachedNodeColumnInfos != null;
         }

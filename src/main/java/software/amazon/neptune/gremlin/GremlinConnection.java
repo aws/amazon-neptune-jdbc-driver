@@ -16,6 +16,7 @@
 
 package software.amazon.neptune.gremlin;
 
+import lombok.Getter;
 import lombok.NonNull;
 import software.amazon.jdbc.utilities.ConnectionProperties;
 import software.amazon.jdbc.utilities.QueryExecutor;
@@ -26,6 +27,9 @@ import java.sql.SQLException;
  * Gremlin implementation of Connection.
  */
 public class GremlinConnection extends software.amazon.jdbc.Connection implements java.sql.Connection {
+    @Getter
+    private final GremlinConnectionProperties gremlinConnectionProperties;
+
     /**
      * Gremlin constructor, initializes super class.
      *
@@ -33,6 +37,7 @@ public class GremlinConnection extends software.amazon.jdbc.Connection implement
      */
     public GremlinConnection(@NonNull final ConnectionProperties connectionProperties) throws SQLException {
         super(connectionProperties);
+        this.gremlinConnectionProperties = new GremlinConnectionProperties(getConnectionProperties());
     }
 
     @Override
@@ -47,6 +52,6 @@ public class GremlinConnection extends software.amazon.jdbc.Connection implement
 
     @Override
     public QueryExecutor getQueryExecutor() {
-        return new GremlinQueryExecutor();
+        return new GremlinQueryExecutor(getGremlinConnectionProperties());
     }
 }

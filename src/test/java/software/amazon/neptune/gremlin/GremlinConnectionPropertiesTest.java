@@ -21,6 +21,7 @@ import io.netty.handler.ssl.SslContext;
 import org.apache.log4j.Level;
 import org.apache.tinkerpop.gremlin.driver.LoadBalancingStrategy;
 import org.apache.tinkerpop.gremlin.driver.MessageSerializer;
+import org.apache.tinkerpop.gremlin.driver.ser.Serializers;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -167,7 +168,7 @@ class GremlinConnectionPropertiesTest extends ConnectionPropertiesTestBase {
         connectionProperties = new GremlinConnectionProperties();
         Assertions.assertNull(connectionProperties.getSerializerObject());
 
-        final MessageSerializer serializer = mock(MessageSerializer.class);
+        final Serializers serializer = Serializers.GRAPHBINARY_V1D0;
         Assertions.assertDoesNotThrow(
                 () -> connectionProperties.setSerializer(serializer)
         );

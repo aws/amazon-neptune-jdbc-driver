@@ -1,77 +1,62 @@
+/*
+ * Copyright <2020> Amazon.com, Inc. or its affiliates. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License").
+ * You may not use this file except in compliance with the License.
+ * A copy of the License is located at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * or in the "license" file accompanying this file. This file is distributed
+ * on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
+ * express or implied. See the License for the specific language governing
+ * permissions and limitations under the License.
+ *
+ */
+
 package software.amazon.neptune.gremlin;
 
-import org.junit.Before;
 import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import software.amazon.jdbc.Driver;
-import software.amazon.jdbc.utilities.AuthScheme;
-import software.amazon.jdbc.utilities.ConnectionProperties;
 import software.amazon.neptune.gremlin.mock.MockGremlinDatabase;
-import software.amazon.neptune.opencypher.OpenCypherConnection;
-import software.amazon.neptune.opencypher.OpenCypherConnectionProperties;
-import software.amazon.neptune.opencypher.mock.MockOpenCypherDatabase;
-import software.amazon.neptune.opencypher.resultset.OpenCypherResultSet;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
+import java.io.IOException;
 import java.sql.SQLException;
 import java.util.Properties;
-import java.util.concurrent.atomic.AtomicReference;
-import static software.amazon.jdbc.utilities.ConnectionProperties.APPLICATION_NAME_KEY;
+import static software.amazon.neptune.gremlin.GremlinHelper.getProperties;
 
 public class GremlinConnectionTest {
     private static final String HOSTNAME = "localhost";
+    private static final int PORT = 8182;
     private static final String QUERY = "1+1";
-    private static final Properties PROPERTIES = new Properties();
-    private static final String TEST_PROP_KEY_UNSUPPORTED = "unsupported";
-    private static final String TEST_PROP_VAL_UNSUPPORTED = "unsupported";
-    private static final String TEST_PROP_KEY = "ConnectionTimeout";
-    private static final String TEST_PROP_VAL = "1";
-    private static final Properties TEST_PROP = new Properties();
-    private static final Properties TEST_PROP_INITIAL = new Properties();
-    private static final Properties TEST_PROP_MODIFIED = new Properties();
-    private static MockOpenCypherDatabase database;
+    private static final Properties PROPERTIES = getProperties(HOSTNAME, PORT);
     private java.sql.Connection connection;
 
     /**
      * Function to get a random available port and initialize database before testing.
      */
     @BeforeAll
-    public static void initializeDatabase() {
+    public static void initializeDatabase() throws IOException, InterruptedException {
         MockGremlinDatabase.startGraph();
+
     }
 
     /**
      * Function to get a shutdown database after testing.
      */
     @AfterAll
-    public static void shutdownDatabase() {
+    public static void shutdownDatabase() throws IOException {
         MockGremlinDatabase.stopGraph();
     }
 
     @BeforeEach
     void initialize() throws SQLException {
-        PROPERTIES.put(ConnectionProperties.AUTH_SCHEME_KEY, AuthScheme.None); // set default to None
         connection = new GremlinConnection(new GremlinConnectionProperties(PROPERTIES));
-
-        TEST_PROP.put(TEST_PROP_KEY, TEST_PROP_VAL);
-        TEST_PROP_INITIAL.put(APPLICATION_NAME_KEY, Driver.APPLICATION_NAME);
-        TEST_PROP_INITIAL.putAll(ConnectionProperties.DEFAULT_PROPERTIES_MAP);
-        TEST_PROP_INITIAL.putAll(GremlinConnectionProperties.DEFAULT_PROPERTIES_MAP);
-        TEST_PROP_INITIAL.putAll(PROPERTIES);
-        TEST_PROP_MODIFIED.putAll(TEST_PROP_INITIAL);
-        TEST_PROP_MODIFIED.remove(TEST_PROP_KEY);
     }
 
     @Test
-    void testGremlinPrepareStatementType() {
-        final AtomicReference<PreparedStatement> statement = new AtomicReference<>();
-        Assertions.assertDoesNotThrow(() -> statement.set(connection.prepareStatement(QUERY)));
-        Assertions.assertTrue(statement.get() instanceof software.amazon.jdbc.PreparedStatement);
-
-        final AtomicReference<ResultSet> openCypherResultSet = new AtomicReference<>();
-        Assertions.assertDoesNotThrow(() -> openCypherResultSet.set(statement.get().executeQuery()));
+    void testGremlinDatabase() throws SQLException {
+        connection.createStatement().executeQuery(QUERY);
     }
 }

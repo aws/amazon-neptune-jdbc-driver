@@ -20,7 +20,7 @@ import com.google.common.collect.ImmutableList;
 import io.netty.handler.ssl.SslContext;
 import lombok.NonNull;
 import org.apache.tinkerpop.gremlin.driver.LoadBalancingStrategy;
-import org.apache.tinkerpop.gremlin.driver.MessageSerializer;
+import org.apache.tinkerpop.gremlin.driver.ser.Serializers;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import software.amazon.jdbc.utilities.AuthScheme;
@@ -107,6 +107,7 @@ public class GremlinConnectionProperties extends ConnectionProperties {
     public static final int DEFAULT_PORT = 8182;
     public static final boolean DEFAULT_ENABLE_SSL = true;
     public static final boolean DEFAULT_SSL_SKIP_VALIDATION = false;
+    public static final Serializers DEFAULT_SERIALIZER = Serializers.GRAPHBINARY_V1D0;
 
     public static final Map<String, Object> DEFAULT_PROPERTIES_MAP = new HashMap<>();
     private static final Map<String, ConnectionProperties.PropertyConverter<?>> PROPERTY_CONVERTER_MAP = new HashMap<>();
@@ -140,6 +141,7 @@ public class GremlinConnectionProperties extends ConnectionProperties {
         DEFAULT_PROPERTIES_MAP.put(PORT_KEY, DEFAULT_PORT);
         DEFAULT_PROPERTIES_MAP.put(ENABLE_SSL_KEY, DEFAULT_ENABLE_SSL);
         DEFAULT_PROPERTIES_MAP.put(SSL_SKIP_VALIDATION_KEY, DEFAULT_SSL_SKIP_VALIDATION);
+        DEFAULT_PROPERTIES_MAP.put(SERIALIZER_KEY, DEFAULT_SERIALIZER);
     }
 
     /**
@@ -227,7 +229,7 @@ public class GremlinConnectionProperties extends ConnectionProperties {
         if (!containsKey(SERIALIZER_KEY)) {
             return false;
         }
-        return (get(SERIALIZER_KEY) instanceof MessageSerializer);
+        return (get(SERIALIZER_KEY) instanceof Serializers);
     }
 
     /**
@@ -247,11 +249,11 @@ public class GremlinConnectionProperties extends ConnectionProperties {
      *
      * @return The Serializer object.
      */
-    public MessageSerializer getSerializerObject() {
+    public Serializers getSerializerObject() {
         if (!containsKey(SERIALIZER_KEY)) {
             return null;
         }
-        return (MessageSerializer) get(SERIALIZER_KEY);
+        return (Serializers) get(SERIALIZER_KEY);
     }
 
     /**
@@ -267,12 +269,12 @@ public class GremlinConnectionProperties extends ConnectionProperties {
     }
 
     /**
-     * Sets the MessageSerializer object to use.
+     * Sets the Serializers object to use.
      *
-     * @param serializer The MessageSerializer object.
+     * @param serializer The Serializers object.
      * @throws SQLException if value is invalid.
      */
-    public void setSerializer(@NonNull final MessageSerializer serializer) throws SQLException {
+    public void setSerializer(@NonNull final Serializers serializer) throws SQLException {
         put(SERIALIZER_KEY, serializer);
     }
 
@@ -331,11 +333,12 @@ public class GremlinConnectionProperties extends ConnectionProperties {
      *
      * @return The list of enabled SSL protocols.
      */
-    public List<?> getSslEnabledProtocols() {
+    @SuppressWarnings("unchecked")
+    public List<String> getSslEnabledProtocols() {
         if (!containsKey(SSL_ENABLED_PROTOCOLS_KEY)) {
             return null;
         }
-        return (List<?>) get(SSL_ENABLED_PROTOCOLS_KEY);
+        return (List<String>) get(SSL_ENABLED_PROTOCOLS_KEY);
     }
 
     /**
@@ -353,11 +356,12 @@ public class GremlinConnectionProperties extends ConnectionProperties {
      *
      * @return The list of enabled cipher suites.
      */
-    public List<?> getSslCipherSuites() {
+    @SuppressWarnings("unchecked")
+    public List<String> getSslCipherSuites() {
         if (!containsKey(SSL_CIPHER_SUITES_KEY)) {
             return null;
         }
-        return (List<?>) get(SSL_CIPHER_SUITES_KEY);
+        return (List<String>) get(SSL_CIPHER_SUITES_KEY);
     }
 
     /**
