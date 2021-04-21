@@ -347,17 +347,9 @@ public abstract class ConnectionProperties extends Properties {
                     break;
                 }
             }
-            // If property was not resolved, insert default value, if it exists.
-            if (!containsKey(mapKey) && DEFAULT_PROPERTIES_MAP.containsKey(mapKey)) {
-                put(mapKey, DEFAULT_PROPERTIES_MAP.get(mapKey));
-            }
         }
 
-        for (final String key : DEFAULT_PROPERTIES_MAP.keySet()) {
-            if (get(key) == null) {
-                put(key,DEFAULT_PROPERTIES_MAP.get(key));
-            }
-        }
+        setDefaults();
 
         // If there are any unresolved properties left, log a warning.
         if (!inputPropertiesKeys.isEmpty()) {
@@ -367,6 +359,14 @@ public abstract class ConnectionProperties extends Properties {
         }
 
         validateProperties();
+    }
+
+    void setDefaults() {
+        for (final String key : DEFAULT_PROPERTIES_MAP.keySet()) {
+            if (get(key) == null) {
+                put(key,DEFAULT_PROPERTIES_MAP.get(key));
+            }
+        }
     }
 
     /**

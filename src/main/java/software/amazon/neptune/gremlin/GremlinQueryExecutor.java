@@ -45,7 +45,7 @@ public class GremlinQueryExecutor extends QueryExecutor {
         this.gremlinConnectionProperties = gremlinConnectionProperties;
     }
 
-    private static Cluster createCluster(final GremlinConnectionProperties properties) {
+    private static Cluster createCluster(final GremlinConnectionProperties properties) throws SQLException {
         final Cluster.Builder builder = Cluster.build();
 
         if (properties.containsKey(GremlinConnectionProperties.CONTACT_POINT_KEY)) {
@@ -157,7 +157,7 @@ public class GremlinQueryExecutor extends QueryExecutor {
     }
 
     private static Cluster getCluster(final GremlinConnectionProperties gremlinConnectionProperties,
-                                      final boolean returnNew) {
+                                      final boolean returnNew) throws SQLException {
         if (returnNew) {
             return createCluster(gremlinConnectionProperties);
         }
@@ -181,12 +181,12 @@ public class GremlinQueryExecutor extends QueryExecutor {
         }
     }
 
-    private static Client getClient(final GremlinConnectionProperties gremlinConnectionProperties) {
+    private static Client getClient(final GremlinConnectionProperties gremlinConnectionProperties) throws SQLException {
         return getClient(gremlinConnectionProperties, null);
     }
 
     private static Client getClient(final GremlinConnectionProperties gremlinConnectionProperties,
-                                     final String sessionId) {
+                                     final String sessionId) throws SQLException {
         synchronized (CLUSTER_LOCK) {
             cluster = getCluster(gremlinConnectionProperties, false);
         }

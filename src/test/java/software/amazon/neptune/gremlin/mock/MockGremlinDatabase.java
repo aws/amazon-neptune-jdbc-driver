@@ -35,7 +35,7 @@ public class MockGremlinDatabase {
     /**
      * Simple function to start the database.
      *
-     * @throws IOException thrown if command fails.
+     * @throws IOException          thrown if command fails.
      * @throws InterruptedException thrown if command fails.
      */
     public static void startGraph() throws IOException, InterruptedException {
@@ -44,7 +44,7 @@ public class MockGremlinDatabase {
             stopGraph();
             startGraph();
         }
-        Thread.sleep(2000);
+        Thread.sleep(4000);
     }
 
     /**
@@ -59,8 +59,6 @@ public class MockGremlinDatabase {
     private static String runCommand(final String command) throws IOException {
         final Process p = Runtime.getRuntime().exec(command);
         final BufferedReader input = new BufferedReader(new InputStreamReader(p.getInputStream()));
-        final String line = input.readLine();
-        System.out.println("Server output: '" + line + "'.");
-        return line;
+        return input.readLine();
     }
 }

@@ -39,7 +39,6 @@ public class GremlinConnectionTest {
     @BeforeAll
     public static void initializeDatabase() throws IOException, InterruptedException {
         MockGremlinDatabase.startGraph();
-
     }
 
     /**

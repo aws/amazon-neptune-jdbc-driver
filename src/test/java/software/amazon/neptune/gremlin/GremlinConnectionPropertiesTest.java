@@ -167,7 +167,7 @@ class GremlinConnectionPropertiesTest extends ConnectionPropertiesTestBase {
         connectionProperties = new GremlinConnectionProperties();
         Assertions.assertNotNull(connectionProperties.getSerializerObject());
 
-        final Serializers serializer = Serializers.GRAPHBINARY_V1D0;
+        final Serializers serializer = Serializers.GRAPHSON_V2D0;
         Assertions.assertDoesNotThrow(
                 () -> connectionProperties.setSerializer(serializer)
         );
@@ -179,6 +179,7 @@ class GremlinConnectionPropertiesTest extends ConnectionPropertiesTestBase {
     @Test
     void testSerializerString() throws SQLException {
         connectionProperties = new GremlinConnectionProperties();
+        Assertions.assertNotNull(connectionProperties.getSerializerString());
         final String serializer = "test serializer";
         Assertions.assertDoesNotThrow(
                 () -> connectionProperties.setSerializer(serializer)
