@@ -19,8 +19,10 @@ import lombok.SneakyThrows;
 import org.apache.tinkerpop.gremlin.driver.Client;
 import org.apache.tinkerpop.gremlin.driver.Cluster;
 import org.apache.tinkerpop.gremlin.driver.Result;
+import org.apache.tinkerpop.gremlin.driver.SigV4WebSocketChannelizer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import software.amazon.jdbc.utilities.AuthScheme;
 import software.amazon.jdbc.utilities.QueryExecutor;
 
 import java.sql.ResultSet;
@@ -60,6 +62,8 @@ public class GremlinQueryExecutor extends QueryExecutor {
         if (properties.containsKey(GremlinConnectionProperties.SERIALIZER_KEY)) {
             if (properties.isSerializerObject()) {
                 builder.serializer(properties.getSerializerObject());
+            } else if (properties.isSerializerEnum()) {
+                builder.serializer(properties.getSerializerEnum());
             } else if (properties.isChannelizerString()) {
                 builder.serializer(properties.getSerializerString());
             }
@@ -121,7 +125,9 @@ public class GremlinQueryExecutor extends QueryExecutor {
         if (properties.containsKey(GremlinConnectionProperties.MIN_SIMULT_USAGE_PER_CONNECTION_KEY)) {
             builder.minSimultaneousUsagePerConnection(properties.getMinSimultaneousUsagePerConnection());
         }
-        if (properties.containsKey(GremlinConnectionProperties.CHANNELIZER_KEY)) {
+        if (properties.getAuthScheme() == AuthScheme.IAMSigV4) {
+            builder.channelizer(SigV4WebSocketChannelizer.class);
+        } else if (properties.containsKey(GremlinConnectionProperties.CHANNELIZER_KEY)) {
             if (properties.isChannelizerGeneric()) {
                 builder.channelizer(properties.getChannelizerGeneric());
             } else if (properties.isChannelizerString()) {

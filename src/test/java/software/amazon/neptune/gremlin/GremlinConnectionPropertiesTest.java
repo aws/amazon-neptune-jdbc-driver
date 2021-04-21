@@ -20,6 +20,7 @@ import com.google.common.collect.ImmutableList;
 import io.netty.handler.ssl.SslContext;
 import org.apache.log4j.Level;
 import org.apache.tinkerpop.gremlin.driver.LoadBalancingStrategy;
+import org.apache.tinkerpop.gremlin.driver.MessageSerializer;
 import org.apache.tinkerpop.gremlin.driver.ser.Serializers;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -165,15 +166,31 @@ class GremlinConnectionPropertiesTest extends ConnectionPropertiesTestBase {
     @Test
     void testSerializerObject() throws SQLException {
         connectionProperties = new GremlinConnectionProperties();
-        Assertions.assertNotNull(connectionProperties.getSerializerObject());
+        Assertions.assertNotNull(connectionProperties.getSerializerEnum());
+
+        final MessageSerializer serializer = mock(MessageSerializer.class);
+        Assertions.assertDoesNotThrow(
+                () -> connectionProperties.setSerializer(serializer)
+        );
+        Assertions.assertTrue(connectionProperties.isSerializerObject());
+        Assertions.assertFalse(connectionProperties.isSerializerEnum());
+        Assertions.assertFalse(connectionProperties.isSerializerString());
+        Assertions.assertEquals(serializer, connectionProperties.getSerializerObject());
+    }
+
+    @Test
+    void testSerializerEnum() throws SQLException {
+        connectionProperties = new GremlinConnectionProperties();
+        Assertions.assertNotNull(connectionProperties.getSerializerEnum());
 
         final Serializers serializer = Serializers.GRAPHSON_V2D0;
         Assertions.assertDoesNotThrow(
                 () -> connectionProperties.setSerializer(serializer)
         );
-        Assertions.assertTrue(connectionProperties.isSerializerObject());
+        Assertions.assertTrue(connectionProperties.isSerializerEnum());
+        Assertions.assertFalse(connectionProperties.isSerializerObject());
         Assertions.assertFalse(connectionProperties.isSerializerString());
-        Assertions.assertEquals(serializer, connectionProperties.getSerializerObject());
+        Assertions.assertEquals(serializer, connectionProperties.getSerializerEnum());
     }
 
     @Test
@@ -186,6 +203,7 @@ class GremlinConnectionPropertiesTest extends ConnectionPropertiesTestBase {
         );
 
         Assertions.assertTrue(connectionProperties.isSerializerString());
+        Assertions.assertFalse(connectionProperties.isSerializerEnum());
         Assertions.assertFalse(connectionProperties.isSerializerObject());
         Assertions.assertEquals(serializer, connectionProperties.getSerializerString());
     }
