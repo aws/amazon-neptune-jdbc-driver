@@ -29,7 +29,7 @@ public class MockGremlinDatabase {
             String.format(
                     "./gremlin-server/target/apache-tinkerpop-gremlin-server-3.5.0-SNAPSHOT-standalone/bin/gremlin-server%s",
                     SystemUtils.IS_OS_WINDOWS ? WINDOWS_EXT : NIX_EXT);
-    private static final String START_COMMAND = String.format("%s console", SERVER_COMMAND);
+    private static final String START_COMMAND = String.format("%s start", SERVER_COMMAND);
     private static final String STOP_COMMAND = String.format("%s stop", SERVER_COMMAND);
 
 
