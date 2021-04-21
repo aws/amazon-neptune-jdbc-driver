@@ -20,7 +20,6 @@ import org.apache.commons.lang3.SystemUtils;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.time.Instant;
 
 public class MockGremlinDatabase {
     private static final String WINDOWS_EXT = ".bat";
@@ -36,7 +35,7 @@ public class MockGremlinDatabase {
     /**
      * Simple function to start the database.
      *
-     * @throws IOException thrown if command fails.
+     * @throws IOException          thrown if command fails.
      * @throws InterruptedException thrown if command fails.
      */
     public static void startGraph() throws IOException, InterruptedException {
@@ -45,9 +44,7 @@ public class MockGremlinDatabase {
             stopGraph();
             startGraph();
         }
-        System.out.println("Time1: " + Instant.now().toEpochMilli());
-        Thread.sleep(5000);
-        System.out.println("Time2: " + Instant.now().toEpochMilli());
+        Thread.sleep(2000);
     }
 
     /**
@@ -62,14 +59,6 @@ public class MockGremlinDatabase {
     private static String runCommand(final String command) throws IOException {
         final Process p = Runtime.getRuntime().exec(command);
         final BufferedReader input = new BufferedReader(new InputStreamReader(p.getInputStream()));
-        String line;
-        String firstLine = null;
-        while ((line = input.readLine()) != null) {
-            if (firstLine == null) {
-                firstLine = line;
-            }
-            System.out.println("Server output: '" + line + "'.");
-        }
-        return firstLine;
+        return input.readLine();
     }
 }
