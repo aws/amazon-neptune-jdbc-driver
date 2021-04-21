@@ -180,7 +180,7 @@ public class OpenCypherQueryExecutor extends QueryExecutor {
     @Override
     public java.sql.ResultSet executeGetTables(final java.sql.Statement statement, final String tableName)
             throws SQLException {
-        if (!MetadataCache.isOpenCypherMetadataCached()) {
+        if (!MetadataCache.isMetadataCached()) {
             MetadataCache.updateCache(openCypherConnectionProperties.getEndpoint(), null,
                     (openCypherConnectionProperties.getAuthScheme() == AuthScheme.IAMSigV4));
         }
@@ -236,7 +236,7 @@ public class OpenCypherQueryExecutor extends QueryExecutor {
     @Override
     public java.sql.ResultSet executeGetColumns(final java.sql.Statement statement, final String nodes)
             throws SQLException {
-        if (!MetadataCache.isOpenCypherMetadataCached()) {
+        if (!MetadataCache.isMetadataCached()) {
             MetadataCache.updateCache(openCypherConnectionProperties.getEndpoint(), null,
                     (openCypherConnectionProperties.getAuthScheme() == AuthScheme.IAMSigV4));
         }

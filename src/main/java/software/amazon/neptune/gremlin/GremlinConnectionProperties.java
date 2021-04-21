@@ -20,11 +20,13 @@ import com.google.common.collect.ImmutableList;
 import io.netty.handler.ssl.SslContext;
 import lombok.NonNull;
 import org.apache.tinkerpop.gremlin.driver.LoadBalancingStrategy;
-import org.apache.tinkerpop.gremlin.driver.MessageSerializer;
+import org.apache.tinkerpop.gremlin.driver.ser.Serializers;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import software.amazon.jdbc.utilities.AuthScheme;
 import software.amazon.jdbc.utilities.ConnectionProperties;
+import software.amazon.jdbc.utilities.SqlError;
+import software.amazon.jdbc.utilities.SqlState;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.List;
@@ -67,7 +69,12 @@ public class GremlinConnectionProperties extends ConnectionProperties {
     public static final String VALIDATION_REQUEST_KEY = "validationRequest";
     public static final String RECONNECT_INTERVAL_KEY = "reconnectInterval";
     public static final String LOAD_BALANCING_STRATEGY_KEY = "loadBalancingStrategy";
-
+    public static final String DEFAULT_PATH = "/gremlin";
+    public static final int DEFAULT_PORT = 8182;
+    public static final boolean DEFAULT_ENABLE_SSL = true;
+    public static final boolean DEFAULT_SSL_SKIP_VALIDATION = false;
+    public static final Serializers DEFAULT_SERIALIZER = Serializers.GRAPHBINARY_V1D0;
+    public static final Map<String, Object> DEFAULT_PROPERTIES_MAP = new HashMap<>();
     private static final List<String> SUPPORTED_PROPERTIES_LIST = ImmutableList.<String>builder()
             .add(CONTACT_POINT_KEY)
             .add(PATH_KEY)
@@ -102,14 +109,8 @@ public class GremlinConnectionProperties extends ConnectionProperties {
             .add(RECONNECT_INTERVAL_KEY)
             .add(LOAD_BALANCING_STRATEGY_KEY)
             .build();
-
-    public static final String DEFAULT_PATH = "/gremlin";
-    public static final int DEFAULT_PORT = 8182;
-    public static final boolean DEFAULT_ENABLE_SSL = true;
-    public static final boolean DEFAULT_SSL_SKIP_VALIDATION = false;
-
-    public static final Map<String, Object> DEFAULT_PROPERTIES_MAP = new HashMap<>();
-    private static final Map<String, ConnectionProperties.PropertyConverter<?>> PROPERTY_CONVERTER_MAP = new HashMap<>();
+    private static final Map<String, ConnectionProperties.PropertyConverter<?>> PROPERTY_CONVERTER_MAP =
+            new HashMap<>();
     private static final Logger LOGGER = LoggerFactory.getLogger(GremlinConnectionProperties.class);
 
     static {
@@ -140,6 +141,7 @@ public class GremlinConnectionProperties extends ConnectionProperties {
         DEFAULT_PROPERTIES_MAP.put(PORT_KEY, DEFAULT_PORT);
         DEFAULT_PROPERTIES_MAP.put(ENABLE_SSL_KEY, DEFAULT_ENABLE_SSL);
         DEFAULT_PROPERTIES_MAP.put(SSL_SKIP_VALIDATION_KEY, DEFAULT_SSL_SKIP_VALIDATION);
+        DEFAULT_PROPERTIES_MAP.put(SERIALIZER_KEY, DEFAULT_SERIALIZER);
     }
 
     /**
@@ -151,10 +153,23 @@ public class GremlinConnectionProperties extends ConnectionProperties {
 
     /**
      * GremlinConnectionProperties constructor.
+     *
      * @param properties Properties to examine and extract key details from.
      */
     public GremlinConnectionProperties(final Properties properties) throws SQLException {
         super(properties, DEFAULT_PROPERTIES_MAP, PROPERTY_CONVERTER_MAP);
+    }
+
+    /**
+     * Get the number of processors available to the Java virtual machine.
+     *
+     * @return The number of processors available to the Java virtual machine.
+     */
+    private static int getNumberOfProcessors() {
+        // get the runtime object associated with the current Java application
+        final Runtime runtime = Runtime.getRuntime();
+
+        return runtime.availableProcessors();
     }
 
     /**
@@ -227,7 +242,7 @@ public class GremlinConnectionProperties extends ConnectionProperties {
         if (!containsKey(SERIALIZER_KEY)) {
             return false;
         }
-        return (get(SERIALIZER_KEY) instanceof MessageSerializer);
+        return (get(SERIALIZER_KEY) instanceof Serializers);
     }
 
     /**
@@ -247,11 +262,17 @@ public class GremlinConnectionProperties extends ConnectionProperties {
      *
      * @return The Serializer object.
      */
-    public MessageSerializer getSerializerObject() {
+    public Serializers getSerializerObject() throws SQLException {
         if (!containsKey(SERIALIZER_KEY)) {
             return null;
         }
-        return (MessageSerializer) get(SERIALIZER_KEY);
+        final Object serializer = get(SERIALIZER_KEY);
+        if (serializer instanceof Serializers) {
+            return (Serializers) serializer;
+        } else {
+            throw SqlError.createSQLException(LOGGER, SqlState.DATA_TYPE_TRANSFORM_VIOLATION, SqlError.INVALID_TYPE_CONVERSION,
+                    serializer.getClass().getCanonicalName(), Serializers.class.getCanonicalName());
+        }
     }
 
     /**
@@ -263,16 +284,21 @@ public class GremlinConnectionProperties extends ConnectionProperties {
         if (!containsKey(SERIALIZER_KEY)) {
             return null;
         }
-        return (String) get(SERIALIZER_KEY);
+        final Object serializer = get(SERIALIZER_KEY);
+        if (serializer instanceof String) {
+            return (String) serializer;
+        } else {
+            return serializer.toString();
+        }
     }
 
     /**
-     * Sets the MessageSerializer object to use.
+     * Sets the Serializers object to use.
      *
-     * @param serializer The MessageSerializer object.
+     * @param serializer The Serializers object.
      * @throws SQLException if value is invalid.
      */
-    public void setSerializer(@NonNull final MessageSerializer serializer) throws SQLException {
+    public void setSerializer(@NonNull final Serializers serializer) throws SQLException {
         put(SERIALIZER_KEY, serializer);
     }
 
@@ -433,7 +459,7 @@ public class GremlinConnectionProperties extends ConnectionProperties {
     public void setKeyStorePassword(final String keyStorePassword) throws SQLException {
         if (keyStorePassword != null) {
             put(KEY_STORE_PASSWORD_KEY, keyStorePassword);
-        } else  {
+        } else {
             remove(KEY_STORE_PASSWORD_KEY);
         }
     }
@@ -503,7 +529,7 @@ public class GremlinConnectionProperties extends ConnectionProperties {
     public void setTrustStorePassword(final String trustStorePassword) throws SQLException {
         if (trustStorePassword != null) {
             put(TRUST_STORE_PASSWORD_KEY, trustStorePassword);
-        } else  {
+        } else {
             remove(TRUST_STORE_PASSWORD_KEY);
         }
     }
@@ -1001,7 +1027,8 @@ public class GremlinConnectionProperties extends ConnectionProperties {
         if (getAuthScheme() != null && getAuthScheme().equals(AuthScheme.IAMSigV4)) {
             final String region = System.getenv().get("SERVICE_REGION");
             if (region == null) {
-                throw missingConnectionPropertyError("A Region must be provided to use IAMSigV4 Authentication. Set the SERVICE_REGION environment variable to the appropriate region, such as 'us-east-1'.");
+                throw missingConnectionPropertyError(
+                        "A Region must be provided to use IAMSigV4 Authentication. Set the SERVICE_REGION environment variable to the appropriate region, such as 'us-east-1'.");
             }
 
             if (!getEnableSsl()) {
@@ -1020,16 +1047,5 @@ public class GremlinConnectionProperties extends ConnectionProperties {
     @Override
     public boolean isSupportedProperty(final String name) {
         return SUPPORTED_PROPERTIES_LIST.contains(name);
-    }
-
-    /**
-     * Get the number of processors available to the Java virtual machine.
-     * @return The number of processors available to the Java virtual machine.
-     */
-    private static int getNumberOfProcessors() {
-        // get the runtime object associated with the current Java application
-        final Runtime runtime = Runtime.getRuntime();
-
-        return runtime.availableProcessors();
     }
 }
