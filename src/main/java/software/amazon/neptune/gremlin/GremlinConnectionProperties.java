@@ -20,6 +20,7 @@ import com.google.common.collect.ImmutableList;
 import io.netty.handler.ssl.SslContext;
 import lombok.NonNull;
 import org.apache.tinkerpop.gremlin.driver.LoadBalancingStrategy;
+import org.apache.tinkerpop.gremlin.driver.MessageSerializer;
 import org.apache.tinkerpop.gremlin.driver.ser.Serializers;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -242,6 +243,18 @@ public class GremlinConnectionProperties extends ConnectionProperties {
         if (!containsKey(SERIALIZER_KEY)) {
             return false;
         }
+        return (get(SERIALIZER_KEY) instanceof MessageSerializer);
+    }
+
+    /**
+     * Check whether the Serializer is an enum.
+     *
+     * @return True if Serializer is an enum, otherwise false.
+     */
+    public boolean isSerializerEnum() {
+        if (!containsKey(SERIALIZER_KEY)) {
+            return false;
+        }
         return (get(SERIALIZER_KEY) instanceof Serializers);
     }
 
@@ -258,11 +271,29 @@ public class GremlinConnectionProperties extends ConnectionProperties {
     }
 
     /**
-     * Gets the Serializer object to use.
+     * Gets the MessageSerializer to use.
      *
-     * @return The Serializer object.
+     * @return The MessageSerializer.
      */
-    public Serializers getSerializerObject() throws SQLException {
+    public MessageSerializer getSerializerObject() throws SQLException {
+        if (!containsKey(SERIALIZER_KEY)) {
+            return null;
+        }
+        final Object serializer = get(SERIALIZER_KEY);
+        if (serializer instanceof MessageSerializer) {
+            return (MessageSerializer) serializer;
+        } else {
+            throw SqlError.createSQLException(LOGGER, SqlState.DATA_TYPE_TRANSFORM_VIOLATION, SqlError.INVALID_TYPE_CONVERSION,
+                    serializer.getClass().getCanonicalName(), MessageSerializer.class.getCanonicalName());
+        }
+    }
+
+    /**
+     * Gets the Serializers enum.
+     *
+     * @return The Serializers enum.
+     */
+    public Serializers getSerializerEnum() throws SQLException {
         if (!containsKey(SERIALIZER_KEY)) {
             return null;
         }
@@ -275,10 +306,11 @@ public class GremlinConnectionProperties extends ConnectionProperties {
         }
     }
 
+
     /**
-     * Gets the Serializer class name.
+     * Gets the MessageSerializer enum name.
      *
-     * @return The Serializer class name.
+     * @return The MessageSerializer enum name.
      */
     public String getSerializerString() {
         if (!containsKey(SERIALIZER_KEY)) {
@@ -293,9 +325,19 @@ public class GremlinConnectionProperties extends ConnectionProperties {
     }
 
     /**
-     * Sets the Serializers object to use.
+     * Sets the MessageSerializer to use.
      *
-     * @param serializer The Serializers object.
+     * @param serializer The MessageSerializer object.
+     * @throws SQLException if value is invalid.
+     */
+    public void setSerializer(@NonNull final MessageSerializer serializer) throws SQLException {
+        put(SERIALIZER_KEY, serializer);
+    }
+
+    /**
+     * Sets the MessageSerializer to use via the Serializers enum.
+     *
+     * @param serializer The Serializers enum.
      * @throws SQLException if value is invalid.
      */
     public void setSerializer(@NonNull final Serializers serializer) throws SQLException {
@@ -303,7 +345,7 @@ public class GremlinConnectionProperties extends ConnectionProperties {
     }
 
     /**
-     * Sets the Serializer to use given the exact name of a Serializers enum.
+     * Sets the MessageSerializer to use given the exact name of a Serializers enum.
      *
      * @param serializerMimeType The exact name of a Serializers enum.
      * @throws SQLException if value is invalid.
