@@ -44,7 +44,7 @@ public class MockGremlinDatabase {
             stopGraph();
             startGraph();
         }
-        Thread.sleep(2000);
+        Thread.sleep(4000);
     }
 
     /**
