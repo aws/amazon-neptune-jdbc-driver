@@ -50,16 +50,15 @@ public class SchemaHelperGremlinDataModel {
      * @return List of NodeColumnInfo.
      * @throws SQLException Thrown if an error is encountered.
      */
-    public static List<NodeColumnInfo> getGraphSchema(final String endpoint,
-                                                                          final String nodes,
-                                                                          final boolean useIAM)
+    public static List<NodeColumnInfo> getGraphSchema(final String endpoint, final String nodes, final boolean useIAM,
+                                                      final MetadataCache.PathType pathType)
             throws SQLException, IOException {
         // Create unique directory if doesn't exist
         // If does exist, delete current contents
         final String directory = createUniqueDirectoryForThread();
 
         // Run process
-        final List<String> outputFiles = runGremlinSchemaGrabber(endpoint, nodes, directory, useIAM);
+        final List<String> outputFiles = runGremlinSchemaGrabber(endpoint, nodes, directory, useIAM, pathType);
 
         // Validate to see if files are json
         final List<NodeColumnInfo> nodeColumnInfoList = new ArrayList<>();
@@ -113,16 +112,22 @@ public class SchemaHelperGremlinDataModel {
 
     @VisibleForTesting
     private static List<String> runGremlinSchemaGrabber(final String endpoint, final String nodes,
-                                                        final String outputPath, final boolean useIAM)
+                                                        final String outputPath, final boolean useIAM,
+                                                        final MetadataCache.PathType pathType)
             throws SQLException {
-        final String[] endpointSplit = endpoint.split(":");
-        if ((endpointSplit.length != 3) || (!endpointSplit[1].startsWith("//"))) {
-            throw SqlError.createSQLException(
-                    LOGGER,
-                    SqlState.CONNECTION_FAILURE,
-                    SqlError.INVALID_ENDPOINT, endpoint);
+        final String adjustedEndpoint;
+        if (pathType == MetadataCache.PathType.Bolt) {
+            final String[] endpointSplit = endpoint.split(":");
+            if ((endpointSplit.length != 3) || (!endpointSplit[1].startsWith("//"))) {
+                throw SqlError.createSQLException(
+                        LOGGER,
+                        SqlState.CONNECTION_FAILURE,
+                        SqlError.INVALID_ENDPOINT, endpoint);
+            }
+            adjustedEndpoint = endpointSplit[1].substring(2);
+        } else {
+            adjustedEndpoint = endpoint;
         }
-        final String adjustedEndpoint = endpointSplit[1].substring(2);
 
         // Setup arguments
         final List<String> arguments = new LinkedList<>();
@@ -168,6 +173,7 @@ public class SchemaHelperGremlinDataModel {
         LOGGER.info(String.format("Parsing file '%s'", filePath));
         try {
             final String jsonString = new String(Files.readAllBytes(Paths.get(filePath).toAbsolutePath()));
+            System.out.println("JSON FILE: " + jsonString);
             if (jsonString.isEmpty()) {
                 throw new Exception(String.format("Schema file '%s' is empty.", filePath));
             }

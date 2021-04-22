@@ -41,14 +41,20 @@ public class MetadataCache {
      */
     public static void updateCache(final String endpoint,
                                    final String nodes,
-                                   final boolean useIAM) throws SQLException {
+                                   final boolean useIAM,
+                                   final PathType pathType) throws SQLException {
         synchronized (LOCK) {
             try {
-                cachedNodeColumnInfos = SchemaHelperGremlinDataModel.getGraphSchema(endpoint, nodes, useIAM);
+                cachedNodeColumnInfos = SchemaHelperGremlinDataModel.getGraphSchema(endpoint, nodes, useIAM, pathType);
             } catch (final IOException e) {
                 throw new SQLException(e.getMessage());
             }
         }
+    }
+
+    public enum PathType {
+        Bolt,
+        Gremlin
     }
 
     /**

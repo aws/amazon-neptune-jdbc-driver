@@ -16,7 +16,7 @@
 
 package software.amazon.neptune.gremlin.resultset;
 
-import org.neo4j.driver.types.Type;
+import software.amazon.neptune.gremlin.GremlinTypeMapping;
 import software.amazon.neptune.opencypher.OpenCypherTypeMapping;
 import java.sql.SQLException;
 import java.util.List;
@@ -26,7 +26,7 @@ import java.util.List;
  */
 public class GremlinResultSetMetadata extends software.amazon.jdbc.ResultSetMetaData
         implements java.sql.ResultSetMetaData {
-    private final List<Type> columnTypes;
+    private final List<Class<?>> columnTypes;
 
     /**
      * GremlinResultSetMetadata constructor.
@@ -34,7 +34,7 @@ public class GremlinResultSetMetadata extends software.amazon.jdbc.ResultSetMeta
      * @param columns     List of column names.
      * @param columnTypes List of column types.
      */
-    public GremlinResultSetMetadata(final List<String> columns, final List<Type> columnTypes) {
+    public GremlinResultSetMetadata(final List<String> columns, final List<Class<?>> columnTypes) {
         super(columns);
         this.columnTypes = columnTypes;
     }
@@ -45,7 +45,7 @@ public class GremlinResultSetMetadata extends software.amazon.jdbc.ResultSetMeta
      * @param column the 1-based column index.
      * @return Bolt Type Object for column.
      */
-    protected Type getColumnBoltType(final int column) {
+    protected Class<?> getColumnGremlinType(final int column) {
         // TODO: Loop rows to find common type and cache it.
         return columnTypes.get(column - 1);
     }
@@ -53,18 +53,18 @@ public class GremlinResultSetMetadata extends software.amazon.jdbc.ResultSetMeta
     @Override
     public int getColumnType(final int column) throws SQLException {
         verifyColumnIndex(column);
-        return OpenCypherTypeMapping.BOLT_TO_JDBC_TYPE_MAP.get(getColumnBoltType(column)).getJdbcCode();
+        return GremlinTypeMapping.GREMLIN_TO_JDBC_TYPE_MAP.get(getColumnGremlinType(column)).getJdbcCode();
     }
 
     @Override
     public String getColumnTypeName(final int column) throws SQLException {
         verifyColumnIndex(column);
-        return getColumnBoltType(column).name();
+        return getColumnGremlinType(column).getName();
     }
 
     @Override
     public String getColumnClassName(final int column) throws SQLException {
         verifyColumnIndex(column);
-        return OpenCypherTypeMapping.BOLT_TO_JAVA_TYPE_MAP.get(getColumnBoltType(column)).getName();
+        return OpenCypherTypeMapping.BOLT_TO_JAVA_TYPE_MAP.get(getColumnGremlinType(column)).getName();
     }
 }

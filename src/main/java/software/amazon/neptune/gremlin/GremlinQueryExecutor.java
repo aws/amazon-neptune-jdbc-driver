@@ -19,15 +19,32 @@ import lombok.SneakyThrows;
 import org.apache.tinkerpop.gremlin.driver.Client;
 import org.apache.tinkerpop.gremlin.driver.Cluster;
 import org.apache.tinkerpop.gremlin.driver.Result;
+import org.apache.tinkerpop.gremlin.driver.SigV4WebSocketChannelizer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import software.amazon.jdbc.utilities.AuthScheme;
 import software.amazon.jdbc.utilities.QueryExecutor;
-
+import software.amazon.jdbc.utilities.SqlError;
+import software.amazon.jdbc.utilities.SqlState;
+import software.amazon.neptune.common.gremlindatamodel.MetadataCache;
+import software.amazon.neptune.common.gremlindatamodel.NodeColumnInfo;
+import software.amazon.neptune.common.gremlindatamodel.resultset.ResultSetGetCatalogs;
+import software.amazon.neptune.common.gremlindatamodel.resultset.ResultSetGetSchemas;
+import software.amazon.neptune.common.gremlindatamodel.resultset.ResultSetGetTableTypes;
+import software.amazon.neptune.gremlin.resultset.GremlinResultSet;
+import software.amazon.neptune.gremlin.resultset.GremlinResultSetGetColumns;
+import software.amazon.neptune.gremlin.resultset.GremlinResultSetGetTables;
+import java.lang.reflect.Constructor;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.Iterator;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
 
 /**
  * Implementation of QueryExecutor for Gremlin.
@@ -36,10 +53,10 @@ public class GremlinQueryExecutor extends QueryExecutor {
     private static final Logger LOGGER = LoggerFactory.getLogger(GremlinQueryExecutor.class);
     private static final Object CLUSTER_LOCK = new Object();
     private static Cluster cluster = null;
-    private final Object completableFutureLock = new Object();
-    private CompletableFuture<org.apache.tinkerpop.gremlin.driver.ResultSet> completableFuture;
-    private final GremlinConnectionProperties gremlinConnectionProperties;
     private static GremlinConnectionProperties previousGremlinConnectionProperties = null;
+    private final Object completableFutureLock = new Object();
+    private final GremlinConnectionProperties gremlinConnectionProperties;
+    private CompletableFuture<org.apache.tinkerpop.gremlin.driver.ResultSet> completableFuture;
 
     GremlinQueryExecutor(final GremlinConnectionProperties gremlinConnectionProperties) {
         this.gremlinConnectionProperties = gremlinConnectionProperties;
@@ -121,7 +138,9 @@ public class GremlinQueryExecutor extends QueryExecutor {
         if (properties.containsKey(GremlinConnectionProperties.MIN_SIMULT_USAGE_PER_CONNECTION_KEY)) {
             builder.minSimultaneousUsagePerConnection(properties.getMinSimultaneousUsagePerConnection());
         }
-        if (properties.containsKey(GremlinConnectionProperties.CHANNELIZER_KEY)) {
+        if (properties.getAuthScheme() == AuthScheme.IAMSigV4) {
+            builder.channelizer(SigV4WebSocketChannelizer.class);
+        } else if (properties.containsKey(GremlinConnectionProperties.CHANNELIZER_KEY)) {
             if (properties.isChannelizerGeneric()) {
                 builder.channelizer(properties.getChannelizerGeneric());
             } else if (properties.isChannelizerString()) {
@@ -186,7 +205,7 @@ public class GremlinQueryExecutor extends QueryExecutor {
     }
 
     private static Client getClient(final GremlinConnectionProperties gremlinConnectionProperties,
-                                     final String sessionId) throws SQLException {
+                                    final String sessionId) throws SQLException {
         synchronized (CLUSTER_LOCK) {
             cluster = getCluster(gremlinConnectionProperties, false);
         }
@@ -231,52 +250,143 @@ public class GremlinQueryExecutor extends QueryExecutor {
      */
     @Override
     public ResultSet executeQuery(final String sql, final Statement statement) throws SQLException {
-        return runQuery(sql); // TODO: Fix this in result casting, this is for testing purposes.
+        final Constructor<?> constructor;
+        try {
+            constructor = GremlinResultSet.class
+                    .getConstructor(java.sql.Statement.class, GremlinResultSet.ResultSetInfoWithRows.class);
+        } catch (final NoSuchMethodException e) {
+            throw SqlError.createSQLException(
+                    LOGGER,
+                    SqlState.INVALID_QUERY_EXPRESSION,
+                    SqlError.QUERY_FAILED, e);
+        }
+        return runCancellableQuery(constructor, statement, sql);
     }
 
+    /**
+     * Function to get tables.
+     *
+     * @param statement java.sql.Statement Object required for result set.
+     * @param tableName String table name with colon delimits.
+     * @return java.sql.ResultSet object returned from query execution.
+     * @throws SQLException if query execution fails, or it was cancelled.
+     */
     @Override
-    public ResultSet executeGetTables(final Statement statement, final String tableName) throws SQLException {
-        return null;
+    public java.sql.ResultSet executeGetTables(final java.sql.Statement statement, final String tableName)
+            throws SQLException {
+        System.out.println("Contact point: " + gremlinConnectionProperties.getContactPoint());
+        if (!MetadataCache.isMetadataCached()) {
+            MetadataCache.updateCache(gremlinConnectionProperties.getContactPoint(), null,
+                    (gremlinConnectionProperties.getAuthScheme() == AuthScheme.IAMSigV4),
+                    MetadataCache.PathType.Gremlin);
+        }
+
+        final List<NodeColumnInfo> nodeColumnInfoList =
+                MetadataCache.getFilteredCacheNodeColumnInfos(tableName);
+        return new GremlinResultSetGetTables(statement, nodeColumnInfoList,
+                MetadataCache.getFilteredResultSetInfoWithoutRowsForTables(tableName));
     }
 
+    /**
+     * Function to get schema.
+     *
+     * @param statement java.sql.Statement Object required for result set.
+     * @return java.sql.ResulSet Object containing schemas.
+     * @throws SQLException if query execution fails, or it was cancelled.
+     */
     @Override
-    public ResultSet executeGetSchemas(final Statement statement) throws SQLException {
-        return null;
+    public java.sql.ResultSet executeGetSchemas(final java.sql.Statement statement)
+            throws SQLException {
+        return new ResultSetGetSchemas(statement);
     }
 
+    /**
+     * Function to get catalogs.
+     *
+     * @param statement java.sql.Statement Object required for result set.
+     * @return java.sql.ResultSet Object containing catalogs.
+     */
     @Override
-    public ResultSet executeGetCatalogs(final Statement statement) throws SQLException {
-        return null;
+    public java.sql.ResultSet executeGetCatalogs(final java.sql.Statement statement) {
+        return new ResultSetGetCatalogs(statement);
     }
 
+    /**
+     * Function to get table types.
+     *
+     * @param statement java.sql.Statement Object required for result set.
+     * @return java.sql.ResultSet Object containing table types.
+     */
     @Override
-    public ResultSet executeGetTableTypes(final Statement statement) throws SQLException {
-        return null;
+    public java.sql.ResultSet executeGetTableTypes(final java.sql.Statement statement) {
+        return new ResultSetGetTableTypes(statement);
     }
 
+    /**
+     * Function to get table types.
+     *
+     * @param statement java.sql.Statement Object required for result set.
+     * @param nodes     String containing nodes to get schema for.
+     * @return java.sql.ResultSet Object containing columns.
+     */
     @Override
-    public ResultSet executeGetColumns(final Statement statement, final String nodes) throws SQLException {
-        return null;
+    public java.sql.ResultSet executeGetColumns(final java.sql.Statement statement, final String nodes)
+            throws SQLException {
+        if (!MetadataCache.isMetadataCached()) {
+            MetadataCache.updateCache(gremlinConnectionProperties.getContactPoint(), null,
+                    (gremlinConnectionProperties.getAuthScheme() == AuthScheme.IAMSigV4),
+                    MetadataCache.PathType.Gremlin);
+        }
+
+        final List<NodeColumnInfo> nodeColumnInfoList =
+                MetadataCache.getFilteredCacheNodeColumnInfos(nodes);
+        return new GremlinResultSetGetColumns(statement, nodeColumnInfoList,
+                MetadataCache.getFilteredResultSetInfoWithoutRowsForColumns(nodes));
     }
 
     @SneakyThrows
     @Override
+    @SuppressWarnings("unchecked")
     protected <T> T runQuery(final String query) throws SQLException {
         final Client client = getClient(gremlinConnectionProperties);
 
         synchronized (completableFutureLock) {
-             completableFuture = client.submitAsync(query);
+            completableFuture = client.submitAsync(query);
         }
 
-        final Iterator<Result> resultIterator = completableFuture.get().stream().iterator();
-        while (resultIterator.hasNext()) {
-            final Result result = resultIterator.next();
+        final List<Result> results = completableFuture.get().all().get();
+        final List<Map<String, Object>> rows = new ArrayList<>();
+        final List<String> columns = new ArrayList<>();
+        for (final Object result : results.stream().map(Result::getObject).collect(Collectors.toList())) {
+            if (!(result instanceof LinkedHashMap)) {
+                // Best way to handle it seems to be to issue a warning.
+                LOGGER.warn(String.format("Result of type '%s' is not convertible to a Map and will be skipped.",
+                        result.getClass().getCanonicalName()));
+                continue;
+            }
+
+            // We don't know key or value types, so pull it out raw.
+            final Map<?, ?> uncastedRow = (LinkedHashMap<?, ?>) result;
+
+            // Convert generic key types to string and insert in new map with corresponding value.
+            final Map<String, Object> row = new HashMap<>();
+            uncastedRow.forEach((key, value) -> row.put(key.toString(), value));
+
+            // Add row to List of rows.
+            rows.add(row);
+
+            // Get columns from row and put in columns List if they aren't already in there.
+            // TODO: Consider using HashSet here and converting to a List later for performance.
+            row.keySet().forEach(x -> {
+                if (!columns.contains(x)) {
+                    columns.add(x);
+                }
+            });
         }
 
         client.close();
 
-        // TODO - return result
-        return null;
+        return (T) new GremlinResultSet.ResultSetInfoWithRows(rows, columns);
     }
 
     @Override

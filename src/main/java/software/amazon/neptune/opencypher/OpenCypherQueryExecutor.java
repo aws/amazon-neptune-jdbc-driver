@@ -182,7 +182,8 @@ public class OpenCypherQueryExecutor extends QueryExecutor {
             throws SQLException {
         if (!MetadataCache.isMetadataCached()) {
             MetadataCache.updateCache(openCypherConnectionProperties.getEndpoint(), null,
-                    (openCypherConnectionProperties.getAuthScheme() == AuthScheme.IAMSigV4));
+                    (openCypherConnectionProperties.getAuthScheme() == AuthScheme.IAMSigV4),
+                    MetadataCache.PathType.Bolt);
         }
 
         final List<NodeColumnInfo> nodeColumnInfoList =
@@ -238,7 +239,8 @@ public class OpenCypherQueryExecutor extends QueryExecutor {
             throws SQLException {
         if (!MetadataCache.isMetadataCached()) {
             MetadataCache.updateCache(openCypherConnectionProperties.getEndpoint(), null,
-                    (openCypherConnectionProperties.getAuthScheme() == AuthScheme.IAMSigV4));
+                    (openCypherConnectionProperties.getAuthScheme() == AuthScheme.IAMSigV4),
+                    MetadataCache.PathType.Bolt);
         }
 
         final List<NodeColumnInfo> nodeColumnInfoList =

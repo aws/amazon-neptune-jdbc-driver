@@ -16,8 +16,6 @@
 
 package software.amazon.neptune.gremlin.resultset;
 
-import org.neo4j.driver.internal.types.InternalTypeSystem;
-import org.neo4j.driver.types.Type;
 import software.amazon.neptune.common.ResultSetInfoWithoutRows;
 import software.amazon.neptune.common.gremlindatamodel.NodeColumnInfo;
 import software.amazon.neptune.common.gremlindatamodel.resultset.ResultSetGetColumns;
@@ -30,33 +28,33 @@ import java.util.List;
 import java.util.Map;
 
 public class GremlinResultSetGetColumns extends ResultSetGetColumns implements java.sql.ResultSet {
-    private static final Map<String, Type> COLUMN_TYPE_MAP = new HashMap<>();
+    private static final Map<String, Class<?>> COLUMN_TYPE_MAP = new HashMap<>();
 
     static {
-        COLUMN_TYPE_MAP.put("TABLE_CAT", InternalTypeSystem.TYPE_SYSTEM.STRING());
-        COLUMN_TYPE_MAP.put("TABLE_SCHEM", InternalTypeSystem.TYPE_SYSTEM.STRING());
-        COLUMN_TYPE_MAP.put("TABLE_NAME", InternalTypeSystem.TYPE_SYSTEM.STRING());
-        COLUMN_TYPE_MAP.put("COLUMN_NAME", InternalTypeSystem.TYPE_SYSTEM.STRING());
-        COLUMN_TYPE_MAP.put("DATA_TYPE", InternalTypeSystem.TYPE_SYSTEM.INTEGER());
-        COLUMN_TYPE_MAP.put("TYPE_NAME", InternalTypeSystem.TYPE_SYSTEM.STRING());
-        COLUMN_TYPE_MAP.put("COLUMN_SIZE", InternalTypeSystem.TYPE_SYSTEM.INTEGER());
-        COLUMN_TYPE_MAP.put("BUFFER_LENGTH", InternalTypeSystem.TYPE_SYSTEM.INTEGER());
-        COLUMN_TYPE_MAP.put("DECIMAL_DIGITS", InternalTypeSystem.TYPE_SYSTEM.INTEGER());
-        COLUMN_TYPE_MAP.put("NUM_PREC_RADIX", InternalTypeSystem.TYPE_SYSTEM.INTEGER());
-        COLUMN_TYPE_MAP.put("NULLABLE", InternalTypeSystem.TYPE_SYSTEM.INTEGER());
-        COLUMN_TYPE_MAP.put("REMARKS", InternalTypeSystem.TYPE_SYSTEM.STRING());
-        COLUMN_TYPE_MAP.put("COLUMN_DEF", InternalTypeSystem.TYPE_SYSTEM.STRING());
-        COLUMN_TYPE_MAP.put("SQL_DATA_TYPE", InternalTypeSystem.TYPE_SYSTEM.INTEGER());
-        COLUMN_TYPE_MAP.put("SQL_DATETIME_SUB", InternalTypeSystem.TYPE_SYSTEM.INTEGER());
-        COLUMN_TYPE_MAP.put("CHAR_OCTET_LENGTH", InternalTypeSystem.TYPE_SYSTEM.INTEGER());
-        COLUMN_TYPE_MAP.put("ORDINAL_POSITION", InternalTypeSystem.TYPE_SYSTEM.INTEGER());
-        COLUMN_TYPE_MAP.put("IS_NULLABLE", InternalTypeSystem.TYPE_SYSTEM.STRING());
-        COLUMN_TYPE_MAP.put("SCOPE_CATALOG", InternalTypeSystem.TYPE_SYSTEM.STRING());
-        COLUMN_TYPE_MAP.put("SCOPE_SCHEMA", InternalTypeSystem.TYPE_SYSTEM.STRING());
-        COLUMN_TYPE_MAP.put("SCOPE_TABLE", InternalTypeSystem.TYPE_SYSTEM.STRING());
-        COLUMN_TYPE_MAP.put("SOURCE_DATA_TYPE", InternalTypeSystem.TYPE_SYSTEM.INTEGER());
-        COLUMN_TYPE_MAP.put("IS_AUTOINCREMENT", InternalTypeSystem.TYPE_SYSTEM.STRING());
-        COLUMN_TYPE_MAP.put("IS_GENERATEDCOLUMN", InternalTypeSystem.TYPE_SYSTEM.STRING());
+        COLUMN_TYPE_MAP.put("TABLE_CAT", String.class);
+        COLUMN_TYPE_MAP.put("TABLE_SCHEM", String.class);
+        COLUMN_TYPE_MAP.put("TABLE_NAME", String.class);
+        COLUMN_TYPE_MAP.put("COLUMN_NAME", String.class);
+        COLUMN_TYPE_MAP.put("DATA_TYPE", Integer.class);
+        COLUMN_TYPE_MAP.put("TYPE_NAME", String.class);
+        COLUMN_TYPE_MAP.put("COLUMN_SIZE", Integer.class);
+        COLUMN_TYPE_MAP.put("BUFFER_LENGTH", Integer.class);
+        COLUMN_TYPE_MAP.put("DECIMAL_DIGITS", Integer.class);
+        COLUMN_TYPE_MAP.put("NUM_PREC_RADIX", Integer.class);
+        COLUMN_TYPE_MAP.put("NULLABLE", Integer.class);
+        COLUMN_TYPE_MAP.put("REMARKS", String.class);
+        COLUMN_TYPE_MAP.put("COLUMN_DEF", String.class);
+        COLUMN_TYPE_MAP.put("SQL_DATA_TYPE", Integer.class);
+        COLUMN_TYPE_MAP.put("SQL_DATETIME_SUB", Integer.class);
+        COLUMN_TYPE_MAP.put("CHAR_OCTET_LENGTH", Integer.class);
+        COLUMN_TYPE_MAP.put("ORDINAL_POSITION", Integer.class);
+        COLUMN_TYPE_MAP.put("IS_NULLABLE", String.class);
+        COLUMN_TYPE_MAP.put("SCOPE_CATALOG", String.class);
+        COLUMN_TYPE_MAP.put("SCOPE_SCHEMA", String.class);
+        COLUMN_TYPE_MAP.put("SCOPE_TABLE", String.class);
+        COLUMN_TYPE_MAP.put("SOURCE_DATA_TYPE", Integer.class);
+        COLUMN_TYPE_MAP.put("IS_AUTOINCREMENT", String.class);
+        COLUMN_TYPE_MAP.put("IS_GENERATEDCOLUMN", String.class);
     }
 
     /**
@@ -76,7 +74,7 @@ public class GremlinResultSetGetColumns extends ResultSetGetColumns implements j
     @Override
     protected ResultSetMetaData getResultMetadata() {
         final List<String> orderedColumns = getColumns();
-        final List<Type> rowTypes = new ArrayList<>();
+        final List<Class<?>> rowTypes = new ArrayList<>();
         for (final String column : orderedColumns) {
             rowTypes.add(COLUMN_TYPE_MAP.get(column));
         }

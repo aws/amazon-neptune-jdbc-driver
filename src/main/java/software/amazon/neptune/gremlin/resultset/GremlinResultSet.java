@@ -18,18 +18,9 @@ package software.amazon.neptune.gremlin.resultset;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import org.neo4j.driver.Record;
-import org.neo4j.driver.Result;
-import org.neo4j.driver.Session;
-import org.neo4j.driver.Value;
-import org.neo4j.driver.internal.types.InternalTypeSystem;
-import org.neo4j.driver.types.Type;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import software.amazon.jdbc.utilities.SqlError;
-import software.amazon.jdbc.utilities.SqlState;
 import software.amazon.neptune.common.ResultSetInfoWithoutRows;
-import software.amazon.neptune.opencypher.OpenCypherTypeMapping;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -39,48 +30,37 @@ import java.util.Map;
 public class GremlinResultSet extends software.amazon.jdbc.ResultSet implements java.sql.ResultSet {
     private static final Logger LOGGER = LoggerFactory.getLogger(GremlinResultSet.class);
     private final List<String> columns;
-    private final List<Record> rows;
-    private final Result result;
-    private final Session session;
-    private boolean wasNull = false;
+    private final List<Map<String, Object>> rows;
+    private final boolean wasNull = false;
 
-    // TODO: Separate the result set without info to a common result set that this can use.
     /**
-     * OpenCypherResultSet constructor, initializes super class.
+     * GremlinResultSet constructor, initializes super class.
      *
      * @param statement     Statement Object.
      * @param resultSetInfo ResultSetInfoWithRows Object.
      */
     public GremlinResultSet(final java.sql.Statement statement, final ResultSetInfoWithRows resultSetInfo) {
         super(statement, resultSetInfo.getColumns(), resultSetInfo.getRows().size());
-        this.session = resultSetInfo.getSession();
-        this.result = resultSetInfo.getResult();
         this.columns = resultSetInfo.getColumns();
         this.rows = resultSetInfo.getRows();
     }
 
     /**
-     * OpenCypherResultSet constructor, initializes super class.
+     * GremlinResultSet constructor, initializes super class.
      *
-     * @param statement Statement Object.
+     * @param statement     Statement Object.
      * @param resultSetInfo ResultSetInfoWithoutRows Object.
      */
     public GremlinResultSet(final java.sql.Statement statement, final ResultSetInfoWithoutRows resultSetInfo) {
         super(statement, resultSetInfo.getColumns(), resultSetInfo.getRowCount());
-        this.session = null;
-        this.result = null;
+        // TODO.
         this.columns = resultSetInfo.getColumns();
         this.rows = null;
     }
 
     @Override
     protected void doClose() throws SQLException {
-        if (result != null) {
-            result.consume();
-        }
-        if (session != null) {
-            session.close();
-        }
+        // TODO.
     }
 
     @Override
@@ -101,58 +81,36 @@ public class GremlinResultSet extends software.amazon.jdbc.ResultSet implements 
 
     @Override
     protected ResultSetMetaData getResultMetadata() throws SQLException {
-        final List<Type> rowTypes = new ArrayList<>();
-        if (rows == null) {
-            for (int i = 0; i < columns.size(); i++) {
-                rowTypes.add(InternalTypeSystem.TYPE_SYSTEM.STRING());
-            }
-        } else {
-            // TODO: Loop through records and do some sort of type promotion.
-            final Record record = rows.get(0);
-            for (int i = 0; i < columns.size(); i++) {
-                rowTypes.add(record.get(i).type());
-            }
+        final List<Class<?>> rowTypes = new ArrayList<>();
+        // TODO: Fix type support here, we need to go through and figure out what the types are.
+        for (int i = 0; i < columns.size(); i++) {
+            rowTypes.add(String.class);
         }
         return new GremlinResultSetMetadata(columns, rowTypes);
     }
 
     protected Object getConvertedValue(final int columnIndex) throws SQLException {
-        final Value value = getValue(columnIndex);
-        final OpenCypherTypeMapping.Converter<?> converter = getConverter(value);
-        return converter.convert(value);
-    }
+        // Get current row from map.
 
-    private Value getValue(final int columnIndex) throws SQLException {
-        verifyOpen();
-        if (rows == null) {
-            throw SqlError.createSQLException(
-                    LOGGER,
-                    SqlState.DATA_EXCEPTION,
-                    SqlError.UNSUPPORTED_RESULT_SET_TYPE);
-        }
-        validateRowColumn(columnIndex);
-        final Value value = rows.get(getRowIndex()).get(columnIndex - 1);
-        wasNull = value.isNull();
-        return value;
-    }
+        // Get string name of column from column list.
 
-    protected OpenCypherTypeMapping.Converter<?> getConverter(final Value value) {
-        return OpenCypherTypeMapping.BOLT_TO_JAVA_TRANSFORM_MAP.get(value.type());
+        // Check if map contains column name.
+        // If not set wasNull and return null.
+        // Else convert to primitive Java type and return (Integer, String, etc)
+        return null;
     }
 
     @Override
     public Object getObject(final int columnIndex, final Map<String, Class<?>> map) throws SQLException {
         LOGGER.trace("Getting column {} as an Object using provided Map.", columnIndex);
-        final Value value = getValue(columnIndex);
-        return getObject(columnIndex, map.get(OpenCypherTypeMapping.BOLT_TO_JDBC_TYPE_MAP.get(value.type()).name()));
+        // TODO
+        return null;
     }
 
     @AllArgsConstructor
     @Getter
     public static class ResultSetInfoWithRows {
-        private final Session session;
-        private final Result result;
-        private final List<Record> rows;
+        private final List<Map<String, Object>> rows;
         private final List<String> columns;
     }
 }
