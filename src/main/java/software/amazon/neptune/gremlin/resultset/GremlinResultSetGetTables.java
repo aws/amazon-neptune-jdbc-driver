@@ -27,6 +27,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Gremlin ResultSet class for getTables.
+ */
 public class GremlinResultSetGetTables extends ResultSetGetTables implements java.sql.ResultSet {
     private static final Map<String, Class<?>> COLUMN_TYPE_MAP = new HashMap<>();
 

@@ -30,6 +30,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Base ResultSet for getTables.
+ */
 public abstract class ResultSetGetTables extends GenericResultSet implements java.sql.ResultSet {
     private static final Logger LOGGER = LoggerFactory.getLogger(ResultSetGetTables.class);
     /**

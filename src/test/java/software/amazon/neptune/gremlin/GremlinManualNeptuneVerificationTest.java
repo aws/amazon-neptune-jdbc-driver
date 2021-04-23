@@ -30,8 +30,6 @@ import static software.amazon.neptune.gremlin.GremlinConnectionProperties.ENABLE
 import static software.amazon.neptune.gremlin.GremlinConnectionProperties.PORT_KEY;
 
 public class GremlinManualNeptuneVerificationTest {
-
-
     private static final String ENDPOINT = "iam-auth-test-lyndon.cluster-cdubgfjknn5r.us-east-1.neptune.amazonaws.com";
     private static final String SAMPLE_QUERY = "g.V().count()";
     private static final int PORT = 8182;

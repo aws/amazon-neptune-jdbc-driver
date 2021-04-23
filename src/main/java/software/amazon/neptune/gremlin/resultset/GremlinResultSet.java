@@ -27,6 +27,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Gremlin ResultSet class.
+ */
 public class GremlinResultSet extends software.amazon.jdbc.ResultSet implements java.sql.ResultSet {
     private static final Logger LOGGER = LoggerFactory.getLogger(GremlinResultSet.class);
     private final List<String> columns;
@@ -53,7 +56,6 @@ public class GremlinResultSet extends software.amazon.jdbc.ResultSet implements 
      */
     public GremlinResultSet(final java.sql.Statement statement, final ResultSetInfoWithoutRows resultSetInfo) {
         super(statement, resultSetInfo.getColumns(), resultSetInfo.getRowCount());
-        // TODO.
         this.columns = resultSetInfo.getColumns();
         this.rows = null;
     }

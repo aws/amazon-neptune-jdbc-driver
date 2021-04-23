@@ -16,26 +16,19 @@
 
 package software.amazon.neptune.common.gremlindatamodel.resultset;
 
-import org.neo4j.driver.Value;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import software.amazon.jdbc.utilities.SqlError;
-import software.amazon.jdbc.utilities.SqlState;
-import software.amazon.neptune.opencypher.OpenCypherTypeMapping;
 import java.sql.SQLException;
 import java.util.List;
-import java.util.Map;
 
+/**
+ * Generic ResultSet class.
+ */
 public abstract class GenericResultSet extends software.amazon.jdbc.ResultSet implements java.sql.ResultSet {
-    private static final Logger LOGGER = LoggerFactory.getLogger(GenericResultSet.class);
-    private boolean wasNull = false;
-
     /**
      * OpenCypherResultSet constructor, initializes super class.
      *
-     * @param statement     Statement Object.
-     * @param columns       Columns for result.
-     * @param rowCount      Row count for result.
+     * @param statement Statement Object.
+     * @param columns   Columns for result.
+     * @param rowCount  Row count for result.
      */
     public GenericResultSet(final java.sql.Statement statement, final List<String> columns, final int rowCount) {
         super(statement, columns, rowCount);
@@ -58,21 +51,6 @@ public abstract class GenericResultSet extends software.amazon.jdbc.ResultSet im
 
     @Override
     public boolean wasNull() throws SQLException {
-        return wasNull;
-    }
-
-    private Value getValue(final int columnIndex) throws SQLException {
-        verifyOpen();
-        throw SqlError.createSQLException(
-                LOGGER,
-                SqlState.DATA_EXCEPTION,
-                SqlError.UNSUPPORTED_RESULT_SET_TYPE);
-    }
-
-    @Override
-    public Object getObject(final int columnIndex, final Map<String, Class<?>> map) throws SQLException {
-        LOGGER.trace("Getting column {} as an Object using provided Map.", columnIndex);
-        final Value value = getValue(columnIndex);
-        return getObject(columnIndex, map.get(OpenCypherTypeMapping.BOLT_TO_JDBC_TYPE_MAP.get(value.type()).name()));
+        return false;
     }
 }

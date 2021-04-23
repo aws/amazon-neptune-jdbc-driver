@@ -28,11 +28,11 @@ import software.amazon.jdbc.utilities.SqlError;
 import software.amazon.jdbc.utilities.SqlState;
 import software.amazon.neptune.common.gremlindatamodel.MetadataCache;
 import software.amazon.neptune.common.gremlindatamodel.NodeColumnInfo;
-import software.amazon.neptune.common.gremlindatamodel.resultset.ResultSetGetCatalogs;
-import software.amazon.neptune.common.gremlindatamodel.resultset.ResultSetGetSchemas;
-import software.amazon.neptune.common.gremlindatamodel.resultset.ResultSetGetTableTypes;
 import software.amazon.neptune.gremlin.resultset.GremlinResultSet;
+import software.amazon.neptune.gremlin.resultset.GremlinResultSetGetCatalogs;
 import software.amazon.neptune.gremlin.resultset.GremlinResultSetGetColumns;
+import software.amazon.neptune.gremlin.resultset.GremlinResultSetGetSchemas;
+import software.amazon.neptune.gremlin.resultset.GremlinResultSetGetTableTypes;
 import software.amazon.neptune.gremlin.resultset.GremlinResultSetGetTables;
 import java.lang.reflect.Constructor;
 import java.sql.ResultSet;
@@ -274,7 +274,6 @@ public class GremlinQueryExecutor extends QueryExecutor {
     @Override
     public java.sql.ResultSet executeGetTables(final java.sql.Statement statement, final String tableName)
             throws SQLException {
-        System.out.println("Contact point: " + gremlinConnectionProperties.getContactPoint());
         if (!MetadataCache.isMetadataCached()) {
             MetadataCache.updateCache(gremlinConnectionProperties.getContactPoint(), null,
                     (gremlinConnectionProperties.getAuthScheme() == AuthScheme.IAMSigV4),
@@ -297,7 +296,7 @@ public class GremlinQueryExecutor extends QueryExecutor {
     @Override
     public java.sql.ResultSet executeGetSchemas(final java.sql.Statement statement)
             throws SQLException {
-        return new ResultSetGetSchemas(statement);
+        return new GremlinResultSetGetSchemas(statement);
     }
 
     /**
@@ -308,7 +307,7 @@ public class GremlinQueryExecutor extends QueryExecutor {
      */
     @Override
     public java.sql.ResultSet executeGetCatalogs(final java.sql.Statement statement) {
-        return new ResultSetGetCatalogs(statement);
+        return new GremlinResultSetGetCatalogs(statement);
     }
 
     /**
@@ -319,7 +318,7 @@ public class GremlinQueryExecutor extends QueryExecutor {
      */
     @Override
     public java.sql.ResultSet executeGetTableTypes(final java.sql.Statement statement) {
-        return new ResultSetGetTableTypes(statement);
+        return new GremlinResultSetGetTableTypes(statement);
     }
 
     /**

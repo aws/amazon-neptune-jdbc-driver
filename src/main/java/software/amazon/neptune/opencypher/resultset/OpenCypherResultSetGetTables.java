@@ -29,6 +29,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * OpenCypher ResultSet class for getTables.
+ */
 public class OpenCypherResultSetGetTables extends ResultSetGetTables implements java.sql.ResultSet {
     private static final Map<String, Type> COLUMN_TYPE_MAP = new HashMap<>();
 

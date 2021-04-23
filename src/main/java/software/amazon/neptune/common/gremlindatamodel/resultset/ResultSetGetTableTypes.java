@@ -23,7 +23,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class ResultSetGetTableTypes extends ResultSetGetString {
+/**
+ * Base ResultSet for getTableTypes.
+ */
+public abstract class ResultSetGetTableTypes extends ResultSetGetString {
     /**
      * TABLE_TYPE String => table type. Typical types are "TABLE", "VIEW", "SYSTEM TABLE", "GLOBAL TEMPORARY", "LOCAL TEMPORARY", "ALIAS", "SYNONYM".
      */
@@ -44,5 +47,9 @@ public class ResultSetGetTableTypes extends ResultSetGetString {
     public ResultSetGetTableTypes(final Statement statement) {
         super(statement, RESULT_SET_INFO_WITHOUT_ROWS.getColumns(), RESULT_SET_INFO_WITHOUT_ROWS.getRowCount(),
                 ImmutableList.of(CONVERSION_MAP));
+    }
+
+    public static List<String> getColumns() {
+        return COLUMNS;
     }
 }

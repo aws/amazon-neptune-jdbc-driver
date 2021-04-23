@@ -23,7 +23,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class ResultSetGetCatalogs extends ResultSetGetString {
+// TODO: Things extending this should switch to dependency injection to reduce the number of classes that have the same code.
+
+/**
+ * Base ResultSet for getCatalogs.
+ */
+public abstract class ResultSetGetCatalogs extends ResultSetGetString {
     /**
      * TABLE_CAT String => catalog name
      */
@@ -37,12 +42,16 @@ public class ResultSetGetCatalogs extends ResultSetGetString {
     }
 
     /**
-     * OpenCypherResultSetGetCatalogs constructor, initializes super class.
+     * ResultSetGetCatalogs constructor, initializes super class.
      *
      * @param statement Statement Object.
      */
     public ResultSetGetCatalogs(final Statement statement) {
         super(statement, RESULT_SET_INFO_WITHOUT_ROWS.getColumns(), RESULT_SET_INFO_WITHOUT_ROWS.getRowCount(),
                 ImmutableList.of(CONVERSION_MAP));
+    }
+
+    protected List<String> getColumns() {
+        return COLUMNS;
     }
 }

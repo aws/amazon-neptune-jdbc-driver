@@ -31,11 +31,11 @@ import software.amazon.jdbc.utilities.SqlError;
 import software.amazon.jdbc.utilities.SqlState;
 import software.amazon.neptune.common.gremlindatamodel.MetadataCache;
 import software.amazon.neptune.common.gremlindatamodel.NodeColumnInfo;
-import software.amazon.neptune.common.gremlindatamodel.resultset.ResultSetGetCatalogs;
-import software.amazon.neptune.common.gremlindatamodel.resultset.ResultSetGetSchemas;
-import software.amazon.neptune.common.gremlindatamodel.resultset.ResultSetGetTableTypes;
 import software.amazon.neptune.opencypher.resultset.OpenCypherResultSet;
+import software.amazon.neptune.opencypher.resultset.OpenCypherResultSetGetCatalogs;
 import software.amazon.neptune.opencypher.resultset.OpenCypherResultSetGetColumns;
+import software.amazon.neptune.opencypher.resultset.OpenCypherResultSetGetSchemas;
+import software.amazon.neptune.opencypher.resultset.OpenCypherResultSetGetTableTypes;
 import software.amazon.neptune.opencypher.resultset.OpenCypherResultSetGetTables;
 import java.lang.reflect.Constructor;
 import java.sql.SQLException;
@@ -202,7 +202,7 @@ public class OpenCypherQueryExecutor extends QueryExecutor {
     @Override
     public java.sql.ResultSet executeGetSchemas(final java.sql.Statement statement)
             throws SQLException {
-        return new ResultSetGetSchemas(statement);
+        return new OpenCypherResultSetGetSchemas(statement);
     }
 
     /**
@@ -213,7 +213,7 @@ public class OpenCypherQueryExecutor extends QueryExecutor {
      */
     @Override
     public java.sql.ResultSet executeGetCatalogs(final java.sql.Statement statement) {
-        return new ResultSetGetCatalogs(statement);
+        return new OpenCypherResultSetGetCatalogs(statement);
     }
 
     /**
@@ -224,7 +224,7 @@ public class OpenCypherQueryExecutor extends QueryExecutor {
      */
     @Override
     public java.sql.ResultSet executeGetTableTypes(final java.sql.Statement statement) {
-        return new ResultSetGetTableTypes(statement);
+        return new OpenCypherResultSetGetTableTypes(statement);
     }
 
     /**

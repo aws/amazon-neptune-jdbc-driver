@@ -23,7 +23,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class ResultSetGetSchemas extends ResultSetGetString {
+/**
+ * Base ResultSet for getSchemas.
+ */
+public abstract class ResultSetGetSchemas extends ResultSetGetString {
     /**
      * TABLE_CAT String => catalog name
      */
@@ -45,5 +48,9 @@ public class ResultSetGetSchemas extends ResultSetGetString {
     public ResultSetGetSchemas(final Statement statement) {
         super(statement, RESULT_SET_INFO_WITHOUT_ROWS.getColumns(), RESULT_SET_INFO_WITHOUT_ROWS.getRowCount(),
                 ImmutableList.of(CONVERSION_MAP));
+    }
+
+    protected List<String> getColumns() {
+        return COLUMNS;
     }
 }

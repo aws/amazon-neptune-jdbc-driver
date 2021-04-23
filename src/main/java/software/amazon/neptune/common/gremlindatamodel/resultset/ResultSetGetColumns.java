@@ -34,6 +34,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Base ResultSet for getColumns.
+ */
 public abstract class ResultSetGetColumns extends software.amazon.jdbc.ResultSet
         implements java.sql.ResultSet {
     private static final Logger LOGGER = LoggerFactory.getLogger(ResultSetGetColumns.class);
