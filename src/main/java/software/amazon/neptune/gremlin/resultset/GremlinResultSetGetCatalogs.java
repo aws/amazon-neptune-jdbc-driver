@@ -14,10 +14,8 @@
  *
  */
 
-package software.amazon.neptune.opencypher.resultset;
+package software.amazon.neptune.gremlin.resultset;
 
-import org.neo4j.driver.internal.types.InternalTypeSystem;
-import org.neo4j.driver.types.Type;
 import software.amazon.neptune.common.gremlindatamodel.resultset.ResultSetGetCatalogs;
 import java.sql.ResultSetMetaData;
 import java.sql.Statement;
@@ -25,24 +23,24 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * OpenCypher ResultSet class for getCatalogs.
+ * Gremlin ResultSet class for getCatalogs.
  */
-public class OpenCypherResultSetGetCatalogs extends ResultSetGetCatalogs {
+public class GremlinResultSetGetCatalogs extends ResultSetGetCatalogs {
     /**
-     * Constructor for OpenCypherResultSetGetCatalogs.
+     * Constructor for GremlinResultSetGetCatalogs.
      *
      * @param statement Statement Object.
      */
-    public OpenCypherResultSetGetCatalogs(final Statement statement) {
+    public GremlinResultSetGetCatalogs(final Statement statement) {
         super(statement);
     }
 
     @Override
     protected ResultSetMetaData getResultMetadata() {
-        final List<Type> rowTypes = new ArrayList<>();
+        final List<Class<?>> rowTypes = new ArrayList<>();
         for (int i = 0; i < getColumns().size(); i++) {
-            rowTypes.add(InternalTypeSystem.TYPE_SYSTEM.STRING());
+            rowTypes.add(String.class);
         }
-        return new OpenCypherResultSetMetadata(getColumns(), rowTypes);
+        return new GremlinResultSetMetadata(getColumns(), rowTypes);
     }
 }

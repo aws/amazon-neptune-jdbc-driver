@@ -23,7 +23,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import software.amazon.jdbc.utilities.AuthScheme;
 import software.amazon.neptune.common.ResultSetInfoWithoutRows;
-import software.amazon.neptune.common.gremlindatamodel.ResultSetGetTables;
+import software.amazon.neptune.common.gremlindatamodel.resultset.ResultSetGetTables;
 import software.amazon.neptune.opencypher.resultset.OpenCypherResultSetGetColumns;
 import software.amazon.neptune.opencypher.utilities.OpenCypherGetColumnUtilities;
 import java.sql.DatabaseMetaData;

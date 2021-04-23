@@ -14,48 +14,39 @@
  *
  */
 
-package software.amazon.neptune.opencypher.resultset;
+package software.amazon.neptune.common.gremlindatamodel.resultset;
 
-import org.neo4j.driver.internal.types.InternalTypeSystem;
-import org.neo4j.driver.types.Type;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import software.amazon.jdbc.utilities.SqlError;
-import software.amazon.neptune.common.ResultSetInfoWithoutRows;
-import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-public class OpenCypherResultSetGetString extends OpenCypherResultSet {
-    private static final Logger LOGGER = LoggerFactory.getLogger(OpenCypherResultSetGetString.class);
+/**
+ * Base ResultSet for String types.
+ */
+public abstract class ResultSetGetString extends GenericResultSet {
+    private static final Logger LOGGER = LoggerFactory.getLogger(ResultSetGetString.class);
     private final List<String> columns;
     private final List<Map<String, String>> constantReturns;
 
     /**
-     * OpenCypherResultSetGetString constructor, initializes super class.
+     * ResultSetGetString constructor, initializes super class.
      *
-     * @param statement                Statement Object.
-     * @param resultSetInfoWithoutRows ResultSetInfoWithoutRows Object.
-     * @param constantReturns          Map of return values for given keys.
+     * @param statement       Statement Object.
+     * @param columns         Columns for result.
+     * @param rowCount        Row count for result.
+     * @param constantReturns Map of return values for given keys.
      */
-    public OpenCypherResultSetGetString(final Statement statement,
-                                        final ResultSetInfoWithoutRows resultSetInfoWithoutRows,
-                                        final List<Map<String, String>> constantReturns) {
-        super(statement, resultSetInfoWithoutRows);
-        this.columns = resultSetInfoWithoutRows.getColumns();
+    public ResultSetGetString(final Statement statement,
+                              final List<String> columns,
+                              final int rowCount,
+                              final List<Map<String, String>> constantReturns) {
+        super(statement, columns, rowCount);
+        this.columns = columns;
         this.constantReturns = constantReturns;
-    }
-
-    @Override
-    protected ResultSetMetaData getResultMetadata() throws SQLException {
-        final List<Type> rowTypes = new ArrayList<>();
-        for (int i = 0; i < columns.size(); i++) {
-            rowTypes.add(InternalTypeSystem.TYPE_SYSTEM.STRING());
-        }
-        return new OpenCypherResultSetMetadata(columns, rowTypes);
     }
 
     @Override

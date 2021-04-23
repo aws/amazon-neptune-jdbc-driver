@@ -36,6 +36,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+
+/**
+ * OpenCypher ResultSet class.
+ */
 public class OpenCypherResultSet extends software.amazon.jdbc.ResultSet implements java.sql.ResultSet {
     private static final Logger LOGGER = LoggerFactory.getLogger(OpenCypherResultSet.class);
     private final List<String> columns;
