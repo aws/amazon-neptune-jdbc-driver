@@ -87,9 +87,8 @@ public class GremlinResultSet extends software.amazon.jdbc.ResultSet implements 
     @Override
     protected ResultSetMetaData getResultMetadata() throws SQLException {
         final List<Class<?>> rowTypes = new ArrayList<>();
-        // TODO: Fix type support here, we need to go through and figure out what the types are.
         for (int i = 0; i < columns.size(); i++) {
-            rowTypes.add(String.class);
+            rowTypes.add(getConvertedValue(i).getClass());
         }
         return new GremlinResultSetMetadata(columns, rowTypes);
     }
@@ -111,7 +110,7 @@ public class GremlinResultSet extends software.amazon.jdbc.ResultSet implements 
         }
         validateRowColumn(columnIndex);
 
-        final String colName = columns.get(columnIndex);
+        final String colName = columns.get(columnIndex - 1);
         final Map<String, Object> row = rows.get(getRowIndex());
         final Object value = row.getOrDefault(colName, null);
         wasNull = (value == null);
@@ -122,8 +121,8 @@ public class GremlinResultSet extends software.amazon.jdbc.ResultSet implements 
     @Override
     public Object getObject(final int columnIndex, final Map<String, Class<?>> map) throws SQLException {
         LOGGER.trace("Getting column {} as an Object using provided Map.", columnIndex);
-        // TODO
-        return null;
+        final Object value = getValue(columnIndex);
+        return getObject(columnIndex, map.get(GremlinTypeMapping.GREMLIN_TO_JDBC_TYPE_MAP.get(value.getClass()).name()));
     }
 
     @AllArgsConstructor
