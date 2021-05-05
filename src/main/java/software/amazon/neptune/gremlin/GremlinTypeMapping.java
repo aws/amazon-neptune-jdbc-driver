@@ -58,7 +58,6 @@ public class GremlinTypeMapping {
         GREMLIN_TO_JDBC_TYPE_MAP.put(Map.class, JdbcType.VARCHAR);
         GREMLIN_TO_JDBC_TYPE_MAP.put(HashMap.class, JdbcType.VARCHAR);
         GREMLIN_TO_JDBC_TYPE_MAP.put(LinkedHashMap.class, JdbcType.VARCHAR);
-        // TODO: Find other types and convert.
 
         // Gremlin->Java mapping.
         // GREMLIN_TO_JAVA_TYPE_MAP.put(InternalTypeSystem.TYPE_SYSTEM.ANY(), String.class); ??
@@ -79,7 +78,6 @@ public class GremlinTypeMapping {
         GREMLIN_TO_JAVA_TYPE_MAP.put(HashMap.class, String.class);
         GREMLIN_TO_JAVA_TYPE_MAP.put(LinkedHashMap.class, String.class);
         GREMLIN_TO_JAVA_TYPE_MAP.put(null, Object.class);
-        // TODO: Find other types and convert.
 
         // TODO: Find required conversions and implement them
 
@@ -102,6 +100,5 @@ public class GremlinTypeMapping {
         GREMLIN_JAVA_TYPE_SET.add(Long.class);
         GREMLIN_JAVA_TYPE_SET.add(Double.class);
         GREMLIN_JAVA_TYPE_SET.add(Float.class);
-        // TODO: Find other types and convert.
     }
 }

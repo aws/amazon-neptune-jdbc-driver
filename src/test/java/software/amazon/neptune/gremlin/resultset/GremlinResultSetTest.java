@@ -21,22 +21,21 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import software.amazon.jdbc.utilities.AuthScheme;
-import software.amazon.jdbc.utilities.ConnectionProperties;
 import software.amazon.neptune.gremlin.GremlinConnection;
 import software.amazon.neptune.gremlin.GremlinConnectionProperties;
+import software.amazon.neptune.gremlin.mock.MockGremlinDatabase;
 
+import java.io.IOException;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Properties;
 
-import static software.amazon.neptune.gremlin.GremlinConnectionProperties.CONTACT_POINT_KEY;
-import static software.amazon.neptune.gremlin.GremlinConnectionProperties.ENABLE_SSL_KEY;
-import static software.amazon.neptune.gremlin.GremlinConnectionProperties.PORT_KEY;
+import static software.amazon.neptune.gremlin.GremlinHelper.getProperties;
 
 class GremlinResultSetTest {
-    private static final String ENDPOINT = "iam-auth-test-lyndon.cluster-cdubgfjknn5r.us-east-1.neptune.amazonaws.com";
+    private static final String HOSTNAME = "localhost";
     private static final int PORT = 8182;
+    private static final AuthScheme AUTH_SCHEME = AuthScheme.None;
     private static final String VERTEX = "planet";
 
     @SuppressWarnings({ "unchecked", "rawtypes" })
@@ -51,29 +50,23 @@ class GremlinResultSetTest {
         VORTEX_PROPERTIES_MAP.put("supportsLife", true);
     }
 
-
     private static java.sql.Connection connection;
     private static java.sql.ResultSet resultSet;
 
     @BeforeAll
-    static void beforeAll() throws SQLException {
-        final Properties properties = new Properties();
-        properties.put(ConnectionProperties.AUTH_SCHEME_KEY, AuthScheme.IAMSigV4);
-        properties.put(CONTACT_POINT_KEY, ENDPOINT);
-        properties.put(PORT_KEY, PORT);
-        properties.put(ENABLE_SSL_KEY, true);
-        connection = new GremlinConnection(new GremlinConnectionProperties(properties));
+    static void beforeAll() throws SQLException, IOException, InterruptedException {
+        MockGremlinDatabase.startGraph();
+        connection = new GremlinConnection(new GremlinConnectionProperties(getProperties(HOSTNAME, PORT)));
         createVertex(VERTEX);
         resultSet = getVertex(VERTEX);
     }
 
     @AfterAll
-    static void shutdown() throws SQLException {
+    static void shutdown() throws SQLException, IOException {
         deleteVertex(VERTEX);
         connection.close();
+        MockGremlinDatabase.stopGraph();
     }
-
-
 
     private static String createVertexQuery(final String label, final Map<String, ?> properties) {
         final String q = "\"";
@@ -120,7 +113,7 @@ class GremlinResultSetTest {
 
     @Test
     void testNullType() throws SQLException {
-        // TODO
+        // TODO: AN-534
     }
 
     @Test
@@ -210,7 +203,5 @@ class GremlinResultSetTest {
         Assertions.assertThrows(SQLException.class, () -> resultSet.getDouble(col));
         Assertions.assertThrows(SQLException.class, () -> resultSet.getFloat(col));
     }
-
-    // TODO: Composite types
 }
 
