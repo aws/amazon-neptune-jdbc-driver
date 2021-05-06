@@ -21,10 +21,12 @@ import java.sql.Date;
 import java.sql.Time;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Gremlin type mapping class to simplify type conversion and mapping.
@@ -37,6 +39,7 @@ public class GremlinTypeMapping {
     public static final Map<Class<?>, JdbcType> GREMLIN_TO_JDBC_TYPE_MAP = new HashMap<>();
     public static final Map<Class<?>, Class<?>> GREMLIN_TO_JAVA_TYPE_MAP = new HashMap<>();
     public static final Map<String, Class<?>> GREMLIN_STRING_TYPE_TO_JAVA_TYPE_CONVERTER_MAP = new HashMap<>();
+    public static final Set<Class> GREMLIN_JAVA_TYPE_SET = new HashSet<>();
 
     static {
         // Gremlin->JDBC mapping.
@@ -55,7 +58,6 @@ public class GremlinTypeMapping {
         GREMLIN_TO_JDBC_TYPE_MAP.put(Map.class, JdbcType.VARCHAR);
         GREMLIN_TO_JDBC_TYPE_MAP.put(HashMap.class, JdbcType.VARCHAR);
         GREMLIN_TO_JDBC_TYPE_MAP.put(LinkedHashMap.class, JdbcType.VARCHAR);
-        // TODO: Find other types and convert.
 
         // Gremlin->Java mapping.
         // GREMLIN_TO_JAVA_TYPE_MAP.put(InternalTypeSystem.TYPE_SYSTEM.ANY(), String.class); ??
@@ -76,7 +78,6 @@ public class GremlinTypeMapping {
         GREMLIN_TO_JAVA_TYPE_MAP.put(HashMap.class, String.class);
         GREMLIN_TO_JAVA_TYPE_MAP.put(LinkedHashMap.class, String.class);
         GREMLIN_TO_JAVA_TYPE_MAP.put(null, Object.class);
-        // TODO: Find other types and convert.
 
         // TODO: Find required conversions and implement them
 
@@ -90,5 +91,14 @@ public class GremlinTypeMapping {
         GREMLIN_STRING_TYPE_TO_JAVA_TYPE_CONVERTER_MAP.put("String", String.class);
         GREMLIN_STRING_TYPE_TO_JAVA_TYPE_CONVERTER_MAP.put("Date", Date.class);
         GREMLIN_STRING_TYPE_TO_JAVA_TYPE_CONVERTER_MAP.put("Time", Time.class);
+
+        GREMLIN_JAVA_TYPE_SET.add(String.class);
+        GREMLIN_JAVA_TYPE_SET.add(Boolean.class);
+        GREMLIN_JAVA_TYPE_SET.add(Byte.class);
+        GREMLIN_JAVA_TYPE_SET.add(Short.class);
+        GREMLIN_JAVA_TYPE_SET.add(Integer.class);
+        GREMLIN_JAVA_TYPE_SET.add(Long.class);
+        GREMLIN_JAVA_TYPE_SET.add(Double.class);
+        GREMLIN_JAVA_TYPE_SET.add(Float.class);
     }
 }

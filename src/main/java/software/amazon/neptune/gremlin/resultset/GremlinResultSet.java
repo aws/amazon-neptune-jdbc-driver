@@ -20,7 +20,10 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import software.amazon.jdbc.utilities.SqlError;
+import software.amazon.jdbc.utilities.SqlState;
 import software.amazon.neptune.common.ResultSetInfoWithoutRows;
+import software.amazon.neptune.gremlin.GremlinTypeMapping;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -34,7 +37,7 @@ public class GremlinResultSet extends software.amazon.jdbc.ResultSet implements 
     private static final Logger LOGGER = LoggerFactory.getLogger(GremlinResultSet.class);
     private final List<String> columns;
     private final List<Map<String, Object>> rows;
-    private final boolean wasNull = false;
+    private boolean wasNull = false;
 
     /**
      * GremlinResultSet constructor, initializes super class.
@@ -84,29 +87,42 @@ public class GremlinResultSet extends software.amazon.jdbc.ResultSet implements 
     @Override
     protected ResultSetMetaData getResultMetadata() throws SQLException {
         final List<Class<?>> rowTypes = new ArrayList<>();
-        // TODO: Fix type support here, we need to go through and figure out what the types are.
         for (int i = 0; i < columns.size(); i++) {
-            rowTypes.add(String.class);
+            rowTypes.add(getConvertedValue(i).getClass());
         }
         return new GremlinResultSetMetadata(columns, rowTypes);
     }
 
     protected Object getConvertedValue(final int columnIndex) throws SQLException {
-        // Get current row from map.
+        final Object value = getValue(columnIndex);
+        return (value == null) || GremlinTypeMapping.GREMLIN_JAVA_TYPE_SET.contains(value.getClass())
+                ? value
+                : value.toString();
+    }
 
-        // Get string name of column from column list.
+    private Object getValue(final int columnIndex) throws SQLException {
+        verifyOpen();
+        if (rows == null) {
+            throw SqlError.createSQLException(
+                    LOGGER,
+                    SqlState.DATA_EXCEPTION,
+                    SqlError.UNSUPPORTED_RESULT_SET_TYPE);
+        }
+        validateRowColumn(columnIndex);
 
-        // Check if map contains column name.
-        // If not set wasNull and return null.
-        // Else convert to primitive Java type and return (Integer, String, etc)
-        return null;
+        final String colName = columns.get(columnIndex - 1);
+        final Map<String, Object> row = rows.get(getRowIndex());
+        final Object value = row.getOrDefault(colName, null);
+        wasNull = (value == null);
+
+        return value;
     }
 
     @Override
     public Object getObject(final int columnIndex, final Map<String, Class<?>> map) throws SQLException {
         LOGGER.trace("Getting column {} as an Object using provided Map.", columnIndex);
-        // TODO
-        return null;
+        final Object value = getValue(columnIndex);
+        return getObject(columnIndex, map.get(GremlinTypeMapping.GREMLIN_TO_JDBC_TYPE_MAP.get(value.getClass()).name()));
     }
 
     @AllArgsConstructor
