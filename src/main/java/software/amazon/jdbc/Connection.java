@@ -60,7 +60,12 @@ public abstract class Connection implements java.sql.Connection {
         setLogLevel();
     }
 
-    protected abstract QueryExecutor getQueryExecutor();
+    /**
+     * Function to get QueryExecutor of underlying connection.
+     *
+     * @return QueryExecutor Object.
+     */
+    public abstract QueryExecutor getQueryExecutor();
 
     protected ConnectionProperties getConnectionProperties() {
         return this.connectionProperties;

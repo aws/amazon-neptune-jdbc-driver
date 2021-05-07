@@ -17,6 +17,7 @@
 package software.amazon.neptune.gremlin;
 
 import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -57,5 +58,13 @@ public class GremlinConnectionTest {
     @Test
     void testGremlinDatabase() throws SQLException {
         connection.createStatement().executeQuery(QUERY);
+    }
+
+    @Test
+    void testIsValid() throws SQLException {
+        Assertions.assertTrue(connection.isValid(1));
+        final java.sql.Connection invalidConnection = new GremlinConnection(
+                new GremlinConnectionProperties(getProperties("invalid", 1234)));
+        Assertions.assertFalse(invalidConnection.isValid(1));
     }
 }

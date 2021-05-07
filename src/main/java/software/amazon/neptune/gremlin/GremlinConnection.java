@@ -42,7 +42,7 @@ public class GremlinConnection extends software.amazon.jdbc.Connection implement
 
     @Override
     public void doClose() {
-        // TODO.
+        GremlinQueryExecutor.close();
     }
 
     @Override

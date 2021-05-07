@@ -23,8 +23,6 @@ import org.neo4j.driver.types.Point;
 import org.neo4j.driver.types.Relationship;
 import org.neo4j.driver.types.Type;
 import software.amazon.jdbc.utilities.JdbcType;
-import java.sql.Date;
-import java.sql.Time;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -39,8 +37,6 @@ public class OpenCypherTypeMapping {
     public static final Converter<String> RELATIONSHIP_CONVERTER = new RelationshipConverter();
     public static final Converter<String> PATH_CONVERTER = new PathConverter();
     public static final Converter<String> POINT_CONVERTER = new PointConverter();
-    // TODO: This should ultimately be moved to the gremlin codebase when that is active.
-    public static final Map<String, Class<?>> GREMLIN_STRING_TYPE_TO_JAVA_TYPE_CONVERTER_MAP = new HashMap<>();
 
     static {
         // Bolt->JDBC mapping.
@@ -109,16 +105,6 @@ public class OpenCypherTypeMapping {
         BOLT_TO_JAVA_TRANSFORM_MAP.put(InternalTypeSystem.TYPE_SYSTEM.DATE_TIME(), Value::asZonedDateTime);
         BOLT_TO_JAVA_TRANSFORM_MAP.put(InternalTypeSystem.TYPE_SYSTEM.DURATION(), Value::asIsoDuration);
         BOLT_TO_JAVA_TRANSFORM_MAP.put(InternalTypeSystem.TYPE_SYSTEM.NULL(), (Value v) -> null);
-
-        GREMLIN_STRING_TYPE_TO_JAVA_TYPE_CONVERTER_MAP.put("Byte", Byte.class);
-        GREMLIN_STRING_TYPE_TO_JAVA_TYPE_CONVERTER_MAP.put("Short", Short.class);
-        GREMLIN_STRING_TYPE_TO_JAVA_TYPE_CONVERTER_MAP.put("Integer", Integer.class);
-        GREMLIN_STRING_TYPE_TO_JAVA_TYPE_CONVERTER_MAP.put("Long", Long.class);
-        GREMLIN_STRING_TYPE_TO_JAVA_TYPE_CONVERTER_MAP.put("Float", Float.class);
-        GREMLIN_STRING_TYPE_TO_JAVA_TYPE_CONVERTER_MAP.put("Double", Double.class);
-        GREMLIN_STRING_TYPE_TO_JAVA_TYPE_CONVERTER_MAP.put("String", String.class);
-        GREMLIN_STRING_TYPE_TO_JAVA_TYPE_CONVERTER_MAP.put("Date", Date.class);
-        GREMLIN_STRING_TYPE_TO_JAVA_TYPE_CONVERTER_MAP.put("Time", Time.class);
     }
 
     /**

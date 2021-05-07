@@ -18,15 +18,14 @@ package software.amazon.neptune.opencypher;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import software.amazon.jdbc.DatabaseMetaData;
-import software.amazon.neptune.common.EmptyResultSet;
+import software.amazon.neptune.NeptuneDatabaseMetadata;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
 /**
  * OpenCypher implementation of DatabaseMetaData.
  */
-public class OpenCypherDatabaseMetadata extends DatabaseMetaData implements java.sql.DatabaseMetaData {
+public class OpenCypherDatabaseMetadata extends NeptuneDatabaseMetadata implements java.sql.DatabaseMetaData {
     private static final Logger LOGGER = LoggerFactory.getLogger(OpenCypherDatabaseMetadata.class);
     private final OpenCypherConnection connection;
 
@@ -40,88 +39,9 @@ public class OpenCypherDatabaseMetadata extends DatabaseMetaData implements java
         this.connection = (OpenCypherConnection) connection;
     }
 
-    // TODO: Go through and implement these functions
-    @Override
-    public String getURL() throws SQLException {
-        return "";
-    }
-
-    @Override
-    public String getUserName() throws SQLException {
-        return "";
-    }
-
-    @Override
-    public String getDatabaseProductName() throws SQLException {
-        // TODO: Is there a way to get this?
-        return "Neptune";
-    }
-
-    @Override
-    public String getDatabaseProductVersion() throws SQLException {
-        // TODO: Is there a way to get this?
-        return "1.0";
-    }
-
     @Override
     public String getDriverName() throws SQLException {
         return "neptune:opencypher";
-    }
-
-    @Override
-    public String getSQLKeywords() throws SQLException {
-        return "";
-    }
-
-    @Override
-    public String getNumericFunctions() throws SQLException {
-        return "";
-    }
-
-    @Override
-    public String getStringFunctions() throws SQLException {
-        return "";
-    }
-
-    @Override
-    public String getSystemFunctions() throws SQLException {
-        return "";
-    }
-
-    @Override
-    public String getTimeDateFunctions() throws SQLException {
-        return "";
-    }
-
-    @Override
-    public String getSearchStringEscape() throws SQLException {
-        return "'";
-    }
-
-    @Override
-    public String getExtraNameCharacters() throws SQLException {
-        return "";
-    }
-
-    @Override
-    public String getCatalogTerm() throws SQLException {
-        return "graph";
-    }
-
-    @Override
-    public String getCatalogSeparator() throws SQLException {
-        return ":-";
-    }
-
-    @Override
-    public int getMaxRowSize() throws SQLException {
-        return 0;
-    }
-
-    @Override
-    public ResultSet getProcedures(final String catalog, final String schemaPattern, final String procedureNamePattern)
-            throws SQLException {
-        return new EmptyResultSet(getConnection().createStatement());
     }
 
     @Override
@@ -133,12 +53,6 @@ public class OpenCypherDatabaseMetadata extends DatabaseMetaData implements java
         final OpenCypherQueryExecutor openCypherQueryExecutor =
                 new OpenCypherQueryExecutor(connection.getOpenCypherConnectionProperties());
         return openCypherQueryExecutor.executeGetTables(getConnection().createStatement(), tableNamePattern);
-    }
-
-    @Override
-    public ResultSet getSchemas(final String catalog, final String schemaPattern) throws SQLException {
-        // No support for getSchemas other than empty result set so we can just invoke getSchema().
-        return getSchemas();
     }
 
     @Override
@@ -181,73 +95,5 @@ public class OpenCypherDatabaseMetadata extends DatabaseMetaData implements java
         final OpenCypherQueryExecutor openCypherQueryExecutor =
                 new OpenCypherQueryExecutor(connection.getOpenCypherConnectionProperties());
         return openCypherQueryExecutor.executeGetColumns(getConnection().createStatement(), tableNamePattern);
-    }
-
-    @Override
-    public ResultSet getColumnPrivileges(final String catalog, final String schema, final String table,
-                                         final String columnNamePattern)
-            throws SQLException {
-        return new EmptyResultSet(getConnection().createStatement());
-    }
-
-    @Override
-    public ResultSet getBestRowIdentifier(final String catalog, final String schema, final String table,
-                                          final int scope, final boolean nullable)
-            throws SQLException {
-        return new EmptyResultSet(getConnection().createStatement());
-    }
-
-    @Override
-    public ResultSet getPrimaryKeys(final String catalog, final String schema, final String table) throws SQLException {
-        return new EmptyResultSet(getConnection().createStatement());
-    }
-
-    @Override
-    public ResultSet getImportedKeys(final String catalog, final String schema, final String table)
-            throws SQLException {
-        return new EmptyResultSet(getConnection().createStatement());
-    }
-
-    @Override
-    public ResultSet getTypeInfo() throws SQLException {
-        return new EmptyResultSet(getConnection().createStatement());
-    }
-
-    @Override
-    public ResultSet getIndexInfo(final String catalog, final String schema, final String table, final boolean unique,
-                                  final boolean approximate)
-            throws SQLException {
-        return new EmptyResultSet(getConnection().createStatement());
-    }
-
-    @Override
-    public ResultSet getAttributes(final String catalog, final String schemaPattern, final String typeNamePattern,
-                                   final String attributeNamePattern) throws SQLException {
-        return new EmptyResultSet(getConnection().createStatement());
-    }
-
-    @Override
-    public int getDatabaseMajorVersion() throws SQLException {
-        return 0;
-    }
-
-    @Override
-    public int getDatabaseMinorVersion() throws SQLException {
-        return 0;
-    }
-
-    @Override
-    public int getJDBCMajorVersion() throws SQLException {
-        return 4;
-    }
-
-    @Override
-    public int getJDBCMinorVersion() throws SQLException {
-        return 2;
-    }
-
-    @Override
-    public ResultSet getClientInfoProperties() throws SQLException {
-        return new EmptyResultSet(getConnection().createStatement());
     }
 }

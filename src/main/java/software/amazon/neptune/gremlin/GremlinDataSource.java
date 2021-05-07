@@ -206,7 +206,7 @@ public class GremlinDataSource extends software.amazon.jdbc.DataSource
      * @return The use encryption.
      */
     public boolean getEnableSsl() {
-        return (connectionProperties.getEnableSsl());
+        return connectionProperties.getEnableSsl();
     }
 
     /**

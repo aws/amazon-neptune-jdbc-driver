@@ -39,7 +39,7 @@ public class MockConnection extends Connection implements java.sql.Connection {
     }
 
     @Override
-    protected QueryExecutor getQueryExecutor() {
+    public QueryExecutor getQueryExecutor() {
         return new MockQueryExecutor();
     }
 

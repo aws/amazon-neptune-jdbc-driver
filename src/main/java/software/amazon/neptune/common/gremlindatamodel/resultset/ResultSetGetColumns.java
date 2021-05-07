@@ -24,10 +24,11 @@ import software.amazon.jdbc.utilities.SqlError;
 import software.amazon.jdbc.utilities.SqlState;
 import software.amazon.neptune.common.ResultSetInfoWithoutRows;
 import software.amazon.neptune.common.gremlindatamodel.NodeColumnInfo;
-import software.amazon.neptune.opencypher.OpenCypherTypeMapping;
 import java.sql.DatabaseMetaData;
+import java.sql.Date;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.sql.Time;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -80,6 +81,7 @@ public abstract class ResultSetGetColumns extends software.amazon.jdbc.ResultSet
      */
     private static final Map<String, Object> CONVERSION_MAP = new HashMap<>();
     private static final List<String> ORDERED_COLUMNS = new ArrayList<>();
+    private static final Map<String, Class<?>> GREMLIN_STRING_TYPE_TO_JAVA_TYPE_CONVERTER_MAP = new HashMap<>();
 
     static {
         CONVERSION_MAP.put("TABLE_CAT", null); // null
@@ -122,6 +124,16 @@ public abstract class ResultSetGetColumns extends software.amazon.jdbc.ResultSet
         ORDERED_COLUMNS.add("SOURCE_DATA_TYPE");
         ORDERED_COLUMNS.add("IS_AUTOINCREMENT");
         ORDERED_COLUMNS.add("IS_GENERATEDCOLUMN");
+
+        GREMLIN_STRING_TYPE_TO_JAVA_TYPE_CONVERTER_MAP.put("Byte", Byte.class);
+        GREMLIN_STRING_TYPE_TO_JAVA_TYPE_CONVERTER_MAP.put("Short", Short.class);
+        GREMLIN_STRING_TYPE_TO_JAVA_TYPE_CONVERTER_MAP.put("Integer", Integer.class);
+        GREMLIN_STRING_TYPE_TO_JAVA_TYPE_CONVERTER_MAP.put("Long", Long.class);
+        GREMLIN_STRING_TYPE_TO_JAVA_TYPE_CONVERTER_MAP.put("Float", Float.class);
+        GREMLIN_STRING_TYPE_TO_JAVA_TYPE_CONVERTER_MAP.put("Double", Double.class);
+        GREMLIN_STRING_TYPE_TO_JAVA_TYPE_CONVERTER_MAP.put("String", String.class);
+        GREMLIN_STRING_TYPE_TO_JAVA_TYPE_CONVERTER_MAP.put("Date", Date.class);
+        GREMLIN_STRING_TYPE_TO_JAVA_TYPE_CONVERTER_MAP.put("Time", Time.class);
     }
 
     private final List<Map<String, Object>> rows = new ArrayList<>();
@@ -149,8 +161,8 @@ public abstract class ResultSetGetColumns extends software.amazon.jdbc.ResultSet
                 // Get column type.
                 final String dataType = property.get("dataType").toString();
                 map.put("TYPE_NAME", dataType);
-                final Class<?> javaClass = OpenCypherTypeMapping.GREMLIN_STRING_TYPE_TO_JAVA_TYPE_CONVERTER_MAP
-                        .getOrDefault(dataType, String.class);
+                final Class<?> javaClass =
+                        GREMLIN_STRING_TYPE_TO_JAVA_TYPE_CONVERTER_MAP.getOrDefault(dataType, String.class);
                 map.put("CHAR_OCTET_LENGTH", (javaClass == String.class) ? Integer.MAX_VALUE : null);
                 final int jdbcType = JavaToJdbcTypeConverter.CLASS_TO_JDBC_ORDINAL
                         .getOrDefault(javaClass, JdbcType.VARCHAR.getJdbcCode());

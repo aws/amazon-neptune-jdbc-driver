@@ -44,6 +44,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 /**
@@ -62,7 +63,8 @@ public class GremlinQueryExecutor extends QueryExecutor {
         this.gremlinConnectionProperties = gremlinConnectionProperties;
     }
 
-    private static Cluster createCluster(final GremlinConnectionProperties properties) throws SQLException {
+    private static Cluster.Builder createClusterBuilder(final GremlinConnectionProperties properties)
+            throws SQLException {
         final Cluster.Builder builder = Cluster.build();
 
         if (properties.containsKey(GremlinConnectionProperties.CONTACT_POINT_KEY)) {
@@ -174,18 +176,18 @@ public class GremlinQueryExecutor extends QueryExecutor {
             builder.loadBalancingStrategy(properties.getLoadBalancingStrategy());
         }
 
-        return builder.create();
+        return builder;
     }
 
     private static Cluster getCluster(final GremlinConnectionProperties gremlinConnectionProperties,
                                       final boolean returnNew) throws SQLException {
         if (returnNew) {
-            return createCluster(gremlinConnectionProperties);
+            return createClusterBuilder(gremlinConnectionProperties).create();
         }
         if (cluster == null ||
                 !propertiesEqual(previousGremlinConnectionProperties, gremlinConnectionProperties)) {
             previousGremlinConnectionProperties = gremlinConnectionProperties;
-            return createCluster(gremlinConnectionProperties);
+            return createClusterBuilder(gremlinConnectionProperties).create();
         }
         return cluster;
     }
@@ -238,7 +240,22 @@ public class GremlinQueryExecutor extends QueryExecutor {
      * @return true if the connection is valid, otherwise false.
      */
     @Override
+    @SneakyThrows
     public boolean isValid(final int timeout) {
+        final Cluster tempCluster =
+                GremlinQueryExecutor.createClusterBuilder(gremlinConnectionProperties).maxWaitForConnection(timeout)
+                        .create();
+        final Client client = tempCluster.connect();
+        client.init();
+
+        try {
+            // Neptune doesn't support arbitrary math queries, but the below command is valid in Gremlin and is basically
+            // saying return 0.
+            final CompletableFuture<List<Result>> tempCompletableFuture = client.submit("g.inject(0)").all();
+            tempCompletableFuture.get(timeout, TimeUnit.SECONDS);
+            return true;
+        } catch (final RuntimeException ignored) {
+        }
         return false;
     }
 
