@@ -64,7 +64,7 @@ public class GremlinConnectionTest {
     void testIsValid() throws SQLException {
         Assertions.assertTrue(connection.isValid(1));
         final java.sql.Connection invalidConnection = new GremlinConnection(
-                new GremlinConnectionProperties(getProperties("invalid", 1234)));
+                new GremlinConnectionProperties(getProperties(HOSTNAME, 1234)));
         Assertions.assertFalse(invalidConnection.isValid(1));
     }
 }
