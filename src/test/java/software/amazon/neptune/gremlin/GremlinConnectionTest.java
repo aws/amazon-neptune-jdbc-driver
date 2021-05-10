@@ -17,6 +17,7 @@
 package software.amazon.neptune.gremlin;
 
 import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -29,7 +30,7 @@ import static software.amazon.neptune.gremlin.GremlinHelper.getProperties;
 
 public class GremlinConnectionTest {
     private static final String HOSTNAME = "localhost";
-    private static final int PORT = 8182;
+    private static final int PORT = 8181;
     private static final String QUERY = "1+1";
     private static final Properties PROPERTIES = getProperties(HOSTNAME, PORT);
     private java.sql.Connection connection;
@@ -46,13 +47,18 @@ public class GremlinConnectionTest {
      * Function to get a shutdown database after testing.
      */
     @AfterAll
-    public static void shutdownDatabase() throws IOException {
+    public static void shutdownDatabase() throws IOException, InterruptedException {
         MockGremlinDatabase.stopGraph();
     }
 
     @BeforeEach
     void initialize() throws SQLException {
         connection = new GremlinConnection(new GremlinConnectionProperties(PROPERTIES));
+    }
+
+    @AfterEach
+    void shutdown() throws SQLException {
+        connection.close();
     }
 
     @Test

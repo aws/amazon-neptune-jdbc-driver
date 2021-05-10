@@ -44,7 +44,7 @@ public class MockGremlinDatabase {
             stopGraph();
             startGraph();
         }
-        Thread.sleep(4000);
+        Thread.sleep(8000);
     }
 
     /**
@@ -52,8 +52,9 @@ public class MockGremlinDatabase {
      *
      * @throws IOException thrown if command fails.
      */
-    public static void stopGraph() throws IOException {
+    public static void stopGraph() throws IOException, InterruptedException {
         runCommand(STOP_COMMAND);
+        Thread.sleep(8000);
     }
 
     private static String runCommand(final String command) throws IOException {

@@ -20,6 +20,7 @@ import lombok.Getter;
 import lombok.NonNull;
 import software.amazon.jdbc.utilities.ConnectionProperties;
 import software.amazon.jdbc.utilities.QueryExecutor;
+import software.amazon.neptune.NeptuneDatabaseMetadata;
 import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
 
@@ -53,11 +54,16 @@ public class OpenCypherConnection extends software.amazon.jdbc.Connection implem
 
     @Override
     public DatabaseMetaData getMetaData() {
-        return new OpenCypherDatabaseMetadata(this);
+        return new NeptuneDatabaseMetadata(this);
     }
 
     @Override
     public QueryExecutor getQueryExecutor() {
         return new OpenCypherQueryExecutor(getOpenCypherConnectionProperties());
+    }
+
+    @Override
+    public String getDriverName() {
+        return "neptune:opencypher";
     }
 }

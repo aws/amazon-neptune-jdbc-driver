@@ -34,7 +34,7 @@ import static software.amazon.neptune.gremlin.GremlinHelper.getProperties;
 
 class GremlinResultSetTest {
     private static final String HOSTNAME = "localhost";
-    private static final int PORT = 8182;
+    private static final int PORT = 8181;
     private static final AuthScheme AUTH_SCHEME = AuthScheme.None;
     private static final String VERTEX = "planet";
 
@@ -62,7 +62,7 @@ class GremlinResultSetTest {
     }
 
     @AfterAll
-    static void shutdown() throws SQLException, IOException {
+    static void shutdown() throws SQLException, IOException, InterruptedException {
         deleteVertex(VERTEX);
         connection.close();
         MockGremlinDatabase.stopGraph();

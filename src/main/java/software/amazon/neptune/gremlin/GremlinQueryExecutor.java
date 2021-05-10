@@ -40,9 +40,11 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -179,11 +181,7 @@ public class GremlinQueryExecutor extends QueryExecutor {
         return builder;
     }
 
-    private static Cluster getCluster(final GremlinConnectionProperties gremlinConnectionProperties,
-                                      final boolean returnNew) throws SQLException {
-        if (returnNew) {
-            return createClusterBuilder(gremlinConnectionProperties).create();
-        }
+    private static Cluster getCluster(final GremlinConnectionProperties gremlinConnectionProperties) throws SQLException {
         if (cluster == null ||
                 !propertiesEqual(previousGremlinConnectionProperties, gremlinConnectionProperties)) {
             previousGremlinConnectionProperties = gremlinConnectionProperties;
@@ -205,22 +203,10 @@ public class GremlinQueryExecutor extends QueryExecutor {
     }
 
     private static Client getClient(final GremlinConnectionProperties gremlinConnectionProperties) throws SQLException {
-        return getClient(gremlinConnectionProperties, null);
-    }
-
-    private static Client getClient(final GremlinConnectionProperties gremlinConnectionProperties,
-                                    final String sessionId) throws SQLException {
         synchronized (CLUSTER_LOCK) {
-            cluster = getCluster(gremlinConnectionProperties, false);
+            cluster = getCluster(gremlinConnectionProperties);
+            return cluster.connect().init();
         }
-
-        final Client client;
-        if (sessionId != null) {
-            client = cluster.connect(sessionId);
-        } else {
-            client = cluster.connect();
-        }
-        return client.init();
     }
 
     /**
@@ -366,15 +352,21 @@ public class GremlinQueryExecutor extends QueryExecutor {
     @Override
     @SuppressWarnings("unchecked")
     protected <T> T runQuery(final String query) throws SQLException {
+        System.out.println("get client");
         final Client client = getClient(gremlinConnectionProperties);
 
+        System.out.println("submit async");
         synchronized (completableFutureLock) {
             completableFuture = client.submitAsync(query);
         }
 
-        final List<Result> results = completableFuture.get().all().get();
+        System.out.println("future");
+        final org.apache.tinkerpop.gremlin.driver.ResultSet future = completableFuture.get();
+        System.out.println("results");
+        final List<Result> results = future.all().get();
+        System.out.println("loop");
         final List<Map<String, Object>> rows = new ArrayList<>();
-        final List<String> columns = new ArrayList<>();
+        final Set<String> columns = new HashSet<>();
         for (final Object result : results.stream().map(Result::getObject).collect(Collectors.toList())) {
             if (!(result instanceof LinkedHashMap)) {
                 // Best way to handle it seems to be to issue a warning.
@@ -394,17 +386,12 @@ public class GremlinQueryExecutor extends QueryExecutor {
             rows.add(row);
 
             // Get columns from row and put in columns List if they aren't already in there.
-            // TODO: Consider using HashSet here and converting to a List later for performance.
-            row.keySet().forEach(x -> {
-                if (!columns.contains(x)) {
-                    columns.add(x);
-                }
-            });
+            columns.addAll(row.keySet());
         }
 
         client.close();
-
-        return (T) new GremlinResultSet.ResultSetInfoWithRows(rows, columns);
+        final List<String> columnsList = new ArrayList<>(columns);
+        return (T) new GremlinResultSet.ResultSetInfoWithRows(rows, columnsList);
     }
 
     @Override
