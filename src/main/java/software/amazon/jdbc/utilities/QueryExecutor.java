@@ -162,6 +162,8 @@ public abstract class QueryExecutor {
                 resetQueryState();
             }
             return (java.sql.ResultSet) constructor.newInstance(statement, intermediateResult);
+        } catch (final SQLException e) {
+          throw e;
         } catch (final Exception e) {
             synchronized (lock) {
                 if (queryState.equals(QueryState.CANCELLED)) {
