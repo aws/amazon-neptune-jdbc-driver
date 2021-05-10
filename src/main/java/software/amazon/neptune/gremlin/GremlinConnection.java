@@ -20,6 +20,7 @@ import lombok.Getter;
 import lombok.NonNull;
 import software.amazon.jdbc.utilities.ConnectionProperties;
 import software.amazon.jdbc.utilities.QueryExecutor;
+import software.amazon.neptune.NeptuneDatabaseMetadata;
 import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
 
@@ -42,16 +43,21 @@ public class GremlinConnection extends software.amazon.jdbc.Connection implement
 
     @Override
     public void doClose() {
-        // TODO.
+        GremlinQueryExecutor.close();
     }
 
     @Override
     public DatabaseMetaData getMetaData() {
-        return new GremlinDatabaseMetadata(this);
+        return new NeptuneDatabaseMetadata(this);
     }
 
     @Override
     public QueryExecutor getQueryExecutor() {
         return new GremlinQueryExecutor(getGremlinConnectionProperties());
+    }
+
+    @Override
+    public String getDriverName() {
+        return "neptune:gremlin";
     }
 }

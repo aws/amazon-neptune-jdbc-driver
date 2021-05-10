@@ -17,18 +17,19 @@
 package software.amazon.neptune.opencypher;
 
 import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import software.amazon.jdbc.helpers.HelperFunctions;
 import software.amazon.jdbc.utilities.AuthScheme;
-import software.amazon.jdbc.utilities.SqlError;
+import software.amazon.neptune.NeptuneStatementTestHelper;
 import software.amazon.neptune.opencypher.mock.MockOpenCypherDatabase;
 import java.sql.SQLException;
+import java.util.Properties;
 
 public class OpenCypherStatementTest extends OpenCypherStatementTestBase {
+    protected static final String HOSTNAME = "localhost";
+    protected static final Properties PROPERTIES = new Properties();
     private static MockOpenCypherDatabase database;
-    private static java.sql.Statement statement;
+    private static NeptuneStatementTestHelper neptuneStatementTestHelper;
 
     /**
      * Function to get a random available port and initialize database before testing.
@@ -40,7 +41,8 @@ public class OpenCypherStatementTest extends OpenCypherStatementTestBase {
         PROPERTIES.putIfAbsent(OpenCypherConnectionProperties.ENDPOINT_KEY,
                 String.format("bolt://%s:%d", HOSTNAME, database.getPort()));
         final java.sql.Connection connection = new OpenCypherConnection(new OpenCypherConnectionProperties(PROPERTIES));
-        statement = connection.createStatement();
+        neptuneStatementTestHelper =
+                new NeptuneStatementTestHelper(connection.createStatement(), LONG_QUERY, QUICK_QUERY);
     }
 
     /**
@@ -53,35 +55,21 @@ public class OpenCypherStatementTest extends OpenCypherStatementTestBase {
 
     @Test
     void testCancelQueryWithoutExecute() {
-        launchCancelThread(0, statement);
-        waitCancelToComplete();
-        HelperFunctions.expectFunctionThrows(SqlError.QUERY_NOT_STARTED_OR_COMPLETE, this::getCancelException);
+        neptuneStatementTestHelper.testCancelQueryWithoutExecute();
     }
 
     @Test
     void testCancelQueryWhileExecuteInProgress() {
-        // Wait 200 milliseconds before attempting to cancel.
-        launchCancelThread(200, statement);
-        HelperFunctions.expectFunctionThrows(SqlError.QUERY_CANCELED, () -> statement.execute(getLongQuery()));
-        waitCancelToComplete();
+        neptuneStatementTestHelper.testCancelQueryWhileExecuteInProgress();
     }
 
     @Test
     void testCancelQueryTwice() {
-        // Wait 200 milliseconds before attempting to cancel.
-        launchCancelThread(200, statement);
-        HelperFunctions.expectFunctionThrows(SqlError.QUERY_CANCELED, () -> statement.execute(getLongQuery()));
-        waitCancelToComplete();
-        launchCancelThread(1, statement);
-        waitCancelToComplete();
-        HelperFunctions.expectFunctionThrows(SqlError.QUERY_NOT_STARTED_OR_COMPLETE, this::getCancelException);
+        neptuneStatementTestHelper.testCancelQueryTwice();
     }
 
     @Test
     void testCancelQueryAfterExecuteComplete() {
-        Assertions.assertDoesNotThrow(() -> statement.execute(QUICK_QUERY));
-        launchCancelThread(0, statement);
-        waitCancelToComplete();
-        HelperFunctions.expectFunctionThrows(SqlError.QUERY_NOT_STARTED_OR_COMPLETE, this::getCancelException);
+        neptuneStatementTestHelper.testCancelQueryAfterExecuteComplete();
     }
 }

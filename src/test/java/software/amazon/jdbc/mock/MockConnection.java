@@ -39,8 +39,13 @@ public class MockConnection extends Connection implements java.sql.Connection {
     }
 
     @Override
-    protected QueryExecutor getQueryExecutor() {
+    public QueryExecutor getQueryExecutor() {
         return new MockQueryExecutor();
+    }
+
+    @Override
+    public String getDriverName() {
+        return "neptune:mock";
     }
 
     @Override

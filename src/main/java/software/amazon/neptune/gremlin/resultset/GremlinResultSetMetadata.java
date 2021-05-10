@@ -53,7 +53,7 @@ public class GremlinResultSetMetadata extends software.amazon.jdbc.ResultSetMeta
     @Override
     public int getColumnType(final int column) throws SQLException {
         verifyColumnIndex(column);
-        return GremlinTypeMapping.GREMLIN_TO_JDBC_TYPE_MAP.get(getColumnGremlinType(column)).getJdbcCode();
+        return GremlinTypeMapping.getJDBCType(getColumnGremlinType(column)).getJdbcCode();
     }
 
     @Override

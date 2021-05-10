@@ -168,9 +168,7 @@ public class GremlinConnectionProperties extends ConnectionProperties {
      */
     private static int getNumberOfProcessors() {
         // get the runtime object associated with the current Java application
-        final Runtime runtime = Runtime.getRuntime();
-
-        return runtime.availableProcessors();
+        return Runtime.getRuntime().availableProcessors();
     }
 
     /**

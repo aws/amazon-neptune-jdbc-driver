@@ -17,32 +17,18 @@
 package software.amazon.neptune.gremlin;
 
 import software.amazon.jdbc.utilities.JdbcType;
-import java.sql.Date;
 import java.sql.Time;
-import java.util.ArrayList;
+import java.sql.Timestamp;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * Gremlin type mapping class to simplify type conversion and mapping.
  */
 public class GremlinTypeMapping {
-    /**
-     * TODO: This file is likely not required to the extent it was in OpenCypher, will need to implement what is required and strip the rest.
-     */
-
     public static final Map<Class<?>, JdbcType> GREMLIN_TO_JDBC_TYPE_MAP = new HashMap<>();
-    public static final Map<Class<?>, Class<?>> GREMLIN_TO_JAVA_TYPE_MAP = new HashMap<>();
-    public static final Map<String, Class<?>> GREMLIN_STRING_TYPE_TO_JAVA_TYPE_CONVERTER_MAP = new HashMap<>();
-    public static final Set<Class> GREMLIN_JAVA_TYPE_SET = new HashSet<>();
 
     static {
-        // Gremlin->JDBC mapping.
         GREMLIN_TO_JDBC_TYPE_MAP.put(String.class, JdbcType.VARCHAR);
         GREMLIN_TO_JDBC_TYPE_MAP.put(Boolean.class, JdbcType.BIT);
         GREMLIN_TO_JDBC_TYPE_MAP.put(byte[].class, JdbcType.VARCHAR);
@@ -52,53 +38,29 @@ public class GremlinTypeMapping {
         GREMLIN_TO_JDBC_TYPE_MAP.put(Long.class, JdbcType.BIGINT);
         GREMLIN_TO_JDBC_TYPE_MAP.put(Float.class, JdbcType.FLOAT);
         GREMLIN_TO_JDBC_TYPE_MAP.put(Double.class, JdbcType.DOUBLE);
-        GREMLIN_TO_JDBC_TYPE_MAP.put(List.class, JdbcType.VARCHAR);
-        GREMLIN_TO_JDBC_TYPE_MAP.put(ArrayList.class, JdbcType.VARCHAR);
-        GREMLIN_TO_JDBC_TYPE_MAP.put(LinkedList.class, JdbcType.VARCHAR);
-        GREMLIN_TO_JDBC_TYPE_MAP.put(Map.class, JdbcType.VARCHAR);
-        GREMLIN_TO_JDBC_TYPE_MAP.put(HashMap.class, JdbcType.VARCHAR);
-        GREMLIN_TO_JDBC_TYPE_MAP.put(LinkedHashMap.class, JdbcType.VARCHAR);
+        GREMLIN_TO_JDBC_TYPE_MAP.put(java.util.Date.class, JdbcType.DATE);
+        GREMLIN_TO_JDBC_TYPE_MAP.put(java.sql.Date.class, JdbcType.DATE);
+        GREMLIN_TO_JDBC_TYPE_MAP.put(Time.class, JdbcType.TIME);
+        GREMLIN_TO_JDBC_TYPE_MAP.put(Timestamp.class, JdbcType.TIMESTAMP);
+    }
 
-        // Gremlin->Java mapping.
-        // GREMLIN_TO_JAVA_TYPE_MAP.put(InternalTypeSystem.TYPE_SYSTEM.ANY(), String.class); ??
-        GREMLIN_TO_JAVA_TYPE_MAP.put(Boolean.class, Boolean.class);
-        GREMLIN_TO_JAVA_TYPE_MAP.put(byte[].class, byte[].class);
-        GREMLIN_TO_JAVA_TYPE_MAP.put(String.class, String.class);
-        GREMLIN_TO_JAVA_TYPE_MAP.put(Byte.class, Byte.class);
-        GREMLIN_TO_JAVA_TYPE_MAP.put(Short.class, Short.class);
-        GREMLIN_TO_JAVA_TYPE_MAP.put(Integer.class, Integer.class);
-        GREMLIN_TO_JAVA_TYPE_MAP.put(Long.class, Long.class);
-        GREMLIN_TO_JAVA_TYPE_MAP.put(Float.class, Float.class);
-        GREMLIN_TO_JAVA_TYPE_MAP.put(Double.class, Double.class);
-        GREMLIN_TO_JAVA_TYPE_MAP.put(List.class, String.class);
-        GREMLIN_TO_JAVA_TYPE_MAP.put(ArrayList.class, String.class);
-        GREMLIN_TO_JAVA_TYPE_MAP.put(LinkedList.class, String.class);
-        // We might need to put special stuff in here to deal with the maps....
-        GREMLIN_TO_JAVA_TYPE_MAP.put(Map.class, String.class);
-        GREMLIN_TO_JAVA_TYPE_MAP.put(HashMap.class, String.class);
-        GREMLIN_TO_JAVA_TYPE_MAP.put(LinkedHashMap.class, String.class);
-        GREMLIN_TO_JAVA_TYPE_MAP.put(null, Object.class);
+    /**
+     * Function to get JDBC type equivalent of Gremlin input type.
+     *
+     * @param gremlinClass Gremlin class type.
+     * @return JDBC equivalent for Gremlin class type.
+     */
+    public static JdbcType getJDBCType(final Class<?> gremlinClass) {
+        return GREMLIN_TO_JDBC_TYPE_MAP.getOrDefault(gremlinClass, JdbcType.VARCHAR);
+    }
 
-        // TODO: Find required conversions and implement them
-
-        // TODO: Is this required?
-        GREMLIN_STRING_TYPE_TO_JAVA_TYPE_CONVERTER_MAP.put("Byte", Byte.class);
-        GREMLIN_STRING_TYPE_TO_JAVA_TYPE_CONVERTER_MAP.put("Short", Short.class);
-        GREMLIN_STRING_TYPE_TO_JAVA_TYPE_CONVERTER_MAP.put("Integer", Integer.class);
-        GREMLIN_STRING_TYPE_TO_JAVA_TYPE_CONVERTER_MAP.put("Long", Long.class);
-        GREMLIN_STRING_TYPE_TO_JAVA_TYPE_CONVERTER_MAP.put("Float", Float.class);
-        GREMLIN_STRING_TYPE_TO_JAVA_TYPE_CONVERTER_MAP.put("Double", Double.class);
-        GREMLIN_STRING_TYPE_TO_JAVA_TYPE_CONVERTER_MAP.put("String", String.class);
-        GREMLIN_STRING_TYPE_TO_JAVA_TYPE_CONVERTER_MAP.put("Date", Date.class);
-        GREMLIN_STRING_TYPE_TO_JAVA_TYPE_CONVERTER_MAP.put("Time", Time.class);
-
-        GREMLIN_JAVA_TYPE_SET.add(String.class);
-        GREMLIN_JAVA_TYPE_SET.add(Boolean.class);
-        GREMLIN_JAVA_TYPE_SET.add(Byte.class);
-        GREMLIN_JAVA_TYPE_SET.add(Short.class);
-        GREMLIN_JAVA_TYPE_SET.add(Integer.class);
-        GREMLIN_JAVA_TYPE_SET.add(Long.class);
-        GREMLIN_JAVA_TYPE_SET.add(Double.class);
-        GREMLIN_JAVA_TYPE_SET.add(Float.class);
+    /**
+     * Function to check if Gremlin has a direct converter for the given class type.
+     *
+     * @param gremlinClass Input class type.
+     * @return True if a direct converter exists, false otherwise.
+     */
+    public static boolean checkContains(final Class<?> gremlinClass) {
+        return GREMLIN_TO_JDBC_TYPE_MAP.containsKey(gremlinClass);
     }
 }

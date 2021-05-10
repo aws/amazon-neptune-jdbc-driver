@@ -40,10 +40,13 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 /**
@@ -62,7 +65,8 @@ public class GremlinQueryExecutor extends QueryExecutor {
         this.gremlinConnectionProperties = gremlinConnectionProperties;
     }
 
-    private static Cluster createCluster(final GremlinConnectionProperties properties) throws SQLException {
+    private static Cluster.Builder createClusterBuilder(final GremlinConnectionProperties properties)
+            throws SQLException {
         final Cluster.Builder builder = Cluster.build();
 
         if (properties.containsKey(GremlinConnectionProperties.CONTACT_POINT_KEY)) {
@@ -174,18 +178,14 @@ public class GremlinQueryExecutor extends QueryExecutor {
             builder.loadBalancingStrategy(properties.getLoadBalancingStrategy());
         }
 
-        return builder.create();
+        return builder;
     }
 
-    private static Cluster getCluster(final GremlinConnectionProperties gremlinConnectionProperties,
-                                      final boolean returnNew) throws SQLException {
-        if (returnNew) {
-            return createCluster(gremlinConnectionProperties);
-        }
+    private static Cluster getCluster(final GremlinConnectionProperties gremlinConnectionProperties) throws SQLException {
         if (cluster == null ||
                 !propertiesEqual(previousGremlinConnectionProperties, gremlinConnectionProperties)) {
             previousGremlinConnectionProperties = gremlinConnectionProperties;
-            return createCluster(gremlinConnectionProperties);
+            return createClusterBuilder(gremlinConnectionProperties).create();
         }
         return cluster;
     }
@@ -203,22 +203,10 @@ public class GremlinQueryExecutor extends QueryExecutor {
     }
 
     private static Client getClient(final GremlinConnectionProperties gremlinConnectionProperties) throws SQLException {
-        return getClient(gremlinConnectionProperties, null);
-    }
-
-    private static Client getClient(final GremlinConnectionProperties gremlinConnectionProperties,
-                                    final String sessionId) throws SQLException {
         synchronized (CLUSTER_LOCK) {
-            cluster = getCluster(gremlinConnectionProperties, false);
+            cluster = getCluster(gremlinConnectionProperties);
+            return cluster.connect().init();
         }
-
-        final Client client;
-        if (sessionId != null) {
-            client = cluster.connect(sessionId);
-        } else {
-            client = cluster.connect();
-        }
-        return client.init();
     }
 
     /**
@@ -238,7 +226,22 @@ public class GremlinQueryExecutor extends QueryExecutor {
      * @return true if the connection is valid, otherwise false.
      */
     @Override
+    @SneakyThrows
     public boolean isValid(final int timeout) {
+        final Cluster tempCluster =
+                GremlinQueryExecutor.createClusterBuilder(gremlinConnectionProperties).maxWaitForConnection(timeout)
+                        .create();
+        final Client client = tempCluster.connect();
+        client.init();
+
+        try {
+            // Neptune doesn't support arbitrary math queries, but the below command is valid in Gremlin and is basically
+            // saying return 0.
+            final CompletableFuture<List<Result>> tempCompletableFuture = client.submit("g.inject(0)").all();
+            tempCompletableFuture.get(timeout, TimeUnit.SECONDS);
+            return true;
+        } catch (final RuntimeException ignored) {
+        }
         return false;
     }
 
@@ -357,7 +360,7 @@ public class GremlinQueryExecutor extends QueryExecutor {
 
         final List<Result> results = completableFuture.get().all().get();
         final List<Map<String, Object>> rows = new ArrayList<>();
-        final List<String> columns = new ArrayList<>();
+        final Set<String> columns = new HashSet<>();
         for (final Object result : results.stream().map(Result::getObject).collect(Collectors.toList())) {
             if (!(result instanceof LinkedHashMap)) {
                 // Best way to handle it seems to be to issue a warning.
@@ -377,17 +380,12 @@ public class GremlinQueryExecutor extends QueryExecutor {
             rows.add(row);
 
             // Get columns from row and put in columns List if they aren't already in there.
-            // TODO: Consider using HashSet here and converting to a List later for performance.
-            row.keySet().forEach(x -> {
-                if (!columns.contains(x)) {
-                    columns.add(x);
-                }
-            });
+            columns.addAll(row.keySet());
         }
 
         client.close();
-
-        return (T) new GremlinResultSet.ResultSetInfoWithRows(rows, columns);
+        final List<String> columnsList = new ArrayList<>(columns);
+        return (T) new GremlinResultSet.ResultSetInfoWithRows(rows, columnsList);
     }
 
     @Override
