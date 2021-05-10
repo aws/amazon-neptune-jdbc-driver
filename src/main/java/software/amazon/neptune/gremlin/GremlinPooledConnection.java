@@ -20,12 +20,12 @@ import software.amazon.jdbc.PooledConnection;
 import java.sql.SQLException;
 
 /**
- * OpenCypher implementation of PooledConnection.
+ * Gremlin implementation of PooledConnection.
  */
 public class GremlinPooledConnection extends PooledConnection implements javax.sql.PooledConnection {
 
     /**
-     * OpenCypherPooledConnection constructor, initializes super class.
+     * GremlinPooledConnection constructor, initializes super class.
      *
      * @param connection Connection Object.
      */

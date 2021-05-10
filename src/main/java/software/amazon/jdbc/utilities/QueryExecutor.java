@@ -20,7 +20,6 @@ import lombok.Setter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
 import java.sql.SQLException;
 import java.util.Properties;
 
@@ -163,7 +162,9 @@ public abstract class QueryExecutor {
                 resetQueryState();
             }
             return (java.sql.ResultSet) constructor.newInstance(statement, intermediateResult);
-        } catch (final RuntimeException | InstantiationException | IllegalAccessException | InvocationTargetException e) {
+        } catch (final SQLException e) {
+          throw e;
+        } catch (final Exception e) {
             synchronized (lock) {
                 if (queryState.equals(QueryState.CANCELLED)) {
                     resetQueryState();

@@ -21,6 +21,7 @@ import software.amazon.jdbc.utilities.ConnectionProperties;
 import java.util.Properties;
 import static software.amazon.neptune.gremlin.GremlinConnectionProperties.CONTACT_POINT_KEY;
 import static software.amazon.neptune.gremlin.GremlinConnectionProperties.ENABLE_SSL_KEY;
+import static software.amazon.neptune.gremlin.GremlinConnectionProperties.MAX_CONTENT_LENGTH_KEY;
 import static software.amazon.neptune.gremlin.GremlinConnectionProperties.PORT_KEY;
 import static software.amazon.neptune.gremlin.GremlinConnectionProperties.SSL_SKIP_VALIDATION_KEY;
 
@@ -39,6 +40,19 @@ public class GremlinHelper {
         properties.put(PORT_KEY, port);
         properties.put(ENABLE_SSL_KEY, false);
         properties.put(SSL_SKIP_VALIDATION_KEY, true);
+        return properties;
+    }
+    /**
+     * Function to get properties for Gremlin connection.
+     *
+     * @param hostname hostname for properties.
+     * @param port port number for properties.
+     * @param maxContentLength max content length for properties.
+     * @return Properties for Gremlin connection.
+     */
+    public static Properties getProperties(final String hostname, final int port, final int maxContentLength) {
+        final Properties properties = getProperties(hostname, port);
+        properties.put(MAX_CONTENT_LENGTH_KEY, maxContentLength);
         return properties;
     }
 }

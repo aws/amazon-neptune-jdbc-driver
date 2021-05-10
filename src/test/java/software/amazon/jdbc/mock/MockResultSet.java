@@ -54,6 +54,9 @@ public class MockResultSet extends ResultSet implements java.sql.ResultSet {
 
     @Override
     protected Object getConvertedValue(final int columnIndex) throws SQLException {
+        if (columnIndex == 0 || columnIndex > COL_COUNT) {
+            throw new SQLException("Index out of bounds.");
+        }
         return null;
     }
 
