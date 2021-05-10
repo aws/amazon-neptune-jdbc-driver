@@ -70,6 +70,19 @@ public class GremlinManualNeptuneVerificationTest {
 
     @Disabled
     @Test
+    void testGetTables() throws SQLException {
+        final java.sql.ResultSet resultSet = databaseMetaData.getTables(null, null, null, null);
+        Assertions.assertTrue(resultSet.next());
+        do {
+
+            for (int i = 1; i <= resultSet.getMetaData().getColumnCount(); i++) {
+                System.out.println(resultSet.getMetaData().getColumnName(i) + " - " + resultSet.getString(i));
+            }
+        } while (resultSet.next());
+    }
+
+    @Disabled
+    @Test
     void testGetColumnsBook() throws SQLException {
         final java.sql.ResultSet resultSet = databaseMetaData.getColumns(null, null, "book", null);
         Assertions.assertTrue(resultSet.next());

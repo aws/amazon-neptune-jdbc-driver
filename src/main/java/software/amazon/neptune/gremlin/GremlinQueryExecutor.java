@@ -360,11 +360,7 @@ public class GremlinQueryExecutor extends QueryExecutor {
             completableFuture = client.submitAsync(query);
         }
 
-        System.out.println("future");
-        final org.apache.tinkerpop.gremlin.driver.ResultSet future = completableFuture.get();
-        System.out.println("results");
-        final List<Result> results = future.all().get();
-        System.out.println("loop");
+        final List<Result> results = completableFuture.get().all().get();
         final List<Map<String, Object>> rows = new ArrayList<>();
         final Set<String> columns = new HashSet<>();
         for (final Object result : results.stream().map(Result::getObject).collect(Collectors.toList())) {
