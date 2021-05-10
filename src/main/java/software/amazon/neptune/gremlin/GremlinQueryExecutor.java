@@ -352,10 +352,8 @@ public class GremlinQueryExecutor extends QueryExecutor {
     @Override
     @SuppressWarnings("unchecked")
     protected <T> T runQuery(final String query) throws SQLException {
-        System.out.println("get client");
         final Client client = getClient(gremlinConnectionProperties);
 
-        System.out.println("submit async");
         synchronized (completableFutureLock) {
             completableFuture = client.submitAsync(query);
         }

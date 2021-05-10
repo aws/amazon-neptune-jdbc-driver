@@ -30,7 +30,7 @@ import static software.amazon.neptune.gremlin.GremlinHelper.getProperties;
 
 public class GremlinConnectionTest {
     private static final String HOSTNAME = "localhost";
-    private static final int PORT = 8181;
+    private static final int PORT = 8181; // Mock server uses 8181.
     private static final String QUERY = "1+1";
     private static final Properties PROPERTIES = getProperties(HOSTNAME, PORT);
     private java.sql.Connection connection;

@@ -34,7 +34,7 @@ import static software.amazon.neptune.gremlin.GremlinHelper.getProperties;
 
 class GremlinResultSetTest {
     private static final String HOSTNAME = "localhost";
-    private static final int PORT = 8181;
+    private static final int PORT = 8181; // Mock server uses 8181.
     private static final AuthScheme AUTH_SCHEME = AuthScheme.None;
     private static final String VERTEX = "planet";
 

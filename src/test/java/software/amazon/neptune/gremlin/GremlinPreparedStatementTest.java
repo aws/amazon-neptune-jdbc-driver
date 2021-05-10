@@ -27,7 +27,7 @@ import static software.amazon.neptune.gremlin.GremlinHelper.getProperties;
 
 public class GremlinPreparedStatementTest extends GremlinStatementTestBase {
     private static final String HOSTNAME = "localhost";
-    private static final int PORT = 8181;
+    private static final int PORT = 8181; // Mock server uses 8181.
     private static final int MAX_CONTENT_LENGTH = 500000; // Took from PropertyGraphSerializationModule.
     private NeptunePreparedStatementTestHelper neptunePreparedStatementTestHelper;
 
