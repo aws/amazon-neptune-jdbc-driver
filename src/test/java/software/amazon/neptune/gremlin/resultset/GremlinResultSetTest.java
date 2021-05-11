@@ -20,7 +20,6 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import software.amazon.jdbc.utilities.AuthScheme;
 import software.amazon.neptune.gremlin.GremlinConnection;
 import software.amazon.neptune.gremlin.GremlinConnectionProperties;
 import software.amazon.neptune.gremlin.mock.MockGremlinDatabase;
@@ -30,24 +29,26 @@ import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 
+import static software.amazon.neptune.gremlin.GremlinHelper.createVertex;
+import static software.amazon.neptune.gremlin.GremlinHelper.dropVertex;
 import static software.amazon.neptune.gremlin.GremlinHelper.getProperties;
+import static software.amazon.neptune.gremlin.GremlinHelper.getVertex;
 
 class GremlinResultSetTest {
     private static final String HOSTNAME = "localhost";
     private static final int PORT = 8181; // Mock server uses 8181.
-    private static final AuthScheme AUTH_SCHEME = AuthScheme.None;
     private static final String VERTEX = "planet";
 
     @SuppressWarnings({ "unchecked", "rawtypes" })
-    private static final Map<String, Object> VORTEX_PROPERTIES_MAP = new HashMap();
+    private static final Map<String, Object> VERTEX_PROPERTIES_MAP = new HashMap();
     static {
-        VORTEX_PROPERTIES_MAP.put("name", "Earth");
-        VORTEX_PROPERTIES_MAP.put("continents", 7);
-        VORTEX_PROPERTIES_MAP.put("diameter", 12742);
-        VORTEX_PROPERTIES_MAP.put("age", 4500000000L);
-        VORTEX_PROPERTIES_MAP.put("tilt", 23.4392811);
-        VORTEX_PROPERTIES_MAP.put("density", 5.514F);
-        VORTEX_PROPERTIES_MAP.put("supportsLife", true);
+        VERTEX_PROPERTIES_MAP.put("name", "Earth");
+        VERTEX_PROPERTIES_MAP.put("continents", 7);
+        VERTEX_PROPERTIES_MAP.put("diameter", 12742);
+        VERTEX_PROPERTIES_MAP.put("age", 4500000000L);
+        VERTEX_PROPERTIES_MAP.put("tilt", 23.4392811);
+        VERTEX_PROPERTIES_MAP.put("density", 5.514F);
+        VERTEX_PROPERTIES_MAP.put("supportsLife", true);
     }
 
     private static java.sql.Connection connection;
@@ -57,58 +58,17 @@ class GremlinResultSetTest {
     static void beforeAll() throws SQLException, IOException, InterruptedException {
         MockGremlinDatabase.startGraph();
         connection = new GremlinConnection(new GremlinConnectionProperties(getProperties(HOSTNAME, PORT)));
-        createVertex(VERTEX);
-        resultSet = getVertex(VERTEX);
+        createVertex(connection, VERTEX, VERTEX_PROPERTIES_MAP);
+        resultSet = getVertex(connection, VERTEX);
+        Assertions.assertNotNull(resultSet);
+        Assertions.assertDoesNotThrow(() -> resultSet.next());
     }
 
     @AfterAll
     static void shutdown() throws SQLException, IOException, InterruptedException {
-        deleteVertex(VERTEX);
+        dropVertex(connection, VERTEX);
         connection.close();
         MockGremlinDatabase.stopGraph();
-    }
-
-    private static String createVertexQuery(final String label, final Map<String, ?> properties) {
-        final String q = "\"";
-        final StringBuilder sb = new StringBuilder();
-        sb.append("g.addV(").append(q).append(label).append(q).append(")");
-        for (Map.Entry<String, ?> entry : properties.entrySet()) {
-            sb.append(".property(")
-                    .append(q).append(entry.getKey()).append(q)
-                    .append(", ");
-            if (entry.getValue() instanceof String) {
-                sb.append(q).append(entry.getValue()).append(q);
-            } else {
-                sb.append(entry.getValue());
-            }
-            sb.append(")");
-        }
-        return sb.toString();
-    }
-
-    private static String getVertexQuery(final String label) {
-        return String.format("g.V().hasLabel(\"%s\").valueMap().by(unfold())", label);
-    }
-
-    private static String dropVertexQuery(final String label) {
-        return String.format("g.V().hasLabel(\"%s\").drop().iterate()", label);
-    }
-
-    private static void createVertex(final String label) throws SQLException {
-        connection.createStatement()
-                .executeQuery(createVertexQuery(label, VORTEX_PROPERTIES_MAP));
-    }
-
-    private static GremlinResultSet getVertex(final String label) throws SQLException {
-        final GremlinResultSet result = (GremlinResultSet) connection.createStatement()
-                .executeQuery(getVertexQuery(label));
-        Assertions.assertTrue(result.next());
-
-        return result;
-    }
-
-    private static void deleteVertex(final String label) throws SQLException {
-        connection.createStatement().executeQuery(dropVertexQuery(label));
     }
 
     @Test
@@ -132,7 +92,7 @@ class GremlinResultSetTest {
     @Test
     void testShortType() throws SQLException {
         final int col = resultSet.findColumn("continents");
-        final int expected = (int)VORTEX_PROPERTIES_MAP.get("continents");
+        final int expected = (int)VERTEX_PROPERTIES_MAP.get("continents");
         Assertions.assertEquals(expected, 7);
         Assertions.assertEquals((byte)expected, resultSet.getByte(col));
         Assertions.assertEquals((short)expected, resultSet.getShort(col));
@@ -147,7 +107,7 @@ class GremlinResultSetTest {
     @Test
     void testIntegerType() throws SQLException {
         final int col = resultSet.findColumn("diameter");
-        final int expected = (int)VORTEX_PROPERTIES_MAP.get("diameter");
+        final int expected = (int)VERTEX_PROPERTIES_MAP.get("diameter");
         Assertions.assertEquals(expected, 12742);
         Assertions.assertEquals(expected, resultSet.getInt(col));
         Assertions.assertEquals(expected, resultSet.getLong(col));
@@ -160,7 +120,7 @@ class GremlinResultSetTest {
     @Test
     void testLongType() throws SQLException {
         final int col = resultSet.findColumn("age");
-        final long expected = (long)VORTEX_PROPERTIES_MAP.get("age");
+        final long expected = (long)VERTEX_PROPERTIES_MAP.get("age");
         Assertions.assertEquals(expected, 4500000000L);
         Assertions.assertEquals(expected, resultSet.getLong(col));
         Assertions.assertEquals(expected, resultSet.getDouble(col));
@@ -172,7 +132,7 @@ class GremlinResultSetTest {
     @Test
     void testDoubleType() throws SQLException {
         final int col = resultSet.findColumn("tilt");
-        final double expected = (double)VORTEX_PROPERTIES_MAP.get("tilt");
+        final double expected = (double)VERTEX_PROPERTIES_MAP.get("tilt");
         Assertions.assertEquals(expected, 23.4392811);
         Assertions.assertEquals(expected, resultSet.getDouble(col));
         Assertions.assertEquals((float)expected, resultSet.getFloat(col));
@@ -182,7 +142,7 @@ class GremlinResultSetTest {
     @Test
     void testFloatingPointType() throws SQLException {
         final int col = resultSet.findColumn("density");
-        final float expected = (float)VORTEX_PROPERTIES_MAP.get("density");
+        final float expected = (float)VERTEX_PROPERTIES_MAP.get("density");
         Assertions.assertEquals(expected, 5.514F);
         Assertions.assertEquals(expected, resultSet.getDouble(col), 0.3);
         Assertions.assertEquals(expected, resultSet.getFloat(col));
@@ -192,7 +152,7 @@ class GremlinResultSetTest {
     @Test
     void testStringType() throws SQLException {
         final int col = resultSet.findColumn("name");
-        final String expected = (String)VORTEX_PROPERTIES_MAP.get("name");
+        final String expected = (String)VERTEX_PROPERTIES_MAP.get("name");
         Assertions.assertEquals(expected, "Earth");
         Assertions.assertEquals(expected, resultSet.getString(col));
         Assertions.assertThrows(SQLException.class, () -> resultSet.getBoolean(col));

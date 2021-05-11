@@ -27,6 +27,7 @@ import software.amazon.neptune.gremlin.GremlinTypeMapping;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -37,6 +38,7 @@ public class GremlinResultSet extends software.amazon.jdbc.ResultSet implements 
     private static final Logger LOGGER = LoggerFactory.getLogger(GremlinResultSet.class);
     private final List<String> columns;
     private final List<Map<String, Object>> rows;
+    private final Map<String, Class<?>> columnTypes;
     private boolean wasNull = false;
 
     /**
@@ -49,6 +51,7 @@ public class GremlinResultSet extends software.amazon.jdbc.ResultSet implements 
         super(statement, resultSetInfo.getColumns(), resultSetInfo.getRows().size());
         this.columns = resultSetInfo.getColumns();
         this.rows = resultSetInfo.getRows();
+        this.columnTypes = resultSetInfo.getColumnsTypes();
     }
 
     /**
@@ -60,6 +63,7 @@ public class GremlinResultSet extends software.amazon.jdbc.ResultSet implements 
     public GremlinResultSet(final java.sql.Statement statement, final ResultSetInfoWithoutRows resultSetInfo) {
         super(statement, resultSetInfo.getColumns(), resultSetInfo.getRowCount());
         this.columns = resultSetInfo.getColumns();
+        this.columnTypes = new HashMap<>();
         this.rows = null;
     }
 
@@ -86,8 +90,8 @@ public class GremlinResultSet extends software.amazon.jdbc.ResultSet implements 
     @Override
     protected ResultSetMetaData getResultMetadata() throws SQLException {
         final List<Class<?>> rowTypes = new ArrayList<>();
-        for (int i = 0; i < columns.size(); i++) {
-            rowTypes.add(getConvertedValue(i).getClass());
+        for (final String column : columns) {
+            rowTypes.add(columnTypes.getOrDefault(column, String.class));
         }
         return new GremlinResultSetMetadata(columns, rowTypes);
     }
@@ -128,6 +132,7 @@ public class GremlinResultSet extends software.amazon.jdbc.ResultSet implements 
     @Getter
     public static class ResultSetInfoWithRows {
         private final List<Map<String, Object>> rows;
+        private final Map<String, Class<?>> columnsTypes;
         private final List<String> columns;
     }
 }
