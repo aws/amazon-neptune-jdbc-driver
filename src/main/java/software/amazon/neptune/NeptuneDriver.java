@@ -21,6 +21,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import software.amazon.jdbc.Driver;
 import software.amazon.jdbc.utilities.ConnectionProperties;
+import software.amazon.neptune.gremlin.GremlinConnection;
+import software.amazon.neptune.gremlin.GremlinConnectionProperties;
 import software.amazon.neptune.opencypher.OpenCypherConnection;
 import software.amazon.neptune.opencypher.OpenCypherConnectionProperties;
 import javax.annotation.Nullable;
@@ -43,7 +45,9 @@ public class NeptuneDriver extends Driver implements java.sql.Driver {
         }
     }
 
-    private final Map<String, Class<?>> connectionMap = ImmutableMap.of("opencypher", OpenCypherConnection.class);
+    private final Map<String, Class<?>> connectionMap = ImmutableMap.of(
+            "opencypher", OpenCypherConnection.class,
+            "gremlin", GremlinConnection.class);
 
     @Override
     public boolean acceptsURL(final @Nullable String url) throws SQLException {
@@ -86,6 +90,9 @@ public class NeptuneDriver extends Driver implements java.sql.Driver {
         if ("opencypher".equalsIgnoreCase(language)) {
             return new OpenCypherConnectionProperties(properties);
         }
+        if ("gremlin".equalsIgnoreCase(language)) {
+            return new GremlinConnectionProperties(properties);
+        }
         // TODO - implement for other languages
         return new OpenCypherConnectionProperties(properties);
     }
@@ -93,6 +100,9 @@ public class NeptuneDriver extends Driver implements java.sql.Driver {
     private String firstPropertyKey(final String language) {
         if ("opencypher".equalsIgnoreCase(language)) {
             return OpenCypherConnectionProperties.ENDPOINT_KEY;
+        }
+        if ("gremlin".equalsIgnoreCase(language)) {
+            return GremlinConnectionProperties.CONTACT_POINT_KEY;
         }
         // TODO - implement for other languages
         return OpenCypherConnectionProperties.ENDPOINT_KEY;

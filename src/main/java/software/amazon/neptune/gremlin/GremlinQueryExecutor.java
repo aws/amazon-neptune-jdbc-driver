@@ -40,11 +40,9 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -181,7 +179,8 @@ public class GremlinQueryExecutor extends QueryExecutor {
         return builder;
     }
 
-    private static Cluster getCluster(final GremlinConnectionProperties gremlinConnectionProperties) throws SQLException {
+    private static Cluster getCluster(final GremlinConnectionProperties gremlinConnectionProperties)
+            throws SQLException {
         if (cluster == null ||
                 !propertiesEqual(previousGremlinConnectionProperties, gremlinConnectionProperties)) {
             previousGremlinConnectionProperties = gremlinConnectionProperties;
@@ -360,7 +359,7 @@ public class GremlinQueryExecutor extends QueryExecutor {
 
         final List<Result> results = completableFuture.get().all().get();
         final List<Map<String, Object>> rows = new ArrayList<>();
-        final Set<String> columns = new HashSet<>();
+        final Map<String, Class<?>> columns = new HashMap<>();
         for (final Object result : results.stream().map(Result::getObject).collect(Collectors.toList())) {
             if (!(result instanceof LinkedHashMap)) {
                 // Best way to handle it seems to be to issue a warning.
@@ -380,12 +379,23 @@ public class GremlinQueryExecutor extends QueryExecutor {
             rows.add(row);
 
             // Get columns from row and put in columns List if they aren't already in there.
-            columns.addAll(row.keySet());
+            for (final String key : row.keySet()) {
+                if (!columns.containsKey(key)) {
+                    final Object value = row.get(key);
+                    if (GremlinTypeMapping.checkContains(value.getClass())) {
+                        columns.put(key, value.getClass());
+                    } else {
+                        columns.put(key, String.class);
+                    }
+                } else if (columns.get(key) != row.get(key)) {
+                    columns.put(key, String.class);
+                }
+            }
         }
 
         client.close();
-        final List<String> columnsList = new ArrayList<>(columns);
-        return (T) new GremlinResultSet.ResultSetInfoWithRows(rows, columnsList);
+        final List<String> listColumns = new ArrayList<>(columns.keySet());
+        return (T) new GremlinResultSet.ResultSetInfoWithRows(rows, columns, listColumns);
     }
 
     @Override
