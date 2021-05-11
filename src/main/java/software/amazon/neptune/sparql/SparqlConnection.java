@@ -40,12 +40,6 @@ public class SparqlConnection extends software.amazon.jdbc.Connection implements
     }
 
     @Override
-    public boolean isValid(final int timeout) throws SQLException {
-        final SparqlQueryExecutor queryExecutor = new SparqlQueryExecutor(sparqlConnectionProperties);
-        return queryExecutor.isValid(timeout);
-    }
-
-    @Override
     protected void doClose() {
 
     }
