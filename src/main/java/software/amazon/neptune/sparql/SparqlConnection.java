@@ -20,6 +20,7 @@ import lombok.Getter;
 import lombok.NonNull;
 import software.amazon.jdbc.utilities.ConnectionProperties;
 import software.amazon.jdbc.utilities.QueryExecutor;
+import software.amazon.neptune.NeptuneDatabaseMetadata;
 
 import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
@@ -45,17 +46,22 @@ public class SparqlConnection extends software.amazon.jdbc.Connection implements
     }
 
     @Override
-    protected QueryExecutor getQueryExecutor() {
-        return new SparqlQueryExecutor(getSparqlConnectionProperties());
-    }
-
-    @Override
     protected void doClose() {
 
     }
 
     @Override
     public DatabaseMetaData getMetaData() throws SQLException {
-        return new SparqlDatabaseMetadata(this);
+        return new NeptuneDatabaseMetadata(this);
+    }
+
+    @Override
+    public QueryExecutor getQueryExecutor() {
+        return new SparqlQueryExecutor(getSparqlConnectionProperties());
+    }
+
+    @Override
+    public String getDriverName() {
+        return "neptune:sparql";
     }
 }
