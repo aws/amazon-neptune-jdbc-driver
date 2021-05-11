@@ -14,50 +14,48 @@
  *
  */
 
-package software.amazon.neptune.opencypher;
+package software.amazon.neptune.sparql;
 
 import lombok.Getter;
 import lombok.NonNull;
 import software.amazon.jdbc.utilities.ConnectionProperties;
 import software.amazon.jdbc.utilities.QueryExecutor;
 import software.amazon.neptune.NeptuneDatabaseMetadata;
+
 import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
 
-/**
- * OpenCypher implementation of Connection.
- */
-public class OpenCypherConnection extends software.amazon.jdbc.Connection implements java.sql.Connection {
+public class SparqlConnection extends software.amazon.jdbc.Connection implements java.sql.Connection {
     @Getter
-    private final OpenCypherConnectionProperties openCypherConnectionProperties;
+    private final SparqlConnectionProperties sparqlConnectionProperties;
 
     /**
-     * OpenCypherConnection constructor, initializes super class.
+     * Sparql constructor, initializes super class.
      *
      * @param connectionProperties ConnectionProperties Object.
      */
-    public OpenCypherConnection(@NonNull final ConnectionProperties connectionProperties) throws SQLException {
+    public SparqlConnection(@NonNull final ConnectionProperties connectionProperties) throws SQLException {
         super(connectionProperties);
-        openCypherConnectionProperties = new OpenCypherConnectionProperties(getConnectionProperties());
+        this.sparqlConnectionProperties = new SparqlConnectionProperties(getConnectionProperties());
     }
 
     @Override
-    public void doClose() {
-        OpenCypherQueryExecutor.close();
+    protected void doClose() {
+
     }
 
     @Override
-    public DatabaseMetaData getMetaData() {
+    public DatabaseMetaData getMetaData() throws SQLException {
         return new NeptuneDatabaseMetadata(this);
     }
 
     @Override
     public QueryExecutor getQueryExecutor() {
-        return new OpenCypherQueryExecutor(getOpenCypherConnectionProperties());
+        return new SparqlQueryExecutor(getSparqlConnectionProperties());
     }
 
     @Override
     public String getDriverName() {
-        return "neptune:opencypher";
+        return "neptune:sparql";
     }
 }
