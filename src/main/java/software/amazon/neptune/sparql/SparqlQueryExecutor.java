@@ -1,31 +1,21 @@
 package software.amazon.neptune.sparql;
 
 import lombok.SneakyThrows;
-import org.apache.jena.query.Query;
-import org.apache.jena.query.QueryFactory;
-import org.apache.jena.query.ResultSetFormatter;
+import org.apache.jena.query.QueryExecution;
 import org.apache.jena.rdfconnection.RDFConnection;
 import org.apache.jena.rdfconnection.RDFConnectionRemote;
 import org.apache.jena.rdfconnection.RDFConnectionRemoteBuilder;
-import org.neo4j.driver.Driver;
-import org.neo4j.driver.Session;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import software.amazon.jdbc.utilities.QueryExecutor;
-
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
-
 public class SparqlQueryExecutor extends QueryExecutor {
     private static final Logger LOGGER = LoggerFactory.getLogger(SparqlQueryExecutor.class);
-    private static final Object DRIVER_LOCK = new Object();
-    private static SparqlConnectionProperties previousSparqlConnectionProperties = null;
-    private static Driver driver = null;
+    // private static SparqlConnectionProperties previousSparqlConnectionProperties = null;
     private final SparqlConnectionProperties sparqlConnectionProperties;
-    private final Object sessionLock = new Object();
-    private Session session = null;
 
     SparqlQueryExecutor(final SparqlConnectionProperties sparqlConnectionProperties) {
         this.sparqlConnectionProperties = sparqlConnectionProperties;
@@ -49,9 +39,6 @@ public class SparqlQueryExecutor extends QueryExecutor {
         if (properties.containsKey(SparqlConnectionProperties.QUERY_ENDPOINT_KEY)) {
             builder.queryEndpoint(properties.getQueryEndpoint());
         }
-        if (properties.containsKey(SparqlConnectionProperties.UPDATE_ENDPOINT_KEY)) {
-            builder.updateEndpoint(properties.getUpdateEndpoint());
-        }
 
         return builder;
     }
@@ -70,26 +57,24 @@ public class SparqlQueryExecutor extends QueryExecutor {
     @Override
     @SneakyThrows
     public boolean isValid(final int timeout) {
-        // TODO: neither RDFConnectionRemoteBuilder nor RDFConnection have a timeout field/method - find roundabout way?
         final RDFConnection tempConn =
                 SparqlQueryExecutor.createRDFBuilder(sparqlConnectionProperties).build();
 
         try {
-            final Query query = QueryFactory.create("SELECT * { ?s ?p ?o } LIMIT 100");
-            tempConn.queryResultSet(query, ResultSetFormatter::out);
+            final QueryExecution executeQuery = tempConn.query("SELECT * { ?s ?p ?o } LIMIT 0");
+            executeQuery.setTimeout(timeout * 1000);
+            executeQuery.execSelect();
             return true;
         } catch (final Exception e) {
             LOGGER.error("Connection to database returned an error:", e);
             return false;
         }
-
-        // return false;
     }
 
     /**
      * Function to execute query.
      *
-     * @param sparql       Query to execute.
+     * @param sparql    Query to execute.
      * @param statement java.sql.Statement Object required for result set.
      * @return java.sql.ResultSet object returned from query execution.
      * @throws SQLException if query execution fails, or it was cancelled.

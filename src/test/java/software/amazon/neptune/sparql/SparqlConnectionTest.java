@@ -58,7 +58,6 @@ public class SparqlConnectionTest {
     private static final String HOSTNAME = "http://localhost:";
     private static final String ENDPOINT = "/mock";
     private static final String QUERY_ENDPOINT = "/query";
-    private static final String UPDATE_ENDPOINT = "/update";
     private static final int PORT = SparqlMockServer.port(); // Mock server dynamically generates port?.
     private static final Properties sparqlProperties() {
         final Properties properties = new Properties();
@@ -67,7 +66,6 @@ public class SparqlConnectionTest {
         properties.put(SparqlConnectionProperties.PORT_KEY, PORT);
         properties.put(SparqlConnectionProperties.ENDPOINT_KEY, ENDPOINT);
         properties.put(SparqlConnectionProperties.QUERY_ENDPOINT_KEY, QUERY_ENDPOINT);
-        properties.put(SparqlConnectionProperties.UPDATE_ENDPOINT_KEY, UPDATE_ENDPOINT);
         return properties;
     }
     private java.sql.Connection connection;
@@ -92,7 +90,6 @@ public class SparqlConnectionTest {
         invalidProperties.put(SparqlConnectionProperties.PORT_KEY, 1234);
         invalidProperties.put(SparqlConnectionProperties.ENDPOINT_KEY, "invalid");
         invalidProperties.put(SparqlConnectionProperties.QUERY_ENDPOINT_KEY, "invalid");
-        invalidProperties.put(SparqlConnectionProperties.UPDATE_ENDPOINT_KEY, "invalid");
 
         final java.sql.Connection invalidConnection = new SparqlConnection(
                 new SparqlConnectionProperties(invalidProperties));
@@ -100,6 +97,7 @@ public class SparqlConnectionTest {
     }
 
     @Test
+    // TODO: proof of concept tests for mock database - modify/remove later
     void testMockConnection() {
         final RDFConnectionRemoteBuilder builder = RDFConnectionRemote.create()
                 .destination(SparqlMockServer.urlDataset())
@@ -121,6 +119,7 @@ public class SparqlConnectionTest {
     }
 
     @Test
+    // TODO: proof of concept tests for mock database - modify/remove later
     void testMockConnection2() {
         final String req = "" +
                 "SELECT ?x " +
