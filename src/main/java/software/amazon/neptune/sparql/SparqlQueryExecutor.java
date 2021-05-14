@@ -1,5 +1,12 @@
 package software.amazon.neptune.sparql;
 
+import lombok.SneakyThrows;
+import org.apache.jena.query.Query;
+import org.apache.jena.query.QueryFactory;
+import org.apache.jena.query.ResultSetFormatter;
+import org.apache.jena.rdfconnection.RDFConnection;
+import org.apache.jena.rdfconnection.RDFConnectionRemote;
+import org.apache.jena.rdfconnection.RDFConnectionRemoteBuilder;
 import org.neo4j.driver.Driver;
 import org.neo4j.driver.Session;
 import org.slf4j.Logger;
@@ -9,6 +16,7 @@ import software.amazon.jdbc.utilities.QueryExecutor;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+
 
 public class SparqlQueryExecutor extends QueryExecutor {
     private static final Logger LOGGER = LoggerFactory.getLogger(SparqlQueryExecutor.class);
@@ -23,6 +31,31 @@ public class SparqlQueryExecutor extends QueryExecutor {
         this.sparqlConnectionProperties = sparqlConnectionProperties;
     }
 
+    private static RDFConnectionRemoteBuilder createRDFBuilder(final SparqlConnectionProperties properties)
+            throws SQLException {
+        final RDFConnectionRemoteBuilder builder = RDFConnectionRemote.create();
+
+        // This is mimicking urlDataset() function in MockServer, the input into builder.destination
+        // with returning format: "http://localhost:"+port()+datasetPath()
+        // Right now it is being concatenated from various connection properties
+        // TODO: Maybe turn databaseUrl into a connection property itself?
+        if (properties.containsKey(SparqlConnectionProperties.CONTACT_POINT_KEY) &&
+                properties.containsKey(SparqlConnectionProperties.PORT_KEY) &&
+                properties.containsKey(SparqlConnectionProperties.ENDPOINT_KEY)) {
+            final String databaseUrl = properties.getContactPoint() + properties.getPort() + properties.getEndpoint();
+            builder.destination(databaseUrl);
+        }
+
+        if (properties.containsKey(SparqlConnectionProperties.QUERY_ENDPOINT_KEY)) {
+            builder.queryEndpoint(properties.getQueryEndpoint());
+        }
+        if (properties.containsKey(SparqlConnectionProperties.UPDATE_ENDPOINT_KEY)) {
+            builder.updateEndpoint(properties.getUpdateEndpoint());
+        }
+
+        return builder;
+    }
+
     @Override
     public int getMaxFetchSize() {
         return 0;
@@ -35,8 +68,22 @@ public class SparqlQueryExecutor extends QueryExecutor {
      * @return true if the connection is valid, otherwise false.
      */
     @Override
+    @SneakyThrows
     public boolean isValid(final int timeout) {
-        return false;
+        // TODO: neither RDFConnectionRemoteBuilder nor RDFConnection have a timeout field/method - find roundabout way?
+        final RDFConnection tempConn =
+                SparqlQueryExecutor.createRDFBuilder(sparqlConnectionProperties).build();
+
+        try {
+            final Query query = QueryFactory.create("SELECT * { ?s ?p ?o } LIMIT 100");
+            tempConn.queryResultSet(query, ResultSetFormatter::out);
+            return true;
+        } catch (final Exception e) {
+            LOGGER.error("Connection to database returned an error:", e);
+            return false;
+        }
+
+        // return false;
     }
 
     /**
