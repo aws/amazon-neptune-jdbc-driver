@@ -506,6 +506,9 @@ public abstract class Connection implements java.sql.Connection {
 
     @Override
     public boolean isValid(final int timeout) throws SQLException {
+        if (timeout < 0) {
+            throw new SQLException("Timeout value must be greater than or equal to 0");
+        }
         return getQueryExecutor().isValid(timeout);
     }
 }

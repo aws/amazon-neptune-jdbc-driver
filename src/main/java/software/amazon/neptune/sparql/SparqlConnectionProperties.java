@@ -32,7 +32,16 @@ public class SparqlConnectionProperties extends ConnectionProperties {
     // reference https://github.com/aws/amazon-neptune-sparql-java-sigv4/blob/master/src/main/java/com/amazonaws/neptune/client/rdf4j/NeptuneSparqlRepository.java
 
     // URL of the Neptune endpoint (*without* the trailing "/sparql" servlet)
+    // contactPoint doesn't apply to RDF builder, currently using it as the root part of the full url
+    public static final String CONTACT_POINT_KEY = "rootUrl";
+    public static final String PORT_KEY = "port";
+    public static final int DEFAULT_PORT = 3030;
+    // equivalent to dataset
     public static final String ENDPOINT_KEY = "endpoint";
+    // the two endpoints for sparql database
+    public static final String QUERY_ENDPOINT_KEY = "queryEndpoint";
+    // TODO: AN-527 we won't support update operations, but leaving it here for now
+    public static final String UPDATE_ENDPOINT_KEY = "updateEndpoint";
     // does this have anything to do with authenticationEnabled?
     // sparql might not have this as a input?
     public static final String USE_ENCRYPTION_KEY = "useEncryption";
@@ -54,16 +63,24 @@ public class SparqlConnectionProperties extends ConnectionProperties {
     private static final Logger LOGGER = LoggerFactory.getLogger(SparqlConnectionProperties.class);
 
     static {
+        PROPERTY_CONVERTER_MAP.put(CONTACT_POINT_KEY, (key, value) -> value);
         PROPERTY_CONVERTER_MAP.put(AWS_CREDENTIALS_PROVIDER_CLASS_KEY, (key, value) -> value);
         PROPERTY_CONVERTER_MAP.put(CUSTOM_CREDENTIALS_FILE_PATH_KEY, (key, value) -> value);
+        PROPERTY_CONVERTER_MAP.put(PORT_KEY, ConnectionProperties::toUnsigned);
         PROPERTY_CONVERTER_MAP.put(ENDPOINT_KEY, (key, value) -> value);
+        PROPERTY_CONVERTER_MAP.put(QUERY_ENDPOINT_KEY, (key, value) -> value);
+        PROPERTY_CONVERTER_MAP.put(UPDATE_ENDPOINT_KEY, (key, value) -> value);
         PROPERTY_CONVERTER_MAP.put(REGION_KEY, (key, value) -> value);
         PROPERTY_CONVERTER_MAP.put(USE_ENCRYPTION_KEY, ConnectionProperties::toBoolean);
         PROPERTY_CONVERTER_MAP.put(CONNECTION_POOL_SIZE_KEY, ConnectionProperties::toUnsigned);
     }
 
     static {
+        DEFAULT_PROPERTIES_MAP.put(PORT_KEY, DEFAULT_PORT);
+        DEFAULT_PROPERTIES_MAP.put(CONTACT_POINT_KEY, "");
         DEFAULT_PROPERTIES_MAP.put(ENDPOINT_KEY, "");
+        DEFAULT_PROPERTIES_MAP.put(QUERY_ENDPOINT_KEY, "");
+        DEFAULT_PROPERTIES_MAP.put(UPDATE_ENDPOINT_KEY, "");
         DEFAULT_PROPERTIES_MAP.put(REGION_KEY, "");
         DEFAULT_PROPERTIES_MAP.put(USE_ENCRYPTION_KEY, DEFAULT_USE_ENCRYPTION);
         DEFAULT_PROPERTIES_MAP.put(CONNECTION_POOL_SIZE_KEY, DEFAULT_CONNECTION_POOL_SIZE);
@@ -96,6 +113,47 @@ public class SparqlConnectionProperties extends ConnectionProperties {
     }
 
     /**
+     * Gets the connection contact point.
+     *
+     * @return The connection contact point.
+     */
+    public String getContactPoint() {
+        return getProperty(CONTACT_POINT_KEY);
+    }
+
+    /**
+     * Sets the connection contact point.
+     *
+     * @param contactPoint The connection contact point.
+     * @throws SQLException if value is invalid.
+     */
+    public void setContactPoint(@NonNull final String contactPoint) throws SQLException {
+        setProperty(CONTACT_POINT_KEY,
+                (String) PROPERTY_CONVERTER_MAP.get(CONTACT_POINT_KEY).convert(CONTACT_POINT_KEY, contactPoint));
+    }
+
+    /**
+     * Gets the port that the Gremlin Servers will be listening on.
+     *
+     * @return The port.
+     */
+    public int getPort() {
+        return (int) get(PORT_KEY);
+    }
+
+    /**
+     * Sets the port that the Gremlin Servers will be listening on.
+     *
+     * @param port The port.
+     */
+    public void setPort(final int port) throws SQLException {
+        if (port < 0) {
+            throw invalidConnectionPropertyError(PORT_KEY, port);
+        }
+        put(PORT_KEY, port);
+    }
+
+    /**
      * Gets the connection endpoint.
      *
      * @return The connection endpoint.
@@ -113,6 +171,46 @@ public class SparqlConnectionProperties extends ConnectionProperties {
     public void setEndpoint(@NonNull final String endpoint) throws SQLException {
         setProperty(ENDPOINT_KEY,
                 (String) PROPERTY_CONVERTER_MAP.get(ENDPOINT_KEY).convert(ENDPOINT_KEY, endpoint));
+    }
+
+    /**
+     * Gets the connection endpoint.
+     *
+     * @return The connection endpoint for sparql query.
+     */
+    public String getQueryEndpoint() {
+        return getProperty(QUERY_ENDPOINT_KEY);
+    }
+
+    /**
+     * Sets the connection endpoint.
+     *
+     * @param queryEndpoint The connection endpoint.
+     * @throws SQLException if value is invalid.
+     */
+    public void setQueryEndpoint(@NonNull final String queryEndpoint) throws SQLException {
+        setProperty(QUERY_ENDPOINT_KEY,
+                (String) PROPERTY_CONVERTER_MAP.get(QUERY_ENDPOINT_KEY).convert(QUERY_ENDPOINT_KEY, queryEndpoint));
+    }
+
+    /**
+     * Gets the connection endpoint.
+     *
+     * @return The connection endpoint for sparql query.
+     */
+    public String getUpdateEndpoint() {
+        return getProperty(UPDATE_ENDPOINT_KEY);
+    }
+
+    /**
+     * Sets the connection endpoint.
+     *
+     * @param updateEndpoint The connection endpoint.
+     * @throws SQLException if value is invalid.
+     */
+    public void setUpdateEndpoint(@NonNull final String updateEndpoint) throws SQLException {
+        setProperty(UPDATE_ENDPOINT_KEY,
+                (String) PROPERTY_CONVERTER_MAP.get(UPDATE_ENDPOINT_KEY).convert(UPDATE_ENDPOINT_KEY, updateEndpoint));
     }
 
     /**

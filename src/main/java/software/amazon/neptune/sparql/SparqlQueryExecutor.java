@@ -1,26 +1,47 @@
 package software.amazon.neptune.sparql;
 
-import org.neo4j.driver.Driver;
-import org.neo4j.driver.Session;
+import org.apache.jena.query.QueryExecution;
+import org.apache.jena.rdfconnection.RDFConnection;
+import org.apache.jena.rdfconnection.RDFConnectionRemote;
+import org.apache.jena.rdfconnection.RDFConnectionRemoteBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import software.amazon.jdbc.utilities.QueryExecutor;
-
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.concurrent.TimeUnit;
 
 public class SparqlQueryExecutor extends QueryExecutor {
     private static final Logger LOGGER = LoggerFactory.getLogger(SparqlQueryExecutor.class);
-    private static final Object DRIVER_LOCK = new Object();
-    private static SparqlConnectionProperties previousSparqlConnectionProperties = null;
-    private static Driver driver = null;
+    // private static SparqlConnectionProperties previousSparqlConnectionProperties = null;
     private final SparqlConnectionProperties sparqlConnectionProperties;
-    private final Object sessionLock = new Object();
-    private Session session = null;
 
     SparqlQueryExecutor(final SparqlConnectionProperties sparqlConnectionProperties) {
         this.sparqlConnectionProperties = sparqlConnectionProperties;
+    }
+
+    private static RDFConnectionRemoteBuilder createRDFBuilder(final SparqlConnectionProperties properties)
+            throws SQLException {
+        final RDFConnectionRemoteBuilder builder = RDFConnectionRemote.create();
+
+        // This is mimicking urlDataset() function in MockServer, the input into builder.destination
+        // with returning format: "http://localhost:"+port()+"/"+datasetPath()
+        // Right now it is being concatenated from various connection properties
+        // TODO: AN-527 Maybe turn databaseUrl into a connection property itself?
+        if (properties.containsKey(SparqlConnectionProperties.CONTACT_POINT_KEY) &&
+                properties.containsKey(SparqlConnectionProperties.PORT_KEY) &&
+                properties.containsKey(SparqlConnectionProperties.ENDPOINT_KEY)) {
+            final String databaseUrl = properties.getContactPoint() + ":" + properties.getPort() + "/" +
+                    properties.getEndpoint();
+            builder.destination(databaseUrl);
+        }
+
+        if (properties.containsKey(SparqlConnectionProperties.QUERY_ENDPOINT_KEY)) {
+            builder.queryEndpoint(properties.getQueryEndpoint());
+        }
+
+        return builder;
     }
 
     @Override
@@ -36,13 +57,24 @@ public class SparqlQueryExecutor extends QueryExecutor {
      */
     @Override
     public boolean isValid(final int timeout) {
-        return false;
+        try {
+            final RDFConnection tempConn =
+                    SparqlQueryExecutor.createRDFBuilder(sparqlConnectionProperties).build();
+            final QueryExecution executeQuery = tempConn.query("SELECT * { ?s ?p ?o } LIMIT 0");
+            // the 2nd parameter controls the timeout for the whole query execution
+            executeQuery.setTimeout(timeout, TimeUnit.SECONDS, timeout, TimeUnit.SECONDS);
+            executeQuery.execSelect();
+            return true;
+        } catch (final Exception e) {
+            LOGGER.error("Connection to database returned an error:", e);
+            return false;
+        }
     }
 
     /**
      * Function to execute query.
      *
-     * @param sparql       Query to execute.
+     * @param sparql    Query to execute.
      * @param statement java.sql.Statement Object required for result set.
      * @return java.sql.ResultSet object returned from query execution.
      * @throws SQLException if query execution fails, or it was cancelled.

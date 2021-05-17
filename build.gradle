@@ -274,6 +274,10 @@ dependencies {
     // Yaml file parsing
     implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.12.0'
     implementation group: 'com.fasterxml.jackson.dataformat', name: 'jackson-dataformat-yaml', version: '2.12.0'
+
+    // SPARQL test server https://mvnrepository.com/artifact/org.apache.jena/jena-fuseki-main
+    testImplementation group: 'org.apache.jena', name: 'jena-fuseki-main', version: '4.0.0'
+
 }
 
 shadowJar {
