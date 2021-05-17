@@ -11,6 +11,7 @@ import software.amazon.jdbc.utilities.QueryExecutor;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.concurrent.TimeUnit;
 
 public class SparqlQueryExecutor extends QueryExecutor {
     private static final Logger LOGGER = LoggerFactory.getLogger(SparqlQueryExecutor.class);
@@ -26,13 +27,14 @@ public class SparqlQueryExecutor extends QueryExecutor {
         final RDFConnectionRemoteBuilder builder = RDFConnectionRemote.create();
 
         // This is mimicking urlDataset() function in MockServer, the input into builder.destination
-        // with returning format: "http://localhost:"+port()+datasetPath()
+        // with returning format: "http://localhost:"+port()+"/"+datasetPath()
         // Right now it is being concatenated from various connection properties
         // TODO: Maybe turn databaseUrl into a connection property itself?
         if (properties.containsKey(SparqlConnectionProperties.CONTACT_POINT_KEY) &&
                 properties.containsKey(SparqlConnectionProperties.PORT_KEY) &&
                 properties.containsKey(SparqlConnectionProperties.ENDPOINT_KEY)) {
-            final String databaseUrl = properties.getContactPoint() + properties.getPort() + properties.getEndpoint();
+            final String databaseUrl = properties.getContactPoint() + ":" + properties.getPort() + "/" +
+                    properties.getEndpoint();
             builder.destination(databaseUrl);
         }
 
@@ -62,7 +64,8 @@ public class SparqlQueryExecutor extends QueryExecutor {
 
         try {
             final QueryExecution executeQuery = tempConn.query("SELECT * { ?s ?p ?o } LIMIT 0");
-            executeQuery.setTimeout(timeout * 1000);
+            // the 2nd parameter controls the timeout for the whole query execution
+            executeQuery.setTimeout(timeout, TimeUnit.SECONDS, timeout, TimeUnit.SECONDS);
             executeQuery.execSelect();
             return true;
         } catch (final Exception e) {
