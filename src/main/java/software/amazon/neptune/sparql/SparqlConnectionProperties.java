@@ -33,14 +33,14 @@ public class SparqlConnectionProperties extends ConnectionProperties {
 
     // URL of the Neptune endpoint (*without* the trailing "/sparql" servlet)
     // contactPoint doesn't apply to RDF builder, currently using it as the root part of the full url
-    public static final String CONTACT_POINT_KEY = "rooUrl";
+    public static final String CONTACT_POINT_KEY = "rootUrl";
     public static final String PORT_KEY = "port";
     public static final int DEFAULT_PORT = 3030;
     // equivalent to dataset
     public static final String ENDPOINT_KEY = "endpoint";
     // the two endpoints for sparql database
     public static final String QUERY_ENDPOINT_KEY = "queryEndpoint";
-    // TODO: we won't support update operations, but leaving it here for now
+    // TODO: AN-527 we won't support update operations, but leaving it here for now
     public static final String UPDATE_ENDPOINT_KEY = "updateEndpoint";
     // does this have anything to do with authenticationEnabled?
     // sparql might not have this as a input?

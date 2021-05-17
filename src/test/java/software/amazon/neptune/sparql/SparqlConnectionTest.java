@@ -22,6 +22,20 @@ import java.sql.SQLException;
 import java.util.Properties;
 
 public class SparqlConnectionTest {
+    private static final String HOSTNAME = "http://localhost";
+    private static final String ENDPOINT = "mock";
+    private static final String QUERY_ENDPOINT = "query";
+    private static final int PORT = SparqlMockServer.port(); // Mock server dynamically generates port
+    private static final Properties sparqlProperties() {
+        final Properties properties = new Properties();
+        properties.put(ConnectionProperties.AUTH_SCHEME_KEY, AuthScheme.None); // set default to None
+        properties.put(SparqlConnectionProperties.CONTACT_POINT_KEY, HOSTNAME);
+        properties.put(SparqlConnectionProperties.PORT_KEY, PORT);
+        properties.put(SparqlConnectionProperties.ENDPOINT_KEY, ENDPOINT);
+        properties.put(SparqlConnectionProperties.QUERY_ENDPOINT_KEY, QUERY_ENDPOINT);
+        return properties;
+    }
+    private java.sql.Connection connection;
 
     /**
      * Function to start the mock server before testing.
@@ -55,21 +69,6 @@ public class SparqlConnectionTest {
         SparqlMockServer.ctlAfterTest();
     }
 
-    private static final String HOSTNAME = "http://localhost";
-    private static final String ENDPOINT = "mock";
-    private static final String QUERY_ENDPOINT = "query";
-    private static final int PORT = SparqlMockServer.port(); // Mock server dynamically generates port
-    private static final Properties sparqlProperties() {
-        final Properties properties = new Properties();
-        properties.put(ConnectionProperties.AUTH_SCHEME_KEY, AuthScheme.None); // set default to None
-        properties.put(SparqlConnectionProperties.CONTACT_POINT_KEY, HOSTNAME);
-        properties.put(SparqlConnectionProperties.PORT_KEY, PORT);
-        properties.put(SparqlConnectionProperties.ENDPOINT_KEY, ENDPOINT);
-        properties.put(SparqlConnectionProperties.QUERY_ENDPOINT_KEY, QUERY_ENDPOINT);
-        return properties;
-    }
-    private java.sql.Connection connection;
-
     @BeforeEach
     void initialize() throws SQLException {
         connection = new SparqlConnection(new SparqlConnectionProperties(sparqlProperties()));
@@ -81,8 +80,14 @@ public class SparqlConnectionTest {
     }
 
     @Test
+    // TODO: AN-527 abstract this test after completing connection properties? - it's similar across all 3 executors
     void testIsValid() throws SQLException {
         Assertions.assertTrue(connection.isValid(1));
+
+        final Throwable negativeTimeout = Assertions.assertThrows(SQLException.class,
+                () -> connection.isValid(-1));
+        Assertions.assertEquals("Timeout value must be greater than or equal to 0",
+                negativeTimeout.getMessage());
 
         final Properties timeoutProperties = new Properties();
         timeoutProperties.put(ConnectionProperties.AUTH_SCHEME_KEY, AuthScheme.None); // set default to None
@@ -109,7 +114,7 @@ public class SparqlConnectionTest {
     }
 
     @Test
-    // TODO: proof of concept tests for mock database - modify/remove later
+    // TODO: AN-528 proof of concept tests for mock database - modify/remove later
     void testMockConnection() {
         final RDFConnectionRemoteBuilder builder = RDFConnectionRemote.create()
                 .destination(SparqlMockServer.urlDataset())
@@ -131,7 +136,7 @@ public class SparqlConnectionTest {
     }
 
     @Test
-    // TODO: proof of concept tests for mock database - modify/remove later
+    // TODO: AN-528 proof of concept tests for mock database - modify/remove later
     void testMockConnection2() {
         final String req = "" +
                 "SELECT ?x " +

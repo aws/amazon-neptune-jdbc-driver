@@ -1,6 +1,5 @@
 package software.amazon.neptune.sparql;
 
-import lombok.SneakyThrows;
 import org.apache.jena.query.QueryExecution;
 import org.apache.jena.rdfconnection.RDFConnection;
 import org.apache.jena.rdfconnection.RDFConnectionRemote;
@@ -29,7 +28,7 @@ public class SparqlQueryExecutor extends QueryExecutor {
         // This is mimicking urlDataset() function in MockServer, the input into builder.destination
         // with returning format: "http://localhost:"+port()+"/"+datasetPath()
         // Right now it is being concatenated from various connection properties
-        // TODO: Maybe turn databaseUrl into a connection property itself?
+        // TODO: AN-527 Maybe turn databaseUrl into a connection property itself?
         if (properties.containsKey(SparqlConnectionProperties.CONTACT_POINT_KEY) &&
                 properties.containsKey(SparqlConnectionProperties.PORT_KEY) &&
                 properties.containsKey(SparqlConnectionProperties.ENDPOINT_KEY)) {
@@ -57,12 +56,10 @@ public class SparqlQueryExecutor extends QueryExecutor {
      * @return true if the connection is valid, otherwise false.
      */
     @Override
-    @SneakyThrows
     public boolean isValid(final int timeout) {
-        final RDFConnection tempConn =
-                SparqlQueryExecutor.createRDFBuilder(sparqlConnectionProperties).build();
-
         try {
+            final RDFConnection tempConn =
+                    SparqlQueryExecutor.createRDFBuilder(sparqlConnectionProperties).build();
             final QueryExecution executeQuery = tempConn.query("SELECT * { ?s ?p ?o } LIMIT 0");
             // the 2nd parameter controls the timeout for the whole query execution
             executeQuery.setTimeout(timeout, TimeUnit.SECONDS, timeout, TimeUnit.SECONDS);
