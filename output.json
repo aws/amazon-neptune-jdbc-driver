@@ -1,0 +1,16 @@
+{
+  "tables": [
+    {
+      "name": "Person",
+      "columns": [
+        {"name": "name", "type": "string"},
+        {"name": "age", "type": "string"},
+        {"name": "dog", "type": "string"},
+        {"name": "cat", "type": "string"},
+        {"name": "pets", "type": "string"}
+      ]
+    }
+  ],
+  "relationships": [
+  ]
+}

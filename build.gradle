@@ -178,6 +178,7 @@ repositories {
     flatDir {
         dir 'amazon-neptune-tools/neptune-export/target'
         dir 'amazon-neptune-tools/neptune-gremlin-client/gremlin-client/target'
+        dir 'sql-gremlin/target'
     }
 }
 
@@ -195,6 +196,7 @@ ext {
     rdf4jVersion = '3.5.0'
     amazonSigv4SignerVersion = '2.1.1'
     nettyVersion = '4.1.52.Final'
+    calciteVersion = '1.5.0'
 }
 
 subprojects {
@@ -210,6 +212,8 @@ dependencies {
     implementation(':neptune-export:1.0-SNAPSHOT')
     implementation('com.amazonaws:gremlin-client:1.0-SNAPSHOT')
     implementation(':gremlin-client:1.0-SNAPSHOT')
+    implementation('org.twilmes:sql-gremlin')
+    implementation(':sql-gremlin')
 
     // neptune-export dependencies
     compile group: 'com.github.rvesse', name: 'airline', version: '2.8.0'
@@ -228,6 +232,8 @@ dependencies {
     // Might need tinkerpop, also shade exclude for testing???
     // compile group: 'org.apache.tinkerpop', name: 'gremlin-groovy', version: gremlinVersion
     // implementation group: 'org.fusesource.jansi', name: 'jansi', version: '2.0.0'
+    // implementation group: 'org.apache.calcite', name: 'calcite-core', version: '1.5.0'
+    // implementation group: 'org.apache.calcite', name: 'calcite-linq4j', version: '1.5.0'
 
     compile group: 'io.netty', name: 'netty-all', version: nettyVersion
     compile group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.10.5'
