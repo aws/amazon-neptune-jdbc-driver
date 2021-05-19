@@ -1,3 +1,6 @@
 [submodule "amazon-neptune-tools"]
 	path = amazon-neptune-tools
 	url = https://github.com/awslabs/amazon-neptune-tools
+[submodule "sql-gremlin"]
+	path = sql-gremlin
+	url = https://github.com/lyndonb-bq/sql-gremlin
