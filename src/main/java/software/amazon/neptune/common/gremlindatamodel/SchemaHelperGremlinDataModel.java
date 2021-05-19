@@ -45,13 +45,15 @@ public class SchemaHelperGremlinDataModel {
     /**
      * Function to get graph schema and return list of NodeColumnInfo describing it.
      *
-     * @param endpoint Endpoint to connect to.
-     * @param nodes    Nodes to use if only single table is targeted.
-     * @return List of NodeColumnInfo.
+     * @param endpoint       Endpoint to connect to.
+     * @param nodes          Nodes to use if only single table is targeted.
+     * @param nodeSchemaList List of GraphSchema for nodes.
+     * @param edgeSchemaList List of GraphSchema for edges.
      * @throws SQLException Thrown if an error is encountered.
      */
-    public static List<NodeColumnInfo> getGraphSchema(final String endpoint, final String nodes, final boolean useIAM,
-                                                      final MetadataCache.PathType pathType)
+    public static void getGraphSchema(final String endpoint, final String nodes, final boolean useIAM,
+                                      final MetadataCache.PathType pathType, final List<GraphSchema> nodeSchemaList,
+                                      final List<GraphSchema> edgeSchemaList)
             throws SQLException, IOException {
         // Create unique directory if doesn't exist
         // If does exist, delete current contents
@@ -61,9 +63,8 @@ public class SchemaHelperGremlinDataModel {
         final List<String> outputFiles = runGremlinSchemaGrabber(endpoint, nodes, directory, useIAM, pathType);
 
         // Validate to see if files are json
-        final List<NodeColumnInfo> nodeColumnInfoList = new ArrayList<>();
         for (final String file : outputFiles) {
-            parseFile(file, nodeColumnInfoList);
+            parseFile(file, nodeSchemaList, edgeSchemaList);
         }
 
         // Clean up
@@ -71,8 +72,6 @@ public class SchemaHelperGremlinDataModel {
             deleteDirectoryIfExists(Paths.get(directory));
         } catch (final IOException ignored) {
         }
-
-        return nodeColumnInfoList;
     }
 
     @VisibleForTesting
@@ -110,7 +109,6 @@ public class SchemaHelperGremlinDataModel {
                 .collect(Collectors.toList());
     }
 
-    @VisibleForTesting
     private static List<String> runGremlinSchemaGrabber(final String endpoint, final String nodes,
                                                         final String outputPath, final boolean useIAM,
                                                         final MetadataCache.PathType pathType)
@@ -169,43 +167,57 @@ public class SchemaHelperGremlinDataModel {
 
     @VisibleForTesting
     static void parseFile(final String filePath,
-                          final List<NodeColumnInfo> nodeColumnInfoList) {
+                          final List<GraphSchema> nodeSchemaList,
+                          final List<GraphSchema> edgeSchemaList) {
         LOGGER.info(String.format("Parsing file '%s'", filePath));
         try {
             final String jsonString = new String(Files.readAllBytes(Paths.get(filePath).toAbsolutePath()));
-            System.out.println("JSON FILE: " + jsonString);
             if (jsonString.isEmpty()) {
                 throw new Exception(String.format("Schema file '%s' is empty.", filePath));
             }
             final ObjectMapper mapper = new ObjectMapper();
-            final Map<String, List<Map<String, Object>>> listOfNodes = mapper.readValue(jsonString, HashMap.class);
-            if (!listOfNodes.containsKey("nodes")) {
-                throw new Exception("Schema file does not contain 'node' key");
+            final Map<String, List<Map<String, Object>>> nodesAndEdges = mapper.readValue(jsonString, HashMap.class);
+            if (!nodesAndEdges.containsKey("nodes")) {
+                throw new Exception("Schema file does not contain the 'node' key.");
             }
 
-            for (final Map<String, Object> node : listOfNodes.get("nodes")) {
-                if (!node.keySet().equals(ImmutableSet.of("label", "properties"))) {
-                    throw new Exception("Node does not contain 'label' and/or 'properties' keys");
-                }
-                List<String> labels;
-                try {
-                    labels = getValueCheckType(node, "label", ArrayList.class);
-                } catch (final Exception ignored) {
-                    labels = ImmutableList.of(getValueCheckType(node, "label", String.class));
-                }
-                final List<Map<String, Object>> properties =
-                        getValueCheckType(node, "properties", ArrayList.class);
-                for (final Map<String, Object> property : properties) {
-                    if (!property.keySet()
-                            .equals(ImmutableSet.of("property", "dataType", "isMultiValue", "isNullable"))) {
-                        throw new Exception(
-                                "Properties does not contain 'property', 'dataType', 'isMultiValue', and/or 'isNullable' keys");
-                    }
-                }
-                nodeColumnInfoList.add(new NodeColumnInfo(labels, properties));
+            // Get node labels and properties.
+            parseGraphSchema("nodes", nodesAndEdges, nodeSchemaList);
+
+            if (!nodesAndEdges.containsKey("edges")) {
+                LOGGER.warn("Schema file does not contain the 'edge' key. Graph has no edges.");
+            } else {
+                parseGraphSchema("edges", nodesAndEdges, edgeSchemaList);
             }
         } catch (final Exception e) {
             LOGGER.error(e.getMessage());
+        }
+    }
+
+    private static void parseGraphSchema(final String key, final Map<String, List<Map<String, Object>>> nodesAndEdges,
+                                         final List<GraphSchema> graphSchemaList)
+            throws Exception {
+        for (final Map<String, Object> node : nodesAndEdges.get(key)) {
+            if (!node.keySet().equals(ImmutableSet.of("label", "properties"))) {
+                throw new Exception(
+                        String.format("Schema under '%s' key does not contain 'label' and/or 'properties' keys", key));
+            }
+            List<String> labels;
+            try {
+                labels = getValueCheckType(node, "label", ArrayList.class);
+            } catch (final Exception ignored) {
+                labels = ImmutableList.of(getValueCheckType(node, "label", String.class));
+            }
+            final List<Map<String, Object>> properties =
+                    getValueCheckType(node, "properties", ArrayList.class);
+            for (final Map<String, Object> property : properties) {
+                if (!property.keySet()
+                        .equals(ImmutableSet.of("property", "dataType", "isMultiValue", "isNullable"))) {
+                    throw new Exception(
+                            "Properties does not contain 'property', 'dataType', 'isMultiValue', and/or 'isNullable' keys");
+                }
+            }
+            graphSchemaList.add(new GraphSchema(labels, properties));
         }
     }
 

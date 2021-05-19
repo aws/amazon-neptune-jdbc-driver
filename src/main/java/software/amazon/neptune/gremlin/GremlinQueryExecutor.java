@@ -26,8 +26,8 @@ import software.amazon.jdbc.utilities.AuthScheme;
 import software.amazon.jdbc.utilities.QueryExecutor;
 import software.amazon.jdbc.utilities.SqlError;
 import software.amazon.jdbc.utilities.SqlState;
+import software.amazon.neptune.common.gremlindatamodel.GraphSchema;
 import software.amazon.neptune.common.gremlindatamodel.MetadataCache;
-import software.amazon.neptune.common.gremlindatamodel.NodeColumnInfo;
 import software.amazon.neptune.gremlin.resultset.GremlinResultSet;
 import software.amazon.neptune.gremlin.resultset.GremlinResultSetGetCatalogs;
 import software.amazon.neptune.gremlin.resultset.GremlinResultSetGetColumns;
@@ -63,7 +63,7 @@ public class GremlinQueryExecutor extends QueryExecutor {
         this.gremlinConnectionProperties = gremlinConnectionProperties;
     }
 
-    private static Cluster.Builder createClusterBuilder(final GremlinConnectionProperties properties)
+    protected static Cluster.Builder createClusterBuilder(final GremlinConnectionProperties properties)
             throws SQLException {
         final Cluster.Builder builder = Cluster.build();
 
@@ -179,7 +179,7 @@ public class GremlinQueryExecutor extends QueryExecutor {
         return builder;
     }
 
-    private static Cluster getCluster(final GremlinConnectionProperties gremlinConnectionProperties)
+    protected static Cluster getCluster(final GremlinConnectionProperties gremlinConnectionProperties)
             throws SQLException {
         if (cluster == null ||
                 !propertiesEqual(previousGremlinConnectionProperties, gremlinConnectionProperties)) {
@@ -201,7 +201,8 @@ public class GremlinQueryExecutor extends QueryExecutor {
         }
     }
 
-    private static Client getClient(final GremlinConnectionProperties gremlinConnectionProperties) throws SQLException {
+    protected static Client getClient(final GremlinConnectionProperties gremlinConnectionProperties)
+            throws SQLException {
         synchronized (CLUSTER_LOCK) {
             cluster = getCluster(gremlinConnectionProperties);
             return cluster.connect().init();
@@ -278,15 +279,16 @@ public class GremlinQueryExecutor extends QueryExecutor {
     @Override
     public java.sql.ResultSet executeGetTables(final java.sql.Statement statement, final String tableName)
             throws SQLException {
+        // TODO: Update this caching mechanism, should try to make this automatic or something.
         if (!MetadataCache.isMetadataCached()) {
             MetadataCache.updateCache(gremlinConnectionProperties.getContactPoint(), null,
                     (gremlinConnectionProperties.getAuthScheme() == AuthScheme.IAMSigV4),
                     MetadataCache.PathType.Gremlin);
         }
 
-        final List<NodeColumnInfo> nodeColumnInfoList =
+        final List<GraphSchema> graphSchemaList =
                 MetadataCache.getFilteredCacheNodeColumnInfos(tableName);
-        return new GremlinResultSetGetTables(statement, nodeColumnInfoList,
+        return new GremlinResultSetGetTables(statement, graphSchemaList,
                 MetadataCache.getFilteredResultSetInfoWithoutRowsForTables(tableName));
     }
 
@@ -341,9 +343,9 @@ public class GremlinQueryExecutor extends QueryExecutor {
                     MetadataCache.PathType.Gremlin);
         }
 
-        final List<NodeColumnInfo> nodeColumnInfoList =
+        final List<GraphSchema> graphSchemaList =
                 MetadataCache.getFilteredCacheNodeColumnInfos(nodes);
-        return new GremlinResultSetGetColumns(statement, nodeColumnInfoList,
+        return new GremlinResultSetGetColumns(statement, graphSchemaList,
                 MetadataCache.getFilteredResultSetInfoWithoutRowsForColumns(nodes));
     }
 

@@ -22,7 +22,7 @@ import org.slf4j.LoggerFactory;
 import software.amazon.jdbc.utilities.SqlError;
 import software.amazon.jdbc.utilities.SqlState;
 import software.amazon.neptune.common.ResultSetInfoWithoutRows;
-import software.amazon.neptune.common.gremlindatamodel.NodeColumnInfo;
+import software.amazon.neptune.common.gremlindatamodel.GraphSchema;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
@@ -72,17 +72,17 @@ public abstract class ResultSetGetTables extends GenericResultSet implements jav
      * ResultSetGetTables constructor, initializes super class.
      *
      * @param statement                Statement Object.
-     * @param nodeColumnInfos          List of NodeColumnInfo Objects.
+     * @param graphSchemas          List of NodeColumnInfo Objects.
      * @param resultSetInfoWithoutRows ResultSetInfoWithoutRows Object.
      */
     public ResultSetGetTables(final Statement statement,
-                              final List<NodeColumnInfo> nodeColumnInfos,
+                              final List<GraphSchema> graphSchemas,
                               final ResultSetInfoWithoutRows resultSetInfoWithoutRows) {
         super(statement, resultSetInfoWithoutRows.getColumns(), resultSetInfoWithoutRows.getRowCount());
-        for (final NodeColumnInfo nodeColumnInfo : nodeColumnInfos) {
+        for (final GraphSchema graphSchema : graphSchemas) {
             // Add defaults, table name, and push into List.
             final Map<String, Object> map = new HashMap<>(MAPPED_KEYS);
-            map.put(TABLE_NAME, nodeListToString(nodeColumnInfo.getLabels()));
+            map.put(TABLE_NAME, nodeListToString(graphSchema.getLabels()));
             rows.add(map);
         }
     }
