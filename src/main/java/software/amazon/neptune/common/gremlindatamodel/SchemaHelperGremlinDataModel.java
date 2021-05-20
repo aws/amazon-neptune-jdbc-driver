@@ -109,6 +109,7 @@ public class SchemaHelperGremlinDataModel {
                 .collect(Collectors.toList());
     }
 
+    @VisibleForTesting
     private static List<String> runGremlinSchemaGrabber(final String endpoint, final String nodes,
                                                         final String outputPath, final boolean useIAM,
                                                         final MetadataCache.PathType pathType)
