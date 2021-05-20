@@ -17,7 +17,7 @@
 package software.amazon.neptune.gremlin.resultset;
 
 import software.amazon.neptune.common.ResultSetInfoWithoutRows;
-import software.amazon.neptune.common.gremlindatamodel.NodeColumnInfo;
+import software.amazon.neptune.common.gremlindatamodel.GraphSchema;
 import software.amazon.neptune.common.gremlindatamodel.resultset.ResultSetGetColumns;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
@@ -64,14 +64,14 @@ public class GremlinResultSetGetColumns extends ResultSetGetColumns implements j
      * OpenCypherResultSetGetColumns constructor, initializes super class.
      *
      * @param statement                Statement Object.
-     * @param nodeColumnInfos          List of NodeColumnInfo Objects.
+     * @param graphSchemas             List of NodeColumnInfo Objects.
      * @param resultSetInfoWithoutRows ResultSetInfoWithoutRows Object.
      */
     public GremlinResultSetGetColumns(final Statement statement,
-                                      final List<NodeColumnInfo> nodeColumnInfos,
+                                      final List<GraphSchema> graphSchemas,
                                       final ResultSetInfoWithoutRows resultSetInfoWithoutRows)
             throws SQLException {
-        super(statement, nodeColumnInfos, resultSetInfoWithoutRows);
+        super(statement, graphSchemas, resultSetInfoWithoutRows);
     }
 
     @Override

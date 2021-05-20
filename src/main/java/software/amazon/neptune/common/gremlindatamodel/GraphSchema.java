@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 @AllArgsConstructor
-public class NodeColumnInfo {
+public class GraphSchema {
     @Getter
     private final List<String> labels;
     @Getter
@@ -14,10 +14,10 @@ public class NodeColumnInfo {
 
     @Override
     public boolean equals(final Object nodeColumnInfo) {
-        if (!(nodeColumnInfo instanceof NodeColumnInfo)) {
+        if (!(nodeColumnInfo instanceof GraphSchema)) {
             return false;
         }
-        final NodeColumnInfo nodeInfo = (NodeColumnInfo) (nodeColumnInfo);
+        final GraphSchema nodeInfo = (GraphSchema) (nodeColumnInfo);
         return nodeInfo.labels.equals(this.labels) && nodeInfo.properties.equals(this.properties);
     }
 }
