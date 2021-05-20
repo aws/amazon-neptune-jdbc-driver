@@ -133,7 +133,7 @@ public class SqlGremlinTest {
         }
         return stringRows;
     }
-    
+
     void printVertexes() {
         System.out.println("Input vertexes:");
         System.out.println("\t\tPerson: {\n" +
