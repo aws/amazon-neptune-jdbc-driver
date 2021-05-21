@@ -18,8 +18,8 @@ package software.amazon.neptune.sparql;
 
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.protocol.HttpClientContext;
+import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.protocol.HttpContext;
-import org.apache.jena.riot.web.HttpOp;
 import org.apache.log4j.Level;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -234,7 +234,7 @@ public class SparqlConnectionPropertiesTest {
 
     @Test
     void testConcurrentModificationExceptionHttpClient() throws SQLException {
-        final HttpClient testClient = HttpOp.createDefaultHttpClient();
+        final HttpClient testClient = HttpClientBuilder.create().build();
         connectionProperties = new SparqlConnectionProperties();
         Assertions.assertNull(connectionProperties.getHttpClient());
 
@@ -253,7 +253,7 @@ public class SparqlConnectionPropertiesTest {
 
     @Test
     void testHttpClient() throws SQLException {
-        final HttpClient testClient = HttpOp.createDefaultHttpClient();
+        final HttpClient testClient = HttpClientBuilder.create().build();
         connectionProperties = new SparqlConnectionProperties();
         Assertions.assertNull(connectionProperties.getHttpClient());
 
@@ -277,7 +277,7 @@ public class SparqlConnectionPropertiesTest {
 
     @Test
     void testHttpClientWithSigV4Auth() {
-        final HttpClient testClient = HttpOp.createDefaultHttpClient();
+        final HttpClient testClient = HttpClientBuilder.create().build();
         Assertions.assertNotNull(testClient);
 
         final Properties testProperties = new Properties();
