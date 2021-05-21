@@ -1,3 +1,19 @@
+/*
+ * Copyright <2020> Amazon.com, final Inc. or its affiliates. All Rights Reserved.
+ *
+ * Licensed under the Apache License, final Version 2.0 (the "License").
+ * You may not use this file except in compliance with the License.
+ * A copy of the License is located at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * or in the "license" file accompanying this file. This file is distributed
+ * on an "AS IS" BASIS, final WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, final either
+ * express or implied. See the License for the specific language governing
+ * permissions and limitations under the License.
+ *
+ */
+
 package software.amazon.neptune.sparql;
 
 import org.apache.http.client.HttpClient;
@@ -42,6 +58,8 @@ public class SparqlConnectionPropertiesTest extends ConnectionPropertiesTestBase
         randomIntValue = HelperFunctions.randomPositiveIntValue(1000);
     }
 
+    // TODO: edge cases for auth, etc
+
     @Test
     void testDefaultValues() throws SQLException {
         connectionProperties = new SparqlConnectionProperties();
@@ -51,8 +69,6 @@ public class SparqlConnectionPropertiesTest extends ConnectionPropertiesTestBase
                 connectionProperties.getConnectionTimeoutMillis());
         Assertions.assertEquals(SparqlConnectionProperties.DEFAULT_CONNECTION_RETRY_COUNT,
                 connectionProperties.getConnectionRetryCount());
-        Assertions.assertEquals(SparqlConnectionProperties.DEFAULT_CONNECTION_POOL_SIZE,
-                connectionProperties.getConnectionPoolSize());
         Assertions
                 .assertEquals(SparqlConnectionProperties.DEFAULT_AUTH_SCHEME, connectionProperties.getAuthScheme());
         Assertions.assertEquals("", connectionProperties.getRegion());
@@ -101,17 +117,6 @@ public class SparqlConnectionPropertiesTest extends ConnectionPropertiesTestBase
     }
 
     @Test
-    void testConnectionPoolSize() throws SQLException {
-        testIntegerPropertyViaConstructor(
-                SparqlConnectionProperties.CONNECTION_POOL_SIZE_KEY,
-                SparqlConnectionProperties.DEFAULT_CONNECTION_POOL_SIZE);
-
-        connectionProperties = new SparqlConnectionProperties();
-        connectionProperties.setConnectionPoolSize(10);
-        Assertions.assertEquals(10, connectionProperties.getConnectionPoolSize());
-    }
-
-    @Test
     void testContactPoint() throws SQLException {
         testStringPropertyViaConstructor(
                 SparqlConnectionProperties.CONTACT_POINT_KEY,
@@ -148,18 +153,6 @@ public class SparqlConnectionPropertiesTest extends ConnectionPropertiesTestBase
     }
 
     @Test
-    void testUpdateEndpoint() throws SQLException {
-        testStringPropertyViaConstructor(
-                SparqlConnectionProperties.UPDATE_ENDPOINT_KEY,
-                DEFAULT_EMPTY_STRING);
-
-        final String testValue = "test update endpoint";
-        connectionProperties = new SparqlConnectionProperties();
-        connectionProperties.setUpdateEndpoint(testValue);
-        Assertions.assertEquals(testValue, connectionProperties.getUpdateEndpoint());
-    }
-
-    @Test
     void testPort() throws SQLException {
         testIntegerPropertyViaConstructor(
                 SparqlConnectionProperties.PORT_KEY,
@@ -178,6 +171,7 @@ public class SparqlConnectionPropertiesTest extends ConnectionPropertiesTestBase
         connectionProperties = new SparqlConnectionProperties();
         connectionProperties.setAuthScheme(AuthScheme.None);
         Assertions.assertEquals(AuthScheme.None, connectionProperties.getAuthScheme());
+        System.out.println("region is: " + connectionProperties.getRegion());
     }
 
     @Test
@@ -209,34 +203,38 @@ public class SparqlConnectionPropertiesTest extends ConnectionPropertiesTestBase
     }
 
     @Test
-    void testAwsCredentialsProviderClass() throws SQLException {
-        testStringPropertyViaConstructor(
-                SparqlConnectionProperties.AWS_CREDENTIALS_PROVIDER_CLASS_KEY);
-
-        connectionProperties = new SparqlConnectionProperties();
-        final String testValue = "test AwsCredentialsProviderClass";
-        connectionProperties.setAwsCredentialsProviderClass(testValue);
-        Assertions.assertEquals(testValue, connectionProperties.getAwsCredentialsProviderClass());
-    }
-
-    @Test
-    void testCustomCredentialsFilePath() throws SQLException {
-        testStringPropertyViaConstructor(
-                SparqlConnectionProperties.CUSTOM_CREDENTIALS_FILE_PATH_KEY);
-
-        connectionProperties = new SparqlConnectionProperties();
-        final String testValue = "test CustomCredentialsFilePath";
-        connectionProperties.setCustomCredentialsFilePath(testValue);
-        Assertions.assertEquals(testValue, connectionProperties.getCustomCredentialsFilePath());
-    }
-
-    @Test
     void testHttpClient() throws SQLException {
         final HttpClient testClient = HttpOp.createDefaultHttpClient();
         connectionProperties = new SparqlConnectionProperties();
         Assertions.assertNull(connectionProperties.getHttpClient());
         connectionProperties.setHttpClient(testClient);
         Assertions.assertEquals(testClient, connectionProperties.getHttpClient());
+    }
+
+    @Test
+    void testHttpClientWithSigV4() throws SQLException {
+        final HttpClient testClient = HttpOp.createDefaultHttpClient();
+        connectionProperties = new SparqlConnectionProperties();
+        Assertions.assertNotNull(testClient);
+        Assertions.assertNull(connectionProperties.getHttpClient());
+        connectionProperties.setAuthScheme(AuthScheme.IAMSigV4); // set default to None
+        connectionProperties.setContactPoint("http://localhost");
+        connectionProperties.setPort(3030);
+        connectionProperties.setEndpoint("mock");
+        connectionProperties.setQueryEndpoint("query");
+        connectionProperties.setHttpClient(testClient);
+        Assertions.assertEquals(testClient, connectionProperties.getHttpClient());
+
+        final Properties testProperties = new Properties();
+        testProperties.put(ConnectionProperties.AUTH_SCHEME_KEY, AuthScheme.IAMSigV4);
+        testProperties.put(SparqlConnectionProperties.CONTACT_POINT_KEY, "http://localhost");
+        testProperties.put(SparqlConnectionProperties.PORT_KEY, 3030);
+        testProperties.put(SparqlConnectionProperties.ENDPOINT_KEY, "mock");
+        testProperties.put(SparqlConnectionProperties.QUERY_ENDPOINT_KEY, "query");
+        testProperties.put(SparqlConnectionProperties.HTTP_CLIENT_KEY, testClient);
+
+        Assertions.assertThrows(SQLException.class,
+                () -> new SparqlConnection(new SparqlConnectionProperties(testProperties)));
     }
 
     @Test

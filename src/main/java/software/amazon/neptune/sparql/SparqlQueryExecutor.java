@@ -16,12 +16,24 @@
 
 package software.amazon.neptune.sparql;
 
+import com.amazonaws.auth.AWSCredentialsProvider;
+import com.amazonaws.auth.DefaultAWSCredentialsProviderChain;
+import com.amazonaws.neptune.auth.NeptuneApacheHttpSigV4Signer;
+import com.amazonaws.neptune.auth.NeptuneSigV4SignerException;
+import org.apache.http.HttpException;
+import org.apache.http.HttpRequest;
+import org.apache.http.HttpRequestInterceptor;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpUriRequest;
+import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.protocol.HttpContext;
 import org.apache.jena.query.QueryExecution;
 import org.apache.jena.rdfconnection.RDFConnection;
 import org.apache.jena.rdfconnection.RDFConnectionRemote;
 import org.apache.jena.rdfconnection.RDFConnectionRemoteBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import software.amazon.jdbc.utilities.AuthScheme;
 import software.amazon.jdbc.utilities.QueryExecutor;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -38,23 +50,12 @@ public class SparqlQueryExecutor extends QueryExecutor {
     }
 
     private static RDFConnectionRemoteBuilder createRDFBuilder(final SparqlConnectionProperties properties)
-            throws SQLException {
+            throws SQLException, NeptuneSigV4SignerException {
         final RDFConnectionRemoteBuilder builder = RDFConnectionRemote.create();
 
-        // This is mimicking urlDataset() function in MockServer, the input into builder.destination
-        // with returning format: "http://localhost:"+port()+"/"+datasetPath()
-        // Right now it is being concatenated from various connection properties
-        // TODO: AN-527 Maybe turn databaseUrl into a connection property itself? --> not quite testable because
-        //  it is derived from port and base url, etc, so a setter for it would involve changing other fields --> using
-        //  a private helper to avoid code block here
-        // if (properties.containsKey(SparqlConnectionProperties.CONTACT_POINT_KEY) &&
-        //        properties.containsKey(SparqlConnectionProperties.PORT_KEY) &&
-        //        properties.containsKey(SparqlConnectionProperties.ENDPOINT_KEY)) {
-        //    final String databaseUrl = properties.getContactPoint() + ":" + properties.getPort() + "/" +
-        //            properties.getEndpoint();
-        //    builder.destination(databaseUrl);
-        // }
-        builder.destination(buildDestination(properties));
+        if (properties.containsKey(SparqlConnectionProperties.DESTINATION_KEY)) {
+            builder.destination(properties.getDestination());
+        }
 
         if (properties.containsKey(SparqlConnectionProperties.QUERY_ENDPOINT_KEY)) {
             builder.queryEndpoint(properties.getQueryEndpoint());
@@ -88,8 +89,43 @@ public class SparqlQueryExecutor extends QueryExecutor {
             builder.parseCheckSPARQL(properties.getParseCheckSparql());
         }
 
-        // TODO: RDF throws an exception here for invalid formats, should we catch it in the connection properties class?
-        //  or catch it here to return a custom message?
+        // https://github.com/aws/amazon-neptune-sparql-java-sigv4/blob/master/src/main/java/com/amazonaws/neptune/client/jena/NeptuneJenaSigV4Example.java
+        if (properties.getAuthScheme() == AuthScheme.IAMSigV4) {
+
+            final AWSCredentialsProvider awsCredentialsProvider = new DefaultAWSCredentialsProviderChain();
+            final NeptuneApacheHttpSigV4Signer v4Signer =
+                    new NeptuneApacheHttpSigV4Signer(properties.getRegion(), awsCredentialsProvider);
+
+            final HttpClient v4SigningClient =
+                    HttpClientBuilder.create().addInterceptorLast(new HttpRequestInterceptor() {
+
+                        @Override
+                        public void process(final HttpRequest req, final HttpContext ctx) throws HttpException {
+                            if (req instanceof HttpUriRequest) {
+                                final HttpUriRequest httpUriReq = (HttpUriRequest) req;
+                                try {
+                                    v4Signer.signRequest(httpUriReq);
+                                } catch (final NeptuneSigV4SignerException e) {
+                                    throw new HttpException("Problem signing the request: ", e);
+                                }
+                            } else {
+                                throw new HttpException("Not an HttpUriRequest"); // this should never happen
+                            }
+                        }
+
+                    }).build();
+
+            properties.setHttpClient(v4SigningClient);
+            builder.httpClient(v4SigningClient);
+
+        } else if (properties.containsKey(SparqlConnectionProperties.HTTP_CLIENT_KEY)) {
+            builder.httpClient(properties.getHttpClient());
+        }
+
+        if (properties.containsKey(SparqlConnectionProperties.HTTP_CONTEXT_KEY)) {
+            builder.httpContext(properties.getHttpContext());
+        }
+
         if (properties.containsKey(SparqlConnectionProperties.QUADS_FORMAT_KEY)) {
             builder.quadsFormat(properties.getQuadsFormat());
         }

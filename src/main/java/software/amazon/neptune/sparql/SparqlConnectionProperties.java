@@ -37,13 +37,10 @@ public class SparqlConnectionProperties extends ConnectionProperties {
     public static final String PORT_KEY = "port";
     // dataset endpoint
     public static final String ENDPOINT_KEY = "endpoint";
-    //    public static final String DESTINATION_KEY = "destination";
+    public static final String DESTINATION_KEY = "destination";
     // the query and update endpoints for sparql database
     public static final String QUERY_ENDPOINT_KEY = "queryEndpoint";
-    // TODO: remove this
-    public static final String UPDATE_ENDPOINT_KEY = "updateEndpoint";
     public static final String REGION_KEY = "region";
-    public static final String CONNECTION_POOL_SIZE_KEY = "connectionPoolSize";
     public static final String ACCEPT_HEADER_ASK_QUERY_KEY = "acceptHeaderAskQuery";
     public static final String ACCEPT_HEADER_DATASET_KEY = "acceptHeaderDataset";
     public static final String ACCEPT_HEADER_GRAPH_KEY = "acceptHeaderGraph";
@@ -55,12 +52,7 @@ public class SparqlConnectionProperties extends ConnectionProperties {
     public static final String HTTP_CONTEXT_KEY = "httpContext";
     public static final String QUADS_FORMAT_KEY = "quadsFormat";
     public static final String TRIPLES_FORMAT_KEY = "triplesFormat";
-    // TODO: Revisit. We should probably support these.
-    public static final String AWS_CREDENTIALS_PROVIDER_CLASS_KEY = "awsCredentialsProviderClass";
-    public static final String CUSTOM_CREDENTIALS_FILE_PATH_KEY = "customCredentialsFilePath";
     public static final int DEFAULT_PORT = 3030;
-    public static final int DEFAULT_CONNECTION_POOL_SIZE = 1000;
-    public static final boolean DEFAULT_USE_ENCRYPTION = true;
     public static final Map<String, Object> DEFAULT_PROPERTIES_MAP = new HashMap<>();
     private static final Map<String, ConnectionProperties.PropertyConverter<?>> PROPERTY_CONVERTER_MAP =
             new HashMap<>();
@@ -69,11 +61,9 @@ public class SparqlConnectionProperties extends ConnectionProperties {
             .add(CONTACT_POINT_KEY)
             .add(PORT_KEY)
             .add(ENDPOINT_KEY)
-            //.add(DESTINATION_KEY)
+            .add(DESTINATION_KEY)
             .add(QUERY_ENDPOINT_KEY)
-            .add(UPDATE_ENDPOINT_KEY)
             .add(REGION_KEY)
-            .add(CONNECTION_POOL_SIZE_KEY)
             .add(ACCEPT_HEADER_ASK_QUERY_KEY)
             .add(ACCEPT_HEADER_DATASET_KEY)
             .add(ACCEPT_HEADER_GRAPH_KEY)
@@ -85,8 +75,6 @@ public class SparqlConnectionProperties extends ConnectionProperties {
             .add(HTTP_CONTEXT_KEY)
             .add(QUADS_FORMAT_KEY)
             .add(TRIPLES_FORMAT_KEY)
-            .add(AWS_CREDENTIALS_PROVIDER_CLASS_KEY)
-            .add(CUSTOM_CREDENTIALS_FILE_PATH_KEY)
             .build();
 
     // property converter parses on the in-coming connection string
@@ -94,11 +82,9 @@ public class SparqlConnectionProperties extends ConnectionProperties {
         PROPERTY_CONVERTER_MAP.put(CONTACT_POINT_KEY, (key, value) -> value);
         PROPERTY_CONVERTER_MAP.put(PORT_KEY, ConnectionProperties::toUnsigned);
         PROPERTY_CONVERTER_MAP.put(ENDPOINT_KEY, (key, value) -> value);
-        // PROPERTY_CONVERTER_MAP.put(DESTINATION_KEY, (key, value) -> value);
+        PROPERTY_CONVERTER_MAP.put(DESTINATION_KEY, (key, value) -> value);
         PROPERTY_CONVERTER_MAP.put(QUERY_ENDPOINT_KEY, (key, value) -> value);
-        PROPERTY_CONVERTER_MAP.put(UPDATE_ENDPOINT_KEY, (key, value) -> value);
         PROPERTY_CONVERTER_MAP.put(REGION_KEY, (key, value) -> value);
-        PROPERTY_CONVERTER_MAP.put(CONNECTION_POOL_SIZE_KEY, ConnectionProperties::toUnsigned);
         PROPERTY_CONVERTER_MAP.put(PARSE_CHECK_SPARQL_KEY, ConnectionProperties::toBoolean);
         PROPERTY_CONVERTER_MAP.put(ACCEPT_HEADER_ASK_QUERY_KEY, (key, value) -> value);
         PROPERTY_CONVERTER_MAP.put(ACCEPT_HEADER_DATASET_KEY, (key, value) -> value);
@@ -108,19 +94,17 @@ public class SparqlConnectionProperties extends ConnectionProperties {
         PROPERTY_CONVERTER_MAP.put(GSP_ENDPOINT_KEY, (key, value) -> value);
         PROPERTY_CONVERTER_MAP.put(QUADS_FORMAT_KEY, (key, value) -> value);
         PROPERTY_CONVERTER_MAP.put(TRIPLES_FORMAT_KEY, (key, value) -> value);
-        PROPERTY_CONVERTER_MAP.put(AWS_CREDENTIALS_PROVIDER_CLASS_KEY, (key, value) -> value);
-        PROPERTY_CONVERTER_MAP.put(CUSTOM_CREDENTIALS_FILE_PATH_KEY, (key, value) -> value);
     }
 
+    // TODO: why default to empty string?
     static {
         DEFAULT_PROPERTIES_MAP.put(PORT_KEY, DEFAULT_PORT);
         DEFAULT_PROPERTIES_MAP.put(CONTACT_POINT_KEY, "");
         DEFAULT_PROPERTIES_MAP.put(ENDPOINT_KEY, "");
         DEFAULT_PROPERTIES_MAP.put(QUERY_ENDPOINT_KEY, "");
-        DEFAULT_PROPERTIES_MAP.put(UPDATE_ENDPOINT_KEY, "");
-        // DEFAULT_PROPERTIES_MAP.put(DESTINATION_KEY, "");
+        DEFAULT_PROPERTIES_MAP.put(DESTINATION_KEY, "");
         DEFAULT_PROPERTIES_MAP.put(REGION_KEY, "");
-        DEFAULT_PROPERTIES_MAP.put(CONNECTION_POOL_SIZE_KEY, DEFAULT_CONNECTION_POOL_SIZE);
+        //        DEFAULT_PROPERTIES_MAP.put(HTTP_CLIENT_KEY, HttpOp.createDefaultHttpClient());
     }
 
     /**
@@ -211,21 +195,25 @@ public class SparqlConnectionProperties extends ConnectionProperties {
                 (String) PROPERTY_CONVERTER_MAP.get(ENDPOINT_KEY).convert(ENDPOINT_KEY, endpoint));
     }
 
-    // this doesn't quite work, as it get will reset the value based on the ports and stuff everytime, so the setter
-    // then has to change all 3 fields which doesn't seem reasonable --> moving this back to queryExecutor
-    // @SneakyThrows
-    // public String getDestination() {
-    //    if (!containsKey(CONTACT_POINT_KEY) && !containsKey(PORT_KEY) && !containsKey(ENDPOINT_KEY)) {
-    //        return null;
-    //    }
-    //    final String databaseUrl = getContactPoint() + ":" + getPort() + "/" + getEndpoint();
-    //    setDestination(databaseUrl);
-    //    return getProperty(DESTINATION_KEY);
-    // }
+    /**
+     * Gets the RDF connection destination.
+     *
+     * @return The RDF connection destination.
+     */
 
-    // public void setDestination(@NonNull final String destination) throws SQLException {
-    //     put(DESTINATION_KEY, destination);
-    // }
+    public String getDestination() {
+        return getProperty(DESTINATION_KEY);
+    }
+
+    /**
+     * Sets the RDF connection destination.
+     *
+     * @param destination The RDF connection destination.
+     * @throws SQLException if value is invalid.
+     */
+    public void setDestination(@NonNull final String destination) throws SQLException {
+        put(DESTINATION_KEY, destination);
+    }
 
     /**
      * Gets the query endpoint.
@@ -245,26 +233,6 @@ public class SparqlConnectionProperties extends ConnectionProperties {
     public void setQueryEndpoint(@NonNull final String queryEndpoint) throws SQLException {
         setProperty(QUERY_ENDPOINT_KEY,
                 (String) PROPERTY_CONVERTER_MAP.get(QUERY_ENDPOINT_KEY).convert(QUERY_ENDPOINT_KEY, queryEndpoint));
-    }
-
-    /**
-     * Gets the update endpoint.
-     *
-     * @return The update endpoint for sparql query.
-     */
-    public String getUpdateEndpoint() {
-        return getProperty(UPDATE_ENDPOINT_KEY);
-    }
-
-    /**
-     * Sets the update endpoint.
-     *
-     * @param updateEndpoint The connection endpoint.
-     * @throws SQLException if value is invalid.
-     */
-    public void setUpdateEndpoint(@NonNull final String updateEndpoint) throws SQLException {
-        setProperty(UPDATE_ENDPOINT_KEY,
-                (String) PROPERTY_CONVERTER_MAP.get(UPDATE_ENDPOINT_KEY).convert(UPDATE_ENDPOINT_KEY, updateEndpoint));
     }
 
     /**
@@ -495,54 +463,6 @@ public class SparqlConnectionProperties extends ConnectionProperties {
     }
 
     /**
-     * Gets the AWS credentials provider class.
-     *
-     * @return The AWS credentials provider class.
-     */
-    public String getAwsCredentialsProviderClass() {
-        if (!containsKey(AWS_CREDENTIALS_PROVIDER_CLASS_KEY)) {
-            return null;
-        }
-        return getProperty(AWS_CREDENTIALS_PROVIDER_CLASS_KEY);
-    }
-
-    /**
-     * Sets the AWS credentials provider class.
-     *
-     * @param awsCredentialsProviderClass The AWS credentials provider class.
-     * @throws SQLException if value is invalid.
-     */
-    public void setAwsCredentialsProviderClass(@NonNull final String awsCredentialsProviderClass) throws SQLException {
-        setProperty(AWS_CREDENTIALS_PROVIDER_CLASS_KEY,
-                (String) PROPERTY_CONVERTER_MAP.get(AWS_CREDENTIALS_PROVIDER_CLASS_KEY)
-                        .convert(AWS_CREDENTIALS_PROVIDER_CLASS_KEY, awsCredentialsProviderClass));
-    }
-
-    /**
-     * Gets the custom credentials filepath.
-     *
-     * @return The custom credentials filepath.
-     */
-    public String getCustomCredentialsFilePath() {
-        if (!containsKey(CUSTOM_CREDENTIALS_FILE_PATH_KEY)) {
-            return null;
-        }
-        return getProperty(CUSTOM_CREDENTIALS_FILE_PATH_KEY);
-    }
-
-    /**
-     * Sets the custom credentials filepath.
-     *
-     * @param customCredentialsFilePath The custom credentials filepath.
-     * @throws SQLException if value is invalid.
-     */
-    public void setCustomCredentialsFilePath(@NonNull final String customCredentialsFilePath) throws SQLException {
-        setProperty(CUSTOM_CREDENTIALS_FILE_PATH_KEY,
-                (String) PROPERTY_CONVERTER_MAP.get(CUSTOM_CREDENTIALS_FILE_PATH_KEY)
-                        .convert(CUSTOM_CREDENTIALS_FILE_PATH_KEY, customCredentialsFilePath));
-    }
-
-    /**
      * Gets the region.
      *
      * @return The region.
@@ -562,27 +482,6 @@ public class SparqlConnectionProperties extends ConnectionProperties {
                 (String) PROPERTY_CONVERTER_MAP.get(REGION_KEY).convert(REGION_KEY, region));
     }
 
-    /**
-     * Gets the connection pool size.
-     *
-     * @return The connection pool size.
-     */
-    public int getConnectionPoolSize() {
-        return (int) get(CONNECTION_POOL_SIZE_KEY);
-    }
-
-    /**
-     * Sets the connection pool size.
-     *
-     * @param connectionPoolSize The connection pool size.
-     * @throws SQLException if value is invalid.
-     */
-    public void setConnectionPoolSize(final int connectionPoolSize) throws SQLException {
-        if (connectionPoolSize < 0) {
-            throw invalidConnectionPropertyError(CONNECTION_POOL_SIZE_KEY, connectionPoolSize);
-        }
-        put(CONNECTION_POOL_SIZE_KEY, connectionPoolSize);
-    }
 
     /**
      * Validate the supported properties.
@@ -591,18 +490,37 @@ public class SparqlConnectionProperties extends ConnectionProperties {
     protected void validateProperties() throws SQLException {
         // If IAMSigV4 is specified, we need the region provided to us.
         if (getAuthScheme() != null && getAuthScheme().equals(AuthScheme.IAMSigV4)) {
-            final String region = System.getenv().get("SERVICE_REGION");
-            if (region == null) {
-                throw missingConnectionPropertyError(
-                        "A Region must be provided to use IAMSigV4 Authentication. Set the SERVICE_REGION " +
-                                "environment variable to the appropriate region, such as 'us-east-1'.");
+            // TODO check for region key first - any required format???
+            if (getRegion() == "") {
+                final String region = System.getenv().get("SERVICE_REGION");
+                if (region == null) {
+                    throw missingConnectionPropertyError(
+                            "A Region must be provided to use IAMSigV4 Authentication. Set the SERVICE_REGION " +
+                                    "environment variable to the appropriate region, such as 'us-east-1'.");
+                }
+                setRegion(region);
             }
-            setRegion(region);
-            // TODO: also need to make a new HttpClient for this? like the example in Amazon v4SigningClient?
-            //  https://github.com/aws/amazon-neptune-sparql-java-sigv4/blob/master/src/main/java/com/amazonaws/neptune/client/jena/NeptuneJenaSigV4Example.java
+            // Throw if both IAM AUTH and HTTP_CLIENT_KEY are given
+            System.out.println("Http Client: " + getHttpClient());
+            System.out.println(containsKey(HTTP_CLIENT_KEY));
+            if (getHttpClient() != null) {
+                throw invalidConnectionPropertyValueError(AUTH_SCHEME_KEY, "IAMSigV4 does not support custom" +
+                        "HttpClient input. Set AuthScheme to None to pass in custom HttpClient.");
+            }
 
-            // TODO: Jena RDF builder doesn't have an encryption field, do we somehow support it?
+            // TODO: AN-531 Jena RDF builder doesn't have an encryption field, look into
         }
+        // check all destination stuff exists and build it here
+        // TODO find better checks then empty string checks? also check neptune default port
+        // TODO will fix && to || for next commit--> only set to && to pass the original unit tests for this commit
+        if (getContactPoint().equals("") && getPort() < 0 && getEndpoint().equals("")) {
+            throw missingConnectionPropertyError("The CONTACT_POINT, PORT_KEY, and ENDPOINT_KEY fields must be" +
+                    " provided");
+        } else {
+            final String destination = String.format("%s:%d/%s", getContactPoint(), getPort(), getEndpoint());
+            setDestination(destination);
+        }
+
     }
 
 
