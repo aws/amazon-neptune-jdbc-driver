@@ -52,7 +52,7 @@ public class SparqlConnectionProperties extends ConnectionProperties {
     public static final String HTTP_CONTEXT_KEY = "httpContext";
     public static final String QUADS_FORMAT_KEY = "quadsFormat";
     public static final String TRIPLES_FORMAT_KEY = "triplesFormat";
-    public static final int DEFAULT_PORT = 3030;
+    public static final int DEFAULT_PORT = 8182; // possible Neptune default port
     public static final Map<String, Object> DEFAULT_PROPERTIES_MAP = new HashMap<>();
     private static final Map<String, ConnectionProperties.PropertyConverter<?>> PROPERTY_CONVERTER_MAP =
             new HashMap<>();
@@ -96,7 +96,7 @@ public class SparqlConnectionProperties extends ConnectionProperties {
         PROPERTY_CONVERTER_MAP.put(TRIPLES_FORMAT_KEY, (key, value) -> value);
     }
 
-    // TODO: why default to empty string?
+    // TODO: AN-547 revisit
     static {
         DEFAULT_PROPERTIES_MAP.put(PORT_KEY, DEFAULT_PORT);
         DEFAULT_PROPERTIES_MAP.put(CONTACT_POINT_KEY, "");
@@ -104,7 +104,6 @@ public class SparqlConnectionProperties extends ConnectionProperties {
         DEFAULT_PROPERTIES_MAP.put(QUERY_ENDPOINT_KEY, "");
         DEFAULT_PROPERTIES_MAP.put(DESTINATION_KEY, "");
         DEFAULT_PROPERTIES_MAP.put(REGION_KEY, "");
-        //        DEFAULT_PROPERTIES_MAP.put(HTTP_CLIENT_KEY, HttpOp.createDefaultHttpClient());
     }
 
     /**
@@ -490,8 +489,7 @@ public class SparqlConnectionProperties extends ConnectionProperties {
     protected void validateProperties() throws SQLException {
         // If IAMSigV4 is specified, we need the region provided to us.
         if (getAuthScheme() != null && getAuthScheme().equals(AuthScheme.IAMSigV4)) {
-            // TODO check for region key first - any required format???
-            if (getRegion() == "") {
+            if ("".equals(getRegion())) {
                 final String region = System.getenv().get("SERVICE_REGION");
                 if (region == null) {
                     throw missingConnectionPropertyError(
@@ -508,12 +506,11 @@ public class SparqlConnectionProperties extends ConnectionProperties {
                         "HttpClient input. Set AuthScheme to None to pass in custom HttpClient.");
             }
 
-            // TODO: AN-531 Jena RDF builder doesn't have an encryption field, look into
+            // TODO: AN-531 Jena RDF builder doesn't have an encryption field, look into Http?
         }
         // check all destination stuff exists and build it here
-        // TODO find better checks then empty string checks? also check neptune default port
-        // TODO will fix && to || for next commit--> only set to && to pass the original unit tests for this commit
-        if (getContactPoint().equals("") && getPort() < 0 && getEndpoint().equals("")) {
+        // TODO: AN-547 this will likely change when we revisit ConnectionProperties
+        if ("".equals(getContactPoint()) || getPort() < 0 || "".equals(getEndpoint())) {
             throw missingConnectionPropertyError("The CONTACT_POINT, PORT_KEY, and ENDPOINT_KEY fields must be" +
                     " provided");
         } else {

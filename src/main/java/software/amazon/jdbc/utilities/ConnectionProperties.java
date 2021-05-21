@@ -83,12 +83,10 @@ public abstract class ConnectionProperties extends Properties {
         if (defaultPropertiesMap != null) {
             DEFAULT_PROPERTIES_MAP.putAll(defaultPropertiesMap);
         }
-        // DEFAULT_PROPERTIES_MAP.forEach((key, value) -> System.out.println("Default Entry: " + key + " || Default value: " + value));
 
         if (propertyConverterMap != null) {
             PROPERTY_CONVERTER_MAP.putAll(propertyConverterMap);
         }
-        // PROPERTY_CONVERTER_MAP.forEach((key, value) -> System.out.println("Converter Entry: " + key + " || Converter value: " + value));
 
         if (properties.isEmpty()) {
             putAll(DEFAULT_PROPERTIES_MAP);
@@ -337,7 +335,6 @@ public abstract class ConnectionProperties extends Properties {
     private void resolveProperties(final Properties inputProperties) throws SQLException {
         // List of input properties keys used to keep track of unresolved properties.
         final Set<Object> inputPropertiesKeys = new HashSet<>(inputProperties.keySet());
-        // inputProperties.forEach((key, value) -> System.out.println("Input Entry: " + key + " || Input value: " + value));
 
         for (final String mapKey : PROPERTY_CONVERTER_MAP.keySet()) {
             for (final Map.Entry<Object, Object> entry : inputProperties.entrySet()) {
@@ -349,8 +346,6 @@ public abstract class ConnectionProperties extends Properties {
                     put(mapKey, PROPERTY_CONVERTER_MAP.get(mapKey).convert(key, value));
                     // Remove key for the resolved property.
                     inputPropertiesKeys.remove(key);
-
-                    // System.out.println("Resolved Entry: " + key + " || Resolved value: " + value);
                     break;
                 }
             }
@@ -358,7 +353,9 @@ public abstract class ConnectionProperties extends Properties {
 
         setDefaults();
 
-        for (final Object inputPropertiesKey : inputPropertiesKeys) {
+        // Go through properties in the supportedProperties
+        final Set<Object> inputPropertiesKeyCopy = new HashSet<>(inputPropertiesKeys);
+        for (final Object inputPropertiesKey : inputPropertiesKeyCopy) {
             if (isSupportedProperty(inputPropertiesKey.toString())) {
                 put(inputPropertiesKey, inputProperties.get(inputPropertiesKey));
                 inputPropertiesKeys.remove(inputPropertiesKey);
