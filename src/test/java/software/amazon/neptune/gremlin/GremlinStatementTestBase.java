@@ -20,7 +20,7 @@ import software.amazon.neptune.NeptuneStatementTestHelperBase;
 
 public class GremlinStatementTestBase extends NeptuneStatementTestHelperBase {
     protected static final String QUICK_QUERY;
-    protected static final int LONG_QUERY_NODE_COUNT = 1000;
+    protected static final int LONG_QUERY_NODE_COUNT = 500;
     private static int currentIndex = 0;
 
     static {

@@ -65,6 +65,6 @@ public class GremlinResultSetMetadata extends software.amazon.jdbc.ResultSetMeta
     @Override
     public String getColumnClassName(final int column) throws SQLException {
         verifyColumnIndex(column);
-        return OpenCypherTypeMapping.BOLT_TO_JAVA_TYPE_MAP.get(getColumnGremlinType(column)).getName();
+        return getColumnGremlinType(column).getName();
     }
 }
