@@ -100,7 +100,7 @@ public abstract class NeptuneDriverTestBase {
             }
         }
         final String validUrl = createValidUrl(useEncryption, "opencypher", false);
-        Assertions.assertNull(driver.connect(validUrl, null));
+        Assertions.assertNotNull(driver.connect(validUrl, null));
 
         for (final String invalidUrl : invalidUrls) {
             Assertions.assertNull(driver.connect(invalidUrl, new Properties()));

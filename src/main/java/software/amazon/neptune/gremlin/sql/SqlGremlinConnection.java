@@ -21,7 +21,6 @@ import software.amazon.jdbc.utilities.ConnectionProperties;
 import software.amazon.jdbc.utilities.QueryExecutor;
 import software.amazon.neptune.NeptuneDatabaseMetadata;
 import software.amazon.neptune.gremlin.GremlinConnection;
-import software.amazon.neptune.gremlin.GremlinQueryExecutor;
 import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
 
@@ -54,6 +53,6 @@ public class SqlGremlinConnection extends GremlinConnection {
 
     @Override
     public String getDriverName() {
-        return "neptune:sql-gremlin";
+        return "neptune:sqlgremlin";
     }
 }

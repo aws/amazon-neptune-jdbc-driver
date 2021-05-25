@@ -59,6 +59,10 @@ public class GremlinQueryExecutor extends QueryExecutor {
     private final GremlinConnectionProperties gremlinConnectionProperties;
     private CompletableFuture<org.apache.tinkerpop.gremlin.driver.ResultSet> completableFuture;
 
+    /**
+     * GremlinQueryExecutor constructor.
+     * @param gremlinConnectionProperties GremlinConnectionProperties for use in the executor.
+     */
     public GremlinQueryExecutor(final GremlinConnectionProperties gremlinConnectionProperties) {
         this.gremlinConnectionProperties = gremlinConnectionProperties;
     }

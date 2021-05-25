@@ -23,6 +23,7 @@ import software.amazon.jdbc.Driver;
 import software.amazon.jdbc.utilities.ConnectionProperties;
 import software.amazon.neptune.gremlin.GremlinConnection;
 import software.amazon.neptune.gremlin.GremlinConnectionProperties;
+import software.amazon.neptune.gremlin.sql.SqlGremlinConnection;
 import software.amazon.neptune.opencypher.OpenCypherConnection;
 import software.amazon.neptune.opencypher.OpenCypherConnectionProperties;
 import javax.annotation.Nullable;
@@ -47,7 +48,8 @@ public class NeptuneDriver extends Driver implements java.sql.Driver {
 
     private final Map<String, Class<?>> connectionMap = ImmutableMap.of(
             "opencypher", OpenCypherConnection.class,
-            "gremlin", GremlinConnection.class);
+            "gremlin", GremlinConnection.class,
+            "sqlgremlin", SqlGremlinConnection.class);
 
     @Override
     public boolean acceptsURL(final @Nullable String url) throws SQLException {
@@ -65,23 +67,21 @@ public class NeptuneDriver extends Driver implements java.sql.Driver {
         if (!acceptsURL(url)) {
             return null;
         }
-        final java.sql.Connection connection;
-        final ConnectionProperties connectionProperties;
+
         try {
             final String language = getLanguage(url, CONN_STRING_PATTERN);
-            final String propertyString = getPropertyString(url, CONN_STRING_PATTERN);
-            final Properties properties = parsePropertyString(propertyString, firstPropertyKey(language));
-            properties.putAll(info);
-            connectionProperties = connectionProperties(language, properties);
-            connection = (java.sql.Connection) connectionMap.get(language)
+            final Properties properties =
+                    parsePropertyString(getPropertyString(url, CONN_STRING_PATTERN), firstPropertyKey(language));
+            if (info != null) {
+                properties.putAll(info);
+            }
+            return (java.sql.Connection) connectionMap.get(language)
                     .getConstructor(ConnectionProperties.class)
-                    .newInstance(connectionProperties);
+                    .newInstance(connectionProperties(language, properties));
         } catch (final Exception e) {
             LOGGER.error("Unexpected error while creating connection:", e);
             return null;
         }
-
-        return connection;
     }
 
     private ConnectionProperties connectionProperties(final String language, final Properties properties)
@@ -89,7 +89,7 @@ public class NeptuneDriver extends Driver implements java.sql.Driver {
         if ("opencypher".equalsIgnoreCase(language)) {
             return new OpenCypherConnectionProperties(properties);
         }
-        if ("gremlin".equalsIgnoreCase(language)) {
+        if ("gremlin".equalsIgnoreCase(language) || "sqlgremlin".equalsIgnoreCase(language)) {
             return new GremlinConnectionProperties(properties);
         }
         // TODO - implement for other languages
@@ -100,7 +100,7 @@ public class NeptuneDriver extends Driver implements java.sql.Driver {
         if ("opencypher".equalsIgnoreCase(language)) {
             return OpenCypherConnectionProperties.ENDPOINT_KEY;
         }
-        if ("gremlin".equalsIgnoreCase(language)) {
+        if ("gremlin".equalsIgnoreCase(language) || "sqlgremlin".equalsIgnoreCase(language)) {
             return GremlinConnectionProperties.CONTACT_POINT_KEY;
         }
         // TODO - implement for other languages

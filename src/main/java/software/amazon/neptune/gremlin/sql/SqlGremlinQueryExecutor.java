@@ -48,7 +48,7 @@ import static org.apache.tinkerpop.gremlin.process.traversal.AnonymousTraversalS
  */
 public class SqlGremlinQueryExecutor extends GremlinQueryExecutor {
     private static final Logger LOGGER = LoggerFactory.getLogger(SqlGremlinQueryExecutor.class);
-    private static final Object traversalLock = new Object();
+    private static final Object TRAVERSAL_LOCK = new Object();
     private static SqlToGremlin sqlToGremlin = null;
     private static GraphTraversalSource graphTraversalSource = null;
     private final GremlinConnectionProperties gremlinConnectionProperties;
@@ -63,9 +63,12 @@ public class SqlGremlinQueryExecutor extends GremlinQueryExecutor {
         this.gremlinConnectionProperties = gremlinConnectionProperties;
     }
 
+    /**
+     * Function to release the SqlGremlinQueryExecutor resources.
+     */
     public static void close() {
         try {
-            synchronized (traversalLock) {
+            synchronized (TRAVERSAL_LOCK) {
                 if (graphTraversalSource != null) {
                     graphTraversalSource.close();
                 }
@@ -81,7 +84,7 @@ public class SqlGremlinQueryExecutor extends GremlinQueryExecutor {
             final GremlinConnectionProperties gremlinConnectionProperties)
             throws SQLException {
         if (graphTraversalSource == null) {
-            synchronized (traversalLock) {
+            synchronized (TRAVERSAL_LOCK) {
                 graphTraversalSource =
                         traversal().withRemote(DriverRemoteConnection.using(getClient(gremlinConnectionProperties)));
             }

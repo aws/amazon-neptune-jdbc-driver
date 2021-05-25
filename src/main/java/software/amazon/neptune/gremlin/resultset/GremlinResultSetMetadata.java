@@ -17,7 +17,6 @@
 package software.amazon.neptune.gremlin.resultset;
 
 import software.amazon.neptune.gremlin.GremlinTypeMapping;
-import software.amazon.neptune.opencypher.OpenCypherTypeMapping;
 import java.sql.SQLException;
 import java.util.List;
 
