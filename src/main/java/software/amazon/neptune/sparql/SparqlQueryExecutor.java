@@ -137,17 +137,6 @@ public class SparqlQueryExecutor extends QueryExecutor {
         return builder;
     }
 
-    // helper for building the RDF destination url from properties
-    private static String buildDestination(final SparqlConnectionProperties properties) {
-        if (properties.containsKey(SparqlConnectionProperties.CONTACT_POINT_KEY) &&
-                properties.containsKey(SparqlConnectionProperties.PORT_KEY) &&
-                properties.containsKey(SparqlConnectionProperties.ENDPOINT_KEY)) {
-            return properties.getContactPoint() + ":" + properties.getPort() + "/" +
-                    properties.getEndpoint();
-        }
-        return null;
-    }
-
     @Override
     public int getMaxFetchSize() {
         return 0;

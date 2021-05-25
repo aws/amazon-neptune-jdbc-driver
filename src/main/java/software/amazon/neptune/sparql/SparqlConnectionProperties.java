@@ -407,7 +407,7 @@ public class SparqlConnectionProperties extends ConnectionProperties {
     }
 
     /**
-     * Sets thename of the SPARQL GraphStore Protocol endpoint
+     * Sets the name of the SPARQL GraphStore Protocol endpoint
      *
      * @param gspEndpoint The endpoint.
      * @throws SQLException if value is invalid.
@@ -488,7 +488,7 @@ public class SparqlConnectionProperties extends ConnectionProperties {
     @Override
     protected void validateProperties() throws SQLException {
         // If IAMSigV4 is specified, we need the region provided to us.
-        if (getAuthScheme() != null && getAuthScheme().equals(AuthScheme.IAMSigV4)) {
+        if (AuthScheme.IAMSigV4.equals(getAuthScheme())) {
             if ("".equals(getRegion())) {
                 final String region = System.getenv().get("SERVICE_REGION");
                 if (region == null) {
@@ -499,8 +499,6 @@ public class SparqlConnectionProperties extends ConnectionProperties {
                 setRegion(region);
             }
             // Throw if both IAM AUTH and HTTP_CLIENT_KEY are given
-            System.out.println("Http Client: " + getHttpClient());
-            System.out.println(containsKey(HTTP_CLIENT_KEY));
             if (getHttpClient() != null) {
                 throw invalidConnectionPropertyValueError(AUTH_SCHEME_KEY, "IAMSigV4 does not support custom" +
                         "HttpClient input. Set AuthScheme to None to pass in custom HttpClient.");
