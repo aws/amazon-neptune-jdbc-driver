@@ -64,7 +64,7 @@ public class GremlinResultSetGetTables extends ResultSetGetTables implements jav
      * OpenCypherResultSetGetColumns constructor, initializes super class.
      *
      * @param statement                Statement Object.
-     * @param graphSchemas             List of NodeColumnInfo Objects.
+     * @param graphSchemas             List of GraphSchema Objects.
      * @param resultSetInfoWithoutRows ResultSetInfoWithoutRows Object.
      */
     public GremlinResultSetGetTables(final Statement statement,

@@ -142,7 +142,7 @@ public abstract class ResultSetGetColumns extends software.amazon.jdbc.ResultSet
      * ResultSetGetColumns constructor, initializes super class.
      *
      * @param statement                Statement Object.
-     * @param graphSchemas          List of NodeColumnInfo Objects.
+     * @param graphSchemas          List of GraphSchema Objects.
      * @param resultSetInfoWithoutRows ResultSetInfoWithoutRows Object.
      */
     public ResultSetGetColumns(final Statement statement, final List<GraphSchema> graphSchemas,

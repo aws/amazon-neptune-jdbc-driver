@@ -66,7 +66,7 @@ public class OpenCypherResultSetGetTables extends ResultSetGetTables implements 
      * OpenCypherResultSetGetColumns constructor, initializes super class.
      *
      * @param statement                Statement Object.
-     * @param graphSchemas             List of NodeColumnInfo Objects.
+     * @param graphSchemas             List of GraphSchema Objects.
      * @param resultSetInfoWithoutRows ResultSetInfoWithoutRows Object.
      */
     public OpenCypherResultSetGetTables(final Statement statement,

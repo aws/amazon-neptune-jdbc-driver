@@ -72,7 +72,7 @@ public abstract class ResultSetGetTables extends GenericResultSet implements jav
      * ResultSetGetTables constructor, initializes super class.
      *
      * @param statement                Statement Object.
-     * @param graphSchemas          List of NodeColumnInfo Objects.
+     * @param graphSchemas          List of GraphSchema Objects.
      * @param resultSetInfoWithoutRows ResultSetInfoWithoutRows Object.
      */
     public ResultSetGetTables(final Statement statement,
