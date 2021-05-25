@@ -29,7 +29,9 @@ import java.util.List;
 public class MetadataCache {
     private static final Object LOCK = new Object();
     @Getter
-    private static List<NodeColumnInfo> cachedNodeColumnInfos = null;
+    private static List<GraphSchema> nodeSchemaList = null;
+    @Getter
+    private static List<GraphSchema> edgeSchemaList = null;
 
     /**
      * Function to update the cache of the metadata.
@@ -45,16 +47,16 @@ public class MetadataCache {
                                    final PathType pathType) throws SQLException {
         synchronized (LOCK) {
             try {
-                cachedNodeColumnInfos = SchemaHelperGremlinDataModel.getGraphSchema(endpoint, nodes, useIAM, pathType);
+                nodeSchemaList = new ArrayList<>();
+                edgeSchemaList = new ArrayList<>();
+                SchemaHelperGremlinDataModel
+                        .getGraphSchema(endpoint, nodes, useIAM, pathType, nodeSchemaList, edgeSchemaList);
             } catch (final IOException e) {
+                nodeSchemaList = null;
+                edgeSchemaList = null;
                 throw new SQLException(e.getMessage());
             }
         }
-    }
-
-    public enum PathType {
-        Bolt,
-        Gremlin
     }
 
     /**
@@ -64,7 +66,7 @@ public class MetadataCache {
      */
     public static boolean isMetadataCached() {
         synchronized (LOCK) {
-            return cachedNodeColumnInfos != null;
+            return ((nodeSchemaList != null) && (edgeSchemaList != null));
         }
     }
 
@@ -74,21 +76,31 @@ public class MetadataCache {
      * @param nodeFilter Filter to apply.
      * @return Filtered NodeColumnInfo List.
      */
-    public static List<NodeColumnInfo> getFilteredCacheNodeColumnInfos(
+    public static List<GraphSchema> getFilteredCacheNodeColumnInfos(
             final String nodeFilter) {
         synchronized (LOCK) {
-            final List<NodeColumnInfo> nodeColumnInfos = new ArrayList<>();
-            for (final NodeColumnInfo nodeColumnInfo : cachedNodeColumnInfos) {
+            final List<GraphSchema> graphSchemas = new ArrayList<>();
+            for (final GraphSchema graphSchema : nodeSchemaList) {
                 if (nodeFilter != null && !"%".equals(nodeFilter)) {
                     if (Arrays.stream(nodeFilter.split(":"))
-                            .allMatch(node -> nodeColumnInfo.getLabels().contains(node))) {
-                        nodeColumnInfos.add(nodeColumnInfo);
+                            .allMatch(node -> graphSchema.getLabels().contains(node))) {
+                        graphSchemas.add(graphSchema);
                     }
                 } else {
-                    nodeColumnInfos.add(nodeColumnInfo);
+                    graphSchemas.add(graphSchema);
                 }
             }
-            return nodeColumnInfos;
+            for (final GraphSchema graphSchema : edgeSchemaList) {
+                if (nodeFilter != null && !"%".equals(nodeFilter)) {
+                    if (Arrays.stream(nodeFilter.split(":"))
+                            .allMatch(node -> graphSchema.getLabels().contains(node))) {
+                        graphSchemas.add(graphSchema);
+                    }
+                } else {
+                    graphSchemas.add(graphSchema);
+                }
+            }
+            return graphSchemas;
         }
     }
 
@@ -115,5 +127,10 @@ public class MetadataCache {
             final String nodeFilter) {
         return new ResultSetInfoWithoutRows(
                 getFilteredCacheNodeColumnInfos(nodeFilter).size(), ResultSetGetTables.getColumns());
+    }
+
+    public enum PathType {
+        Bolt,
+        Gremlin
     }
 }

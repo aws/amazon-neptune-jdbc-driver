@@ -19,7 +19,7 @@ package software.amazon.neptune.opencypher.resultset;
 import org.neo4j.driver.internal.types.InternalTypeSystem;
 import org.neo4j.driver.types.Type;
 import software.amazon.neptune.common.ResultSetInfoWithoutRows;
-import software.amazon.neptune.common.gremlindatamodel.NodeColumnInfo;
+import software.amazon.neptune.common.gremlindatamodel.GraphSchema;
 import software.amazon.neptune.common.gremlindatamodel.resultset.ResultSetGetTables;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
@@ -66,14 +66,14 @@ public class OpenCypherResultSetGetTables extends ResultSetGetTables implements 
      * OpenCypherResultSetGetColumns constructor, initializes super class.
      *
      * @param statement                Statement Object.
-     * @param nodeColumnInfos          List of NodeColumnInfo Objects.
+     * @param graphSchemas             List of GraphSchema Objects.
      * @param resultSetInfoWithoutRows ResultSetInfoWithoutRows Object.
      */
     public OpenCypherResultSetGetTables(final Statement statement,
-                                        final List<NodeColumnInfo> nodeColumnInfos,
+                                        final List<GraphSchema> graphSchemas,
                                         final ResultSetInfoWithoutRows resultSetInfoWithoutRows)
             throws SQLException {
-        super(statement, nodeColumnInfos, resultSetInfoWithoutRows);
+        super(statement, graphSchemas, resultSetInfoWithoutRows);
     }
 
     @Override

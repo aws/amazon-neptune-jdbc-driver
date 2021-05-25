@@ -63,7 +63,6 @@ public class NeptuneDriver extends Driver implements java.sql.Driver {
     @Override
     public java.sql.Connection connect(final @Nullable String url, final Properties info) throws SQLException {
         if (!acceptsURL(url)) {
-            LOGGER.error("Invalid url: {}.", url);
             return null;
         }
         final java.sql.Connection connection;
