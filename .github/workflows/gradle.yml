@@ -20,10 +20,12 @@ on:
     branches:
       - master
       - develop
+      - sparql-develop
   pull_request:
     branches:
       - master
       - develop
+      - sparql-develop
 
 jobs:
   build:

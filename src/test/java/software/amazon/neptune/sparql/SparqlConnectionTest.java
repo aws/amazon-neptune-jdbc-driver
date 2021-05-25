@@ -1,3 +1,19 @@
+/*
+ * Copyright <2020> Amazon.com, final Inc. or its affiliates. All Rights Reserved.
+ *
+ * Licensed under the Apache License, final Version 2.0 (the "License").
+ * You may not use this file except in compliance with the License.
+ * A copy of the License is located at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * or in the "license" file accompanying this file. This file is distributed
+ * on an "AS IS" BASIS, final WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, final either
+ * express or implied. See the License for the specific language governing
+ * permissions and limitations under the License.
+ *
+ */
+
 package software.amazon.neptune.sparql;
 
 import org.apache.jena.query.Query;
@@ -17,7 +33,6 @@ import org.junit.jupiter.api.Test;
 import software.amazon.jdbc.utilities.AuthScheme;
 import software.amazon.jdbc.utilities.ConnectionProperties;
 import software.amazon.neptune.sparql.mock.SparqlMockServer;
-
 import java.sql.SQLException;
 import java.util.Properties;
 
@@ -26,7 +41,9 @@ public class SparqlConnectionTest {
     private static final String ENDPOINT = "mock";
     private static final String QUERY_ENDPOINT = "query";
     private static final int PORT = SparqlMockServer.port(); // Mock server dynamically generates port
-    private static final Properties sparqlProperties() {
+    private java.sql.Connection connection;
+
+    private static Properties sparqlProperties() {
         final Properties properties = new Properties();
         properties.put(ConnectionProperties.AUTH_SCHEME_KEY, AuthScheme.None); // set default to None
         properties.put(SparqlConnectionProperties.CONTACT_POINT_KEY, HOSTNAME);
@@ -35,7 +52,6 @@ public class SparqlConnectionTest {
         properties.put(SparqlConnectionProperties.QUERY_ENDPOINT_KEY, QUERY_ENDPOINT);
         return properties;
     }
-    private java.sql.Connection connection;
 
     /**
      * Function to start the mock server before testing.
@@ -79,8 +95,8 @@ public class SparqlConnectionTest {
         connection.close();
     }
 
-    @Test
     // TODO: AN-527 abstract this test after completing connection properties? - it's similar across all 3 executors
+    @Test
     void testIsValid() throws SQLException {
         Assertions.assertTrue(connection.isValid(1));
 
@@ -113,8 +129,8 @@ public class SparqlConnectionTest {
         Assertions.assertFalse(invalidConnection.isValid(1));
     }
 
-    @Test
     // TODO: AN-528 proof of concept tests for mock database - modify/remove later
+    @Test
     void testMockConnection() {
         final RDFConnectionRemoteBuilder builder = RDFConnectionRemote.create()
                 .destination(SparqlMockServer.urlDataset())
@@ -128,15 +144,15 @@ public class SparqlConnectionTest {
         final Query query = QueryFactory.create("SELECT * { ?s ?p ?o } LIMIT 100");
 
         // connects to database, updates the database, then query it
-        try (RDFConnection conn = builder.build()) {
+        try (final RDFConnection conn = builder.build()) {
             System.out.println(conn.isClosed());
             conn.update(update);
             conn.queryResultSet(query, ResultSetFormatter::out);
         }
     }
 
-    @Test
     // TODO: AN-528 proof of concept tests for mock database - modify/remove later
+    @Test
     void testMockConnection2() {
         final String req = "" +
                 "SELECT ?x " +
@@ -152,7 +168,7 @@ public class SparqlConnectionTest {
 
         // Whether the connection can be reused depends on the details of the implementation.
         // See example 5.
-        try (RDFConnection conn = builder.build()) {
+        try (final RDFConnection conn = builder.build()) {
             conn.queryResultSet(query, ResultSetFormatter::out);
         }
     }
