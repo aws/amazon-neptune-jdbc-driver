@@ -16,7 +16,6 @@
 
 package software.amazon.neptune.gremlin.sql;
 
-import com.google.common.collect.ImmutableList;
 import dnl.utils.text.table.TextTable;
 import org.apache.tinkerpop.gremlin.driver.Client;
 import org.apache.tinkerpop.gremlin.driver.Cluster;
@@ -164,7 +163,7 @@ public class SqlGremlinTest {
         final List<List<Object>> rows = result.getRows();
         final List<List<String>> stringRows = new ArrayList<>();
         for (final List<Object> row : rows) {
-            List<String> list = new ArrayList<>();
+            final List<String> list = new ArrayList<>();
             for (final Object obj : row) {
                 if (obj != null) {
                     if (obj instanceof Object[]) {
