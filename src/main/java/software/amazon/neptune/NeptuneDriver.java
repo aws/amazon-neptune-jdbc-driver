@@ -37,6 +37,10 @@ public class NeptuneDriver extends Driver implements java.sql.Driver {
     public static final String CONN_STRING_PREFIX = "jdbc:neptune:";
     private static final Logger LOGGER = LoggerFactory.getLogger(NeptuneDriver.class);
     private static final Pattern CONN_STRING_PATTERN = Pattern.compile(CONN_STRING_PREFIX + "(\\w+)://(.*)");
+    // TODO AN-550: Switch to map with class that holds Conn properties, key, query executor, etc.
+    private static final String OPENCYPHER = "opencypher";
+    private static final String GREMLIN = "gremlin";
+    private static final String SQL_GREMLIN = "sqlgremlin";
 
     static {
         try {
@@ -46,6 +50,7 @@ public class NeptuneDriver extends Driver implements java.sql.Driver {
         }
     }
 
+    // TODO AN-550: Switch to map with class that holds Conn properties, key, query executor, etc.
     private final Map<String, Class<?>> connectionMap = ImmutableMap.of(
             "opencypher", OpenCypherConnection.class,
             "gremlin", GremlinConnection.class,
@@ -54,6 +59,7 @@ public class NeptuneDriver extends Driver implements java.sql.Driver {
     @Override
     public boolean acceptsURL(final @Nullable String url) throws SQLException {
         try {
+            // TODO AN-550: Switch to map with class that holds Conn properties, key, query executor, etc.
             return url != null
                     && url.startsWith(CONN_STRING_PREFIX)
                     && connectionMap.containsKey(getLanguage(url, CONN_STRING_PATTERN));
@@ -86,10 +92,11 @@ public class NeptuneDriver extends Driver implements java.sql.Driver {
 
     private ConnectionProperties connectionProperties(final String language, final Properties properties)
             throws SQLException {
-        if ("opencypher".equalsIgnoreCase(language)) {
+        // TODO AN-550: Switch to map with class that holds Conn properties, key, query executor, etc.
+        if (OPENCYPHER.equalsIgnoreCase(language)) {
             return new OpenCypherConnectionProperties(properties);
         }
-        if ("gremlin".equalsIgnoreCase(language) || "sqlgremlin".equalsIgnoreCase(language)) {
+        if (GREMLIN.equalsIgnoreCase(language) || SQL_GREMLIN.equalsIgnoreCase(language)) {
             return new GremlinConnectionProperties(properties);
         }
         // TODO - implement for other languages
@@ -97,10 +104,11 @@ public class NeptuneDriver extends Driver implements java.sql.Driver {
     }
 
     private String firstPropertyKey(final String language) {
-        if ("opencypher".equalsIgnoreCase(language)) {
+        // TODO AN-550: Switch to map with class that holds Conn properties, key, query executor, etc.
+        if (OPENCYPHER.equalsIgnoreCase(language)) {
             return OpenCypherConnectionProperties.ENDPOINT_KEY;
         }
-        if ("gremlin".equalsIgnoreCase(language) || "sqlgremlin".equalsIgnoreCase(language)) {
+        if (GREMLIN.equalsIgnoreCase(language) || SQL_GREMLIN.equalsIgnoreCase(language)) {
             return GremlinConnectionProperties.CONTACT_POINT_KEY;
         }
         // TODO - implement for other languages

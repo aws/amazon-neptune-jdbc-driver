@@ -47,6 +47,7 @@ public class SqlGremlinResultSet extends software.amazon.jdbc.ResultSet implemen
     private final List<List<Object>> rows;
     private final List<String> columnTypes;
     private boolean wasNull = false;
+    private final GremlinResultSetMetadata gremlinResultSetMetadata;
 
     /**
      * GremlinResultSet constructor, initializes super class.
@@ -60,6 +61,12 @@ public class SqlGremlinResultSet extends software.amazon.jdbc.ResultSet implemen
         this.columns = queryResult.getColumns();
         this.rows = queryResult.getRows();
         this.columnTypes = queryResult.getColumnTypes();
+
+        final List<Class<?>> rowTypes = new ArrayList<>();
+        for (final String columnType : columnTypes) {
+            rowTypes.add(SQL_GREMLIN_COLUMN_TYPE_TO_JAVA_TYPE.getOrDefault(columnType.toLowerCase(), String.class));
+        }
+        gremlinResultSetMetadata = new GremlinResultSetMetadata(columns, rowTypes);
     }
 
     @Override
@@ -84,11 +91,7 @@ public class SqlGremlinResultSet extends software.amazon.jdbc.ResultSet implemen
 
     @Override
     protected ResultSetMetaData getResultMetadata() throws SQLException {
-        final List<Class<?>> rowTypes = new ArrayList<>();
-        for (final String columnType : columnTypes) {
-            rowTypes.add(SQL_GREMLIN_COLUMN_TYPE_TO_JAVA_TYPE.getOrDefault(columnType.toLowerCase(), String.class));
-        }
-        return new GremlinResultSetMetadata(columns, rowTypes);
+        return gremlinResultSetMetadata;
     }
 
     protected Object getConvertedValue(final int columnIndex) throws SQLException {

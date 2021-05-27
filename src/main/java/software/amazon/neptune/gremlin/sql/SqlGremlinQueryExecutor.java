@@ -83,8 +83,8 @@ public class SqlGremlinQueryExecutor extends GremlinQueryExecutor {
     private static GraphTraversalSource getGraphTraversalSource(
             final GremlinConnectionProperties gremlinConnectionProperties)
             throws SQLException {
-        if (graphTraversalSource == null) {
-            synchronized (TRAVERSAL_LOCK) {
+        synchronized (TRAVERSAL_LOCK) {
+            if (graphTraversalSource == null) {
                 graphTraversalSource =
                         traversal().withRemote(DriverRemoteConnection.using(getClient(gremlinConnectionProperties)));
             }
@@ -176,7 +176,7 @@ public class SqlGremlinQueryExecutor extends GremlinQueryExecutor {
         } catch (final NoSuchMethodException e) {
             throw SqlError.createSQLException(
                     LOGGER,
-                    SqlState.INVALID_QUERY_EXPRESSION,
+                    SqlState.DATA_EXCEPTION,
                     SqlError.QUERY_FAILED, e);
         }
         return runCancellableQuery(constructor, statement, sql);
