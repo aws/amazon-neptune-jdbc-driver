@@ -243,7 +243,7 @@ public class SparqlQueryExecutor extends QueryExecutor {
      * Function to get schema.
      *
      * @param statement java.sql.Statement Object required for result set.
-     * @return java.sql.ResulSet Object containing schemas.
+     * @return java.sql.ResultSet Object containing schemas.
      * @throws SQLException if query execution fails, or it was cancelled.
      */
     @Override
