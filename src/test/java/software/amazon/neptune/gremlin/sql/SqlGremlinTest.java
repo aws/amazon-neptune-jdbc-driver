@@ -164,22 +164,22 @@ public class SqlGremlinTest {
         final List<List<Object>> rows = result.getRows();
         final List<List<String>> stringRows = new ArrayList<>();
         for (final List<Object> row : rows) {
+            List<String> list = new ArrayList<>();
             for (final Object obj : row) {
                 if (obj != null) {
                     if (obj instanceof Object[]) {
                         final Object[] object = (Object[]) obj;
-                        final List<String> stringRow = new ArrayList<>();
                         for (final Object o : object) {
-                            stringRow.add(o == null ? null : o.toString());
+                            list.add(o == null ? null : o.toString());
                         }
-                        stringRows.add(stringRow);
                     } else {
-                        stringRows.add(ImmutableList.of(obj.toString()));
+                        list.add(obj.toString());
                     }
                 } else {
-                    stringRows.add(null);
+                    list.add(null);
                 }
             }
+            stringRows.add(list);
         }
         return stringRows;
     }
