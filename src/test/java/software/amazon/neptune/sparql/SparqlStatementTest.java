@@ -93,5 +93,4 @@ public class SparqlStatementTest extends SparqlStatementTestBase {
         neptuneStatementTestHelper.testCancelQueryAfterExecuteComplete();
     }
 
-
 }

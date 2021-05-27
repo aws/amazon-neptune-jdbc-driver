@@ -18,24 +18,10 @@ package software.amazon.neptune.sparql;
 public class SparqlStatementTestBase {
     protected static final String QUICK_QUERY;
     protected static final String LONG_QUERY;
-    protected static final int LONG_QUERY_NODE_COUNT = 500;
-    private static int currentIndex = 0;
 
     static {
         QUICK_QUERY = "SELECT * { ?s ?p ?o } LIMIT 100";
-
-        final StringBuilder stringBuilder = new StringBuilder();
-        for (int i = currentIndex; i < (currentIndex + LONG_QUERY_NODE_COUNT); i++) {
-            stringBuilder.append(String.format("CREATE (node%d:Foo) ", i));
-        }
-        stringBuilder.append("RETURN ");
-        for (int i = currentIndex; i < (currentIndex + LONG_QUERY_NODE_COUNT); i++) {
-            if (i != currentIndex) {
-                stringBuilder.append(", ");
-            }
-            stringBuilder.append(String.format("node%d", i));
-        }
-        currentIndex += LONG_QUERY_NODE_COUNT;
-        LONG_QUERY = stringBuilder.toString();
+        // TODO put in long query for cancellation testing after implementing ResultSet
+        LONG_QUERY = "TODO";
     }
 }

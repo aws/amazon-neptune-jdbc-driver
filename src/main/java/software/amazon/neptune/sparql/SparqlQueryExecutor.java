@@ -56,7 +56,6 @@ public class SparqlQueryExecutor extends QueryExecutor {
     private final Object queryExecutionLock = new Object();
     private final SparqlConnectionProperties sparqlConnectionProperties;
 
-
     SparqlQueryExecutor(final SparqlConnectionProperties sparqlConnectionProperties) {
         this.sparqlConnectionProperties = sparqlConnectionProperties;
     }
@@ -212,7 +211,6 @@ public class SparqlQueryExecutor extends QueryExecutor {
      */
     @Override
     public ResultSet executeQuery(final String sparql, final Statement statement) throws SQLException {
-        // TODO
         final Constructor<?> constructor;
         try {
             constructor = SparqlResultSet.class
@@ -288,7 +286,6 @@ public class SparqlQueryExecutor extends QueryExecutor {
     @Override
     @SuppressWarnings("unchecked")
     protected <T> T runQuery(final String query) throws SQLException {
-        // TODO
         synchronized (queryExecutionLock) {
             synchronized (RDF_CONNECTION_LOCK) {
                 rdfConnection = getRdfConnection(sparqlConnectionProperties);
@@ -309,7 +306,7 @@ public class SparqlQueryExecutor extends QueryExecutor {
                 new SparqlResultSet.ResultSetInfoWithRows(result, rows, columns);
 
         synchronized (queryExecutionLock) {
-            // close queryExecution first? or just set to null?
+            queryExecution.close();
             queryExecution = null;
         }
 
@@ -318,12 +315,12 @@ public class SparqlQueryExecutor extends QueryExecutor {
 
     @Override
     protected void performCancel() throws SQLException {
-        // TODO
-        // store in class variable, check null/process whether to cancel or throw
-        // synchronized block
         synchronized (queryExecutionLock) {
             if (queryExecution != null) {
                 queryExecution.abort();
+                // TODO check in later tickets if adding close() affects anything or if we need any additional guards,
+                //  as its implementation does have null checks
+                queryExecution.close();
                 queryExecution = null;
             }
         }
