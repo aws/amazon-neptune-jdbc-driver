@@ -31,7 +31,6 @@ import org.twilmes.sql.gremlin.schema.SchemaConfig;
 import software.amazon.jdbc.utilities.AuthScheme;
 import software.amazon.jdbc.utilities.ConnectionProperties;
 import software.amazon.neptune.gremlin.GremlinConnectionProperties;
-import software.amazon.neptune.gremlin.SqlGremlinQueryExecutor;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
@@ -70,6 +69,23 @@ public class SqlGremlinTest {
 
     @Test
     @Disabled
+    void testSqlConnectionExecution() throws SQLException {
+        final Properties properties = new Properties();
+        properties.put(ConnectionProperties.AUTH_SCHEME_KEY, AuthScheme.IAMSigV4); // set default to None
+        properties.put(CONTACT_POINT_KEY, ENDPOINT);
+        properties.put(PORT_KEY, PORT);
+        properties.put(ENABLE_SSL_KEY, true);
+
+        final java.sql.Connection connection = new SqlGremlinConnection(new GremlinConnectionProperties(properties));
+
+        runQueryPrintResults("SELECT * FROM Person", connection.createStatement());
+        final java.sql.DatabaseMetaData databaseMetaData = connection.getMetaData();
+        databaseMetaData.getTables(null, null, null, null);
+        databaseMetaData.getColumns(null, null, null, null);
+    }
+
+    @Test
+    @Disabled
     void testSchema() throws SQLException {
         final Properties properties = new Properties();
         properties.put(ConnectionProperties.AUTH_SCHEME_KEY, AuthScheme.IAMSigV4); // set default to None
@@ -79,7 +95,8 @@ public class SqlGremlinTest {
 
         final SqlGremlinQueryExecutor sqlGremlinQueryExecutor =
                 new SqlGremlinQueryExecutor(new GremlinConnectionProperties(properties));
-        final SchemaConfig schemaConfig = sqlGremlinQueryExecutor.getSqlGremlinGraphSchema();
+        final SchemaConfig schemaConfig =
+                SqlGremlinQueryExecutor.getSqlGremlinGraphSchema(new GremlinConnectionProperties(properties));
         final SqlToGremlin sqlToGremlin = new SqlToGremlin(schemaConfig, getGraphTraversalSource());
 
         printVertexes();
@@ -112,23 +129,56 @@ public class SqlGremlinTest {
         tt.printTable();
     }
 
+    void runQueryPrintResults(final String query, final java.sql.Statement statement) throws SQLException {
+        System.out.println("Executing query: " + query);
+        final java.sql.ResultSet resultSet = statement.executeQuery(query);
+        final int columnCount = resultSet.getMetaData().getColumnCount();
+        final List<String> columns = new ArrayList<>();
+        for (int i = 1; i <= columnCount; i++) {
+            columns.add(resultSet.getMetaData().getColumnName(i));
+        }
+
+        final List<List<Object>> rows = new ArrayList<>();
+        while (resultSet.next()) {
+            final List<Object> row = new ArrayList<>();
+            for (int i = 1; i <= columnCount; i++) {
+                row.add(resultSet.getObject(i));
+            }
+            rows.add(row);
+        }
+
+        final Object[][] rowObjects = new Object[rows.size()][];
+        final String[] colString = new String[columns.size()];
+        for (int i = 0; i < columns.size(); i++) {
+            colString[i] = columns.get(i);
+        }
+        for (int i = 0; i < rows.size(); i++) {
+            rowObjects[i] = rows.get(i) == null ? null : rows.get(i).toArray();
+        }
+
+        final TextTable tt = new TextTable(colString, rowObjects);
+        tt.printTable();
+    }
+
     List<List<String>> rowResultToString(final SingleQueryExecutor.SqlGremlinQueryResult result) {
-        final List<Object> rows = result.getRows();
+        final List<List<Object>> rows = result.getRows();
         final List<List<String>> stringRows = new ArrayList<>();
-        for (final Object obj : rows) {
-            if (obj != null) {
-                if (obj instanceof Object[]) {
-                    final Object[] object = (Object[]) obj;
-                    final List<String> stringRow = new ArrayList<>();
-                    for (final Object o : object) {
-                        stringRow.add(o == null ? null : o.toString());
+        for (final List<Object> row : rows) {
+            for (final Object obj : row) {
+                if (obj != null) {
+                    if (obj instanceof Object[]) {
+                        final Object[] object = (Object[]) obj;
+                        final List<String> stringRow = new ArrayList<>();
+                        for (final Object o : object) {
+                            stringRow.add(o == null ? null : o.toString());
+                        }
+                        stringRows.add(stringRow);
+                    } else {
+                        stringRows.add(ImmutableList.of(obj.toString()));
                     }
-                    stringRows.add(stringRow);
                 } else {
-                    stringRows.add(ImmutableList.of(obj.toString()));
+                    stringRows.add(null);
                 }
-            } else {
-                stringRows.add(null);
             }
         }
         return stringRows;
