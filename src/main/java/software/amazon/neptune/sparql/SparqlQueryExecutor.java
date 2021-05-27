@@ -28,6 +28,7 @@ import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.protocol.HttpContext;
 import org.apache.jena.query.QueryExecution;
+import org.apache.jena.query.QuerySolution;
 import org.apache.jena.rdfconnection.RDFConnection;
 import org.apache.jena.rdfconnection.RDFConnectionRemote;
 import org.apache.jena.rdfconnection.RDFConnectionRemoteBuilder;
@@ -35,15 +36,26 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import software.amazon.jdbc.utilities.AuthScheme;
 import software.amazon.jdbc.utilities.QueryExecutor;
+import software.amazon.jdbc.utilities.SqlError;
+import software.amazon.jdbc.utilities.SqlState;
+import software.amazon.neptune.sparql.resultset.SparqlResultSet;
+import java.lang.reflect.Constructor;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 public class SparqlQueryExecutor extends QueryExecutor {
     private static final Logger LOGGER = LoggerFactory.getLogger(SparqlQueryExecutor.class);
-    // private static SparqlConnectionProperties previousSparqlConnectionProperties = null;
+    private static final Object RDF_CONNECTION_LOCK = new Object();
+    private static RDFConnection rdfConnection = null;
+    private static SparqlConnectionProperties previousSparqlConnectionProperties = null;
+    private static QueryExecution queryExecution = null;
+    private final Object queryExecutionLock = new Object();
     private final SparqlConnectionProperties sparqlConnectionProperties;
+
 
     SparqlQueryExecutor(final SparqlConnectionProperties sparqlConnectionProperties) {
         this.sparqlConnectionProperties = sparqlConnectionProperties;
@@ -137,6 +149,32 @@ public class SparqlQueryExecutor extends QueryExecutor {
         return builder;
     }
 
+    /**
+     * Function to close down the RDF connection.
+     */
+    public static void close() {
+        synchronized (RDF_CONNECTION_LOCK) {
+            if (rdfConnection != null) {
+                rdfConnection.close();
+                rdfConnection = null;
+            }
+        }
+    }
+
+    private RDFConnection getRdfConnection(final SparqlConnectionProperties sparqlConnectionProperties)
+            throws SQLException {
+        if (rdfConnection == null || !propertiesEqual(previousSparqlConnectionProperties, sparqlConnectionProperties)) {
+            previousSparqlConnectionProperties = sparqlConnectionProperties;
+            try {
+                return createRDFBuilder(sparqlConnectionProperties).build();
+            } catch (final NeptuneSigV4SignerException e) {
+                // TODO AN-531 look into this exception handling for auth
+                e.printStackTrace();
+            }
+        }
+        return rdfConnection;
+    }
+
     @Override
     public int getMaxFetchSize() {
         return 0;
@@ -174,7 +212,18 @@ public class SparqlQueryExecutor extends QueryExecutor {
      */
     @Override
     public ResultSet executeQuery(final String sparql, final Statement statement) throws SQLException {
-        return null;
+        // TODO
+        final Constructor<?> constructor;
+        try {
+            constructor = SparqlResultSet.class
+                    .getConstructor(java.sql.Statement.class, SparqlResultSet.ResultSetInfoWithRows.class);
+        } catch (final NoSuchMethodException e) {
+            throw SqlError.createSQLException(
+                    LOGGER,
+                    SqlState.INVALID_QUERY_EXPRESSION,
+                    SqlError.QUERY_FAILED, e);
+        }
+        return runCancellableQuery(constructor, statement, sparql);
     }
 
     /**
@@ -237,12 +286,46 @@ public class SparqlQueryExecutor extends QueryExecutor {
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     protected <T> T runQuery(final String query) throws SQLException {
-        return null;
+        // TODO
+        synchronized (queryExecutionLock) {
+            synchronized (RDF_CONNECTION_LOCK) {
+                rdfConnection = getRdfConnection(sparqlConnectionProperties);
+            }
+            queryExecution = rdfConnection.query(query);
+        }
+
+        final org.apache.jena.query.ResultSet result = queryExecution.execSelect();
+        final List<QuerySolution> rows = new ArrayList<>();
+        final List<String> columns = result.getResultVars();
+
+        while (result.hasNext()) {
+            final QuerySolution querySolution = result.next();
+            rows.add(querySolution);
+        }
+
+        final SparqlResultSet.ResultSetInfoWithRows sparqlResultSet =
+                new SparqlResultSet.ResultSetInfoWithRows(result, rows, columns);
+
+        synchronized (queryExecutionLock) {
+            // close queryExecution first? or just set to null?
+            queryExecution = null;
+        }
+
+        return (T) sparqlResultSet;
     }
 
     @Override
     protected void performCancel() throws SQLException {
-
+        // TODO
+        // store in class variable, check null/process whether to cancel or throw
+        // synchronized block
+        synchronized (queryExecutionLock) {
+            if (queryExecution != null) {
+                queryExecution.abort();
+                queryExecution = null;
+            }
+        }
     }
 }
