@@ -126,7 +126,6 @@ public class SparqlQueryExecutor extends QueryExecutor {
 
                     }).build();
 
-            properties.setHttpClient(v4SigningClient);
             builder.httpClient(v4SigningClient);
 
         } else if (properties.containsKey(SparqlConnectionProperties.HTTP_CLIENT_KEY)) {
