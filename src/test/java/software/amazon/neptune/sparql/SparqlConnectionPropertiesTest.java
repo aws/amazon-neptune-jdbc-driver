@@ -135,7 +135,8 @@ public class SparqlConnectionPropertiesTest {
         connectionProperties.setContactPoint(testValue);
         Assertions.assertEquals(testValue, connectionProperties.getContactPoint());
 
-        // will throw because only ContactPoint is set
+        // will throw because endpoint is not set when AuthScheme is none
+        connectionProperties.setAuthScheme(AuthScheme.None);
         assertThrowsOnNewConnectionProperties(connectionProperties);
 
         // the constructor test with DESTINATION properties properly set to avoid throws

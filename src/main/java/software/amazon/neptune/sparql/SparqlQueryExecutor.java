@@ -20,7 +20,7 @@ import com.amazonaws.auth.AWSCredentialsProvider;
 import com.amazonaws.auth.DefaultAWSCredentialsProviderChain;
 import com.amazonaws.neptune.auth.NeptuneApacheHttpSigV4Signer;
 import com.amazonaws.neptune.auth.NeptuneSigV4SignerException;
-import org.apache.http.HttpException;
+import lombok.SneakyThrows;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpRequestInterceptor;
 import org.apache.http.client.HttpClient;
@@ -61,7 +61,7 @@ public class SparqlQueryExecutor extends QueryExecutor {
     }
 
     private static RDFConnectionRemoteBuilder createRDFBuilder(final SparqlConnectionProperties properties)
-            throws SQLException, NeptuneSigV4SignerException {
+            throws SQLException {
         final RDFConnectionRemoteBuilder builder = RDFConnectionRemote.create();
 
         if (properties.containsKey(SparqlConnectionProperties.DESTINATION_KEY)) {
@@ -102,31 +102,42 @@ public class SparqlQueryExecutor extends QueryExecutor {
 
         // https://github.com/aws/amazon-neptune-sparql-java-sigv4/blob/master/src/main/java/com/amazonaws/neptune/client/jena/NeptuneJenaSigV4Example.java
         if (properties.getAuthScheme() == AuthScheme.IAMSigV4) {
-
             final AWSCredentialsProvider awsCredentialsProvider = new DefaultAWSCredentialsProviderChain();
-            final NeptuneApacheHttpSigV4Signer v4Signer =
-                    new NeptuneApacheHttpSigV4Signer(properties.getRegion(), awsCredentialsProvider);
+            final NeptuneApacheHttpSigV4Signer v4Signer;
 
-            final HttpClient v4SigningClient =
-                    HttpClientBuilder.create().addInterceptorLast(new HttpRequestInterceptor() {
+            try {
+                v4Signer = new NeptuneApacheHttpSigV4Signer(properties.getRegion(), awsCredentialsProvider);
+                final HttpClient v4SigningClient =
+                        HttpClientBuilder.create().addInterceptorLast(new HttpRequestInterceptor() {
 
-                        @Override
-                        public void process(final HttpRequest req, final HttpContext ctx) throws HttpException {
-                            if (req instanceof HttpUriRequest) {
-                                final HttpUriRequest httpUriReq = (HttpUriRequest) req;
-                                try {
-                                    v4Signer.signRequest(httpUriReq);
-                                } catch (final NeptuneSigV4SignerException e) {
-                                    throw new HttpException("Problem signing the request: ", e);
+                            @SneakyThrows
+                            @Override
+                            public void process(final HttpRequest req, final HttpContext ctx) {
+                                if (req instanceof HttpUriRequest) {
+                                    final HttpUriRequest httpUriReq = (HttpUriRequest) req;
+                                    try {
+                                        v4Signer.signRequest(httpUriReq);
+                                    } catch (final NeptuneSigV4SignerException e) {
+                                        throw SqlError.createSQLException(LOGGER,
+                                                SqlState.INVALID_AUTHORIZATION_SPECIFICATION,
+                                                SqlError.CONN_FAILED, e);
+                                    }
+                                } else {
+                                    throw SqlError.createSQLException(LOGGER,
+                                            SqlState.INVALID_AUTHORIZATION_SPECIFICATION,
+                                            SqlError.UNSUPPORTED_REQUEST, "Not an HttpUriRequest");
                                 }
-                            } else {
-                                throw new HttpException("Not an HttpUriRequest"); // this should never happen
                             }
-                        }
 
-                    }).build();
+                        }).build();
+                builder.httpClient(v4SigningClient);
 
-            builder.httpClient(v4SigningClient);
+            } catch (final NeptuneSigV4SignerException e) {
+                throw SqlError.createSQLException(
+                        LOGGER,
+                        SqlState.INVALID_AUTHORIZATION_SPECIFICATION,
+                        SqlError.CONN_FAILED, e);
+            }
 
         } else if (properties.containsKey(SparqlConnectionProperties.HTTP_CLIENT_KEY)) {
             builder.httpClient(properties.getHttpClient());
@@ -163,12 +174,7 @@ public class SparqlQueryExecutor extends QueryExecutor {
             throws SQLException {
         if (rdfConnection == null || !propertiesEqual(previousSparqlConnectionProperties, sparqlConnectionProperties)) {
             previousSparqlConnectionProperties = sparqlConnectionProperties;
-            try {
-                return createRDFBuilder(sparqlConnectionProperties).build();
-            } catch (final NeptuneSigV4SignerException e) {
-                // TODO AN-531 look into this exception handling for auth
-                e.printStackTrace();
-            }
+            return createRDFBuilder(sparqlConnectionProperties).build();
         }
         return rdfConnection;
     }

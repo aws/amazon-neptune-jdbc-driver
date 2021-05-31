@@ -504,18 +504,26 @@ public class SparqlConnectionProperties extends ConnectionProperties {
                         "HttpClient input. Set AuthScheme to None to pass in custom HttpClient.");
             }
 
-            // TODO: AN-531 Jena RDF builder doesn't have an encryption field, look into Http?
-        }
-        // check all destination stuff exists and build it here
-        // TODO: AN-547 this will likely change when we revisit ConnectionProperties
-        if ("".equals(getContactPoint()) || getPort() < 0 || "".equals(getEndpoint())) {
-            throw missingConnectionPropertyError("The CONTACT_POINT, PORT_KEY, and ENDPOINT_KEY fields must be" +
-                    " provided");
+            // TODO: AN-547 this will likely change when we revisit ConnectionProperties
+            // Amazon SigV4 Sign on only needs a Neptune contact point, no Endpoint is needed
+            if ("".equals(getContactPoint()) || getPort() < 0) {
+                throw missingConnectionPropertyError("The CONTACT_POINT and PORT_KEY fields must be" +
+                        " provided");
+            } else {
+                final String destination = String.format("%s:%d", getContactPoint(), getPort());
+                setDestination(destination);
+            }
         } else {
-            final String destination = String.format("%s:%d/%s", getContactPoint(), getPort(), getEndpoint());
-            setDestination(destination);
+            // Endpoint is needed for Fuseki servers
+            // TODO: AN-547 this will likely change when we revisit ConnectionProperties
+            if ("".equals(getContactPoint()) || getPort() < 0 || "".equals(getEndpoint())) {
+                throw missingConnectionPropertyError("The CONTACT_POINT, PORT_KEY, and ENDPOINT_KEY fields must be" +
+                        " provided");
+            } else {
+                final String destination = String.format("%s:%d/%s", getContactPoint(), getPort(), getEndpoint());
+                setDestination(destination);
+            }
         }
-
     }
 
 
