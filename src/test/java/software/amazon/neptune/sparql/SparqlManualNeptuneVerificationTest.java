@@ -33,6 +33,7 @@ import org.apache.jena.rdfconnection.RDFConnection;
 import org.apache.jena.rdfconnection.RDFConnectionRemote;
 import org.apache.jena.rdfconnection.RDFConnectionRemoteBuilder;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import software.amazon.jdbc.utilities.AuthScheme;
@@ -42,26 +43,40 @@ import java.util.Properties;
 
 public class SparqlManualNeptuneVerificationTest {
 
-    private static final String SIGV4_HOSTNAME = "https://iam-auth-test-lyndon.cluster-cdubgfjknn5r.us-east-1.neptune.amazonaws.com";
+    private static final String NEPTUNE_HOSTNAME =
+            "https://iam-auth-test-lyndon.cluster-cdubgfjknn5r.us-east-1.neptune.amazonaws.com";
+    private static final int NEPTUNE_DEFAULT_PORT = 8182;
+    private static final String NEPTUNE_QUERY_ENDPOINT = "sparql";
+    private static final String NEPTUNE_DESTINATION_STRING =
+            String.format("%s:%d", NEPTUNE_HOSTNAME, NEPTUNE_DEFAULT_PORT);
+    private java.sql.Connection authConnection;
+
+    private static Properties authProperties() {
+        final Properties properties = new Properties();
+        properties.put(ConnectionProperties.AUTH_SCHEME_KEY, AuthScheme.IAMSigV4);
+        properties.put(SparqlConnectionProperties.CONTACT_POINT_KEY, NEPTUNE_HOSTNAME);
+        properties.put(SparqlConnectionProperties.PORT_KEY, NEPTUNE_DEFAULT_PORT);
+        properties.put(SparqlConnectionProperties.QUERY_ENDPOINT_KEY, NEPTUNE_QUERY_ENDPOINT);
+        return properties;
+    }
+
+    @BeforeEach
+    void initialize() throws SQLException {
+        // TODO: add result getters after implementing ResultSet
+        authConnection = new SparqlConnection(new SparqlConnectionProperties(authProperties()));
+    }
 
     @Test
     @Disabled
     void testSigV4Auth() throws SQLException {
-        final Properties authProperties = new Properties();
-        authProperties.put(ConnectionProperties.AUTH_SCHEME_KEY, AuthScheme.IAMSigV4);
-        authProperties.put(SparqlConnectionProperties.CONTACT_POINT_KEY, SIGV4_HOSTNAME);
-        authProperties.put(SparqlConnectionProperties.PORT_KEY, 8182);
-        authProperties.put(SparqlConnectionProperties.QUERY_ENDPOINT_KEY, "sparql");
-
-        final java.sql.Connection authConnection = new SparqlConnection(
-                new SparqlConnectionProperties(authProperties));
-
+        // TODO: add additional assertions for result getters
         Assertions.assertTrue(authConnection.isValid(1));
     }
 
     @Test
     @Disabled
     void testRunBasicAuthConnection() throws NeptuneSigV4SignerException {
+        //TODO: remove this test after completing the driver and rest of this test class
         final AWSCredentialsProvider awsCredentialsProvider = new DefaultAWSCredentialsProviderChain();
         final NeptuneApacheHttpSigV4Signer v4Signer =
                 new NeptuneApacheHttpSigV4Signer("us-east-1", awsCredentialsProvider);
@@ -87,7 +102,7 @@ public class SparqlManualNeptuneVerificationTest {
 
         final RDFConnectionRemoteBuilder builder = RDFConnectionRemote.create()
                 .httpClient(v4SigningClient)
-                .destination("https://iam-auth-test-lyndon.cluster-cdubgfjknn5r.us-east-1.neptune.amazonaws.com:8182")
+                .destination(NEPTUNE_DESTINATION_STRING)
                 // Query only.
                 .queryEndpoint("sparql");
 
