@@ -19,7 +19,7 @@ package software.amazon.neptune.opencypher;
 public class OpenCypherStatementTestBase {
     protected static final String QUICK_QUERY;
     protected static final String LONG_QUERY;
-    protected static final int LONG_QUERY_NODE_COUNT = 600;
+    protected static final int LONG_QUERY_NODE_COUNT = 720;
     private static int currentIndex = 0;
 
     static {
