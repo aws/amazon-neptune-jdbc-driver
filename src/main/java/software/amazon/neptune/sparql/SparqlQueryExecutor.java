@@ -100,45 +100,8 @@ public class SparqlQueryExecutor extends QueryExecutor {
             builder.parseCheckSPARQL(properties.getParseCheckSparql());
         }
 
-        // https://github.com/aws/amazon-neptune-sparql-java-sigv4/blob/master/src/main/java/com/amazonaws/neptune/client/jena/NeptuneJenaSigV4Example.java
         if (properties.getAuthScheme() == AuthScheme.IAMSigV4) {
-            final AWSCredentialsProvider awsCredentialsProvider = new DefaultAWSCredentialsProviderChain();
-            final NeptuneApacheHttpSigV4Signer v4Signer;
-
-            try {
-                v4Signer = new NeptuneApacheHttpSigV4Signer(properties.getRegion(), awsCredentialsProvider);
-                final HttpClient v4SigningClient =
-                        HttpClientBuilder.create().addInterceptorLast(new HttpRequestInterceptor() {
-
-                            @SneakyThrows
-                            @Override
-                            public void process(final HttpRequest req, final HttpContext ctx) {
-                                if (req instanceof HttpUriRequest) {
-                                    final HttpUriRequest httpUriReq = (HttpUriRequest) req;
-                                    try {
-                                        v4Signer.signRequest(httpUriReq);
-                                    } catch (final NeptuneSigV4SignerException e) {
-                                        throw SqlError.createSQLException(LOGGER,
-                                                SqlState.INVALID_AUTHORIZATION_SPECIFICATION,
-                                                SqlError.CONN_FAILED, e);
-                                    }
-                                } else {
-                                    throw SqlError.createSQLException(LOGGER,
-                                            SqlState.INVALID_AUTHORIZATION_SPECIFICATION,
-                                            SqlError.UNSUPPORTED_REQUEST, "Not an HttpUriRequest");
-                                }
-                            }
-
-                        }).build();
-                builder.httpClient(v4SigningClient);
-
-            } catch (final NeptuneSigV4SignerException e) {
-                throw SqlError.createSQLException(
-                        LOGGER,
-                        SqlState.INVALID_AUTHORIZATION_SPECIFICATION,
-                        SqlError.CONN_FAILED, e);
-            }
-
+            builder.httpClient(createV4SigningClient(properties));
         } else if (properties.containsKey(SparqlConnectionProperties.HTTP_CLIENT_KEY)) {
             builder.httpClient(properties.getHttpClient());
         }
@@ -156,6 +119,47 @@ public class SparqlQueryExecutor extends QueryExecutor {
         }
 
         return builder;
+    }
+
+    // https://github.com/aws/amazon-neptune-sparql-java-sigv4/blob/master/src/main/java/com/amazonaws/neptune/client/jena/NeptuneJenaSigV4Example.java
+    private static HttpClient createV4SigningClient(final SparqlConnectionProperties properties) throws SQLException {
+        final AWSCredentialsProvider awsCredentialsProvider = new DefaultAWSCredentialsProviderChain();
+        final NeptuneApacheHttpSigV4Signer v4Signer;
+        final HttpClient v4SigningClient;
+
+        try {
+            v4Signer = new NeptuneApacheHttpSigV4Signer(properties.getRegion(), awsCredentialsProvider);
+            v4SigningClient =
+                    HttpClientBuilder.create().addInterceptorLast(new HttpRequestInterceptor() {
+
+                        @SneakyThrows
+                        @Override
+                        public void process(final HttpRequest req, final HttpContext ctx) {
+                            if (req instanceof HttpUriRequest) {
+                                final HttpUriRequest httpUriReq = (HttpUriRequest) req;
+                                try {
+                                    v4Signer.signRequest(httpUriReq);
+                                } catch (final NeptuneSigV4SignerException e) {
+                                    throw SqlError.createSQLException(LOGGER,
+                                            SqlState.INVALID_AUTHORIZATION_SPECIFICATION,
+                                            SqlError.CONN_FAILED, e);
+                                }
+                            } else {
+                                throw SqlError.createSQLException(LOGGER,
+                                        SqlState.INVALID_AUTHORIZATION_SPECIFICATION,
+                                        SqlError.UNSUPPORTED_REQUEST, "Not an HttpUriRequest");
+                            }
+                        }
+
+                    }).build();
+
+        } catch (final NeptuneSigV4SignerException e) {
+            throw SqlError.createSQLException(
+                    LOGGER,
+                    SqlState.INVALID_AUTHORIZATION_SPECIFICATION,
+                    SqlError.CONN_FAILED, e);
+        }
+        return v4SigningClient;
     }
 
     /**

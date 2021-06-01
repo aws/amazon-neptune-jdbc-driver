@@ -38,7 +38,7 @@ import java.util.Properties;
 
 public class SparqlConnectionTest {
     private static final String HOSTNAME = "http://localhost";
-    private static final String ENDPOINT = "mock";
+    private static final String DATASET = "mock";
     private static final String QUERY_ENDPOINT = "query";
     private static final int PORT = SparqlMockServer.port(); // Mock server dynamically generates port
     private java.sql.Connection connection;
@@ -48,7 +48,7 @@ public class SparqlConnectionTest {
         properties.put(ConnectionProperties.AUTH_SCHEME_KEY, AuthScheme.None); // set default to None
         properties.put(SparqlConnectionProperties.CONTACT_POINT_KEY, HOSTNAME);
         properties.put(SparqlConnectionProperties.PORT_KEY, PORT);
-        properties.put(SparqlConnectionProperties.ENDPOINT_KEY, ENDPOINT);
+        properties.put(SparqlConnectionProperties.DATASET_KEY, DATASET);
         properties.put(SparqlConnectionProperties.QUERY_ENDPOINT_KEY, QUERY_ENDPOINT);
         return properties;
     }
@@ -110,7 +110,7 @@ public class SparqlConnectionTest {
         // setting to non-routable IP for timeout
         timeoutProperties.put(SparqlConnectionProperties.CONTACT_POINT_KEY, "http://10.255.255.1");
         timeoutProperties.put(SparqlConnectionProperties.PORT_KEY, 1234);
-        timeoutProperties.put(SparqlConnectionProperties.ENDPOINT_KEY, "timeout");
+        timeoutProperties.put(SparqlConnectionProperties.DATASET_KEY, "timeout");
         timeoutProperties.put(SparqlConnectionProperties.QUERY_ENDPOINT_KEY, "query");
 
         final java.sql.Connection timeoutConnection = new SparqlConnection(
@@ -121,7 +121,7 @@ public class SparqlConnectionTest {
         invalidProperties.put(ConnectionProperties.AUTH_SCHEME_KEY, AuthScheme.None); // set default to None
         invalidProperties.put(SparqlConnectionProperties.CONTACT_POINT_KEY, HOSTNAME);
         invalidProperties.put(SparqlConnectionProperties.PORT_KEY, 1234);
-        invalidProperties.put(SparqlConnectionProperties.ENDPOINT_KEY, "invalid");
+        invalidProperties.put(SparqlConnectionProperties.DATASET_KEY, "invalid");
         invalidProperties.put(SparqlConnectionProperties.QUERY_ENDPOINT_KEY, "query");
 
         final java.sql.Connection invalidConnection = new SparqlConnection(

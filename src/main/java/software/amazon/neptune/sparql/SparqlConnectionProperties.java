@@ -35,8 +35,8 @@ public class SparqlConnectionProperties extends ConnectionProperties {
     // contactPoint doesn't apply to RDF builder, currently using it as the root part of the full url
     public static final String CONTACT_POINT_KEY = "rootUrl";
     public static final String PORT_KEY = "port";
-    // dataset endpoint
-    public static final String ENDPOINT_KEY = "endpoint";
+    // dataset path with is optional depending on server (e.g. Neptune vs Fuseki)
+    public static final String DATASET_KEY = "dataset";
     public static final String DESTINATION_KEY = "destination";
     // the query and update endpoints for sparql database
     public static final String QUERY_ENDPOINT_KEY = "queryEndpoint";
@@ -60,7 +60,7 @@ public class SparqlConnectionProperties extends ConnectionProperties {
     private static final Set<String> SUPPORTED_PROPERTIES_SET = ImmutableSet.<String>builder()
             .add(CONTACT_POINT_KEY)
             .add(PORT_KEY)
-            .add(ENDPOINT_KEY)
+            .add(DATASET_KEY)
             .add(DESTINATION_KEY)
             .add(QUERY_ENDPOINT_KEY)
             .add(REGION_KEY)
@@ -81,7 +81,7 @@ public class SparqlConnectionProperties extends ConnectionProperties {
     static {
         PROPERTY_CONVERTER_MAP.put(CONTACT_POINT_KEY, (key, value) -> value);
         PROPERTY_CONVERTER_MAP.put(PORT_KEY, ConnectionProperties::toUnsigned);
-        PROPERTY_CONVERTER_MAP.put(ENDPOINT_KEY, (key, value) -> value);
+        PROPERTY_CONVERTER_MAP.put(DATASET_KEY, (key, value) -> value);
         PROPERTY_CONVERTER_MAP.put(DESTINATION_KEY, (key, value) -> value);
         PROPERTY_CONVERTER_MAP.put(QUERY_ENDPOINT_KEY, (key, value) -> value);
         PROPERTY_CONVERTER_MAP.put(REGION_KEY, (key, value) -> value);
@@ -100,7 +100,7 @@ public class SparqlConnectionProperties extends ConnectionProperties {
     static {
         DEFAULT_PROPERTIES_MAP.put(PORT_KEY, DEFAULT_PORT);
         DEFAULT_PROPERTIES_MAP.put(CONTACT_POINT_KEY, "");
-        DEFAULT_PROPERTIES_MAP.put(ENDPOINT_KEY, "");
+        DEFAULT_PROPERTIES_MAP.put(DATASET_KEY, "");
         DEFAULT_PROPERTIES_MAP.put(QUERY_ENDPOINT_KEY, "");
         DEFAULT_PROPERTIES_MAP.put(DESTINATION_KEY, "");
         DEFAULT_PROPERTIES_MAP.put(REGION_KEY, "");
@@ -175,23 +175,23 @@ public class SparqlConnectionProperties extends ConnectionProperties {
     }
 
     /**
-     * Gets the connection endpoint.
+     * Gets the dataset path for the connection string.
      *
-     * @return The connection endpoint.
+     * @return The dataset path for the connection string.
      */
-    public String getEndpoint() {
-        return getProperty(ENDPOINT_KEY);
+    public String getDataset() {
+        return getProperty(DATASET_KEY);
     }
 
     /**
-     * Sets the connection endpoint.
+     * Sets the dataset path for the connection string.
      *
-     * @param endpoint The connection endpoint.
+     * @param dataset The dataset path for the connection string.
      * @throws SQLException if value is invalid.
      */
-    public void setEndpoint(@NonNull final String endpoint) throws SQLException {
-        setProperty(ENDPOINT_KEY,
-                (String) PROPERTY_CONVERTER_MAP.get(ENDPOINT_KEY).convert(ENDPOINT_KEY, endpoint));
+    public void setDataset(@NonNull final String dataset) throws SQLException {
+        setProperty(DATASET_KEY,
+                (String) PROPERTY_CONVERTER_MAP.get(DATASET_KEY).convert(DATASET_KEY, dataset));
     }
 
     /**
@@ -503,27 +503,21 @@ public class SparqlConnectionProperties extends ConnectionProperties {
                 throw invalidConnectionPropertyValueError(AUTH_SCHEME_KEY, "IAMSigV4 does not support custom" +
                         "HttpClient input. Set AuthScheme to None to pass in custom HttpClient.");
             }
-
-            // TODO: AN-547 this will likely change when we revisit ConnectionProperties
-            // Amazon SigV4 Sign on only needs a Neptune contact point, no Endpoint is needed
-            if ("".equals(getContactPoint()) || getPort() < 0) {
-                throw missingConnectionPropertyError("The CONTACT_POINT and PORT_KEY fields must be" +
-                        " provided");
-            } else {
-                final String destination = String.format("%s:%d", getContactPoint(), getPort());
-                setDestination(destination);
-            }
-        } else {
-            // Endpoint is needed for Fuseki servers
-            // TODO: AN-547 this will likely change when we revisit ConnectionProperties
-            if ("".equals(getContactPoint()) || getPort() < 0 || "".equals(getEndpoint())) {
-                throw missingConnectionPropertyError("The CONTACT_POINT, PORT_KEY, and ENDPOINT_KEY fields must be" +
-                        " provided");
-            } else {
-                final String destination = String.format("%s:%d/%s", getContactPoint(), getPort(), getEndpoint());
-                setDestination(destination);
-            }
         }
+
+        // TODO: AN-547 this may change when we revisit ConnectionProperties
+        if ("".equals(getContactPoint()) || getPort() < 0) {
+            throw missingConnectionPropertyError("The CONTACT_POINT and PORT_KEY fields must be" +
+                    " provided");
+        }
+
+        String destination = String.format("%s:%d", getContactPoint(), getPort());
+
+        if (!"".equals(getDataset())) {
+            destination = String.format("%s/%s", destination, getDataset());
+        }
+
+        setDestination(destination);
     }
 
 

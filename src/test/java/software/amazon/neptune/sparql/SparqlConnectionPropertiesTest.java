@@ -53,7 +53,7 @@ public class SparqlConnectionPropertiesTest {
             throws SQLException {
         connectionProperties.setContactPoint(HOSTNAME);
         connectionProperties.setPort(PORT);
-        connectionProperties.setEndpoint(ENDPOINT);
+        connectionProperties.setDataset(ENDPOINT);
     }
 
     @BeforeEach
@@ -64,7 +64,7 @@ public class SparqlConnectionPropertiesTest {
     @Test
     void testDefaultValues() throws SQLException {
         connectionProperties = new SparqlConnectionProperties();
-        Assertions.assertEquals("", connectionProperties.getEndpoint());
+        Assertions.assertEquals("", connectionProperties.getDataset());
         Assertions.assertEquals(SparqlConnectionProperties.DEFAULT_LOG_LEVEL, connectionProperties.getLogLevel());
         Assertions.assertEquals(SparqlConnectionProperties.DEFAULT_CONNECTION_TIMEOUT_MILLIS,
                 connectionProperties.getConnectionTimeoutMillis());
@@ -135,10 +135,6 @@ public class SparqlConnectionPropertiesTest {
         connectionProperties.setContactPoint(testValue);
         Assertions.assertEquals(testValue, connectionProperties.getContactPoint());
 
-        // will throw because endpoint is not set when AuthScheme is none
-        connectionProperties.setAuthScheme(AuthScheme.None);
-        assertThrowsOnNewConnectionProperties(connectionProperties);
-
         // the constructor test with DESTINATION properties properly set to avoid throws
         setInitialDestinationProperty(connectionProperties);
         final Properties properties = new Properties();
@@ -150,8 +146,8 @@ public class SparqlConnectionPropertiesTest {
     void testEndpoint() throws SQLException {
         final String testValue = "test endpoint";
         connectionProperties = new SparqlConnectionProperties();
-        connectionProperties.setEndpoint(testValue);
-        Assertions.assertEquals(testValue, connectionProperties.getEndpoint());
+        connectionProperties.setDataset(testValue);
+        Assertions.assertEquals(testValue, connectionProperties.getDataset());
 
         // will throw because only Endpoint is set
         assertThrowsOnNewConnectionProperties(connectionProperties);
@@ -268,7 +264,7 @@ public class SparqlConnectionPropertiesTest {
         testProperties.put(ConnectionProperties.AUTH_SCHEME_KEY, AuthScheme.None);
         testProperties.put(SparqlConnectionProperties.CONTACT_POINT_KEY, "http://localhost");
         testProperties.put(SparqlConnectionProperties.PORT_KEY, 8182);
-        testProperties.put(SparqlConnectionProperties.ENDPOINT_KEY, "mock");
+        testProperties.put(SparqlConnectionProperties.DATASET_KEY, "mock");
         testProperties.put(SparqlConnectionProperties.QUERY_ENDPOINT_KEY, "query");
         testProperties.put(SparqlConnectionProperties.HTTP_CLIENT_KEY, testClient);
         Assertions.assertEquals(testClient, testProperties.get(SparqlConnectionProperties.HTTP_CLIENT_KEY));
@@ -285,7 +281,7 @@ public class SparqlConnectionPropertiesTest {
         testProperties.put(ConnectionProperties.AUTH_SCHEME_KEY, AuthScheme.IAMSigV4);
         testProperties.put(SparqlConnectionProperties.CONTACT_POINT_KEY, "http://localhost");
         testProperties.put(SparqlConnectionProperties.PORT_KEY, 8182);
-        testProperties.put(SparqlConnectionProperties.ENDPOINT_KEY, "mock");
+        testProperties.put(SparqlConnectionProperties.DATASET_KEY, "mock");
         testProperties.put(SparqlConnectionProperties.QUERY_ENDPOINT_KEY, "query");
         testProperties.put(SparqlConnectionProperties.HTTP_CLIENT_KEY, testClient);
         Assertions.assertEquals(testClient, testProperties.get(SparqlConnectionProperties.HTTP_CLIENT_KEY));
@@ -305,7 +301,7 @@ public class SparqlConnectionPropertiesTest {
         testProperties.put(ConnectionProperties.AUTH_SCHEME_KEY, AuthScheme.None);
         testProperties.put(SparqlConnectionProperties.CONTACT_POINT_KEY, "http://localhost");
         testProperties.put(SparqlConnectionProperties.PORT_KEY, 8182);
-        testProperties.put(SparqlConnectionProperties.ENDPOINT_KEY, "mock");
+        testProperties.put(SparqlConnectionProperties.DATASET_KEY, "mock");
         testProperties.put(SparqlConnectionProperties.QUERY_ENDPOINT_KEY, "query");
         testProperties.put(SparqlConnectionProperties.HTTP_CONTEXT_KEY, testContext);
         Assertions.assertEquals(testContext, testProperties.get(SparqlConnectionProperties.HTTP_CONTEXT_KEY));
