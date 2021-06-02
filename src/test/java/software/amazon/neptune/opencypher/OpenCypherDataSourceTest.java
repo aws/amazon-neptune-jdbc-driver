@@ -98,9 +98,6 @@ class OpenCypherDataSourceTest {
         Assertions.assertDoesNotThrow(() -> dataSource.setLoginTimeout(50));
         Assertions.assertEquals(50, dataSource.getLoginTimeout());
 
-        Assertions.assertDoesNotThrow(() -> dataSource.setLogLevel(Level.ERROR));
-        Assertions.assertEquals(Level.ERROR, dataSource.getLogLevel());
-
         Assertions.assertDoesNotThrow(() -> dataSource.setUseEncryption(true));
         Assertions.assertEquals(true, dataSource.getUseEncryption());
     }

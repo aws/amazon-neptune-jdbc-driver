@@ -66,7 +66,6 @@ class GremlinConnectionPropertiesTest extends ConnectionPropertiesTestBase {
     @Test
     void testDefaultValues() throws SQLException {
         connectionProperties = new GremlinConnectionProperties();
-        Assertions.assertEquals(GremlinConnectionProperties.DEFAULT_LOG_LEVEL, connectionProperties.getLogLevel());
         Assertions.assertEquals(GremlinConnectionProperties.DEFAULT_CONNECTION_TIMEOUT_MILLIS, connectionProperties.getConnectionTimeoutMillis());
         Assertions.assertEquals(GremlinConnectionProperties.DEFAULT_CONNECTION_RETRY_COUNT, connectionProperties.getConnectionRetryCount());
         Assertions.assertEquals(GremlinConnectionProperties.DEFAULT_AUTH_SCHEME, connectionProperties.getAuthScheme());
@@ -85,15 +84,6 @@ class GremlinConnectionPropertiesTest extends ConnectionPropertiesTestBase {
         connectionProperties = new GremlinConnectionProperties();
         connectionProperties.setApplicationName(testValue);
         Assertions.assertEquals(testValue, connectionProperties.getApplicationName());
-    }
-
-    @Test
-    void testLogLevel() throws SQLException {
-        testLogLevelSettingViaConstructor();
-
-        connectionProperties = new GremlinConnectionProperties();
-        connectionProperties.setLogLevel(Level.ERROR);
-        Assertions.assertEquals(Level.ERROR, connectionProperties.getLogLevel());
     }
 
     @Test

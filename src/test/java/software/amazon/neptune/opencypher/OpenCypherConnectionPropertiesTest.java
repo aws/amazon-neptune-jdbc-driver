@@ -51,7 +51,6 @@ class OpenCypherConnectionPropertiesTest extends ConnectionPropertiesTestBase {
     void testDefaultValues() throws SQLException {
         connectionProperties = new OpenCypherConnectionProperties();
         Assertions.assertEquals("", connectionProperties.getEndpoint());
-        Assertions.assertEquals(OpenCypherConnectionProperties.DEFAULT_LOG_LEVEL, connectionProperties.getLogLevel());
         Assertions.assertEquals(OpenCypherConnectionProperties.DEFAULT_CONNECTION_TIMEOUT_MILLIS,
                 connectionProperties.getConnectionTimeoutMillis());
         Assertions.assertEquals(OpenCypherConnectionProperties.DEFAULT_CONNECTION_RETRY_COUNT,
@@ -136,15 +135,6 @@ class OpenCypherConnectionPropertiesTest extends ConnectionPropertiesTestBase {
         final String testValue = "test CustomCredentialsFilePath";
         connectionProperties.setCustomCredentialsFilePath(testValue);
         Assertions.assertEquals(testValue, connectionProperties.getCustomCredentialsFilePath());
-    }
-
-    @Test
-    void testLogLevel() throws SQLException {
-        testLogLevelSettingViaConstructor();
-
-        connectionProperties = new OpenCypherConnectionProperties();
-        connectionProperties.setLogLevel(Level.ERROR);
-        Assertions.assertEquals(Level.ERROR, connectionProperties.getLogLevel());
     }
 
     @Test

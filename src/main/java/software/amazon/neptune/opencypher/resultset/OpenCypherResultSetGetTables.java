@@ -39,27 +39,13 @@ public class OpenCypherResultSetGetTables extends ResultSetGetTables implements 
         COLUMN_TYPE_MAP.put("TABLE_CAT", InternalTypeSystem.TYPE_SYSTEM.STRING());
         COLUMN_TYPE_MAP.put("TABLE_SCHEM", InternalTypeSystem.TYPE_SYSTEM.STRING());
         COLUMN_TYPE_MAP.put("TABLE_NAME", InternalTypeSystem.TYPE_SYSTEM.STRING());
-        COLUMN_TYPE_MAP.put("COLUMN_NAME", InternalTypeSystem.TYPE_SYSTEM.STRING());
-        COLUMN_TYPE_MAP.put("DATA_TYPE", InternalTypeSystem.TYPE_SYSTEM.INTEGER());
-        COLUMN_TYPE_MAP.put("TYPE_NAME", InternalTypeSystem.TYPE_SYSTEM.STRING());
-        COLUMN_TYPE_MAP.put("COLUMN_SIZE", InternalTypeSystem.TYPE_SYSTEM.INTEGER());
-        COLUMN_TYPE_MAP.put("BUFFER_LENGTH", InternalTypeSystem.TYPE_SYSTEM.INTEGER());
-        COLUMN_TYPE_MAP.put("DECIMAL_DIGITS", InternalTypeSystem.TYPE_SYSTEM.INTEGER());
-        COLUMN_TYPE_MAP.put("NUM_PREC_RADIX", InternalTypeSystem.TYPE_SYSTEM.INTEGER());
-        COLUMN_TYPE_MAP.put("NULLABLE", InternalTypeSystem.TYPE_SYSTEM.INTEGER());
+        COLUMN_TYPE_MAP.put("TABLE_TYPE", InternalTypeSystem.TYPE_SYSTEM.STRING());
         COLUMN_TYPE_MAP.put("REMARKS", InternalTypeSystem.TYPE_SYSTEM.STRING());
-        COLUMN_TYPE_MAP.put("COLUMN_DEF", InternalTypeSystem.TYPE_SYSTEM.STRING());
-        COLUMN_TYPE_MAP.put("SQL_DATA_TYPE", InternalTypeSystem.TYPE_SYSTEM.INTEGER());
-        COLUMN_TYPE_MAP.put("SQL_DATETIME_SUB", InternalTypeSystem.TYPE_SYSTEM.INTEGER());
-        COLUMN_TYPE_MAP.put("CHAR_OCTET_LENGTH", InternalTypeSystem.TYPE_SYSTEM.INTEGER());
-        COLUMN_TYPE_MAP.put("ORDINAL_POSITION", InternalTypeSystem.TYPE_SYSTEM.INTEGER());
-        COLUMN_TYPE_MAP.put("IS_NULLABLE", InternalTypeSystem.TYPE_SYSTEM.STRING());
-        COLUMN_TYPE_MAP.put("SCOPE_CATALOG", InternalTypeSystem.TYPE_SYSTEM.STRING());
-        COLUMN_TYPE_MAP.put("SCOPE_SCHEMA", InternalTypeSystem.TYPE_SYSTEM.STRING());
-        COLUMN_TYPE_MAP.put("SCOPE_TABLE", InternalTypeSystem.TYPE_SYSTEM.STRING());
-        COLUMN_TYPE_MAP.put("SOURCE_DATA_TYPE", InternalTypeSystem.TYPE_SYSTEM.INTEGER());
-        COLUMN_TYPE_MAP.put("IS_AUTOINCREMENT", InternalTypeSystem.TYPE_SYSTEM.STRING());
-        COLUMN_TYPE_MAP.put("IS_GENERATEDCOLUMN", InternalTypeSystem.TYPE_SYSTEM.STRING());
+        COLUMN_TYPE_MAP.put("TYPE_CAT", InternalTypeSystem.TYPE_SYSTEM.STRING());
+        COLUMN_TYPE_MAP.put("TYPE_SCHEM", InternalTypeSystem.TYPE_SYSTEM.STRING());
+        COLUMN_TYPE_MAP.put("TYPE_NAME", InternalTypeSystem.TYPE_SYSTEM.STRING());
+        COLUMN_TYPE_MAP.put("SELF_REFERENCING_COL_NAME", InternalTypeSystem.TYPE_SYSTEM.STRING());
+        COLUMN_TYPE_MAP.put("REF_GENERATION", InternalTypeSystem.TYPE_SYSTEM.STRING());
     }
 
     /**
