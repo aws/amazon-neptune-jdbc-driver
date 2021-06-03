@@ -20,6 +20,10 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.apache.jena.query.QuerySolution;
 import org.apache.jena.query.ResultSet;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import software.amazon.jdbc.utilities.SqlError;
+import software.amazon.jdbc.utilities.SqlState;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -27,9 +31,11 @@ import java.util.List;
 
 public class SparqlResultSet extends software.amazon.jdbc.ResultSet implements java.sql.ResultSet {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(SparqlResultSet.class);
     private final ResultSet result;
     private final List<QuerySolution> rows;
     private final List<String> columns;
+    private boolean wasNull = false;
 
     /**
      * SparqlResultSet constructor, initializes super class.
@@ -61,7 +67,26 @@ public class SparqlResultSet extends software.amazon.jdbc.ResultSet implements j
 
     @Override
     protected Object getConvertedValue(final int columnIndex) throws SQLException {
-        return null;
+        final Object value = getValue(columnIndex);
+        return value.toString();
+    }
+
+    private Object getValue(final int columnIndex) throws SQLException {
+        verifyOpen();
+        if (rows == null) {
+            throw SqlError.createSQLException(
+                    LOGGER,
+                    SqlState.DATA_EXCEPTION,
+                    SqlError.UNSUPPORTED_RESULT_SET_TYPE);
+        }
+        validateRowColumn(columnIndex);
+
+        final String colName = columns.get(columnIndex - 1);
+        final QuerySolution row = rows.get(getRowIndex());
+        final Object value = row.get(colName); // of type RDFNode
+        wasNull = (value == null);
+
+        return value;
     }
 
     @Override
@@ -71,7 +96,7 @@ public class SparqlResultSet extends software.amazon.jdbc.ResultSet implements j
 
     @Override
     public boolean wasNull() throws SQLException {
-        return false;
+        return wasNull;
     }
 
     @AllArgsConstructor
