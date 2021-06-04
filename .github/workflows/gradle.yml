@@ -50,7 +50,7 @@ jobs:
     - name: Grant Execute Permission for gradlew
       run: chmod +x gradlew
     - name: Build with Gradle
-      run: ./gradlew build
+      run: ./gradlew shadowJar
     - name: Copy Build
       if: always()
       run: |
