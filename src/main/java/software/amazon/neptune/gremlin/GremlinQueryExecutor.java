@@ -53,9 +53,7 @@ import java.util.stream.Collectors;
 public class GremlinQueryExecutor extends QueryExecutor {
     private static final Logger LOGGER = LoggerFactory.getLogger(GremlinQueryExecutor.class);
     private static final Object CLUSTER_LOCK = new Object();
-    private static final Object CLIENT_LOCK = new Object();
     private static Cluster cluster = null;
-    private static Client client = null;
     private static GremlinConnectionProperties previousGremlinConnectionProperties = null;
     private final Object completableFutureLock = new Object();
     private final GremlinConnectionProperties gremlinConnectionProperties;
@@ -63,6 +61,7 @@ public class GremlinQueryExecutor extends QueryExecutor {
 
     /**
      * GremlinQueryExecutor constructor.
+     *
      * @param gremlinConnectionProperties GremlinConnectionProperties for use in the executor.
      */
     public GremlinQueryExecutor(final GremlinConnectionProperties gremlinConnectionProperties) {
@@ -199,13 +198,6 @@ public class GremlinQueryExecutor extends QueryExecutor {
      * Function to close down the cluster.
      */
     public static void close() {
-        synchronized (CLIENT_LOCK) {
-            if (client != null) {
-                client.close();
-                client = null;
-            }
-        }
-
         synchronized (CLUSTER_LOCK) {
             if (cluster != null) {
                 cluster.close();
@@ -244,13 +236,13 @@ public class GremlinQueryExecutor extends QueryExecutor {
         final Cluster tempCluster =
                 GremlinQueryExecutor.createClusterBuilder(gremlinConnectionProperties).maxWaitForConnection(timeout)
                         .create();
-        final Client tempCient = tempCluster.connect();
-        tempCient.init();
+        final Client tempClient = tempCluster.connect();
+        tempClient.init();
 
         try {
             // Neptune doesn't support arbitrary math queries, but the below command is valid in Gremlin and is basically
             // saying return 0.
-            final CompletableFuture<List<Result>> tempCompletableFuture = tempCient.submit("g.inject(0)").all();
+            final CompletableFuture<List<Result>> tempCompletableFuture = tempClient.submit("g.inject(0)").all();
             tempCompletableFuture.get(timeout, TimeUnit.SECONDS);
             return true;
         } catch (final RuntimeException ignored) {
@@ -374,15 +366,12 @@ public class GremlinQueryExecutor extends QueryExecutor {
     @Override
     @SuppressWarnings("unchecked")
     protected <T> T runQuery(final String query) throws SQLException {
-        synchronized (CLIENT_LOCK) {
-            if (client == null) {
-                client = getClient(gremlinConnectionProperties);
-            }
-        }
+        final Client client = getClient(gremlinConnectionProperties);
 
         synchronized (completableFutureLock) {
             completableFuture = client.submitAsync(query);
         }
+
 
         final List<Result> results = completableFuture.get().all().get();
         final List<Map<String, Object>> rows = new ArrayList<>();

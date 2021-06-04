@@ -69,7 +69,7 @@ public class SqlGremlinTest {
     @Disabled
     void load() throws SQLException {
         final Properties properties = new Properties();
-        properties.put(ConnectionProperties.AUTH_SCHEME_KEY, AuthScheme.IAMSigV4); // set default to None
+        properties.put(ConnectionProperties.AUTH_SCHEME_KEY, AuthScheme.IAMSigV4); // set default to IAMSigV4
         properties.put(CONTACT_POINT_KEY, ENDPOINT);
         properties.put(PORT_KEY, PORT);
         properties.put(ENABLE_SSL_KEY, true);
@@ -77,8 +77,8 @@ public class SqlGremlinTest {
         final java.sql.Connection connection = new GremlinConnection(new GremlinConnectionProperties(properties));
 
         final Faker faker = new Faker();
-        for (int i = 0; i < 1000; i++) {
-            System.out.println("Executing query " + (i + 1) + " / 1000.");
+        for (int i = 0; i < 10000; i++) {
+            System.out.println("Executing query " + (i + 1) + " / 10000.");
             connection.createStatement()
                     .executeQuery(addV(faker.address(), faker.cat(), faker.name(), faker.commerce()));
         }
@@ -125,7 +125,7 @@ public class SqlGremlinTest {
     @Disabled
     void testSqlConnectionExecution() throws SQLException {
         final Properties properties = new Properties();
-        properties.put(ConnectionProperties.AUTH_SCHEME_KEY, AuthScheme.IAMSigV4); // set default to None
+        properties.put(ConnectionProperties.AUTH_SCHEME_KEY, AuthScheme.IAMSigV4); // set default to IAMSigV4
         properties.put(CONTACT_POINT_KEY, ENDPOINT);
         properties.put(PORT_KEY, PORT);
         properties.put(ENABLE_SSL_KEY, true);
@@ -151,7 +151,7 @@ public class SqlGremlinTest {
     @Disabled
     void testSchema() throws SQLException {
         final Properties properties = new Properties();
-        properties.put(ConnectionProperties.AUTH_SCHEME_KEY, AuthScheme.IAMSigV4); // set default to None
+        properties.put(ConnectionProperties.AUTH_SCHEME_KEY, AuthScheme.IAMSigV4); // set default to IAMSigV4
         properties.put(CONTACT_POINT_KEY, ENDPOINT);
         properties.put(PORT_KEY, PORT);
         properties.put(ENABLE_SSL_KEY, true);
@@ -211,7 +211,6 @@ public class SqlGremlinTest {
         while (resultSet.next()) {
             final List<Object> row = new ArrayList<>();
             for (int i = 1; i <= columnCount; i++) {
-
                 row.add(resultSet.getObject(i));
             }
             rows.add(row);

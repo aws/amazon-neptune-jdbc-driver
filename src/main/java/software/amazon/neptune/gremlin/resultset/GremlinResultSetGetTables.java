@@ -34,6 +34,7 @@ public class GremlinResultSetGetTables extends ResultSetGetTables implements jav
     private static final Map<String, Class<?>> COLUMN_TYPE_MAP = new HashMap<>();
 
     static {
+        // TODO AN-577 move this stuff to common.
         COLUMN_TYPE_MAP.put("TABLE_CAT", String.class);
         COLUMN_TYPE_MAP.put("TABLE_SCHEM", String.class);
         COLUMN_TYPE_MAP.put("TABLE_NAME", String.class);

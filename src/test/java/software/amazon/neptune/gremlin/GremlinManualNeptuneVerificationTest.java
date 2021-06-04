@@ -46,7 +46,7 @@ public class GremlinManualNeptuneVerificationTest {
     @BeforeEach
     void initialize() throws SQLException {
         final Properties properties = new Properties();
-        properties.put(ConnectionProperties.AUTH_SCHEME_KEY, AuthScheme.IAMSigV4); // set default to None
+        properties.put(ConnectionProperties.AUTH_SCHEME_KEY, AuthScheme.IAMSigV4); // set default to IAMSigV4
         properties.put(CONTACT_POINT_KEY, ENDPOINT);
         properties.put(PORT_KEY, PORT);
         properties.put(ENABLE_SSL_KEY, true);
