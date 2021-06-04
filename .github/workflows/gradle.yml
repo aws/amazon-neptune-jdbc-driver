@@ -49,8 +49,10 @@ jobs:
       run: mvn -B package --file ./sql-gremlin/pom.xml
     - name: Grant Execute Permission for gradlew
       run: chmod +x gradlew
-    - name: Build with Gradle
+    - name: Run tests with Gradle
       run: ./gradlew build
+    - name: Build shadow jar with Gradle
+      run: ./gradlew shadowJar
     - name: Copy Build
       if: always()
       run: |
