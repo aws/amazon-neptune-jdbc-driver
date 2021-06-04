@@ -207,6 +207,7 @@ subprojects {
 
 dependencies {
     // Local neptune-export library
+    // TODO: switch this to a shaded jar and remove the dependencies.
     implementation('com.amazonaws:neptune-export:1.0-SNAPSHOT')
     implementation(':neptune-export:1.0-SNAPSHOT')
     implementation('com.amazonaws:gremlin-client:1.0-SNAPSHOT')
@@ -257,6 +258,7 @@ dependencies {
     implementation group: 'com.puppycrawl.tools', name: 'checkstyle', version: puppyCrawlVersion
     compile group: 'com.google.code.findbugs', name: 'annotations', version: findBugsVersion
     testImplementation group: 'com.puppycrawl.tools', name: 'checkstyle', version: puppyCrawlVersion
+    testImplementation 'org.codehaus.janino:janino:3.1.0'
     testCompile group: 'com.google.code.findbugs', name: 'annotations', version: findBugsVersion
 
     // Testing
@@ -278,6 +280,8 @@ dependencies {
     // Yaml file parsing
     implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.12.0'
     implementation group: 'com.fasterxml.jackson.dataformat', name: 'jackson-dataformat-yaml', version: '2.12.0'
+
+    testCompile 'com.github.javafaker:javafaker:0.12'
 }
 
 shadowJar {
@@ -287,6 +291,7 @@ shadowJar {
     // todo: exclude
     dependencies {
         exclude(dependency('org.slf4j:.*'))
+        exclude(dependency('org.codehaus.janino::'))
         // exclude(dependency('org.apache.logging.log4j:.*:.*'))
     }
 }

@@ -30,6 +30,7 @@ public class GremlinStatementTest extends GremlinStatementTestBase {
     private static final int PORT = 8181; // Mock server uses 8181.
     private static final int MAX_CONTENT_LENGTH = 500000; // Took from PropertyGraphSerializationModule.
     private static NeptuneStatementTestHelper neptuneStatementTestHelper;
+    private static final int MAX_CONNECT_ATTEMPTS = 10;
 
     @BeforeEach
     void initialize() throws SQLException, IOException, InterruptedException {
@@ -39,6 +40,18 @@ public class GremlinStatementTest extends GremlinStatementTestBase {
                         new GremlinConnectionProperties(getProperties(HOSTNAME, PORT, MAX_CONTENT_LENGTH)));
         neptuneStatementTestHelper =
                 new NeptuneStatementTestHelper(connection.createStatement(), getLongQuery(), QUICK_QUERY);
+
+        boolean valid = false;
+        for (int i = 0; i < MAX_CONNECT_ATTEMPTS; i++) {
+            if (connection.isValid(1)) {
+                valid = true;
+                break;
+            }
+        }
+
+        if (!valid) {
+            throw new SQLException("Failed to establish a connection to the database.");
+        }
     }
 
     /**

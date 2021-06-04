@@ -18,7 +18,6 @@ package software.amazon.jdbc;
 
 import lombok.NonNull;
 import lombok.SneakyThrows;
-import org.apache.log4j.LogManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import software.amazon.jdbc.utilities.CastHelper;
@@ -57,7 +56,6 @@ public abstract class Connection implements java.sql.Connection {
         this.connectionProperties.putIfAbsent(
                 ConnectionProperties.APPLICATION_NAME_KEY,
                 Driver.APPLICATION_NAME);
-        setLogLevel();
     }
 
     /**
@@ -76,10 +74,6 @@ public abstract class Connection implements java.sql.Connection {
 
     protected ConnectionProperties getConnectionProperties() {
         return this.connectionProperties;
-    }
-
-    private void setLogLevel() {
-        LogManager.getRootLogger().setLevel(connectionProperties.getLogLevel());
     }
 
     private Map<String, ClientInfoStatus> getFailures(@NonNull final String name, final String value) {

@@ -34,30 +34,17 @@ public class GremlinResultSetGetTables extends ResultSetGetTables implements jav
     private static final Map<String, Class<?>> COLUMN_TYPE_MAP = new HashMap<>();
 
     static {
+        // TODO AN-577 move this stuff to common.
         COLUMN_TYPE_MAP.put("TABLE_CAT", String.class);
         COLUMN_TYPE_MAP.put("TABLE_SCHEM", String.class);
         COLUMN_TYPE_MAP.put("TABLE_NAME", String.class);
-        COLUMN_TYPE_MAP.put("COLUMN_NAME", String.class);
-        COLUMN_TYPE_MAP.put("DATA_TYPE", Integer.class);
-        COLUMN_TYPE_MAP.put("TYPE_NAME", String.class);
-        COLUMN_TYPE_MAP.put("COLUMN_SIZE", Integer.class);
-        COLUMN_TYPE_MAP.put("BUFFER_LENGTH", Integer.class);
-        COLUMN_TYPE_MAP.put("DECIMAL_DIGITS", Integer.class);
-        COLUMN_TYPE_MAP.put("NUM_PREC_RADIX", Integer.class);
-        COLUMN_TYPE_MAP.put("NULLABLE", Integer.class);
+        COLUMN_TYPE_MAP.put("TABLE_TYPE", String.class);
         COLUMN_TYPE_MAP.put("REMARKS", String.class);
-        COLUMN_TYPE_MAP.put("COLUMN_DEF", String.class);
-        COLUMN_TYPE_MAP.put("SQL_DATA_TYPE", Integer.class);
-        COLUMN_TYPE_MAP.put("SQL_DATETIME_SUB", Integer.class);
-        COLUMN_TYPE_MAP.put("CHAR_OCTET_LENGTH", Integer.class);
-        COLUMN_TYPE_MAP.put("ORDINAL_POSITION", Integer.class);
-        COLUMN_TYPE_MAP.put("IS_NULLABLE", String.class);
-        COLUMN_TYPE_MAP.put("SCOPE_CATALOG", String.class);
-        COLUMN_TYPE_MAP.put("SCOPE_SCHEMA", String.class);
-        COLUMN_TYPE_MAP.put("SCOPE_TABLE", String.class);
-        COLUMN_TYPE_MAP.put("SOURCE_DATA_TYPE", Integer.class);
-        COLUMN_TYPE_MAP.put("IS_AUTOINCREMENT", String.class);
-        COLUMN_TYPE_MAP.put("IS_GENERATEDCOLUMN", String.class);
+        COLUMN_TYPE_MAP.put("TYPE_CAT", String.class);
+        COLUMN_TYPE_MAP.put("TYPE_SCHEM", String.class);
+        COLUMN_TYPE_MAP.put("TYPE_NAME", String.class);
+        COLUMN_TYPE_MAP.put("SELF_REFERENCING_COL_NAME", String.class);
+        COLUMN_TYPE_MAP.put("REF_GENERATION", String.class);
     }
 
     /**

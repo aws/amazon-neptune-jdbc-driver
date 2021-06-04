@@ -16,7 +16,6 @@
 
 package software.amazon.neptune.gremlin;
 
-import org.apache.log4j.Level;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import software.amazon.jdbc.utilities.AuthScheme;
@@ -122,25 +121,6 @@ public class GremlinDataSource extends software.amazon.jdbc.DataSource
      */
     public void setContactPoint(final String endpoint) throws SQLException {
         connectionProperties.setContactPoint(endpoint);
-    }
-
-    /**
-     * Gets the logging level.
-     *
-     * @return The logging level.
-     */
-    public Level getLogLevel() {
-        return connectionProperties.getLogLevel();
-    }
-
-    /**
-     * Sets the logging level.
-     *
-     * @param logLevel The logging level.
-     * @throws SQLException if value is invalid.
-     */
-    public void setLogLevel(final Level logLevel) throws SQLException {
-        connectionProperties.setLogLevel(logLevel);
     }
 
     /**

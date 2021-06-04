@@ -49,6 +49,7 @@ public class OpenCypherResultSet extends software.amazon.jdbc.ResultSet implemen
     private boolean wasNull = false;
 
     // TODO: Separate the result set without info to a common result set that this can use.
+
     /**
      * OpenCypherResultSet constructor, initializes super class.
      *
@@ -66,7 +67,7 @@ public class OpenCypherResultSet extends software.amazon.jdbc.ResultSet implemen
     /**
      * OpenCypherResultSet constructor, initializes super class.
      *
-     * @param statement Statement Object.
+     * @param statement     Statement Object.
      * @param resultSetInfo ResultSetInfoWithoutRows Object.
      */
     public OpenCypherResultSet(final java.sql.Statement statement, final ResultSetInfoWithoutRows resultSetInfo) {

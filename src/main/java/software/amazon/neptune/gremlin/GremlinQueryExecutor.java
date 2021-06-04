@@ -61,6 +61,7 @@ public class GremlinQueryExecutor extends QueryExecutor {
 
     /**
      * GremlinQueryExecutor constructor.
+     *
      * @param gremlinConnectionProperties GremlinConnectionProperties for use in the executor.
      */
     public GremlinQueryExecutor(final GremlinConnectionProperties gremlinConnectionProperties) {
@@ -235,13 +236,13 @@ public class GremlinQueryExecutor extends QueryExecutor {
         final Cluster tempCluster =
                 GremlinQueryExecutor.createClusterBuilder(gremlinConnectionProperties).maxWaitForConnection(timeout)
                         .create();
-        final Client client = tempCluster.connect();
-        client.init();
+        final Client tempClient = tempCluster.connect();
+        tempClient.init();
 
         try {
             // Neptune doesn't support arbitrary math queries, but the below command is valid in Gremlin and is basically
             // saying return 0.
-            final CompletableFuture<List<Result>> tempCompletableFuture = client.submit("g.inject(0)").all();
+            final CompletableFuture<List<Result>> tempCompletableFuture = tempClient.submit("g.inject(0)").all();
             tempCompletableFuture.get(timeout, TimeUnit.SECONDS);
             return true;
         } catch (final RuntimeException ignored) {
@@ -285,6 +286,10 @@ public class GremlinQueryExecutor extends QueryExecutor {
             throws SQLException {
         // TODO: Update this caching mechanism, should try to make this automatic or something.
         if (!MetadataCache.isMetadataCached()) {
+            // TODO AN-576: Temp isValid check. Find a better solution inside the export tool to check if connection is valid.
+            if (!statement.getConnection().isValid(3000)) {
+                throw new SQLException("Failed to execute getTables, could not connect to database.");
+            }
             MetadataCache.updateCache(gremlinConnectionProperties.getContactPoint(), null,
                     (gremlinConnectionProperties.getAuthScheme() == AuthScheme.IAMSigV4),
                     MetadataCache.PathType.Gremlin);
@@ -342,6 +347,10 @@ public class GremlinQueryExecutor extends QueryExecutor {
     public java.sql.ResultSet executeGetColumns(final java.sql.Statement statement, final String nodes)
             throws SQLException {
         if (!MetadataCache.isMetadataCached()) {
+            // TODO AN-576: Temp isValid check. Find a better solution inside the export tool to check if connection is valid.
+            if (!statement.getConnection().isValid(3000)) {
+                throw new SQLException("Failed to execute getTables, could not connect to database.");
+            }
             MetadataCache.updateCache(gremlinConnectionProperties.getContactPoint(), null,
                     (gremlinConnectionProperties.getAuthScheme() == AuthScheme.IAMSigV4),
                     MetadataCache.PathType.Gremlin);
@@ -362,6 +371,7 @@ public class GremlinQueryExecutor extends QueryExecutor {
         synchronized (completableFutureLock) {
             completableFuture = client.submitAsync(query);
         }
+
 
         final List<Result> results = completableFuture.get().all().get();
         final List<Map<String, Object>> rows = new ArrayList<>();
@@ -399,7 +409,6 @@ public class GremlinQueryExecutor extends QueryExecutor {
             }
         }
 
-        client.close();
         final List<String> listColumns = new ArrayList<>(columns.keySet());
         return (T) new GremlinResultSet.ResultSetInfoWithRows(rows, columns, listColumns);
     }

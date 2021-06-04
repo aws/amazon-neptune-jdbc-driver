@@ -269,25 +269,6 @@ public abstract class ConnectionProperties extends Properties {
     }
 
     /**
-     * Gets the logging level.
-     *
-     * @return The logging level.
-     */
-    public Level getLogLevel() {
-        return (Level) get(LOG_LEVEL_KEY);
-    }
-
-    /**
-     * Sets the logging level.
-     *
-     * @param logLevel The logging level.
-     * @throws SQLException if value is invalid.
-     */
-    public void setLogLevel(@NonNull final Level logLevel) throws SQLException {
-        put(LOG_LEVEL_KEY, logLevel);
-    }
-
-    /**
      * Validate properties.
      */
     protected abstract void validateProperties() throws SQLException;

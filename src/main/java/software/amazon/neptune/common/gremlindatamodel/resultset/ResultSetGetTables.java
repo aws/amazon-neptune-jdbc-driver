@@ -56,7 +56,7 @@ public abstract class ResultSetGetTables extends GenericResultSet implements jav
 
     static {
         MAPPED_KEYS.put("TABLE_CAT", "catalog");
-        MAPPED_KEYS.put("TABLE_SCHEM", "schema");
+        MAPPED_KEYS.put("TABLE_SCHEM", "");
         MAPPED_KEYS.put("TABLE_TYPE", "TABLE");
         MAPPED_KEYS.put("REMARKS", "");
         MAPPED_KEYS.put("TYPE_CAT", "typecat");
