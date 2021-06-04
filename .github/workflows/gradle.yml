@@ -46,11 +46,13 @@ jobs:
     - name: Build Neptune Export jar
       run: mvn -B verify --file ./amazon-neptune-tools/neptune-export/pom.xml
     - name: Build SQL-Gremlin jar
-      run: mvn -B package --file ./sql-gremlin/pom.xml
-    - name: Grant Execute Permission for gradlew
+      run: mvn -B verify --file ./sql-gremlin/pom.xml
+    - name: Build SQL-Gremlin jar
       run: chmod +x gradlew
-    - name: Build with Gradle
+    - name: Build shadow jar with Gradle
       run: ./gradlew shadowJar
+    - name: Run tests with Gradle
+      run: ./gradlew verify
     - name: Copy Build
       if: always()
       run: |
