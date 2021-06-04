@@ -53,7 +53,9 @@ import java.util.stream.Collectors;
 public class GremlinQueryExecutor extends QueryExecutor {
     private static final Logger LOGGER = LoggerFactory.getLogger(GremlinQueryExecutor.class);
     private static final Object CLUSTER_LOCK = new Object();
+    private static final Object CLIENT_LOCK = new Object();
     private static Cluster cluster = null;
+    private static Client client = null;
     private static GremlinConnectionProperties previousGremlinConnectionProperties = null;
     private final Object completableFutureLock = new Object();
     private final GremlinConnectionProperties gremlinConnectionProperties;
@@ -197,6 +199,13 @@ public class GremlinQueryExecutor extends QueryExecutor {
      * Function to close down the cluster.
      */
     public static void close() {
+        synchronized (CLIENT_LOCK) {
+            if (client != null) {
+                client.close();
+                client = null;
+            }
+        }
+
         synchronized (CLUSTER_LOCK) {
             if (cluster != null) {
                 cluster.close();
@@ -235,13 +244,13 @@ public class GremlinQueryExecutor extends QueryExecutor {
         final Cluster tempCluster =
                 GremlinQueryExecutor.createClusterBuilder(gremlinConnectionProperties).maxWaitForConnection(timeout)
                         .create();
-        final Client client = tempCluster.connect();
-        client.init();
+        final Client tempCient = tempCluster.connect();
+        tempCient.init();
 
         try {
             // Neptune doesn't support arbitrary math queries, but the below command is valid in Gremlin and is basically
             // saying return 0.
-            final CompletableFuture<List<Result>> tempCompletableFuture = client.submit("g.inject(0)").all();
+            final CompletableFuture<List<Result>> tempCompletableFuture = tempCient.submit("g.inject(0)").all();
             tempCompletableFuture.get(timeout, TimeUnit.SECONDS);
             return true;
         } catch (final RuntimeException ignored) {
@@ -285,6 +294,10 @@ public class GremlinQueryExecutor extends QueryExecutor {
             throws SQLException {
         // TODO: Update this caching mechanism, should try to make this automatic or something.
         if (!MetadataCache.isMetadataCached()) {
+            // TODO AN-576: Temp isValid check. Find a better solution inside the export tool to check if connection is valid.
+            if (!statement.getConnection().isValid(3000)) {
+                throw new SQLException("Failed to execute getTables, could not connect to database.");
+            }
             MetadataCache.updateCache(gremlinConnectionProperties.getContactPoint(), null,
                     (gremlinConnectionProperties.getAuthScheme() == AuthScheme.IAMSigV4),
                     MetadataCache.PathType.Gremlin);
@@ -342,6 +355,10 @@ public class GremlinQueryExecutor extends QueryExecutor {
     public java.sql.ResultSet executeGetColumns(final java.sql.Statement statement, final String nodes)
             throws SQLException {
         if (!MetadataCache.isMetadataCached()) {
+            // TODO AN-576: Temp isValid check. Find a better solution inside the export tool to check if connection is valid.
+            if (!statement.getConnection().isValid(3000)) {
+                throw new SQLException("Failed to execute getTables, could not connect to database.");
+            }
             MetadataCache.updateCache(gremlinConnectionProperties.getContactPoint(), null,
                     (gremlinConnectionProperties.getAuthScheme() == AuthScheme.IAMSigV4),
                     MetadataCache.PathType.Gremlin);
@@ -357,7 +374,11 @@ public class GremlinQueryExecutor extends QueryExecutor {
     @Override
     @SuppressWarnings("unchecked")
     protected <T> T runQuery(final String query) throws SQLException {
-        final Client client = getClient(gremlinConnectionProperties);
+        synchronized (CLIENT_LOCK) {
+            if (client == null) {
+                client = getClient(gremlinConnectionProperties);
+            }
+        }
 
         synchronized (completableFutureLock) {
             completableFuture = client.submitAsync(query);
@@ -399,7 +420,6 @@ public class GremlinQueryExecutor extends QueryExecutor {
             }
         }
 
-        client.close();
         final List<String> listColumns = new ArrayList<>(columns.keySet());
         return (T) new GremlinResultSet.ResultSetInfoWithRows(rows, columns, listColumns);
     }

@@ -280,6 +280,8 @@ dependencies {
     // Yaml file parsing
     implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.12.0'
     implementation group: 'com.fasterxml.jackson.dataformat', name: 'jackson-dataformat-yaml', version: '2.12.0'
+
+    testCompile 'com.github.javafaker:javafaker:0.12'
 }
 
 shadowJar {

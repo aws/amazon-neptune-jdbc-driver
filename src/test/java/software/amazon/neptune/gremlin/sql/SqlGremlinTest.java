@@ -16,6 +16,12 @@
 
 package software.amazon.neptune.gremlin.sql;
 
+import com.github.javafaker.Address;
+import com.github.javafaker.Cat;
+import com.github.javafaker.Commerce;
+import com.github.javafaker.Faker;
+import com.github.javafaker.Name;
+import com.google.common.collect.ImmutableList;
 import dnl.utils.text.table.TextTable;
 import org.apache.tinkerpop.gremlin.driver.Client;
 import org.apache.tinkerpop.gremlin.driver.Cluster;
@@ -29,6 +35,7 @@ import org.twilmes.sql.gremlin.processor.SingleQueryExecutor;
 import org.twilmes.sql.gremlin.schema.SchemaConfig;
 import software.amazon.jdbc.utilities.AuthScheme;
 import software.amazon.jdbc.utilities.ConnectionProperties;
+import software.amazon.neptune.gremlin.GremlinConnection;
 import software.amazon.neptune.gremlin.GremlinConnectionProperties;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -60,6 +67,54 @@ public class SqlGremlinTest {
 
     @Test
     @Disabled
+    void load() throws SQLException {
+        final Properties properties = new Properties();
+        properties.put(ConnectionProperties.AUTH_SCHEME_KEY, AuthScheme.IAMSigV4); // set default to None
+        properties.put(CONTACT_POINT_KEY, ENDPOINT);
+        properties.put(PORT_KEY, PORT);
+        properties.put(ENABLE_SSL_KEY, true);
+
+        final java.sql.Connection connection = new GremlinConnection(new GremlinConnectionProperties(properties));
+
+        final Faker faker = new Faker();
+        for (int i = 0; i < 1000; i++) {
+            System.out.println("Executing query " + (i + 1) + " / 1000.");
+            connection.createStatement()
+                    .executeQuery(addV(faker.address(), faker.cat(), faker.name(), faker.commerce()));
+        }
+    }
+
+    String addV(final Address address, final Cat cat, final Name name, final Commerce commerce) {
+        final String stringBuilder = "g" +
+                // Generate vertexes
+                String.format(".addV('%s')", "Address") +
+                String.format(".property('streetAddress', '%s')", address.streetAddress().replace("'", "")) +
+                String.format(".property('buildingNumber', '%s')", address.buildingNumber().replace("'", "")) +
+                String.format(".property('cityName', '%s')", address.cityName().replace("'", "")) +
+                String.format(".property('state', '%s')", address.state().replace("'", "")) +
+                ".as('addr')" +
+                String.format(".addV('%s')", "Cat") +
+                String.format(".property('name', '%s')", cat.name().replace("'", "")) +
+                String.format(".property('breed', '%s')", cat.breed().replace("'", "")) +
+                ".as('c')" +
+                String.format(".addV('%s')", "Person") +
+                String.format(".property('firstName', '%s')", name.firstName().replace("'", "")) +
+                String.format(".property('lastName', '%s')", name.lastName().replace("'", "")) +
+                String.format(".property('title', '%s')", name.title().replace("'", "")) +
+                ".as('p')" +
+                String.format(".addV('%s'n)", "Commerce") +
+                String.format(".property('color', '%s')", commerce.color().replace("'", "")) +
+                String.format(".property('department', '%s')", commerce.department().replace("'", "")) +
+                String.format(".property('material', '%s')", commerce.material().replace("'", "")) +
+                String.format(".property('price', '%s')", commerce.price().replace("'", "")) +
+                String.format(".property('productName', '%s')", commerce.productName().replace("'", "")) +
+                String.format(".property('promotionCode', '%s')", commerce.promotionCode().replace("'", "")) +
+                ".as('comm')";
+        return stringBuilder;
+    }
+
+    @Test
+    @Disabled
     void test() throws SQLException {
         final SqlToGremlin sqlToGremlin = new SqlToGremlin(null, getGraphTraversalSource());
         runQueryPrintResults("SELECT * FROM Person", sqlToGremlin);
@@ -75,12 +130,21 @@ public class SqlGremlinTest {
         properties.put(PORT_KEY, PORT);
         properties.put(ENABLE_SSL_KEY, true);
 
-        final java.sql.Connection connection = new SqlGremlinConnection(new GremlinConnectionProperties(properties));
+        final List<String> queries = ImmutableList.of("SELECT * FROM Person",
+                "SELECT `Person`.`firstName` AS `firstName`, `Cat`.`name` AS `name` FROM `Cat` INNER JOIN `Person` ON (`Cat`.`name` = `Person`.`name`) GROUP BY `Person`.`firstName`, `Cat`.`name`",
+                "SELECT `Person`.`age` AS `age`, `Cat`.`name` AS `name__Cat_` FROM `Person` INNER JOIN `Cat` ON (`Person`.`firstName` = `Cat`.`name`) GROUP BY `Person`.`age`, `Cat`.`name`",
+                "SELECT `Person`.`firstName` AS `firstName`, `Cat`.`name` AS `name` FROM `Cat` INNER JOIN `Person` ON `Cat`.`name` = `Person`.`name`",
+                "SELECT `Person`.`age` AS `age`, SUM(1) AS `cnt_Person_4A9569D21233471BB4DC6258F15087AD_ok`, `Person`.`pets` AS `pets` FROM `Person` GROUP BY `Person`.`age`, `Person`.`pets`",
+                "SELECT `Person`.`age` AS `age`, `Person`.`cat` AS `cat`, `Person`.`dog` AS `dog`, `Person`.`firstName` AS `firstName`, `Person`.`lastName` AS `lastName`, `Person`.`name` AS `name`, `Person`.`pets` AS `pets`, `Person`.`title` AS `title` FROM `Person` LIMIT 10000");
 
-        runQueryPrintResults("SELECT * FROM Person", connection.createStatement());
+        final java.sql.Connection connection = new SqlGremlinConnection(new GremlinConnectionProperties(properties));
         final java.sql.DatabaseMetaData databaseMetaData = connection.getMetaData();
         databaseMetaData.getTables(null, null, null, null);
         databaseMetaData.getColumns(null, null, null, null);
+
+        for (final String query : queries) {
+            runQueryPrintResults(query, connection.createStatement());
+        }
     }
 
     @Test
@@ -92,13 +156,9 @@ public class SqlGremlinTest {
         properties.put(PORT_KEY, PORT);
         properties.put(ENABLE_SSL_KEY, true);
 
-        final SqlGremlinQueryExecutor sqlGremlinQueryExecutor =
-                new SqlGremlinQueryExecutor(new GremlinConnectionProperties(properties));
         final SchemaConfig schemaConfig =
                 SqlGremlinQueryExecutor.getSqlGremlinGraphSchema(new GremlinConnectionProperties(properties));
         final SqlToGremlin sqlToGremlin = new SqlToGremlin(schemaConfig, getGraphTraversalSource());
-
-        printVertexes();
 
         runQueryPrintResults("SELECT * FROM Person", sqlToGremlin);
 
@@ -137,10 +197,17 @@ public class SqlGremlinTest {
             columns.add(resultSet.getMetaData().getColumnName(i));
         }
 
+        while (resultSet.next()) {
+            for (int i = 1; i <= columnCount; i++) {
+                System.out.println(resultSet.getString(i));
+            }
+        }
+
         final List<List<Object>> rows = new ArrayList<>();
         while (resultSet.next()) {
             final List<Object> row = new ArrayList<>();
             for (int i = 1; i <= columnCount; i++) {
+
                 row.add(resultSet.getObject(i));
             }
             rows.add(row);
