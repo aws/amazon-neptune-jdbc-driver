@@ -16,7 +16,6 @@
 
 package software.amazon.neptune.opencypher;
 
-import org.apache.log4j.Level;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;

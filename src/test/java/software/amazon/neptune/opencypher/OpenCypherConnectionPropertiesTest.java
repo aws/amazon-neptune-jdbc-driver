@@ -17,7 +17,6 @@
 package software.amazon.neptune.opencypher;
 
 import com.google.common.collect.ImmutableList;
-import org.apache.log4j.Level;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import software.amazon.jdbc.utilities.AuthScheme;

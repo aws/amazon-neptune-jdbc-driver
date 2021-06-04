@@ -165,12 +165,16 @@ public class SqlGremlinTest {
         schemaConfig.getTables().forEach(table -> {
             final String tableName = table.getName();
             table.getColumns().forEach(column -> {
-                runQueryPrintResults(String.format("SELECT %s FROM %s", column.getName(), tableName), sqlToGremlin);
+                try {
+                    runQueryPrintResults(String.format("SELECT %s FROM %s", column.getName(), tableName), sqlToGremlin);
+                } catch (final SQLException throwables) {
+                    throwables.printStackTrace();
+                }
             });
         });
     }
 
-    void runQueryPrintResults(final String query, final SqlToGremlin sqlToGremlin) {
+    void runQueryPrintResults(final String query, final SqlToGremlin sqlToGremlin) throws SQLException {
         System.out.println("Executing query: " + query);
         final SingleQueryExecutor.SqlGremlinQueryResult queryResult = sqlToGremlin.execute(query);
         final List<String> columns = queryResult.getColumns();
