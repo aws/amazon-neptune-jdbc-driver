@@ -303,6 +303,9 @@ public class JavaToJdbcTypeConverter {
         if (input == null) {
             return null;
         }
+        if (input instanceof java.sql.Date) {
+            return (java.sql.Date) input;
+        }
 
         if (input instanceof Long) {
             return new Date((Long) input);
@@ -317,6 +320,8 @@ public class JavaToJdbcTypeConverter {
             return getCalendarDate(Date.valueOf(((LocalDateTime) input).toLocalDate()), calendar);
         } else if (input instanceof ZonedDateTime) {
             return getCalendarDate(Date.valueOf(((ZonedDateTime) input).toLocalDate()), calendar);
+        } else if (input instanceof Timestamp) {
+            return getCalendarDate(new Date(((Timestamp) input).getTime()), calendar);
         }
         throw createConversionException(input.getClass(), java.sql.Date.class);
     }
@@ -332,6 +337,9 @@ public class JavaToJdbcTypeConverter {
     public static java.sql.Time toTime(final Object input, final Calendar calendar) throws SQLException {
         if (input == null) {
             return null;
+        }
+        if (input instanceof java.sql.Time) {
+            return (java.sql.Time) input;
         }
 
         try {
@@ -350,6 +358,8 @@ public class JavaToJdbcTypeConverter {
                 return getCalendarTime(Time.valueOf(((ZonedDateTime) input).toLocalTime()), calendar);
             } else if (input instanceof OffsetTime) {
                 return getCalendarTime(Time.valueOf(((OffsetTime) input).toLocalTime()), calendar);
+            } else if (input instanceof Timestamp) {
+                return getCalendarTime(new Time(((Timestamp) input).getTime()), calendar);
             }
         } catch (final Exception ignored) {
         }
@@ -367,6 +377,9 @@ public class JavaToJdbcTypeConverter {
     public static java.sql.Timestamp toTimestamp(final Object input, final Calendar calendar) throws SQLException {
         if (input == null) {
             return null;
+        }
+        if (input instanceof Timestamp) {
+            return (Timestamp) input;
         }
 
         try {

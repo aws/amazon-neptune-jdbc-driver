@@ -1,0 +1,303 @@
+/*
+ * Copyright <2020> Amazon.com, final Inc. or its affiliates. All Rights Reserved.
+ *
+ * Licensed under the Apache License, final Version 2.0 (the "License").
+ * You may not use this file except in compliance with the License.
+ * A copy of the License is located at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * or in the "license" file accompanying this file. This file is distributed
+ * on an "AS IS" BASIS, final WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, final either
+ * express or implied. See the License for the specific language governing
+ * permissions and limitations under the License.
+ */
+
+package software.amazon.neptune.sparql.resultset;
+
+import com.google.common.collect.ImmutableList;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import org.apache.jena.query.Query;
+import org.apache.jena.query.QueryFactory;
+import org.apache.jena.query.ResultSetFormatter;
+import org.apache.jena.rdfconnection.RDFConnection;
+import org.apache.jena.rdfconnection.RDFConnectionRemote;
+import org.apache.jena.rdfconnection.RDFConnectionRemoteBuilder;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
+import software.amazon.jdbc.utilities.AuthScheme;
+import software.amazon.jdbc.utilities.ConnectionProperties;
+import software.amazon.neptune.sparql.SparqlConnection;
+import software.amazon.neptune.sparql.SparqlConnectionProperties;
+import software.amazon.neptune.sparql.mock.SparqlMockDataQuery;
+import software.amazon.neptune.sparql.mock.SparqlMockServer;
+import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
+import java.util.List;
+import java.util.Properties;
+
+public class SparqlResultSetMetadataTest {
+    private static final String HOSTNAME = "http://localhost";
+    private static final String DATASET = "mock";
+    private static final String QUERY_ENDPOINT = "query";
+    private static final int PORT = SparqlMockServer.port(); // Mock server dynamically generates port
+    private static final String STRING_QUERY_ONE_COLUMN =
+            "SELECT ?fname WHERE {?x  <http://www.w3.org/2001/vcard-rdf/3.0#FN>  ?fname}";
+    private static final String STRING_QUERY_TWO_COLUMN =
+            "SELECT ?x ?fname WHERE {?x  <http://www.w3.org/2001/vcard-rdf/3.0#FN>  ?fname}";
+    private static final String STRING_QUERY_THREE_COLUMN =
+            "SELECT ?s ?x ?fname WHERE {?x  <http://www.w3.org/2001/vcard-rdf/3.0#FN>  ?fname}";
+    private static final List<SparqlResultSetMetadataTest.MetadataTestHelper> METADATA_TEST_HELPER = ImmutableList.of(
+            new SparqlResultSetMetadataTest.MetadataTestHelper(SparqlMockDataQuery.STRING_QUERY,
+                    0, 256, 0, true, false, java.sql.Types.VARCHAR, String.class.getTypeName(),
+                    String.class.getTypeName()),
+            new SparqlResultSetMetadataTest.MetadataTestHelper(SparqlMockDataQuery.LONG_QUERY,
+                    20, 19, 0, false, true, java.sql.Types.BIGINT, Long.class.getTypeName(),
+                    Long.class.getTypeName()),
+            new SparqlResultSetMetadataTest.MetadataTestHelper(SparqlMockDataQuery.BOOL_QUERY,
+                    1, 1, 0, false, false, java.sql.Types.BIT, Boolean.class.getTypeName(),
+                    Boolean.class.getTypeName()),
+            new SparqlResultSetMetadataTest.MetadataTestHelper(SparqlMockDataQuery.DOUBLE_QUERY,
+                    25, 15, 15, false, true, java.sql.Types.DOUBLE, Double.class.getTypeName(),
+                    Double.class.getTypeName()),
+            new SparqlResultSetMetadataTest.MetadataTestHelper(SparqlMockDataQuery.DATE_QUERY,
+                    24, 24, 0, false, false, java.sql.Types.DATE, java.sql.Date.class.getTypeName(),
+                    org.apache.jena.datatypes.xsd.impl.XSDDateType.class.getTypeName()),
+            new SparqlResultSetMetadataTest.MetadataTestHelper(SparqlMockDataQuery.TIME_QUERY,
+                    24, 24, 0, false, false, java.sql.Types.TIME, java.sql.Time.class.getTypeName(),
+                    org.apache.jena.datatypes.xsd.impl.XSDTimeType.class.getTypeName()),
+            new SparqlResultSetMetadataTest.MetadataTestHelper(SparqlMockDataQuery.DATE_TIME_QUERY,
+                    24, 24, 0, false, false, java.sql.Types.TIMESTAMP, java.sql.Timestamp.class.getTypeName(),
+                    org.apache.jena.datatypes.xsd.impl.XSDDateTimeType.class.getTypeName()),
+            new SparqlResultSetMetadataTest.MetadataTestHelper(SparqlMockDataQuery.DATE_TIME_STAMP_QUERY,
+                    24, 24, 0, false, false, java.sql.Types.TIMESTAMP, java.sql.Timestamp.class.getTypeName(),
+                    org.apache.jena.datatypes.xsd.impl.XSDDateTimeStampType.class.getTypeName()),
+            new SparqlResultSetMetadataTest.MetadataTestHelper(SparqlMockDataQuery.DURATION_QUERY,
+                    0, 256, 0, true, false, java.sql.Types.VARCHAR, String.class.getTypeName(),
+                    org.apache.jena.datatypes.xsd.XSDDuration.class.getTypeName())
+    );
+    private static java.sql.Connection connection;
+    private static RDFConnectionRemoteBuilder rdfConnBuilder;
+
+    private static Properties sparqlProperties() {
+        final Properties properties = new Properties();
+        properties.put(ConnectionProperties.AUTH_SCHEME_KEY, AuthScheme.None); // set default to None
+        properties.put(SparqlConnectionProperties.CONTACT_POINT_KEY, HOSTNAME);
+        properties.put(SparqlConnectionProperties.PORT_KEY, PORT);
+        properties.put(SparqlConnectionProperties.DATASET_KEY, DATASET);
+        properties.put(SparqlConnectionProperties.QUERY_ENDPOINT_KEY, QUERY_ENDPOINT);
+        return properties;
+    }
+
+    /**
+     * Function to start the mock server and populate database before testing.
+     */
+    @BeforeAll
+    public static void ctlBeforeClass() throws SQLException {
+        SparqlMockServer.ctlBeforeClass();
+
+        // TODO: refactor this data insertion else where (e.g. mock server)?
+        // insert into the database here
+        rdfConnBuilder = RDFConnectionRemote.create()
+                .destination(SparqlMockServer.urlDataset())
+                // Query only.
+                .queryEndpoint("/query")
+                .updateEndpoint("/update");
+
+        // load dataset in
+        try (final RDFConnection conn = rdfConnBuilder.build()) {
+            conn.load("src/test/java/software/amazon/neptune/sparql/mock/sparql_mock_data.rdf");
+        }
+    }
+
+    /**
+     * Function to tear down server after testing.
+     */
+    @AfterAll
+    public static void ctlAfterClass() {
+        SparqlMockServer.ctlAfterClass();
+    }
+
+    // to printout result in format of Jena ResultSet
+    private static void printJenaResultSetOut(final String query) {
+        final Query jenaQuery = QueryFactory.create(query);
+        try (final RDFConnection conn = rdfConnBuilder.build()) {
+            conn.queryResultSet(jenaQuery, ResultSetFormatter::out);
+        }
+    }
+
+    @BeforeEach
+    void initialize() throws SQLException {
+        connection = new SparqlConnection(new SparqlConnectionProperties(sparqlProperties()));
+    }
+
+    @AfterEach
+    void shutdown() throws SQLException {
+        connection.close();
+    }
+
+    ResultSetMetaData getResultSetMetaData(final String query) throws SQLException {
+        final java.sql.ResultSet resultSet = connection.createStatement().executeQuery(query);
+        return resultSet.getMetaData();
+    }
+
+    @Test
+    void testGetColumnCount() throws SQLException {
+        Assertions.assertEquals(1, getResultSetMetaData(STRING_QUERY_ONE_COLUMN).getColumnCount());
+        Assertions.assertEquals(2, getResultSetMetaData(STRING_QUERY_TWO_COLUMN).getColumnCount());
+        Assertions.assertEquals(3, getResultSetMetaData(STRING_QUERY_THREE_COLUMN).getColumnCount());
+    }
+
+    @Test
+    void testGetColumnDisplaySize() throws SQLException {
+        for (final SparqlResultSetMetadataTest.MetadataTestHelper helper : METADATA_TEST_HELPER) {
+            Assertions.assertEquals(helper.getDisplaySize(),
+                    getResultSetMetaData(helper.getQuery()).getColumnDisplaySize(2), "For query: " + helper.getQuery());
+        }
+    }
+
+    @Test
+    void testGetPrecision() throws SQLException {
+        for (final SparqlResultSetMetadataTest.MetadataTestHelper helper : METADATA_TEST_HELPER) {
+            Assertions.assertEquals(helper.getPrecision(), getResultSetMetaData(helper.getQuery()).getPrecision(2),
+                    "For query: " + helper.getQuery());
+        }
+    }
+
+    @Test
+    void testGetScale() throws SQLException {
+        for (final SparqlResultSetMetadataTest.MetadataTestHelper helper : METADATA_TEST_HELPER) {
+            Assertions.assertEquals(helper.getScale(), getResultSetMetaData(helper.getQuery()).getScale(2),
+                    "For query: " + helper.getQuery());
+        }
+    }
+
+    @Test
+    void testIsAutoIncrement() throws SQLException {
+        Assertions.assertFalse(getResultSetMetaData(STRING_QUERY_TWO_COLUMN).isAutoIncrement(2));
+        Assertions.assertFalse(getResultSetMetaData(STRING_QUERY_TWO_COLUMN).isAutoIncrement(2));
+    }
+
+    @Test
+    void testIsCaseSensitive() throws SQLException {
+        Assertions.assertTrue(getResultSetMetaData(STRING_QUERY_TWO_COLUMN).isCaseSensitive(2));
+        Assertions.assertFalse(getResultSetMetaData(SparqlMockDataQuery.INT_QUERY).isCaseSensitive(2));
+    }
+
+    @Test
+    void testIsSearchable() throws SQLException {
+        Assertions.assertFalse(getResultSetMetaData(STRING_QUERY_TWO_COLUMN).isSearchable(2));
+    }
+
+    @Test
+    void testIsCurrency() throws SQLException {
+        Assertions.assertFalse(getResultSetMetaData(STRING_QUERY_TWO_COLUMN).isCurrency(2));
+        Assertions.assertFalse(getResultSetMetaData(SparqlMockDataQuery.INT_QUERY).isCurrency(2));
+    }
+
+    @Test
+    void testIsNullable() throws SQLException {
+        Assertions.assertEquals(ResultSetMetaData.columnNullableUnknown,
+                getResultSetMetaData(STRING_QUERY_TWO_COLUMN).isNullable(2));
+        Assertions.assertEquals(ResultSetMetaData.columnNullableUnknown,
+                getResultSetMetaData(SparqlMockDataQuery.INT_QUERY).isNullable(2));
+        Assertions.assertEquals(ResultSetMetaData.columnNullableUnknown,
+                getResultSetMetaData(SparqlMockDataQuery.BOOL_QUERY).isNullable(2));
+    }
+
+    @Test
+    void testIsSigned() throws SQLException {
+        for (final SparqlResultSetMetadataTest.MetadataTestHelper helper : METADATA_TEST_HELPER) {
+            Assertions.assertEquals(helper.isSigned(), getResultSetMetaData(helper.getQuery()).isSigned(2),
+                    "For query: " + helper.getQuery());
+        }
+    }
+
+    @Test
+    void testGetColumnLabel() throws SQLException {
+        Assertions.assertEquals("fname", getResultSetMetaData(STRING_QUERY_ONE_COLUMN).getColumnName(1));
+    }
+
+    @Test
+    void testGetColumnName() throws SQLException {
+        Assertions.assertEquals("fname", getResultSetMetaData(STRING_QUERY_ONE_COLUMN).getColumnName(1));
+    }
+
+    @Test
+    void testGetColumnType() throws SQLException {
+        for (final SparqlResultSetMetadataTest.MetadataTestHelper helper : METADATA_TEST_HELPER) {
+            Assertions.assertEquals(helper.getJdbcType(), getResultSetMetaData(helper.getQuery()).getColumnType(2),
+                    "For query: " + helper.getQuery());
+        }
+    }
+
+    @Test
+    void testGetColumnTypeName() throws SQLException {
+        for (final SparqlResultSetMetadataTest.MetadataTestHelper helper : METADATA_TEST_HELPER) {
+            Assertions.assertEquals(helper.getColumnJenaClassName(),
+                    getResultSetMetaData(helper.getQuery()).getColumnTypeName(2), "For query: " + helper.getQuery());
+        }
+    }
+
+    @Test
+    @Disabled
+    void testGetColumnClassName() throws SQLException {
+        // TODO: Refactoring mapping class for these tests
+        for (final SparqlResultSetMetadataTest.MetadataTestHelper helper : METADATA_TEST_HELPER) {
+            Assertions.assertEquals(helper.getColumnJavaClassName(),
+                    getResultSetMetaData(helper.getQuery()).getColumnClassName(2), "For query: " + helper.getQuery());
+        }
+    }
+
+    @Test
+    void testIsReadOnly() throws SQLException {
+        Assertions.assertTrue(getResultSetMetaData(STRING_QUERY_ONE_COLUMN).isReadOnly(1));
+    }
+
+    @Test
+    void testIsWritable() throws SQLException {
+        Assertions.assertFalse(getResultSetMetaData(STRING_QUERY_ONE_COLUMN).isWritable(1));
+    }
+
+    @Test
+    void testIsDefinitelyWritable() throws SQLException {
+        Assertions.assertFalse(getResultSetMetaData(STRING_QUERY_ONE_COLUMN).isDefinitelyWritable(1));
+    }
+
+    @Test
+    void testGetTableName() throws SQLException {
+        Assertions.assertEquals("", getResultSetMetaData(STRING_QUERY_ONE_COLUMN).getTableName(1));
+    }
+
+    @Test
+    void testGetSchemaName() throws SQLException {
+        Assertions.assertEquals("", getResultSetMetaData(STRING_QUERY_ONE_COLUMN).getSchemaName(1));
+    }
+
+    @Test
+    void testGetCatalogName() throws SQLException {
+        Assertions.assertEquals("", getResultSetMetaData(STRING_QUERY_ONE_COLUMN).getCatalogName(1));
+    }
+
+    @AllArgsConstructor
+    @Getter
+    static
+    class MetadataTestHelper {
+        private final String query;
+        private final int displaySize;
+        private final int precision;
+        private final int scale;
+        private final boolean caseSensitive;
+        private final boolean signed;
+        private final int jdbcType;
+        private final String columnJavaClassName;
+        private final String columnJenaClassName;
+    }
+
+}

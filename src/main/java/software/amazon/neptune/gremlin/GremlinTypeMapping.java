@@ -36,6 +36,7 @@ public class GremlinTypeMapping {
         GREMLIN_TO_JDBC_TYPE_MAP.put(Short.class, JdbcType.SMALLINT);
         GREMLIN_TO_JDBC_TYPE_MAP.put(Integer.class, JdbcType.INTEGER);
         GREMLIN_TO_JDBC_TYPE_MAP.put(Long.class, JdbcType.BIGINT);
+        // Should this be JdbcType.REAL?
         GREMLIN_TO_JDBC_TYPE_MAP.put(Float.class, JdbcType.FLOAT);
         GREMLIN_TO_JDBC_TYPE_MAP.put(Double.class, JdbcType.DOUBLE);
         GREMLIN_TO_JDBC_TYPE_MAP.put(java.util.Date.class, JdbcType.DATE);

@@ -105,7 +105,7 @@ public abstract class ResultSet implements java.sql.ResultSet {
 
     @Override
     public boolean next() throws SQLException {
-        // Increment row index, if it exceeds capacity, set it to 1 after the last element.
+        // Increment row index, if it exceeds capacity, set it to one after the last element.
         if (++this.rowIndex >= rowCount) {
             this.rowIndex = rowCount;
         }
@@ -331,7 +331,7 @@ public abstract class ResultSet implements java.sql.ResultSet {
 
     @Override
     public Timestamp getTimestamp(final int columnIndex, final Calendar cal) throws SQLException {
-        LOGGER.trace("Getting column {} as a Tiemstamp.", columnIndex);
+        LOGGER.trace("Getting column {} as a Timestamp.", columnIndex);
         return JavaToJdbcTypeConverter.toTimestamp(getConvertedValue(columnIndex), cal);
     }
 

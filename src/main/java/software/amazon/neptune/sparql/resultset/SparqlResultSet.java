@@ -20,13 +20,17 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.apache.jena.query.QuerySolution;
 import org.apache.jena.query.ResultSet;
+import org.apache.jena.rdf.model.Literal;
+import org.apache.jena.rdf.model.RDFNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import software.amazon.jdbc.utilities.SqlError;
 import software.amazon.jdbc.utilities.SqlState;
+import software.amazon.neptune.sparql.SparqlTypeMapping;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
 import java.util.List;
 
 public class SparqlResultSet extends software.amazon.jdbc.ResultSet implements java.sql.ResultSet {
@@ -44,6 +48,7 @@ public class SparqlResultSet extends software.amazon.jdbc.ResultSet implements j
      * @param resultSetInfo ResultSetInfoWithRows Object.
      */
     public SparqlResultSet(final Statement statement, final ResultSetInfoWithRows resultSetInfo) {
+        // TODO: fix metadata promotion
         super(statement, resultSetInfo.getColumns(), resultSetInfo.getRows().size());
         this.result = resultSetInfo.getResult();
         this.rows = resultSetInfo.getRows();
@@ -52,26 +57,77 @@ public class SparqlResultSet extends software.amazon.jdbc.ResultSet implements j
 
     @Override
     protected void doClose() throws SQLException {
-
     }
 
     @Override
     protected int getDriverFetchSize() throws SQLException {
+        // Can't be done based on implementation.
         return 0;
     }
 
     @Override
     protected void setDriverFetchSize(final int rows) {
+        // Can't be done based on implementation.
+    }
 
+    @Override
+    public boolean wasNull() throws SQLException {
+        return wasNull;
+    }
+
+    @Override
+    protected ResultSetMetaData getResultMetadata() throws SQLException {
+        final List<Class<?>> rowTypes = new ArrayList<>();
+        for (final String column : columns) {
+            final QuerySolution row = rows.get(0);
+            final RDFNode node = row.get(column);
+            // TODO: type promotion
+            rowTypes.add(getResultClass(node));
+        }
+        return new SparqlResultSetMetadata(columns, rowTypes);
     }
 
     @Override
     protected Object getConvertedValue(final int columnIndex) throws SQLException {
-        final Object value = getValue(columnIndex);
-        return value.toString();
+        final RDFNode value = getValue(columnIndex);
+        if (value == null) {
+            return null;
+        }
+        final Class<?> valueClass = getResultClass(value);
+        // Need to check if XSDDateTime types need converting first
+        if (SparqlTypeMapping.checkConverter(valueClass)) {
+            final SparqlTypeMapping.Converter<?> converter = getConverter(valueClass);
+            return converter.convert(value.asLiteral());
+        }
+        if (SparqlTypeMapping.checkContains(valueClass)) {
+            return value.asLiteral().getValue();
+        }
+        return value.isLiteral() ? value.asLiteral().getLexicalForm() : value.toString();
     }
 
-    private Object getValue(final int columnIndex) throws SQLException {
+    // returns the class of an RDF node
+    private Class<?> getResultClass(final RDFNode node) {
+        Class<?> resultClass;
+        if (node == null) {
+            return null;
+        }
+        if (node.isLiteral()) {
+            final Literal literal = node.asLiteral();
+            resultClass = literal.getDatatype().getJavaClass();
+            if (resultClass == null) {
+                resultClass = literal.getValue().getClass();
+            }
+            // We need to then delineate between different XSDDateTime classes
+            if (resultClass == org.apache.jena.datatypes.xsd.XSDDateTime.class) {
+                resultClass = literal.getDatatype().getClass();
+            }
+        } else {
+            resultClass = node.getClass();
+        }
+        return resultClass;
+    }
+
+    private RDFNode getValue(final int columnIndex) throws SQLException {
         verifyOpen();
         if (rows == null) {
             throw SqlError.createSQLException(
@@ -83,20 +139,16 @@ public class SparqlResultSet extends software.amazon.jdbc.ResultSet implements j
 
         final String colName = columns.get(columnIndex - 1);
         final QuerySolution row = rows.get(getRowIndex());
-        final Object value = row.get(colName); // of type RDFNode
+        final RDFNode value = row.get(colName);
+        // literal: primitives
+        // resource: relationships
         wasNull = (value == null);
 
         return value;
     }
 
-    @Override
-    protected ResultSetMetaData getResultMetadata() throws SQLException {
-        return null;
-    }
-
-    @Override
-    public boolean wasNull() throws SQLException {
-        return wasNull;
+    private SparqlTypeMapping.Converter<?> getConverter(final Class<?> value) {
+        return SparqlTypeMapping.SPARQL_TO_JAVA_TRANSFORM_MAP.get(value);
     }
 
     @AllArgsConstructor
