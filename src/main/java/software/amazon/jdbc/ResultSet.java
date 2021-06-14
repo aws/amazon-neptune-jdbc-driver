@@ -247,7 +247,7 @@ public abstract class ResultSet implements java.sql.ResultSet {
 
     @Override
     public int findColumn(final String columnLabel) throws SQLException {
-        final int index = columns.indexOf(columnLabel) ;
+        final int index = columns.indexOf(columnLabel);
         if (index < 0) {
             throw SqlError.createSQLException(
                     LOGGER,
@@ -297,6 +297,12 @@ public abstract class ResultSet implements java.sql.ResultSet {
     public double getDouble(final int columnIndex) throws SQLException {
         LOGGER.trace("Getting column {} as a Double.", columnIndex);
         return JavaToJdbcTypeConverter.toDouble(getConvertedValue(columnIndex));
+    }
+
+    @Override
+    public BigDecimal getBigDecimal(final int columnIndex) throws SQLException {
+        LOGGER.trace("Getting column {} as a BigDecimal.", columnIndex);
+        return JavaToJdbcTypeConverter.toBigDecimal(getConvertedValue(columnIndex));
     }
 
     @Override
@@ -386,11 +392,6 @@ public abstract class ResultSet implements java.sql.ResultSet {
     }
 
     // Add default not supported for all types.
-    @Override
-    public BigDecimal getBigDecimal(final int columnIndex) throws SQLException {
-        throw SqlError.createSQLFeatureNotSupportedException(LOGGER);
-    }
-
     @Override
     public BigDecimal getBigDecimal(final int columnIndex, final int scale) throws SQLException {
         throw SqlError.createSQLFeatureNotSupportedException(LOGGER);

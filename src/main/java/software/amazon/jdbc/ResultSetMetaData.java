@@ -77,7 +77,7 @@ public abstract class ResultSetMetaData implements java.sql.ResultSetMetaData {
             return 1;
         } else if (type == Types.VARCHAR) {
             return 0;
-        } else if (type == Types.DOUBLE || type == Types.REAL) {
+        } else if (type == Types.DOUBLE || type == Types.REAL || type == Types.DECIMAL) {
             return 25;
         } else if (type == Types.DATE) {
             return 24;
@@ -104,7 +104,7 @@ public abstract class ResultSetMetaData implements java.sql.ResultSetMetaData {
             return 1;
         } else if (type == Types.VARCHAR) {
             return 256;
-        } else if (type == Types.DOUBLE || type == Types.REAL) {
+        } else if (type == Types.DOUBLE || type == Types.REAL || type == Types.DECIMAL) {
             return 15;
         } else if (type == Types.DATE) {
             return 24;
@@ -127,7 +127,7 @@ public abstract class ResultSetMetaData implements java.sql.ResultSetMetaData {
         verifyColumnIndex(column);
 
         final int columnType = getColumnType(column);
-        if ((columnType == Types.DOUBLE) || (columnType == Types.REAL)) {
+        if ((columnType == Types.DOUBLE) || (columnType == Types.REAL) || (columnType == Types.DECIMAL)) {
             // 15 significant digits after decimal.
             return 15;
         } else if (columnType == Types.FLOAT) {

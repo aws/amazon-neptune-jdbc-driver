@@ -17,6 +17,8 @@ package software.amazon.jdbc.utilities;
 
 import com.google.common.collect.ImmutableMap;
 import org.slf4j.LoggerFactory;
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.sql.Date;
 import java.sql.SQLException;
 import java.sql.Time;
@@ -56,6 +58,7 @@ public class JavaToJdbcTypeConverter {
         CLASS_CONVERTER_MAP.put(Date.class, JavaToJdbcTypeConverter::toDate);
         CLASS_CONVERTER_MAP.put(Time.class, JavaToJdbcTypeConverter::toTime);
         CLASS_CONVERTER_MAP.put(Timestamp.class, JavaToJdbcTypeConverter::toTimestamp);
+        CLASS_CONVERTER_MAP.put(java.math.BigDecimal.class, JavaToJdbcTypeConverter::toBigDecimal);
 
         CLASS_TO_JDBC_ORDINAL.put(Boolean.class, JdbcType.BIT.getJdbcCode());
         CLASS_TO_JDBC_ORDINAL.put(Byte.class, JdbcType.TINYINT.getJdbcCode());
@@ -67,6 +70,7 @@ public class JavaToJdbcTypeConverter {
         CLASS_TO_JDBC_ORDINAL.put(Date.class, JdbcType.DATE.getJdbcCode());
         CLASS_TO_JDBC_ORDINAL.put(Time.class, JdbcType.TIME.getJdbcCode());
         CLASS_TO_JDBC_ORDINAL.put(String.class, JdbcType.VARCHAR.getJdbcCode());
+        CLASS_TO_JDBC_ORDINAL.put(java.math.BigDecimal.class, JdbcType.DECIMAL.getJdbcCode());
     }
 
     /**
@@ -268,6 +272,32 @@ public class JavaToJdbcTypeConverter {
             }
         }
         throw createConversionException(input.getClass(), Double.class);
+    }
+
+    /**
+     * Function that takes in a Java Object and attempts to convert it to a BigDecimal.
+     *
+     * @param input Input Object.
+     * @return BigDecimal value.
+     * @throws SQLException if conversion cannot be performed.
+     */
+    public static BigDecimal toBigDecimal(final Object input) throws SQLException {
+        if (input == null) {
+            return new BigDecimal("0.0");
+        }
+        if (input instanceof BigDecimal) {
+            return (BigDecimal) input;
+        } else if (input instanceof BigInteger) {
+            return new BigDecimal((BigInteger) input);
+        } else if (input instanceof Number) {
+            return BigDecimal.valueOf(((Number) input).doubleValue());
+        } else if (input instanceof String) {
+            try {
+                return new BigDecimal((String) input);
+            } catch (final NumberFormatException ignored) {
+            }
+        }
+        throw createConversionException(input.getClass(), BigDecimal.class);
     }
 
     /**

@@ -15,10 +15,11 @@
 
 package software.amazon.neptune.sparql;
 
-import org.apache.jena.datatypes.RDFDatatype;
 import org.apache.jena.datatypes.xsd.XSDDatatype;
 import org.apache.jena.datatypes.xsd.XSDDateTime;
 import org.apache.jena.rdf.model.Literal;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import software.amazon.jdbc.utilities.JdbcType;
 import java.sql.Date;
 import java.sql.Time;
@@ -39,7 +40,7 @@ public class SparqlTypeMapping {
     public static final Converter<ZonedDateTime> DATE_TIME_STAMP_CONVERTER = new DateTimeStampConverter();
     public static final Converter<Date> DATE_CONVERTER = new DateConverter();
     public static final Converter<Time> TIME_CONVERTER = new TimeConverter();
-
+    private static final Logger LOGGER = LoggerFactory.getLogger(SparqlTypeMapping.class);
 
     static {
         SPARQL_LITERAL_TO_JAVA_TYPE_MAP.put(XSDDatatype.XSDdecimal, java.math.BigDecimal.class);
@@ -177,7 +178,6 @@ public class SparqlTypeMapping {
         SPARQL_JAVA_TO_JDBC_TYPE_MAP.put(Time.class, JdbcType.TIME);
         SPARQL_JAVA_TO_JDBC_TYPE_MAP.put(Timestamp.class, JdbcType.TIMESTAMP);
         SPARQL_JAVA_TO_JDBC_TYPE_MAP.put(ZonedDateTime.class, JdbcType.TIMESTAMP);
-        // java.math classes to Jdbc directly? BigInteger to BIGINT?
         SPARQL_JAVA_TO_JDBC_TYPE_MAP.put(java.math.BigInteger.class, JdbcType.BIGINT);
         SPARQL_JAVA_TO_JDBC_TYPE_MAP.put(java.math.BigDecimal.class, JdbcType.DECIMAL);
     }
@@ -189,10 +189,12 @@ public class SparqlTypeMapping {
      * @return JDBC equivalent for Sparql class type.
      */
     public static JdbcType getJDBCType(final Object sparqlClass) {
-        // TODO catching cast exception?
-        return sparqlClass instanceof RDFDatatype ?
-                SPARQL_LITERAL_TO_JDBC_TYPE_MAP.getOrDefault((XSDDatatype) sparqlClass, JdbcType.VARCHAR) :
-                JdbcType.VARCHAR;
+        try {
+            return SPARQL_LITERAL_TO_JDBC_TYPE_MAP.getOrDefault((XSDDatatype) sparqlClass, JdbcType.VARCHAR);
+        } catch (final ClassCastException e) {
+            LOGGER.warn("Value is not of typed literal XSDDatatype, returning as VARCHAR type");
+            return JdbcType.VARCHAR;
+        }
     }
 
     /**
@@ -202,10 +204,12 @@ public class SparqlTypeMapping {
      * @return Java equivalent for Sparql class type.
      */
     public static Class<?> getJavaType(final Object sparqlClass) {
-        // TODO catching cast exception?
-        return sparqlClass instanceof RDFDatatype ?
-                SPARQL_LITERAL_TO_JAVA_TYPE_MAP.getOrDefault((XSDDatatype) sparqlClass, String.class) :
-                String.class;
+        try {
+            return SPARQL_LITERAL_TO_JAVA_TYPE_MAP.getOrDefault((XSDDatatype) sparqlClass, String.class);
+        } catch (final ClassCastException e) {
+            LOGGER.warn("Value is not of typed literal XSDDatatype, returning as String type");
+            return String.class;
+        }
     }
 
     /**

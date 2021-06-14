@@ -36,7 +36,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class SparqlResultSet extends software.amazon.jdbc.ResultSet implements java.sql.ResultSet {
-
     private static final Logger LOGGER = LoggerFactory.getLogger(SparqlResultSet.class);
     private final ResultSet result;
     private final List<QuerySolution> rows;
@@ -95,24 +94,6 @@ public class SparqlResultSet extends software.amazon.jdbc.ResultSet implements j
     }
 
     @Override
-    //    protected Object getConvertedValue(final int columnIndex) throws SQLException {
-    //        final RDFNode value = getValue(columnIndex);
-    //        if (value == null) {
-    //            return null;
-    //        }
-    //        final Class<?> valueClass = getResultClass(value);
-    //        // Need to check if XSDDateTime types need converting first
-    //        // (XSDDatatype) value.asLiteral().getDatatype()
-    //        if (SparqlTypeMapping.checkConverter((XSDDatatype) value.asLiteral().getDatatype())) {
-    //            final SparqlTypeMapping.Converter<?> converter =
-    //                    getConverter((XSDDatatype) value.asLiteral().getDatatype());
-    //            return converter.convert(value.asLiteral());
-    //        }
-    //        if (SparqlTypeMapping.checkContains((XSDDatatype) value.asLiteral().getDatatype()))) {
-    //            return value.asLiteral().getValue();
-    //        }
-    //        return value.isLiteral() ? value.asLiteral().getLexicalForm() : value.toString();
-    //    }
     protected Object getConvertedValue(final int columnIndex) throws SQLException {
         final RDFNode node = getValue(columnIndex);
         if (node == null) {
@@ -121,42 +102,24 @@ public class SparqlResultSet extends software.amazon.jdbc.ResultSet implements j
         if (node.isLiteral()) {
             final Literal literal = node.asLiteral();
             final RDFDatatype resultDatatype = literal.getDatatype();
-            // This convert the DateTime classes into Java
-            // TODO might need to catch casting exception here
-            if (SparqlTypeMapping.checkConverter((XSDDatatype) resultDatatype)) {
-                final SparqlTypeMapping.Converter<?> converter = getConverter((XSDDatatype) resultDatatype);
-                return converter.convert(literal);
+            try {
+                // check for types that needs conversion first
+                if (SparqlTypeMapping.checkConverter((XSDDatatype) resultDatatype)) {
+                    final SparqlTypeMapping.Converter<?> converter = getConverter((XSDDatatype) resultDatatype);
+                    return converter.convert(literal);
+                }
+                if (SparqlTypeMapping.checkContains((XSDDatatype) resultDatatype)) {
+                    return literal.getValue();
+                }
+            } catch (final ClassCastException e) {
+                LOGGER.warn("Value is not of typed literal XSDDatatype, returning as String");
+                return literal.getLexicalForm();
             }
-            // This will return the values wrapped automatically into Java by library
-            if (SparqlTypeMapping.checkContains((XSDDatatype) resultDatatype)) {
-                return literal.getValue();
-            }
+
             return literal.getLexicalForm();
         }
         return node.toString();
     }
-
-    // returns the class of an RDF node
-    //    private Class<?> getResultClass(final RDFNode node) {
-    //        Class<?> resultClass;
-    //        if (node == null) {
-    //            return null;
-    //        }
-    //        if (node.isLiteral()) {
-    //            final Literal literal = node.asLiteral();
-    //            resultClass = literal.getDatatype().getJavaClass();
-    //            if (resultClass == null) {
-    //                resultClass = literal.getValue().getClass();
-    //            }
-    //            // We need to then delineate between different XSDDateTime classes
-    //            if (resultClass == org.apache.jena.datatypes.xsd.XSDDateTime.class) {
-    //                resultClass = literal.getDatatype().getClass();
-    //            }
-    //        } else {
-    //            resultClass = node.getClass();
-    //        }
-    //        return resultClass;
-    //    }
 
     private RDFNode getValue(final int columnIndex) throws SQLException {
         verifyOpen();

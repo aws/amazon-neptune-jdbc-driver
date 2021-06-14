@@ -248,14 +248,12 @@ public class SparqlResultSetTest {
         final java.sql.ResultSet resultSet =
                 statement.executeQuery(SparqlMockDataQuery.DECIMAL_QUERY);
         Assertions.assertTrue(resultSet.next());
-        // TODO: add support for resultSet.getBigDecimal()
-        Assertions.assertEquals(expected, resultSet.getObject(2));
+        Assertions.assertEquals(expected, resultSet.getBigDecimal(2));
         Assertions.assertThrows(SQLException.class, () -> resultSet.getString(2));
         Assertions.assertThrows(SQLException.class, () -> resultSet.getBoolean(2));
         Assertions.assertThrows(SQLException.class, () -> resultSet.getByte(2));
         Assertions.assertThrows(SQLException.class, () -> resultSet.getShort(2));
         Assertions.assertThrows(SQLException.class, () -> resultSet.getLong(2));
-        Assertions.assertThrows(SQLException.class, () -> resultSet.getBigDecimal(2));
         Assertions.assertThrows(SQLException.class, () -> resultSet.getDouble(2));
         Assertions.assertThrows(SQLException.class, () -> resultSet.getFloat(2));
         Assertions.assertThrows(SQLException.class, () -> resultSet.getInt(2));
@@ -269,7 +267,6 @@ public class SparqlResultSetTest {
         Assertions.assertTrue(resultSet.next());
         Assertions.assertEquals(100000.00f, resultSet.getFloat(2));
         Assertions.assertEquals(100000.00, resultSet.getDouble(2));
-        // do we need to test casting to smaller types?
         Assertions.assertEquals((byte) 100000.00, resultSet.getByte(2));
         Assertions.assertEquals((short) 100000.00, resultSet.getShort(2));
         Assertions.assertEquals((int) 100000.00, resultSet.getInt(2));
@@ -401,13 +398,13 @@ public class SparqlResultSetTest {
         Assertions.assertTrue(resultSet.next());
         Assertions.assertEquals("2020", resultSet.getString(2));
         Assertions.assertEquals((byte) Integer.parseInt("2020"), resultSet.getByte(2));
+        Assertions.assertEquals(new BigDecimal("2020"), resultSet.getBigDecimal(2));
         Assertions.assertEquals(Integer.parseInt("2020"), resultSet.getInt(2));
         Assertions.assertEquals(Short.parseShort("2020"), resultSet.getShort(2));
         Assertions.assertEquals(Long.parseLong("2020"), resultSet.getLong(2));
         Assertions.assertEquals(Double.parseDouble("2020"), resultSet.getLong(2));
         Assertions.assertEquals(Float.parseFloat("2020"), resultSet.getFloat(2));
         Assertions.assertThrows(SQLException.class, () -> resultSet.getTimestamp(2));
-        Assertions.assertThrows(SQLException.class, () -> resultSet.getBigDecimal(2));
         Assertions.assertThrows(SQLException.class, () -> resultSet.getBoolean(2));
     }
 
@@ -441,7 +438,7 @@ public class SparqlResultSetTest {
     @Test
     @Disabled
     void testQueryThroughRDFConnection() {
-        // TODO: testing types through Jena RDF class, not through our driver, to be deleted
+        // TODO: testing types through Jena RDF class, not through our driver, to be deleted after completing Sparql
         final RDFConnectionRemoteBuilder builder = RDFConnectionRemote.create()
                 .destination(SparqlMockServer.urlDataset())
                 // Query only.
