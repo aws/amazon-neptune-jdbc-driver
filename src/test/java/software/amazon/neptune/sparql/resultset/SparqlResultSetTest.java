@@ -15,7 +15,6 @@
 
 package software.amazon.neptune.sparql.resultset;
 
-import org.apache.jena.datatypes.xsd.XSDDatatype;
 import org.apache.jena.query.Query;
 import org.apache.jena.query.QueryExecution;
 import org.apache.jena.query.QueryFactory;
@@ -490,7 +489,7 @@ public class SparqlResultSetTest {
 
         while (result.hasNext()) {
             final QuerySolution querySolution = result.next();
-            final RDFNode node = querySolution.get("o");
+            final RDFNode node = querySolution.get("s");
             System.out.println("|NODE CLASS                   | " + node.getClass());
             if (node.isLiteral()) {
                 System.out.println("[--------------NEW ROW : LITERAL--------------]");
@@ -509,7 +508,6 @@ public class SparqlResultSetTest {
                 System.out.println("|LITERAL CLASS                | " + literal.getClass());
                 System.out.println("|getValue().getClass()        | " + literal.getValue().getClass());
                 System.out.println("|getDatatype()                | " + literal.getDatatype());
-                System.out.println("|DATE DATATYPE?               | " + XSDDatatype.XSDdate);
                 System.out.println("|getDatatypeURI()             | " + literal.getDatatypeURI());
                 System.out.println("|getDatatype().getClass()     | " + literal.getDatatype().getClass());
                 System.out.println("|getDatatype().getJavaClass() | " + literal.getDatatype().getJavaClass());

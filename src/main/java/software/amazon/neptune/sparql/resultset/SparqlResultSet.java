@@ -18,6 +18,8 @@ package software.amazon.neptune.sparql.resultset;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import org.apache.jena.datatypes.RDFDatatype;
+import org.apache.jena.datatypes.xsd.XSDDatatype;
 import org.apache.jena.query.QuerySolution;
 import org.apache.jena.query.ResultSet;
 import org.apache.jena.rdf.model.Literal;
@@ -77,55 +79,84 @@ public class SparqlResultSet extends software.amazon.jdbc.ResultSet implements j
 
     @Override
     protected ResultSetMetaData getResultMetadata() throws SQLException {
-        final List<Class<?>> rowTypes = new ArrayList<>();
+        final List<Object> rowTypes = new ArrayList<>();
         for (final String column : columns) {
             final QuerySolution row = rows.get(0);
             final RDFNode node = row.get(column);
             // TODO: type promotion
-            rowTypes.add(getResultClass(node));
+            // TODO: add null types to type map?
+            if (node == null) {
+                rowTypes.add(null);
+            } else {
+                rowTypes.add(node.isLiteral() ? node.asLiteral().getDatatype() : node.getClass());
+            }
         }
         return new SparqlResultSetMetadata(columns, rowTypes);
     }
 
     @Override
+    //    protected Object getConvertedValue(final int columnIndex) throws SQLException {
+    //        final RDFNode value = getValue(columnIndex);
+    //        if (value == null) {
+    //            return null;
+    //        }
+    //        final Class<?> valueClass = getResultClass(value);
+    //        // Need to check if XSDDateTime types need converting first
+    //        // (XSDDatatype) value.asLiteral().getDatatype()
+    //        if (SparqlTypeMapping.checkConverter((XSDDatatype) value.asLiteral().getDatatype())) {
+    //            final SparqlTypeMapping.Converter<?> converter =
+    //                    getConverter((XSDDatatype) value.asLiteral().getDatatype());
+    //            return converter.convert(value.asLiteral());
+    //        }
+    //        if (SparqlTypeMapping.checkContains((XSDDatatype) value.asLiteral().getDatatype()))) {
+    //            return value.asLiteral().getValue();
+    //        }
+    //        return value.isLiteral() ? value.asLiteral().getLexicalForm() : value.toString();
+    //    }
     protected Object getConvertedValue(final int columnIndex) throws SQLException {
-        final RDFNode value = getValue(columnIndex);
-        if (value == null) {
-            return null;
-        }
-        final Class<?> valueClass = getResultClass(value);
-        // Need to check if XSDDateTime types need converting first
-        if (SparqlTypeMapping.checkConverter(valueClass)) {
-            final SparqlTypeMapping.Converter<?> converter = getConverter(valueClass);
-            return converter.convert(value.asLiteral());
-        }
-        if (SparqlTypeMapping.checkContains(valueClass)) {
-            return value.asLiteral().getValue();
-        }
-        return value.isLiteral() ? value.asLiteral().getLexicalForm() : value.toString();
-    }
-
-    // returns the class of an RDF node
-    private Class<?> getResultClass(final RDFNode node) {
-        Class<?> resultClass;
+        final RDFNode node = getValue(columnIndex);
         if (node == null) {
             return null;
         }
         if (node.isLiteral()) {
             final Literal literal = node.asLiteral();
-            resultClass = literal.getDatatype().getJavaClass();
-            if (resultClass == null) {
-                resultClass = literal.getValue().getClass();
+            final RDFDatatype resultDatatype = literal.getDatatype();
+            // This convert the DateTime classes into Java
+            // TODO might need to catch casting exception here
+            if (SparqlTypeMapping.checkConverter((XSDDatatype) resultDatatype)) {
+                final SparqlTypeMapping.Converter<?> converter = getConverter((XSDDatatype) resultDatatype);
+                return converter.convert(literal);
             }
-            // We need to then delineate between different XSDDateTime classes
-            if (resultClass == org.apache.jena.datatypes.xsd.XSDDateTime.class) {
-                resultClass = literal.getDatatype().getClass();
+            // This will return the values wrapped automatically into Java by library
+            if (SparqlTypeMapping.checkContains((XSDDatatype) resultDatatype)) {
+                return literal.getValue();
             }
-        } else {
-            resultClass = node.getClass();
+            return literal.getLexicalForm();
         }
-        return resultClass;
+        return node.toString();
     }
+
+    // returns the class of an RDF node
+    //    private Class<?> getResultClass(final RDFNode node) {
+    //        Class<?> resultClass;
+    //        if (node == null) {
+    //            return null;
+    //        }
+    //        if (node.isLiteral()) {
+    //            final Literal literal = node.asLiteral();
+    //            resultClass = literal.getDatatype().getJavaClass();
+    //            if (resultClass == null) {
+    //                resultClass = literal.getValue().getClass();
+    //            }
+    //            // We need to then delineate between different XSDDateTime classes
+    //            if (resultClass == org.apache.jena.datatypes.xsd.XSDDateTime.class) {
+    //                resultClass = literal.getDatatype().getClass();
+    //            }
+    //        } else {
+    //            resultClass = node.getClass();
+    //        }
+    //        return resultClass;
+    //    }
 
     private RDFNode getValue(final int columnIndex) throws SQLException {
         verifyOpen();
@@ -147,8 +178,8 @@ public class SparqlResultSet extends software.amazon.jdbc.ResultSet implements j
         return value;
     }
 
-    private SparqlTypeMapping.Converter<?> getConverter(final Class<?> value) {
-        return SparqlTypeMapping.SPARQL_TO_JAVA_TRANSFORM_MAP.get(value);
+    private SparqlTypeMapping.Converter<?> getConverter(final XSDDatatype datatype) {
+        return SparqlTypeMapping.SPARQL_LITERAL_TO_JAVA_TRANSFORM_MAP.get(datatype);
     }
 
     @AllArgsConstructor

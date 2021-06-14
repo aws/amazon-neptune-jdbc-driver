@@ -18,6 +18,7 @@ package software.amazon.neptune.sparql.resultset;
 import com.google.common.collect.ImmutableList;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import org.apache.jena.datatypes.xsd.XSDDatatype;
 import org.apache.jena.query.Query;
 import org.apache.jena.query.QueryFactory;
 import org.apache.jena.query.ResultSetFormatter;
@@ -56,31 +57,34 @@ public class SparqlResultSetMetadataTest {
     private static final List<SparqlResultSetMetadataTest.MetadataTestHelper> METADATA_TEST_HELPER = ImmutableList.of(
             new SparqlResultSetMetadataTest.MetadataTestHelper(SparqlMockDataQuery.STRING_QUERY,
                     0, 256, 0, true, false, java.sql.Types.VARCHAR, String.class.getTypeName(),
-                    String.class.getTypeName()),
+                    XSDDatatype.XSDstring.toString()),
             new SparqlResultSetMetadataTest.MetadataTestHelper(SparqlMockDataQuery.LONG_QUERY,
                     20, 19, 0, false, true, java.sql.Types.BIGINT, Long.class.getTypeName(),
-                    Long.class.getTypeName()),
+                    XSDDatatype.XSDlong.toString()),
             new SparqlResultSetMetadataTest.MetadataTestHelper(SparqlMockDataQuery.BOOL_QUERY,
                     1, 1, 0, false, false, java.sql.Types.BIT, Boolean.class.getTypeName(),
-                    Boolean.class.getTypeName()),
+                    XSDDatatype.XSDboolean.toString()),
             new SparqlResultSetMetadataTest.MetadataTestHelper(SparqlMockDataQuery.DOUBLE_QUERY,
                     25, 15, 15, false, true, java.sql.Types.DOUBLE, Double.class.getTypeName(),
-                    Double.class.getTypeName()),
+                    XSDDatatype.XSDdouble.toString()),
             new SparqlResultSetMetadataTest.MetadataTestHelper(SparqlMockDataQuery.DATE_QUERY,
                     24, 24, 0, false, false, java.sql.Types.DATE, java.sql.Date.class.getTypeName(),
-                    org.apache.jena.datatypes.xsd.impl.XSDDateType.class.getTypeName()),
+                    XSDDatatype.XSDdate.toString()),
             new SparqlResultSetMetadataTest.MetadataTestHelper(SparqlMockDataQuery.TIME_QUERY,
                     24, 24, 0, false, false, java.sql.Types.TIME, java.sql.Time.class.getTypeName(),
-                    org.apache.jena.datatypes.xsd.impl.XSDTimeType.class.getTypeName()),
+                    XSDDatatype.XSDtime.toString()),
             new SparqlResultSetMetadataTest.MetadataTestHelper(SparqlMockDataQuery.DATE_TIME_QUERY,
                     24, 24, 0, false, false, java.sql.Types.TIMESTAMP, java.sql.Timestamp.class.getTypeName(),
-                    org.apache.jena.datatypes.xsd.impl.XSDDateTimeType.class.getTypeName()),
+                    XSDDatatype.XSDdateTime.toString()),
             new SparqlResultSetMetadataTest.MetadataTestHelper(SparqlMockDataQuery.DATE_TIME_STAMP_QUERY,
                     24, 24, 0, false, false, java.sql.Types.TIMESTAMP, java.sql.Timestamp.class.getTypeName(),
-                    org.apache.jena.datatypes.xsd.impl.XSDDateTimeStampType.class.getTypeName()),
+                    XSDDatatype.XSDdateTimeStamp.toString()),
             new SparqlResultSetMetadataTest.MetadataTestHelper(SparqlMockDataQuery.DURATION_QUERY,
                     0, 256, 0, true, false, java.sql.Types.VARCHAR, String.class.getTypeName(),
-                    org.apache.jena.datatypes.xsd.XSDDuration.class.getTypeName())
+                    XSDDatatype.XSDduration.toString()),
+            new SparqlResultSetMetadataTest.MetadataTestHelper(SparqlMockDataQuery.PREDICATE_QUERY,
+                    0, 256, 0, true, false, java.sql.Types.VARCHAR, String.class.getTypeName(),
+                    org.apache.jena.rdf.model.impl.ResourceImpl.class.toString())
     );
     private static java.sql.Connection connection;
     private static RDFConnectionRemoteBuilder rdfConnBuilder;
@@ -299,5 +303,4 @@ public class SparqlResultSetMetadataTest {
         private final String columnJavaClassName;
         private final String columnJenaClassName;
     }
-
 }

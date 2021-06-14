@@ -68,4 +68,6 @@ public class SparqlMockDataQuery {
             "SELECT ?x ?yearMonthDuration WHERE {?x  <http://somewhere/peopleInfo#yearMonthDuration>  ?yearMonthDuration}";
     public static final String DAY_TIME_DURATION_QUERY =
             "SELECT ?x ?dayTimeDuration WHERE {?x  <http://somewhere/peopleInfo#dayTimeDuration>  ?dayTimeDuration}";
+    public static final String PREDICATE_QUERY =
+            "SELECT ?fname ?x WHERE {?x  <http://www.w3.org/2001/vcard-rdf/3.0#FN>  ?fname}";
 }

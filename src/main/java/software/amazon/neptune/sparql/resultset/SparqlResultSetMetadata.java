@@ -22,7 +22,7 @@ import java.util.List;
 public class SparqlResultSetMetadata extends software.amazon.jdbc.ResultSetMetaData
         implements java.sql.ResultSetMetaData {
 
-    private final List<Class<?>> columnTypes;
+    private final List<Object> columnTypes;
 
     /**
      * SparqlResultSetMetadata constructor.
@@ -30,7 +30,7 @@ public class SparqlResultSetMetadata extends software.amazon.jdbc.ResultSetMetaD
      * @param columns     List of column names.
      * @param columnTypes List of column types.
      */
-    protected SparqlResultSetMetadata(final List<String> columns, final List<Class<?>> columnTypes) {
+    protected SparqlResultSetMetadata(final List<String> columns, final List<Object> columnTypes) {
         super(columns);
         this.columnTypes = columnTypes;
     }
@@ -42,7 +42,7 @@ public class SparqlResultSetMetadata extends software.amazon.jdbc.ResultSetMetaD
      * @param column the 1-based column index.
      * @return Bolt Type Object for column.
      */
-    protected Class<?> getColumnSparqlType(final int column) {
+    protected Object getColumnSparqlType(final int column) {
         // TODO: Loop rows to find common type and cache it.
         return columnTypes.get(column - 1);
     }
@@ -56,12 +56,12 @@ public class SparqlResultSetMetadata extends software.amazon.jdbc.ResultSetMetaD
     @Override
     public String getColumnTypeName(final int column) throws SQLException {
         verifyColumnIndex(column);
-        return getColumnSparqlType(column).getName();
+        return getColumnSparqlType(column).toString();
     }
 
     @Override
     public String getColumnClassName(final int column) throws SQLException {
         verifyColumnIndex(column);
-        return getColumnSparqlType(column).getName();
+        return SparqlTypeMapping.getJavaType(getColumnSparqlType(column)).getName();
     }
 }
