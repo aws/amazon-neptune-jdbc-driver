@@ -60,38 +60,18 @@ public class SparqlTypeMapping {
         SPARQL_LITERAL_TO_JAVA_TYPE_MAP.put(XSDDatatype.XSDint, Integer.class);
         SPARQL_LITERAL_TO_JAVA_TYPE_MAP.put(XSDDatatype.XSDshort, Short.class);
         SPARQL_LITERAL_TO_JAVA_TYPE_MAP.put(XSDDatatype.XSDboolean, Boolean.class);
-        SPARQL_LITERAL_TO_JAVA_TYPE_MAP.put(XSDDatatype.XSDbase64Binary, String.class);
-        SPARQL_LITERAL_TO_JAVA_TYPE_MAP.put(XSDDatatype.XSDhexBinary, String.class);
         SPARQL_LITERAL_TO_JAVA_TYPE_MAP.put(XSDDatatype.XSDdate, java.sql.Date.class);
         SPARQL_LITERAL_TO_JAVA_TYPE_MAP.put(XSDDatatype.XSDtime, java.sql.Time.class);
         SPARQL_LITERAL_TO_JAVA_TYPE_MAP.put(XSDDatatype.XSDdateTime, java.sql.Timestamp.class);
         SPARQL_LITERAL_TO_JAVA_TYPE_MAP.put(XSDDatatype.XSDdateTimeStamp, java.sql.Timestamp.class);
         SPARQL_LITERAL_TO_JAVA_TYPE_MAP.put(XSDDatatype.XSDduration, String.class);
-        SPARQL_LITERAL_TO_JAVA_TYPE_MAP.put(XSDDatatype.XSDyearMonthDuration, String.class);
-        SPARQL_LITERAL_TO_JAVA_TYPE_MAP.put(XSDDatatype.XSDdayTimeDuration, String.class);
-        SPARQL_LITERAL_TO_JAVA_TYPE_MAP.put(XSDDatatype.XSDgYearMonth, String.class);
-        SPARQL_LITERAL_TO_JAVA_TYPE_MAP.put(XSDDatatype.XSDgMonthDay, String.class);
-        SPARQL_LITERAL_TO_JAVA_TYPE_MAP.put(XSDDatatype.XSDgMonth, String.class);
-        SPARQL_LITERAL_TO_JAVA_TYPE_MAP.put(XSDDatatype.XSDgDay, String.class);
-        SPARQL_LITERAL_TO_JAVA_TYPE_MAP.put(XSDDatatype.XSDgYear, String.class);
-        SPARQL_LITERAL_TO_JAVA_TYPE_MAP.put(XSDDatatype.XSDnormalizedString, String.class);
         SPARQL_LITERAL_TO_JAVA_TYPE_MAP.put(XSDDatatype.XSDstring, String.class);
 
         SPARQL_LITERAL_TO_JAVA_TRANSFORM_MAP.put(XSDDatatype.XSDtime, TIME_CONVERTER);
         SPARQL_LITERAL_TO_JAVA_TRANSFORM_MAP.put(XSDDatatype.XSDdate, DATE_CONVERTER);
         SPARQL_LITERAL_TO_JAVA_TRANSFORM_MAP.put(XSDDatatype.XSDdateTime, DATE_TIME_CONVERTER);
         SPARQL_LITERAL_TO_JAVA_TRANSFORM_MAP.put(XSDDatatype.XSDdateTimeStamp, DATE_TIME_STAMP_CONVERTER);
-        SPARQL_LITERAL_TO_JAVA_TRANSFORM_MAP.put(XSDDatatype.XSDbase64Binary, Literal::getLexicalForm);
-        SPARQL_LITERAL_TO_JAVA_TRANSFORM_MAP.put(XSDDatatype.XSDhexBinary, Literal::getLexicalForm);
         SPARQL_LITERAL_TO_JAVA_TRANSFORM_MAP.put(XSDDatatype.XSDduration, Literal::getLexicalForm);
-        SPARQL_LITERAL_TO_JAVA_TRANSFORM_MAP.put(XSDDatatype.XSDyearMonthDuration, Literal::getLexicalForm);
-        SPARQL_LITERAL_TO_JAVA_TRANSFORM_MAP.put(XSDDatatype.XSDdayTimeDuration, Literal::getLexicalForm);
-        SPARQL_LITERAL_TO_JAVA_TRANSFORM_MAP.put(XSDDatatype.XSDgYearMonth, Literal::getLexicalForm);
-        SPARQL_LITERAL_TO_JAVA_TRANSFORM_MAP.put(XSDDatatype.XSDgMonthDay, Literal::getLexicalForm);
-        SPARQL_LITERAL_TO_JAVA_TRANSFORM_MAP.put(XSDDatatype.XSDgMonth, Literal::getLexicalForm);
-        SPARQL_LITERAL_TO_JAVA_TRANSFORM_MAP.put(XSDDatatype.XSDgDay, Literal::getLexicalForm);
-        SPARQL_LITERAL_TO_JAVA_TRANSFORM_MAP.put(XSDDatatype.XSDgYear, Literal::getLexicalForm);
-        SPARQL_LITERAL_TO_JAVA_TRANSFORM_MAP.put(XSDDatatype.XSDnormalizedString, Literal::getLexicalForm);
         SPARQL_LITERAL_TO_JAVA_TRANSFORM_MAP.put(XSDDatatype.XSDstring, Literal::getLexicalForm);
         // NOTE: Gregorian date types are not supported currently due to incompatibility with java and JDBC datatype,
         // currently returning as String
@@ -113,21 +93,11 @@ public class SparqlTypeMapping {
         SPARQL_LITERAL_TO_JDBC_TYPE_MAP.put(XSDDatatype.XSDint, JdbcType.INTEGER);
         SPARQL_LITERAL_TO_JDBC_TYPE_MAP.put(XSDDatatype.XSDshort, JdbcType.SMALLINT);
         SPARQL_LITERAL_TO_JDBC_TYPE_MAP.put(XSDDatatype.XSDboolean, JdbcType.BIT);
-        SPARQL_LITERAL_TO_JDBC_TYPE_MAP.put(XSDDatatype.XSDbase64Binary, JdbcType.VARCHAR);
-        SPARQL_LITERAL_TO_JDBC_TYPE_MAP.put(XSDDatatype.XSDhexBinary, JdbcType.VARCHAR);
         SPARQL_LITERAL_TO_JDBC_TYPE_MAP.put(XSDDatatype.XSDdate, JdbcType.DATE);
         SPARQL_LITERAL_TO_JDBC_TYPE_MAP.put(XSDDatatype.XSDtime, JdbcType.TIME);
         SPARQL_LITERAL_TO_JDBC_TYPE_MAP.put(XSDDatatype.XSDdateTime, JdbcType.TIMESTAMP);
         SPARQL_LITERAL_TO_JDBC_TYPE_MAP.put(XSDDatatype.XSDdateTimeStamp, JdbcType.TIMESTAMP);
         SPARQL_LITERAL_TO_JDBC_TYPE_MAP.put(XSDDatatype.XSDduration, JdbcType.VARCHAR);
-        SPARQL_LITERAL_TO_JDBC_TYPE_MAP.put(XSDDatatype.XSDyearMonthDuration, JdbcType.VARCHAR);
-        SPARQL_LITERAL_TO_JDBC_TYPE_MAP.put(XSDDatatype.XSDdayTimeDuration, JdbcType.VARCHAR);
-        SPARQL_LITERAL_TO_JDBC_TYPE_MAP.put(XSDDatatype.XSDgYearMonth, JdbcType.VARCHAR);
-        SPARQL_LITERAL_TO_JDBC_TYPE_MAP.put(XSDDatatype.XSDgMonthDay, JdbcType.VARCHAR);
-        SPARQL_LITERAL_TO_JDBC_TYPE_MAP.put(XSDDatatype.XSDgMonth, JdbcType.VARCHAR);
-        SPARQL_LITERAL_TO_JDBC_TYPE_MAP.put(XSDDatatype.XSDgDay, JdbcType.VARCHAR);
-        SPARQL_LITERAL_TO_JDBC_TYPE_MAP.put(XSDDatatype.XSDgYear, JdbcType.VARCHAR);
-        SPARQL_LITERAL_TO_JDBC_TYPE_MAP.put(XSDDatatype.XSDnormalizedString, JdbcType.VARCHAR);
         SPARQL_LITERAL_TO_JDBC_TYPE_MAP.put(XSDDatatype.XSDstring, JdbcType.VARCHAR);
 
         SPARQL_JAVA_TO_JDBC_TYPE_MAP.put(String.class, JdbcType.VARCHAR);
