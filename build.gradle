@@ -11,6 +11,7 @@ plugins {
     id 'java'
     id "com.github.spotbugs" version "4.5.1"
     id 'checkstyle'
+    id 'com.github.hierynomus.license' version '0.15.0'
     id 'jacoco'
 }
 
@@ -172,6 +173,23 @@ jacocoTestCoverageVerification {
 check.dependsOn jacocoTestCoverageVerification
 jacocoTestCoverageVerification.dependsOn jacocoTestReport
 
+/**
+ * License Plugin
+ */
+license {
+    headerDefinitions {
+        slash_star_with_space {
+            firstLine = '/*'
+            endLine   = ' *\n */\n'
+            beforeEachLine = ' * '
+            firstLineDetectionPattern = '/\\*'
+            lastLineDetectionPattern  = ' \\*\n \\*/\n'
+        }
+    }
+    mapping {
+        java = 'slash_star_with_space'
+    }
+}
 
 repositories {
     mavenCentral()
