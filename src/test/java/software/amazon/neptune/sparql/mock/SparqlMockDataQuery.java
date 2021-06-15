@@ -21,8 +21,10 @@ public class SparqlMockDataQuery {
     public static final String BOOL_QUERY = "SELECT ?x ?bool WHERE {?x  <http://somewhere/peopleInfo#bool>  ?bool}";
     public static final String BYTE_QUERY = "SELECT ?x ?byte WHERE {?x  <http://somewhere/peopleInfo#byte>  ?byte}";
     public static final String SHORT_QUERY = "SELECT ?x ?short WHERE {?x  <http://somewhere/peopleInfo#short>  ?short}";
-    public static final String INTEGER_QUERY =
-            "SELECT ?x ?integer WHERE {?x  <http://somewhere/peopleInfo#integer>  ?integer}";
+    public static final String INTEGER_SMALL_QUERY =
+            "SELECT ?x ?integerSm WHERE {?x  <http://somewhere/peopleInfo#integerSm>  ?integerSm}";
+    public static final String INTEGER_LARGE_QUERY =
+            "SELECT ?x ?integerLg WHERE {?x  <http://somewhere/peopleInfo#integerLg>  ?integerLg}";
     public static final String LONG_QUERY = "SELECT ?x ?long WHERE {?x  <http://somewhere/peopleInfo#long>  ?long}";
     public static final String INT_QUERY = "SELECT ?x ?int WHERE {?x  <http://somewhere/peopleInfo#int>  ?int}";
     public static final String DECIMAL_QUERY =
@@ -37,8 +39,10 @@ public class SparqlMockDataQuery {
             "SELECT ?x ?unsignedShort WHERE {?x  <http://somewhere/peopleInfo#unsignedShort>  ?unsignedShort}";
     public static final String UNSIGNED_INT_QUERY =
             "SELECT ?x ?unsignedInt WHERE {?x  <http://somewhere/peopleInfo#unsignedInt>  ?unsignedInt}";
-    public static final String UNSIGNED_LONG_QUERY =
-            "SELECT ?x ?unsignedLong WHERE {?x  <http://somewhere/peopleInfo#unsignedLong>  ?unsignedLong}";
+    public static final String UNSIGNED_LONG_SMALL_QUERY =
+            "SELECT ?x ?unsignedLongSm WHERE {?x  <http://somewhere/peopleInfo#unsignedLongSm>  ?unsignedLongSm}";
+    public static final String UNSIGNED_LONG_LARGE_QUERY =
+            "SELECT ?x ?unsignedLongLg WHERE {?x  <http://somewhere/peopleInfo#unsignedLongLg>  ?unsignedLongLg}";
     public static final String POSITIVE_INTEGER_QUERY =
             "SELECT ?x ?positiveInteger WHERE {?x  <http://somewhere/peopleInfo#positiveInteger>  ?positiveInteger}";
     public static final String NON_NEGATIVE_INTEGER_QUERY =

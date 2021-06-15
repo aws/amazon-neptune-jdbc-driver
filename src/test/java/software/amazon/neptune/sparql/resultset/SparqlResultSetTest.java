@@ -40,6 +40,7 @@ import software.amazon.neptune.sparql.SparqlConnectionProperties;
 import software.amazon.neptune.sparql.mock.SparqlMockDataQuery;
 import software.amazon.neptune.sparql.mock.SparqlMockServer;
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Time;
@@ -219,8 +220,24 @@ public class SparqlResultSetTest {
     }
 
     @Test
-    void testIntegerType() throws SQLException {
-        testIntegerResultTypes(SparqlMockDataQuery.INTEGER_QUERY, 25, 2);
+    void testIntegerSmallType() throws SQLException {
+        testIntegerResultTypes(SparqlMockDataQuery.INTEGER_SMALL_QUERY, 25, 2);
+    }
+
+    @Test
+    void testIntegerLargeType() throws SQLException {
+        final BigInteger expectedValue = new BigInteger("18446744073709551615");
+        final java.sql.ResultSet resultSet = statement.executeQuery(SparqlMockDataQuery.INTEGER_LARGE_QUERY);
+        Assertions.assertTrue(resultSet.next());
+        Assertions.assertEquals(expectedValue.byteValue(), resultSet.getByte(2));
+        Assertions.assertEquals(expectedValue.shortValue(), resultSet.getShort(2));
+        Assertions.assertEquals(expectedValue.intValue(), resultSet.getInt(2));
+        Assertions.assertEquals(expectedValue.doubleValue(), resultSet.getDouble(2));
+        Assertions.assertEquals(expectedValue.floatValue(), resultSet.getFloat(2));
+        Assertions.assertEquals(expectedValue.longValue(), resultSet.getLong(2));
+        Assertions.assertEquals(expectedValue, resultSet.getObject(2));
+        Assertions.assertEquals(String.valueOf(expectedValue), resultSet.getString(2));
+        Assertions.assertThrows(SQLException.class, () -> resultSet.getBoolean(2));
     }
 
     @Test
@@ -244,19 +261,19 @@ public class SparqlResultSetTest {
 
     @Test
     void testBigDecimalType() throws SQLException {
-        final BigDecimal expected = new BigDecimal("180.5");
+        final BigDecimal expectedValue = new BigDecimal("180.5");
         final java.sql.ResultSet resultSet =
                 statement.executeQuery(SparqlMockDataQuery.DECIMAL_QUERY);
         Assertions.assertTrue(resultSet.next());
-        Assertions.assertEquals(expected, resultSet.getBigDecimal(2));
-        Assertions.assertThrows(SQLException.class, () -> resultSet.getString(2));
+        Assertions.assertEquals(expectedValue, resultSet.getBigDecimal(2));
+        Assertions.assertEquals(String.valueOf(expectedValue), resultSet.getString(2));
+        Assertions.assertEquals(expectedValue.byteValue(), resultSet.getByte(2));
+        Assertions.assertEquals(expectedValue.shortValue(), resultSet.getShort(2));
+        Assertions.assertEquals(expectedValue.intValue(), resultSet.getInt(2));
+        Assertions.assertEquals(expectedValue.floatValue(), resultSet.getFloat(2));
+        Assertions.assertEquals(expectedValue.doubleValue(), resultSet.getDouble(2));
+        Assertions.assertEquals(expectedValue.longValue(), resultSet.getLong(2));
         Assertions.assertThrows(SQLException.class, () -> resultSet.getBoolean(2));
-        Assertions.assertThrows(SQLException.class, () -> resultSet.getByte(2));
-        Assertions.assertThrows(SQLException.class, () -> resultSet.getShort(2));
-        Assertions.assertThrows(SQLException.class, () -> resultSet.getLong(2));
-        Assertions.assertThrows(SQLException.class, () -> resultSet.getDouble(2));
-        Assertions.assertThrows(SQLException.class, () -> resultSet.getFloat(2));
-        Assertions.assertThrows(SQLException.class, () -> resultSet.getInt(2));
         Assertions.assertThrows(SQLException.class, () -> resultSet.getTimestamp(2));
     }
 
@@ -275,7 +292,6 @@ public class SparqlResultSetTest {
         Assertions.assertThrows(SQLException.class, () -> resultSet.getBoolean(2));
         Assertions.assertThrows(SQLException.class, () -> resultSet.getTimestamp(2));
     }
-
 
     @Test
     void testFloatType() throws SQLException {
@@ -308,15 +324,32 @@ public class SparqlResultSetTest {
     }
 
     @Test
-    void testUnsignedLongType() throws SQLException {
+    void testUnsignedLongSmallType() throws SQLException {
         final java.sql.ResultSet resultSet =
-                statement.executeQuery(SparqlMockDataQuery.UNSIGNED_LONG_QUERY);
+                statement.executeQuery(SparqlMockDataQuery.UNSIGNED_LONG_SMALL_QUERY);
         Assertions.assertTrue(resultSet.next());
         Assertions.assertEquals((byte) 4294970000L, resultSet.getByte(2));
         Assertions.assertEquals((short) 4294970000L, resultSet.getShort(2));
         Assertions.assertEquals((int) 4294970000L, resultSet.getInt(2));
         Assertions.assertEquals(4294970000L, resultSet.getLong(2));
         Assertions.assertEquals(String.valueOf(4294970000L), resultSet.getString(2));
+    }
+
+    @Test
+    void testUnsignedLongLargeType() throws SQLException {
+        final BigInteger expectedValue = new BigInteger("18446744073709551615");
+        final java.sql.ResultSet resultSet =
+                statement.executeQuery(SparqlMockDataQuery.UNSIGNED_LONG_LARGE_QUERY);
+        Assertions.assertTrue(resultSet.next());
+        Assertions.assertEquals(expectedValue.byteValue(), resultSet.getByte(2));
+        Assertions.assertEquals(expectedValue.shortValue(), resultSet.getShort(2));
+        Assertions.assertEquals(expectedValue.intValue(), resultSet.getInt(2));
+        Assertions.assertEquals(expectedValue.doubleValue(), resultSet.getDouble(2));
+        Assertions.assertEquals(expectedValue.floatValue(), resultSet.getFloat(2));
+        Assertions.assertEquals(expectedValue.longValue(), resultSet.getLong(2));
+        Assertions.assertEquals(expectedValue, resultSet.getObject(2));
+        Assertions.assertEquals(String.valueOf(expectedValue), resultSet.getString(2));
+        Assertions.assertThrows(SQLException.class, () -> resultSet.getBoolean(2));
     }
 
     @Test
@@ -486,7 +519,7 @@ public class SparqlResultSetTest {
 
         while (result.hasNext()) {
             final QuerySolution querySolution = result.next();
-            final RDFNode node = querySolution.get("s");
+            final RDFNode node = querySolution.get("o");
             System.out.println("|NODE CLASS                   | " + node.getClass());
             if (node.isLiteral()) {
                 System.out.println("[--------------NEW ROW : LITERAL--------------]");

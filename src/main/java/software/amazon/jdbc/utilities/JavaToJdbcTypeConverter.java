@@ -115,6 +115,11 @@ public class JavaToJdbcTypeConverter {
             return 0;
         }
         try {
+            if (input instanceof BigInteger) {
+                return ((BigInteger) input).byteValue();
+            } else if (input instanceof BigDecimal) {
+                return ((BigDecimal) input).byteValue();
+            }
             return toLong(input).byteValue();
         } catch (final SQLException ignored) {
             throw createConversionException(input.getClass(), Byte.class);
@@ -133,6 +138,11 @@ public class JavaToJdbcTypeConverter {
             return 0;
         }
         try {
+            if (input instanceof BigInteger) {
+                return ((BigInteger) input).shortValue();
+            } else if (input instanceof BigDecimal) {
+                return ((BigDecimal) input).shortValue();
+            }
             return toLong(input).shortValue();
         } catch (final SQLException ignored) {
             throw createConversionException(input.getClass(), Short.class);
@@ -151,6 +161,11 @@ public class JavaToJdbcTypeConverter {
             return 0;
         }
         try {
+            if (input instanceof BigInteger) {
+                return ((BigInteger) input).intValue();
+            } else if (input instanceof BigDecimal) {
+                return ((BigDecimal) input).intValue();
+            }
             return toLong(input).intValue();
         } catch (final SQLException ignored) {
             throw createConversionException(input.getClass(), Integer.class);
@@ -180,6 +195,10 @@ public class JavaToJdbcTypeConverter {
             return ((Short) input).longValue();
         } else if (input instanceof Byte) {
             return ((Byte) input).longValue();
+        } else if (input instanceof BigInteger) {
+            return ((BigInteger) input).longValue();
+        } else if (input instanceof BigDecimal) {
+            return ((BigDecimal) input).longValue();
         } else if (input instanceof String) {
             try {
                 return Long.parseLong((String) input);
@@ -209,6 +228,8 @@ public class JavaToJdbcTypeConverter {
                 input instanceof Long ||
                 input instanceof Float ||
                 input instanceof Double ||
+                input instanceof BigInteger ||
+                input instanceof BigDecimal ||
                 input instanceof List ||
                 input instanceof Map ||
                 input instanceof java.sql.Date ||
@@ -236,6 +257,11 @@ public class JavaToJdbcTypeConverter {
             return 0.0f;
         }
         try {
+            if (input instanceof BigInteger) {
+                return ((BigInteger) input).floatValue();
+            } else if (input instanceof BigDecimal) {
+                return ((BigDecimal) input).floatValue();
+            }
             return toDouble(input).floatValue();
         } catch (final SQLException ignored) {
             throw createConversionException(input.getClass(), Float.class);
@@ -265,6 +291,10 @@ public class JavaToJdbcTypeConverter {
             return ((Short) input).doubleValue();
         } else if (input instanceof Byte) {
             return ((Byte) input).doubleValue();
+        } else if (input instanceof BigInteger) {
+            return ((BigInteger) input).doubleValue();
+        } else if (input instanceof BigDecimal) {
+            return ((BigDecimal) input).doubleValue();
         } else if (input instanceof String) {
             try {
                 return Double.parseDouble((String) input);

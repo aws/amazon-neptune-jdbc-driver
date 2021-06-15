@@ -61,7 +61,7 @@ public class SparqlResultSetMetadataTest {
             new SparqlResultSetMetadataTest.MetadataTestHelper(SparqlMockDataQuery.LONG_QUERY,
                     20, 19, 0, false, true, java.sql.Types.BIGINT, Long.class.getTypeName(),
                     XSDDatatype.XSDlong.toString()),
-            new SparqlResultSetMetadataTest.MetadataTestHelper(SparqlMockDataQuery.INTEGER_QUERY,
+            new SparqlResultSetMetadataTest.MetadataTestHelper(SparqlMockDataQuery.INTEGER_SMALL_QUERY,
                     20, 19, 0, false, true, java.sql.Types.BIGINT, java.math.BigInteger.class.getName(),
                     XSDDatatype.XSDinteger.toString()),
             new SparqlResultSetMetadataTest.MetadataTestHelper(SparqlMockDataQuery.DECIMAL_QUERY,

@@ -68,6 +68,7 @@ public abstract class ResultSetMetaData implements java.sql.ResultSetMetaData {
         return columns.size();
     }
 
+    // TODO: AN-562 Investigate refactoring for adding constants and/or changing if/else statements to cases
     @Override
     public int getColumnDisplaySize(final int column) throws SQLException {
         verifyColumnIndex(column);

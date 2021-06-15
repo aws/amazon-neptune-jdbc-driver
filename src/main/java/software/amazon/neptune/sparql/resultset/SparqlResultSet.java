@@ -62,12 +62,14 @@ public class SparqlResultSet extends software.amazon.jdbc.ResultSet implements j
 
     @Override
     protected int getDriverFetchSize() throws SQLException {
+        // TODO: AN-562 possibly raise error instead of leaving as a comment
         // Can't be done based on implementation.
         return 0;
     }
 
     @Override
     protected void setDriverFetchSize(final int rows) {
+        // TODO: AN-562 possibly raise error instead of leaving as a comment
         // Can't be done based on implementation.
     }
 
@@ -82,8 +84,7 @@ public class SparqlResultSet extends software.amazon.jdbc.ResultSet implements j
         for (final String column : columns) {
             final QuerySolution row = rows.get(0);
             final RDFNode node = row.get(column);
-            // TODO: type promotion
-            // TODO: add null types to type map?
+            // TODO: AN-562 find efficient type promotion with row looping
             if (node == null) {
                 rowTypes.add(null);
             } else {

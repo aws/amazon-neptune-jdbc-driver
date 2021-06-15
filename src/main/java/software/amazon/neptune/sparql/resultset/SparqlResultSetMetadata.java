@@ -43,7 +43,7 @@ public class SparqlResultSetMetadata extends software.amazon.jdbc.ResultSetMetaD
      * @return Bolt Type Object for column.
      */
     protected Object getColumnSparqlType(final int column) {
-        // TODO: Loop rows to find common type and cache it.
+        // TODO: AN-562 Loop rows to find common type and cache it.
         return columnTypes.get(column - 1);
     }
 
