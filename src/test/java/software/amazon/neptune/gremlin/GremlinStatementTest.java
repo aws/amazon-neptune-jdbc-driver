@@ -1,5 +1,5 @@
 /*
- * Copyright <2020> Amazon.com, Inc. or its affiliates. All Rights Reserved.
+ * Copyright <2021> Amazon.com, Inc. or its affiliates. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License").
  * You may not use this file except in compliance with the License.
@@ -23,14 +23,15 @@ import software.amazon.neptune.NeptuneStatementTestHelper;
 import software.amazon.neptune.gremlin.mock.MockGremlinDatabase;
 import java.io.IOException;
 import java.sql.SQLException;
+
 import static software.amazon.neptune.gremlin.GremlinHelper.getProperties;
 
 public class GremlinStatementTest extends GremlinStatementTestBase {
     private static final String HOSTNAME = "localhost";
     private static final int PORT = 8181; // Mock server uses 8181.
     private static final int MAX_CONTENT_LENGTH = 500000; // Took from PropertyGraphSerializationModule.
-    private static NeptuneStatementTestHelper neptuneStatementTestHelper;
     private static final int MAX_CONNECT_ATTEMPTS = 10;
+    private static NeptuneStatementTestHelper neptuneStatementTestHelper;
 
     @BeforeEach
     void initialize() throws SQLException, IOException, InterruptedException {
