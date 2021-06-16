@@ -64,7 +64,6 @@ public class SparqlStatementTest extends SparqlStatementTestBase {
 
         // connects to database, updates the database
         try (final RDFConnection conn = builder.build()) {
-            System.out.println(conn.isClosed());
             conn.update(update);
         }
 

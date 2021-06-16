@@ -17,6 +17,8 @@ package software.amazon.jdbc.utilities;
 
 import com.google.common.collect.ImmutableMap;
 import org.slf4j.LoggerFactory;
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.sql.Date;
 import java.sql.SQLException;
 import java.sql.Time;
@@ -56,6 +58,7 @@ public class JavaToJdbcTypeConverter {
         CLASS_CONVERTER_MAP.put(Date.class, JavaToJdbcTypeConverter::toDate);
         CLASS_CONVERTER_MAP.put(Time.class, JavaToJdbcTypeConverter::toTime);
         CLASS_CONVERTER_MAP.put(Timestamp.class, JavaToJdbcTypeConverter::toTimestamp);
+        CLASS_CONVERTER_MAP.put(java.math.BigDecimal.class, JavaToJdbcTypeConverter::toBigDecimal);
 
         CLASS_TO_JDBC_ORDINAL.put(Boolean.class, JdbcType.BIT.getJdbcCode());
         CLASS_TO_JDBC_ORDINAL.put(Byte.class, JdbcType.TINYINT.getJdbcCode());
@@ -67,6 +70,7 @@ public class JavaToJdbcTypeConverter {
         CLASS_TO_JDBC_ORDINAL.put(Date.class, JdbcType.DATE.getJdbcCode());
         CLASS_TO_JDBC_ORDINAL.put(Time.class, JdbcType.TIME.getJdbcCode());
         CLASS_TO_JDBC_ORDINAL.put(String.class, JdbcType.VARCHAR.getJdbcCode());
+        CLASS_TO_JDBC_ORDINAL.put(java.math.BigDecimal.class, JdbcType.DECIMAL.getJdbcCode());
     }
 
     /**
@@ -164,18 +168,10 @@ public class JavaToJdbcTypeConverter {
         if (input == null) {
             return 0L;
         }
-        if (input instanceof Double) {
-            return ((Double) input).longValue();
-        } else if (input instanceof Float) {
-            return ((Float) input).longValue();
-        } else if (input instanceof Long) {
+        if (input instanceof Long) {
             return (Long) input;
-        } else if (input instanceof Integer) {
-            return ((Integer) input).longValue();
-        } else if (input instanceof Short) {
-            return ((Short) input).longValue();
-        } else if (input instanceof Byte) {
-            return ((Byte) input).longValue();
+        } else if (input instanceof Number) {
+            return ((Number) input).longValue();
         } else if (input instanceof String) {
             try {
                 return Long.parseLong((String) input);
@@ -199,12 +195,7 @@ public class JavaToJdbcTypeConverter {
         if (input instanceof String) {
             return (String) input;
         } else if (input instanceof Boolean ||
-                input instanceof Byte ||
-                input instanceof Short ||
-                input instanceof Integer ||
-                input instanceof Long ||
-                input instanceof Float ||
-                input instanceof Double ||
+                input instanceof Number ||
                 input instanceof List ||
                 input instanceof Map ||
                 input instanceof java.sql.Date ||
@@ -251,16 +242,8 @@ public class JavaToJdbcTypeConverter {
         }
         if (input instanceof Double) {
             return (Double) input;
-        } else if (input instanceof Float) {
-            return ((Float) input).doubleValue();
-        } else if (input instanceof Long) {
-            return ((Long) input).doubleValue();
-        } else if (input instanceof Integer) {
-            return ((Integer) input).doubleValue();
-        } else if (input instanceof Short) {
-            return ((Short) input).doubleValue();
-        } else if (input instanceof Byte) {
-            return ((Byte) input).doubleValue();
+        } else if (input instanceof Number) {
+            return ((Number) input).doubleValue();
         } else if (input instanceof String) {
             try {
                 return Double.parseDouble((String) input);
@@ -268,6 +251,32 @@ public class JavaToJdbcTypeConverter {
             }
         }
         throw createConversionException(input.getClass(), Double.class);
+    }
+
+    /**
+     * Function that takes in a Java Object and attempts to convert it to a BigDecimal.
+     *
+     * @param input Input Object.
+     * @return BigDecimal value.
+     * @throws SQLException if conversion cannot be performed.
+     */
+    public static BigDecimal toBigDecimal(final Object input) throws SQLException {
+        if (input == null) {
+            return new BigDecimal("0.0");
+        }
+        if (input instanceof BigDecimal) {
+            return (BigDecimal) input;
+        } else if (input instanceof BigInteger) {
+            return new BigDecimal((BigInteger) input);
+        } else if (input instanceof Number) {
+            return BigDecimal.valueOf(((Number) input).doubleValue());
+        } else if (input instanceof String) {
+            try {
+                return new BigDecimal((String) input);
+            } catch (final NumberFormatException ignored) {
+            }
+        }
+        throw createConversionException(input.getClass(), BigDecimal.class);
     }
 
     /**
@@ -303,6 +312,9 @@ public class JavaToJdbcTypeConverter {
         if (input == null) {
             return null;
         }
+        if (input instanceof java.sql.Date) {
+            return (java.sql.Date) input;
+        }
 
         if (input instanceof Long) {
             return new Date((Long) input);
@@ -317,6 +329,8 @@ public class JavaToJdbcTypeConverter {
             return getCalendarDate(Date.valueOf(((LocalDateTime) input).toLocalDate()), calendar);
         } else if (input instanceof ZonedDateTime) {
             return getCalendarDate(Date.valueOf(((ZonedDateTime) input).toLocalDate()), calendar);
+        } else if (input instanceof Timestamp) {
+            return getCalendarDate(new Date(((Timestamp) input).getTime()), calendar);
         }
         throw createConversionException(input.getClass(), java.sql.Date.class);
     }
@@ -332,6 +346,9 @@ public class JavaToJdbcTypeConverter {
     public static java.sql.Time toTime(final Object input, final Calendar calendar) throws SQLException {
         if (input == null) {
             return null;
+        }
+        if (input instanceof java.sql.Time) {
+            return (java.sql.Time) input;
         }
 
         try {
@@ -350,6 +367,8 @@ public class JavaToJdbcTypeConverter {
                 return getCalendarTime(Time.valueOf(((ZonedDateTime) input).toLocalTime()), calendar);
             } else if (input instanceof OffsetTime) {
                 return getCalendarTime(Time.valueOf(((OffsetTime) input).toLocalTime()), calendar);
+            } else if (input instanceof Timestamp) {
+                return getCalendarTime(new Time(((Timestamp) input).getTime()), calendar);
             }
         } catch (final Exception ignored) {
         }
@@ -367,6 +386,9 @@ public class JavaToJdbcTypeConverter {
     public static java.sql.Timestamp toTimestamp(final Object input, final Calendar calendar) throws SQLException {
         if (input == null) {
             return null;
+        }
+        if (input instanceof Timestamp) {
+            return (Timestamp) input;
         }
 
         try {

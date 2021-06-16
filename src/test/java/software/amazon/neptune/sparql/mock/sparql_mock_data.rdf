@@ -1,0 +1,46 @@
+<rdf:RDF
+    xmlns:rdf='http://www.w3.org/1999/02/22-rdf-syntax-ns#'
+    xmlns:vCard='http://www.w3.org/2001/vcard-rdf/3.0#'
+    xmlns:info='http://somewhere/peopleInfo#'
+    >
+
+  <rdf:Description rdf:about="http://somewhere/JohnSmith">
+    <vCard:FN>John Smith</vCard:FN>
+    <info:bool rdf:datatype='http://www.w3.org/2001/XMLSchema#boolean'>true</info:bool>
+    <info:byte rdf:datatype='http://www.w3.org/2001/XMLSchema#byte'>127</info:byte>
+    <info:short rdf:datatype='http://www.w3.org/2001/XMLSchema#short'>32767</info:short>
+    <info:int rdf:datatype='http://www.w3.org/2001/XMLSchema#int'>-100</info:int>
+    <info:long rdf:datatype='http://www.w3.org/2001/XMLSchema#long'>3000000000</info:long>
+    <info:integerSm rdf:datatype='http://www.w3.org/2001/XMLSchema#integer'>25</info:integerSm>
+    <info:integerLg rdf:datatype='http://www.w3.org/2001/XMLSchema#integer'>18446744073709551615</info:integerLg>
+    <info:decimal rdf:datatype='http://www.w3.org/2001/XMLSchema#decimal'>180.5</info:decimal>
+    <info:double rdf:datatype='http://www.w3.org/2001/XMLSchema#double'>100000.00</info:double>
+    <info:float rdf:datatype='http://www.w3.org/2001/XMLSchema#float'>80.5</info:float>
+    <info:unsignedByte rdf:datatype='http://www.w3.org/2001/XMLSchema#unsignedByte'>200</info:unsignedByte>
+    <info:unsignedShort rdf:datatype='http://www.w3.org/2001/XMLSchema#unsignedShort'>300</info:unsignedShort>
+    <info:unsignedInt rdf:datatype='http://www.w3.org/2001/XMLSchema#unsignedInt'>65600</info:unsignedInt>
+    <info:unsignedLongSm rdf:datatype='http://www.w3.org/2001/XMLSchema#unsignedLong'>4294970000</info:unsignedLongSm>
+    <info:unsignedLongLg rdf:datatype='http://www.w3.org/2001/XMLSchema#unsignedLong'>18446744073709551615</info:unsignedLongLg>
+    <info:positiveInteger rdf:datatype='http://www.w3.org/2001/XMLSchema#positiveInteger'>5</info:positiveInteger>
+    <info:nonNegativeInteger rdf:datatype='http://www.w3.org/2001/XMLSchema#nonNegativeInteger'>1</info:nonNegativeInteger>
+    <info:negativeInteger rdf:datatype='http://www.w3.org/2001/XMLSchema#negativeInteger'>-5</info:negativeInteger>
+    <info:nonPositiveInteger rdf:datatype='http://www.w3.org/2001/XMLSchema#nonPositiveInteger'>-1</info:nonPositiveInteger>
+    <info:time rdf:datatype='http://www.w3.org/2001/XMLSchema#time'>22:10:10</info:time>
+    <info:date rdf:datatype='http://www.w3.org/2001/XMLSchema#date'>1996-01-01</info:date>
+    <info:dateTime rdf:datatype='http://www.w3.org/2001/XMLSchema#dateTime'>2020-01-01T00:10:10</info:dateTime>
+    <info:dateTimeStamp rdf:datatype='http://www.w3.org/2001/XMLSchema#dateTimeStamp'>2020-01-01T00:10:10-06:00</info:dateTimeStamp>
+    <info:gYear rdf:datatype='http://www.w3.org/2001/XMLSchema#gYear'>2020</info:gYear>
+    <info:gMonth rdf:datatype='http://www.w3.org/2001/XMLSchema#gMonth'>--10</info:gMonth>
+    <info:gDay rdf:datatype='http://www.w3.org/2001/XMLSchema#gDay'>---20</info:gDay>
+    <info:gYearMonth rdf:datatype='http://www.w3.org/2001/XMLSchema#gYearMonth'>2020-06</info:gYearMonth>
+    <info:gMonthDay rdf:datatype='http://www.w3.org/2001/XMLSchema#gMonthDay'>--06-01</info:gMonthDay>
+    <info:duration rdf:datatype='http://www.w3.org/2001/XMLSchema#duration'>P30D</info:duration>
+    <info:yearMonthDuration rdf:datatype='http://www.w3.org/2001/XMLSchema#yearMonthDuration'>P2M</info:yearMonthDuration>
+    <info:dayTimeDuration rdf:datatype='http://www.w3.org/2001/XMLSchema#dayTimeDuration'>P5D</info:dayTimeDuration>
+    <vCard:N rdf:parseType="Resource">
+        <vCard:Family>Smith</vCard:Family>
+        <vCard:Given>John</vCard:Given>
+    </vCard:N>
+  </rdf:Description>
+
+</rdf:RDF>
