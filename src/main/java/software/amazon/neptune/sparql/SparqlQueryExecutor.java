@@ -1,14 +1,14 @@
 /*
- * Copyright <2020> Amazon.com, final Inc. or its affiliates. All Rights Reserved.
+ * Copyright <2021> Amazon.com, Inc. or its affiliates. All Rights Reserved.
  *
- * Licensed under the Apache License, final Version 2.0 (the "License").
+ * Licensed under the Apache License, Version 2.0 (the "License").
  * You may not use this file except in compliance with the License.
  * A copy of the License is located at
  *
  *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * or in the "license" file accompanying this file. This file is distributed
- * on an "AS IS" BASIS, final WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, final either
+ * on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
  * express or implied. See the License for the specific language governing
  * permissions and limitations under the License.
  *
@@ -38,7 +38,14 @@ import software.amazon.jdbc.utilities.AuthScheme;
 import software.amazon.jdbc.utilities.QueryExecutor;
 import software.amazon.jdbc.utilities.SqlError;
 import software.amazon.jdbc.utilities.SqlState;
+import software.amazon.neptune.common.gremlindatamodel.MetadataCache;
+import software.amazon.neptune.common.gremlindatamodel.NodeColumnInfo;
 import software.amazon.neptune.sparql.resultset.SparqlResultSet;
+import software.amazon.neptune.sparql.resultset.SparqlResultSetGetCatelogs;
+import software.amazon.neptune.sparql.resultset.SparqlResultSetGetColumns;
+import software.amazon.neptune.sparql.resultset.SparqlResultSetGetSchemas;
+import software.amazon.neptune.sparql.resultset.SparqlResultSetGetTableTypes;
+import software.amazon.neptune.sparql.resultset.SparqlResultSetGetTables;
 import java.lang.reflect.Constructor;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -242,8 +249,17 @@ public class SparqlQueryExecutor extends QueryExecutor {
      * @throws SQLException if query execution fails, or it was cancelled.
      */
     @Override
-    public ResultSet executeGetTables(final Statement statement, final String tableName) throws SQLException {
-        return null;
+    public java.sql.ResultSet executeGetTables(final Statement statement, final String tableName) throws SQLException {
+        if (!MetadataCache.isMetadataCached()) {
+            MetadataCache.updateCache(sparqlConnectionProperties.getContactPoint(), null,
+                    (sparqlConnectionProperties.getAuthScheme() == AuthScheme.IAMSigV4),
+                    MetadataCache.PathType.Sparql);
+        }
+
+        final List<NodeColumnInfo> nodeColumnInfoList =
+                MetadataCache.getFilteredCacheNodeColumnInfos(tableName);
+        return new SparqlResultSetGetTables(statement, nodeColumnInfoList,
+                MetadataCache.getFilteredResultSetInfoWithoutRowsForTables(tableName));
     }
 
     /**
@@ -254,8 +270,8 @@ public class SparqlQueryExecutor extends QueryExecutor {
      * @throws SQLException if query execution fails, or it was cancelled.
      */
     @Override
-    public ResultSet executeGetSchemas(final Statement statement) throws SQLException {
-        return null;
+    public java.sql.ResultSet executeGetSchemas(final Statement statement) throws SQLException {
+        return new SparqlResultSetGetSchemas(statement);
     }
 
     /**
@@ -265,8 +281,8 @@ public class SparqlQueryExecutor extends QueryExecutor {
      * @return java.sql.ResultSet Object containing catalogs.
      */
     @Override
-    public ResultSet executeGetCatalogs(final Statement statement) throws SQLException {
-        return null;
+    public java.sql.ResultSet executeGetCatalogs(final Statement statement) throws SQLException {
+        return new SparqlResultSetGetCatelogs(statement);
     }
 
     /**
@@ -276,8 +292,8 @@ public class SparqlQueryExecutor extends QueryExecutor {
      * @return java.sql.ResultSet Object containing table types.
      */
     @Override
-    public ResultSet executeGetTableTypes(final Statement statement) throws SQLException {
-        return null;
+    public java.sql.ResultSet executeGetTableTypes(final Statement statement) throws SQLException {
+        return new SparqlResultSetGetTableTypes(statement);
     }
 
     /**
@@ -288,8 +304,17 @@ public class SparqlQueryExecutor extends QueryExecutor {
      * @return java.sql.ResultSet Object containing columns.
      */
     @Override
-    public ResultSet executeGetColumns(final Statement statement, final String nodes) throws SQLException {
-        return null;
+    public java.sql.ResultSet executeGetColumns(final Statement statement, final String nodes) throws SQLException {
+        if (!MetadataCache.isMetadataCached()) {
+            MetadataCache.updateCache(sparqlConnectionProperties.getContactPoint(), null,
+                    (sparqlConnectionProperties.getAuthScheme() == AuthScheme.IAMSigV4),
+                    MetadataCache.PathType.Gremlin);
+        }
+
+        final List<NodeColumnInfo> nodeColumnInfoList =
+                MetadataCache.getFilteredCacheNodeColumnInfos(nodes);
+        return new SparqlResultSetGetColumns(statement, nodeColumnInfoList,
+                MetadataCache.getFilteredResultSetInfoWithoutRowsForColumns(nodes));
     }
 
     @Override

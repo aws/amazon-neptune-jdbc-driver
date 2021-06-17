@@ -1,16 +1,17 @@
 /*
- * Copyright <2020> Amazon.com, final Inc. or its affiliates. All Rights Reserved.
+ * Copyright <2021> Amazon.com, Inc. or its affiliates. All Rights Reserved.
  *
- * Licensed under the Apache License, final Version 2.0 (the "License").
+ * Licensed under the Apache License, Version 2.0 (the "License").
  * You may not use this file except in compliance with the License.
  * A copy of the License is located at
  *
  *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * or in the "license" file accompanying this file. This file is distributed
- * on an "AS IS" BASIS, final WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, final either
+ * on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
  * express or implied. See the License for the specific language governing
  * permissions and limitations under the License.
+ *
  */
 
 package software.amazon.neptune.sparql;
@@ -45,18 +46,18 @@ public class SparqlTypeMapping {
     static {
         SPARQL_LITERAL_TO_JAVA_TYPE_MAP.put(XSDDatatype.XSDdecimal, java.math.BigDecimal.class);
         SPARQL_LITERAL_TO_JAVA_TYPE_MAP.put(XSDDatatype.XSDinteger, java.math.BigInteger.class);
-        SPARQL_LITERAL_TO_JAVA_TYPE_MAP.put(XSDDatatype.XSDnonPositiveInteger, Integer.class);
-        SPARQL_LITERAL_TO_JAVA_TYPE_MAP.put(XSDDatatype.XSDnonNegativeInteger, Integer.class);
-        SPARQL_LITERAL_TO_JAVA_TYPE_MAP.put(XSDDatatype.XSDpositiveInteger, Integer.class);
-        SPARQL_LITERAL_TO_JAVA_TYPE_MAP.put(XSDDatatype.XSDnegativeInteger, Integer.class);
+        SPARQL_LITERAL_TO_JAVA_TYPE_MAP.put(XSDDatatype.XSDnonPositiveInteger, java.math.BigInteger.class);
+        SPARQL_LITERAL_TO_JAVA_TYPE_MAP.put(XSDDatatype.XSDnonNegativeInteger, java.math.BigInteger.class);
+        SPARQL_LITERAL_TO_JAVA_TYPE_MAP.put(XSDDatatype.XSDpositiveInteger, java.math.BigInteger.class);
+        SPARQL_LITERAL_TO_JAVA_TYPE_MAP.put(XSDDatatype.XSDnegativeInteger, java.math.BigInteger.class);
         SPARQL_LITERAL_TO_JAVA_TYPE_MAP.put(XSDDatatype.XSDbyte, Byte.class);
         SPARQL_LITERAL_TO_JAVA_TYPE_MAP.put(XSDDatatype.XSDunsignedByte, Integer.class);
         SPARQL_LITERAL_TO_JAVA_TYPE_MAP.put(XSDDatatype.XSDdouble, Double.class);
         SPARQL_LITERAL_TO_JAVA_TYPE_MAP.put(XSDDatatype.XSDfloat, Float.class);
         SPARQL_LITERAL_TO_JAVA_TYPE_MAP.put(XSDDatatype.XSDlong, Long.class);
-        SPARQL_LITERAL_TO_JAVA_TYPE_MAP.put(XSDDatatype.XSDunsignedInt, Integer.class);
         SPARQL_LITERAL_TO_JAVA_TYPE_MAP.put(XSDDatatype.XSDunsignedShort, Integer.class);
-        SPARQL_LITERAL_TO_JAVA_TYPE_MAP.put(XSDDatatype.XSDunsignedLong, Integer.class);
+        SPARQL_LITERAL_TO_JAVA_TYPE_MAP.put(XSDDatatype.XSDunsignedInt, java.math.BigInteger.class);
+        SPARQL_LITERAL_TO_JAVA_TYPE_MAP.put(XSDDatatype.XSDunsignedLong, java.math.BigInteger.class);
         SPARQL_LITERAL_TO_JAVA_TYPE_MAP.put(XSDDatatype.XSDint, Integer.class);
         SPARQL_LITERAL_TO_JAVA_TYPE_MAP.put(XSDDatatype.XSDshort, Short.class);
         SPARQL_LITERAL_TO_JAVA_TYPE_MAP.put(XSDDatatype.XSDboolean, Boolean.class);
@@ -78,18 +79,18 @@ public class SparqlTypeMapping {
 
         SPARQL_LITERAL_TO_JDBC_TYPE_MAP.put(XSDDatatype.XSDdecimal, JdbcType.DECIMAL);
         SPARQL_LITERAL_TO_JDBC_TYPE_MAP.put(XSDDatatype.XSDinteger, JdbcType.BIGINT);
-        SPARQL_LITERAL_TO_JDBC_TYPE_MAP.put(XSDDatatype.XSDnonPositiveInteger, JdbcType.INTEGER);
-        SPARQL_LITERAL_TO_JDBC_TYPE_MAP.put(XSDDatatype.XSDnonNegativeInteger, JdbcType.INTEGER);
-        SPARQL_LITERAL_TO_JDBC_TYPE_MAP.put(XSDDatatype.XSDpositiveInteger, JdbcType.INTEGER);
-        SPARQL_LITERAL_TO_JDBC_TYPE_MAP.put(XSDDatatype.XSDnegativeInteger, JdbcType.INTEGER);
+        SPARQL_LITERAL_TO_JDBC_TYPE_MAP.put(XSDDatatype.XSDnonPositiveInteger, JdbcType.BIGINT);
+        SPARQL_LITERAL_TO_JDBC_TYPE_MAP.put(XSDDatatype.XSDnonNegativeInteger, JdbcType.BIGINT);
+        SPARQL_LITERAL_TO_JDBC_TYPE_MAP.put(XSDDatatype.XSDpositiveInteger, JdbcType.BIGINT);
+        SPARQL_LITERAL_TO_JDBC_TYPE_MAP.put(XSDDatatype.XSDnegativeInteger, JdbcType.BIGINT);
         SPARQL_LITERAL_TO_JDBC_TYPE_MAP.put(XSDDatatype.XSDbyte, JdbcType.TINYINT);
         SPARQL_LITERAL_TO_JDBC_TYPE_MAP.put(XSDDatatype.XSDunsignedByte, JdbcType.INTEGER);
         SPARQL_LITERAL_TO_JDBC_TYPE_MAP.put(XSDDatatype.XSDdouble, JdbcType.DOUBLE);
         SPARQL_LITERAL_TO_JDBC_TYPE_MAP.put(XSDDatatype.XSDfloat, JdbcType.REAL);
         SPARQL_LITERAL_TO_JDBC_TYPE_MAP.put(XSDDatatype.XSDlong, JdbcType.BIGINT);
-        SPARQL_LITERAL_TO_JDBC_TYPE_MAP.put(XSDDatatype.XSDunsignedInt, JdbcType.INTEGER);
         SPARQL_LITERAL_TO_JDBC_TYPE_MAP.put(XSDDatatype.XSDunsignedShort, JdbcType.INTEGER);
-        SPARQL_LITERAL_TO_JDBC_TYPE_MAP.put(XSDDatatype.XSDunsignedLong, JdbcType.INTEGER);
+        SPARQL_LITERAL_TO_JDBC_TYPE_MAP.put(XSDDatatype.XSDunsignedInt, JdbcType.BIGINT);
+        SPARQL_LITERAL_TO_JDBC_TYPE_MAP.put(XSDDatatype.XSDunsignedLong, JdbcType.BIGINT);
         SPARQL_LITERAL_TO_JDBC_TYPE_MAP.put(XSDDatatype.XSDint, JdbcType.INTEGER);
         SPARQL_LITERAL_TO_JDBC_TYPE_MAP.put(XSDDatatype.XSDshort, JdbcType.SMALLINT);
         SPARQL_LITERAL_TO_JDBC_TYPE_MAP.put(XSDDatatype.XSDboolean, JdbcType.BIT);
