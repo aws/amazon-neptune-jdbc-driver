@@ -38,8 +38,8 @@ import software.amazon.jdbc.utilities.AuthScheme;
 import software.amazon.jdbc.utilities.QueryExecutor;
 import software.amazon.jdbc.utilities.SqlError;
 import software.amazon.jdbc.utilities.SqlState;
-import software.amazon.neptune.common.gremlindatamodel.MetadataCache;
-import software.amazon.neptune.common.gremlindatamodel.NodeColumnInfo;
+import software.amazon.neptune.common.ResultSetInfoWithoutRows;
+import software.amazon.neptune.common.gremlindatamodel.resultset.ResultSetGetTables;
 import software.amazon.neptune.sparql.resultset.SparqlResultSet;
 import software.amazon.neptune.sparql.resultset.SparqlResultSetGetCatelogs;
 import software.amazon.neptune.sparql.resultset.SparqlResultSetGetColumns;
@@ -250,16 +250,8 @@ public class SparqlQueryExecutor extends QueryExecutor {
      */
     @Override
     public java.sql.ResultSet executeGetTables(final Statement statement, final String tableName) throws SQLException {
-        if (!MetadataCache.isMetadataCached()) {
-            MetadataCache.updateCache(sparqlConnectionProperties.getContactPoint(), null,
-                    (sparqlConnectionProperties.getAuthScheme() == AuthScheme.IAMSigV4),
-                    MetadataCache.PathType.Sparql);
-        }
-
-        final List<NodeColumnInfo> nodeColumnInfoList =
-                MetadataCache.getFilteredCacheNodeColumnInfos(tableName);
-        return new SparqlResultSetGetTables(statement, nodeColumnInfoList,
-                MetadataCache.getFilteredResultSetInfoWithoutRowsForTables(tableName));
+        return new SparqlResultSetGetTables(statement, new ArrayList<>(),
+                new ResultSetInfoWithoutRows(0, ResultSetGetTables.getColumns()));
     }
 
     /**
@@ -305,16 +297,8 @@ public class SparqlQueryExecutor extends QueryExecutor {
      */
     @Override
     public java.sql.ResultSet executeGetColumns(final Statement statement, final String nodes) throws SQLException {
-        if (!MetadataCache.isMetadataCached()) {
-            MetadataCache.updateCache(sparqlConnectionProperties.getContactPoint(), null,
-                    (sparqlConnectionProperties.getAuthScheme() == AuthScheme.IAMSigV4),
-                    MetadataCache.PathType.Gremlin);
-        }
-
-        final List<NodeColumnInfo> nodeColumnInfoList =
-                MetadataCache.getFilteredCacheNodeColumnInfos(nodes);
-        return new SparqlResultSetGetColumns(statement, nodeColumnInfoList,
-                MetadataCache.getFilteredResultSetInfoWithoutRowsForColumns(nodes));
+        return new SparqlResultSetGetColumns(statement, new ArrayList<>(),
+                new ResultSetInfoWithoutRows(0, ResultSetGetTables.getColumns()));
     }
 
     @Override
@@ -326,7 +310,8 @@ public class SparqlQueryExecutor extends QueryExecutor {
             }
             queryExecution = rdfConnection.query(query);
         }
-
+        // TODO: MAKE NEW TICKET - Change execution based on query types: queryExecution.getQuery().queryType()
+        //  Will also need to add additional query result & result metadata classes
         final org.apache.jena.query.ResultSet result = queryExecution.execSelect();
         final List<QuerySolution> rows = new ArrayList<>();
         final List<String> columns = result.getResultVars();

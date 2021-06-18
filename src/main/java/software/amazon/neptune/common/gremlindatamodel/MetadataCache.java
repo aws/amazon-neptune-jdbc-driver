@@ -54,8 +54,7 @@ public class MetadataCache {
 
     public enum PathType {
         Bolt,
-        Gremlin,
-        Sparql
+        Gremlin
     }
 
     /**
