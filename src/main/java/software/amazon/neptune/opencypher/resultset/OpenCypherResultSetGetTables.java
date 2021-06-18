@@ -1,14 +1,14 @@
 /*
- * Copyright <2020> Amazon.com, final Inc. or its affiliates. All Rights Reserved.
+ * Copyright <2021> Amazon.com, Inc. or its affiliates. All Rights Reserved.
  *
- * Licensed under the Apache License, final Version 2.0 (the "License").
+ * Licensed under the Apache License, Version 2.0 (the "License").
  * You may not use this file except in compliance with the License.
  * A copy of the License is located at
  *
  *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * or in the "license" file accompanying this file. This file is distributed
- * on an "AS IS" BASIS, final WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, final either
+ * on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
  * express or implied. See the License for the specific language governing
  * permissions and limitations under the License.
  *
@@ -34,7 +34,7 @@ import java.util.Map;
  */
 public class OpenCypherResultSetGetTables extends ResultSetGetTables implements java.sql.ResultSet {
     private static final Map<String, Type> COLUMN_TYPE_MAP = new HashMap<>();
-
+    // TODO getTables() JavaDoc description has less properties listed, should this reflect that?
     static {
         COLUMN_TYPE_MAP.put("TABLE_CAT", InternalTypeSystem.TYPE_SYSTEM.STRING());
         COLUMN_TYPE_MAP.put("TABLE_SCHEM", InternalTypeSystem.TYPE_SYSTEM.STRING());
@@ -81,6 +81,7 @@ public class OpenCypherResultSetGetTables extends ResultSetGetTables implements 
         final List<String> orderedColumns = getColumns();
         final List<Type> rowTypes = new ArrayList<>();
         for (int i = 0; i < orderedColumns.size(); i++) {
+            // TODO Didn't use the above map?
             rowTypes.add(InternalTypeSystem.TYPE_SYSTEM.STRING());
         }
         return new OpenCypherResultSetMetadata(orderedColumns, rowTypes);

@@ -1,14 +1,14 @@
 /*
- * Copyright <2020> Amazon.com, final Inc. or its affiliates. All Rights Reserved.
+ * Copyright <2021> Amazon.com, Inc. or its affiliates. All Rights Reserved.
  *
- * Licensed under the Apache License, final Version 2.0 (the "License").
+ * Licensed under the Apache License, Version 2.0 (the "License").
  * You may not use this file except in compliance with the License.
  * A copy of the License is located at
  *
  *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * or in the "license" file accompanying this file. This file is distributed
- * on an "AS IS" BASIS, final WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, final either
+ * on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
  * express or implied. See the License for the specific language governing
  * permissions and limitations under the License.
  *
@@ -41,17 +41,25 @@ public class SparqlConnectionProperties extends ConnectionProperties {
     // the query and update endpoints for sparql database
     public static final String QUERY_ENDPOINT_KEY = "queryEndpoint";
     public static final String REGION_KEY = "region";
-    public static final String ACCEPT_HEADER_ASK_QUERY_KEY = "acceptHeaderAskQuery";
-    public static final String ACCEPT_HEADER_DATASET_KEY = "acceptHeaderDataset";
-    public static final String ACCEPT_HEADER_GRAPH_KEY = "acceptHeaderGraph";
+    // TODO: AN547 these are to change the different HTTP header one can for different query types - can keep
+    // e.g. Set a specific accept header; here, sparql-results+json (preferred) and text/tab-separated-values
+    // The default is "application/sparql-results+json, application/sparql-results+xml;q=0.9, text/tab-separated-values;q=0.7, text/csv;q=0.5, application/json;q=0.2, application/xml;q=0.2, */*;q=0.1"
     public static final String ACCEPT_HEADER_QUERY_KEY = "acceptHeaderQuery";
+    public static final String ACCEPT_HEADER_ASK_QUERY_KEY = "acceptHeaderAskQuery";
     public static final String ACCEPT_HEADER_SELECT_QUERY_KEY = "acceptHeaderSelectQuery";
-    public static final String GSP_ENDPOINT_KEY = "gspEndpoint";
     public static final String PARSE_CHECK_SPARQL_KEY = "parseCheckSparql";
-    public static final String HTTP_CLIENT_KEY = "httpClient";
-    public static final String HTTP_CONTEXT_KEY = "httpContext";
+    public static final String ACCEPT_HEADER_DATASET_KEY = "acceptHeaderDataset";
+
+    // TODO: AN547 these are for using SPARQL Graph Store Protocol (alternate to update operations) and HTTP GET/POST
+    //  operations, not supported - delete
+    public static final String GSP_ENDPOINT_KEY = "gspEndpoint";
+    public static final String ACCEPT_HEADER_GRAPH_KEY = "acceptHeaderGraph";
+    // TODO: AN547 we don't need these 2 as they are for sending datasets through PUT & POST - delete
     public static final String QUADS_FORMAT_KEY = "quadsFormat";
     public static final String TRIPLES_FORMAT_KEY = "triplesFormat";
+
+    public static final String HTTP_CLIENT_KEY = "httpClient";
+    public static final String HTTP_CONTEXT_KEY = "httpContext";
     public static final int DEFAULT_PORT = 8182; // possible Neptune default port
     public static final Map<String, Object> DEFAULT_PROPERTIES_MAP = new HashMap<>();
     private static final Map<String, ConnectionProperties.PropertyConverter<?>> PROPERTY_CONVERTER_MAP =
