@@ -262,7 +262,7 @@ public class SparqlConnectionPropertiesTest {
 
         final Properties testProperties = new Properties();
         testProperties.put(ConnectionProperties.AUTH_SCHEME_KEY, AuthScheme.None);
-        testProperties.put(SparqlConnectionProperties.CONTACT_POINT_KEY, "http://localhost");
+        testProperties.put(SparqlConnectionProperties.ENDPOINT_KEY, "http://localhost");
         testProperties.put(SparqlConnectionProperties.PORT_KEY, 8182);
         testProperties.put(SparqlConnectionProperties.DATASET_KEY, "mock");
         testProperties.put(SparqlConnectionProperties.QUERY_ENDPOINT_KEY, "query");
@@ -279,7 +279,7 @@ public class SparqlConnectionPropertiesTest {
 
         final Properties testProperties = new Properties();
         testProperties.put(ConnectionProperties.AUTH_SCHEME_KEY, AuthScheme.IAMSigV4);
-        testProperties.put(SparqlConnectionProperties.CONTACT_POINT_KEY, "http://localhost");
+        testProperties.put(SparqlConnectionProperties.ENDPOINT_KEY, "http://localhost");
         testProperties.put(SparqlConnectionProperties.PORT_KEY, 8182);
         testProperties.put(SparqlConnectionProperties.DATASET_KEY, "mock");
         testProperties.put(SparqlConnectionProperties.QUERY_ENDPOINT_KEY, "query");
@@ -299,7 +299,7 @@ public class SparqlConnectionPropertiesTest {
 
         final Properties testProperties = new Properties();
         testProperties.put(ConnectionProperties.AUTH_SCHEME_KEY, AuthScheme.None);
-        testProperties.put(SparqlConnectionProperties.CONTACT_POINT_KEY, "http://localhost");
+        testProperties.put(SparqlConnectionProperties.ENDPOINT_KEY, "http://localhost");
         testProperties.put(SparqlConnectionProperties.PORT_KEY, 8182);
         testProperties.put(SparqlConnectionProperties.DATASET_KEY, "mock");
         testProperties.put(SparqlConnectionProperties.QUERY_ENDPOINT_KEY, "query");
@@ -338,20 +338,6 @@ public class SparqlConnectionPropertiesTest {
     }
 
     @Test
-    void testAcceptHeaderGraph() throws SQLException {
-        final String testValue = "test accept header graph";
-        connectionProperties = new SparqlConnectionProperties();
-        connectionProperties.setAcceptHeaderGraph(testValue);
-        Assertions.assertEquals(testValue, connectionProperties.getAcceptHeaderGraph());
-
-        // the constructor test with DESTINATION properties properly set to avoid throws
-        setInitialDestinationProperty(connectionProperties);
-        final Properties properties = new Properties();
-        properties.putAll(connectionProperties);
-        assertDoesNotThrowOnNewConnectionProperties(properties);
-    }
-
-    @Test
     void testAcceptHeaderQuery() throws SQLException {
         final String testValue = "test accept header query";
         connectionProperties = new SparqlConnectionProperties();
@@ -380,54 +366,11 @@ public class SparqlConnectionPropertiesTest {
     }
 
     @Test
-    void testGspEndpoint() throws SQLException {
-        final String testValue = "test gsp endpoint";
-        connectionProperties = new SparqlConnectionProperties();
-        connectionProperties.setGspEndpoint(testValue);
-        Assertions.assertEquals(testValue, connectionProperties.getGspEndpoint());
-
-        // the constructor test with DESTINATION properties properly set to avoid throws
-        setInitialDestinationProperty(connectionProperties);
-        final Properties properties = new Properties();
-        properties.putAll(connectionProperties);
-        assertDoesNotThrowOnNewConnectionProperties(properties);
-    }
-
-    @Test
     void testParseCheckSparql() throws SQLException {
         final boolean testValue = true;
         connectionProperties = new SparqlConnectionProperties();
         connectionProperties.setParseCheckSparql(testValue);
         Assertions.assertTrue(connectionProperties.getParseCheckSparql());
-
-        // the constructor test with DESTINATION properties properly set to avoid throws
-        setInitialDestinationProperty(connectionProperties);
-        final Properties properties = new Properties();
-        properties.putAll(connectionProperties);
-        assertDoesNotThrowOnNewConnectionProperties(properties);
-    }
-
-    @Test
-    void testQuadsFormat() throws SQLException {
-        final String testValue = "test quads format";
-        connectionProperties = new SparqlConnectionProperties();
-        connectionProperties.setQuadsFormat(testValue);
-        Assertions.assertEquals(testValue, connectionProperties.getQuadsFormat());
-
-        // the constructor test with DESTINATION properties properly set to avoid throws
-        setInitialDestinationProperty(connectionProperties);
-        final Properties properties = new Properties();
-        properties.putAll(connectionProperties);
-        assertDoesNotThrowOnNewConnectionProperties(properties);
-    }
-
-
-    @Test
-    void testTriplesFormat() throws SQLException {
-        final String testValue = "test triples format";
-        connectionProperties = new SparqlConnectionProperties();
-        connectionProperties.setTriplesFormat(testValue);
-        Assertions.assertEquals(testValue, connectionProperties.getTriplesFormat());
 
         // the constructor test with DESTINATION properties properly set to avoid throws
         setInitialDestinationProperty(connectionProperties);

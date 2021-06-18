@@ -43,7 +43,7 @@ public class SparqlDatabaseMetadataTest {
     private static Properties sparqlProperties() {
         final Properties properties = new Properties();
         properties.put(ConnectionProperties.AUTH_SCHEME_KEY, AuthScheme.None); // set default to None
-        properties.put(SparqlConnectionProperties.CONTACT_POINT_KEY, HOSTNAME);
+        properties.put(SparqlConnectionProperties.ENDPOINT_KEY, HOSTNAME);
         properties.put(SparqlConnectionProperties.PORT_KEY, PORT);
         properties.put(SparqlConnectionProperties.DATASET_KEY, DATASET);
         properties.put(SparqlConnectionProperties.QUERY_ENDPOINT_KEY, QUERY_ENDPOINT);

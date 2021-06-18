@@ -87,20 +87,12 @@ public class SparqlQueryExecutor extends QueryExecutor {
             builder.acceptHeaderDataset(properties.getAcceptHeaderDataset());
         }
 
-        if (properties.containsKey(SparqlConnectionProperties.ACCEPT_HEADER_GRAPH_KEY)) {
-            builder.acceptHeaderGraph(properties.getAcceptHeaderGraph());
-        }
-
         if (properties.containsKey(SparqlConnectionProperties.ACCEPT_HEADER_QUERY_KEY)) {
             builder.acceptHeaderQuery(properties.getAcceptHeaderQuery());
         }
 
         if (properties.containsKey(SparqlConnectionProperties.ACCEPT_HEADER_SELECT_QUERY_KEY)) {
             builder.acceptHeaderSelectQuery(properties.getAcceptHeaderSelectQuery());
-        }
-
-        if (properties.containsKey(SparqlConnectionProperties.GSP_ENDPOINT_KEY)) {
-            builder.gspEndpoint(properties.getGspEndpoint());
         }
 
         if (properties.containsKey(SparqlConnectionProperties.PARSE_CHECK_SPARQL_KEY)) {
@@ -115,14 +107,6 @@ public class SparqlQueryExecutor extends QueryExecutor {
 
         if (properties.containsKey(SparqlConnectionProperties.HTTP_CONTEXT_KEY)) {
             builder.httpContext(properties.getHttpContext());
-        }
-
-        if (properties.containsKey(SparqlConnectionProperties.QUADS_FORMAT_KEY)) {
-            builder.quadsFormat(properties.getQuadsFormat());
-        }
-
-        if (properties.containsKey(SparqlConnectionProperties.TRIPLES_FORMAT_KEY)) {
-            builder.triplesFormat(properties.getTriplesFormat());
         }
 
         return builder;

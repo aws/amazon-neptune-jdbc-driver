@@ -31,42 +31,33 @@ import java.util.Properties;
 import java.util.Set;
 
 public class SparqlConnectionProperties extends ConnectionProperties {
-    // URL of the Neptune endpoint (*without* the trailing "/sparql" servlet)
-    // contactPoint doesn't apply to RDF builder, currently using it as the root part of the full url
-    public static final String CONTACT_POINT_KEY = "rootUrl";
+    // currently this require the full url with "http://" or "https://"
+    // e.g. enter "https://your-neptune-endpoint"
+    public static final String ENDPOINT_KEY = "endpointURL";
     public static final String PORT_KEY = "port";
-    // dataset path with is optional depending on server (e.g. Neptune vs Fuseki)
+    // Dataset path with is optional depending on server (e.g. Neptune vs Fuseki)
     public static final String DATASET_KEY = "dataset";
     public static final String DESTINATION_KEY = "destination";
-    // the query and update endpoints for sparql database
+    // The query endpoints for sparql database
+    // as a read-only driver we don't support update or the graph store protocol endpoints
     public static final String QUERY_ENDPOINT_KEY = "queryEndpoint";
     public static final String REGION_KEY = "region";
-    // TODO: AN547 these are to change the different HTTP header one can for different query types - can keep
-    // e.g. Set a specific accept header; here, sparql-results+json (preferred) and text/tab-separated-values
-    // The default is "application/sparql-results+json, application/sparql-results+xml;q=0.9, text/tab-separated-values;q=0.7, text/csv;q=0.5, application/json;q=0.2, application/xml;q=0.2, */*;q=0.1"
+    // RDF Connection builder has the default: "application/sparql-results+json, application/sparql-results+xml;q=0.9,
+    // text/tab-separated-values;q=0.7, text/csv;q=0.5, application/json;q=0.2, application/xml;q=0.2, */*;q=0.1"
     public static final String ACCEPT_HEADER_QUERY_KEY = "acceptHeaderQuery";
     public static final String ACCEPT_HEADER_ASK_QUERY_KEY = "acceptHeaderAskQuery";
     public static final String ACCEPT_HEADER_SELECT_QUERY_KEY = "acceptHeaderSelectQuery";
     public static final String PARSE_CHECK_SPARQL_KEY = "parseCheckSparql";
     public static final String ACCEPT_HEADER_DATASET_KEY = "acceptHeaderDataset";
-
-    // TODO: AN547 these are for using SPARQL Graph Store Protocol (alternate to update operations) and HTTP GET/POST
-    //  operations, not supported - delete
-    public static final String GSP_ENDPOINT_KEY = "gspEndpoint";
-    public static final String ACCEPT_HEADER_GRAPH_KEY = "acceptHeaderGraph";
-    // TODO: AN547 we don't need these 2 as they are for sending datasets through PUT & POST - delete
-    public static final String QUADS_FORMAT_KEY = "quadsFormat";
-    public static final String TRIPLES_FORMAT_KEY = "triplesFormat";
-
     public static final String HTTP_CLIENT_KEY = "httpClient";
     public static final String HTTP_CONTEXT_KEY = "httpContext";
-    public static final int DEFAULT_PORT = 8182; // possible Neptune default port
+    public static final int DEFAULT_PORT = 8182; // Neptune default port
     public static final Map<String, Object> DEFAULT_PROPERTIES_MAP = new HashMap<>();
     private static final Map<String, ConnectionProperties.PropertyConverter<?>> PROPERTY_CONVERTER_MAP =
             new HashMap<>();
     private static final Logger LOGGER = LoggerFactory.getLogger(SparqlConnectionProperties.class);
     private static final Set<String> SUPPORTED_PROPERTIES_SET = ImmutableSet.<String>builder()
-            .add(CONTACT_POINT_KEY)
+            .add(ENDPOINT_KEY)
             .add(PORT_KEY)
             .add(DATASET_KEY)
             .add(DESTINATION_KEY)
@@ -74,20 +65,16 @@ public class SparqlConnectionProperties extends ConnectionProperties {
             .add(REGION_KEY)
             .add(ACCEPT_HEADER_ASK_QUERY_KEY)
             .add(ACCEPT_HEADER_DATASET_KEY)
-            .add(ACCEPT_HEADER_GRAPH_KEY)
             .add(ACCEPT_HEADER_QUERY_KEY)
             .add(ACCEPT_HEADER_SELECT_QUERY_KEY)
-            .add(GSP_ENDPOINT_KEY)
             .add(PARSE_CHECK_SPARQL_KEY)
             .add(HTTP_CLIENT_KEY)
             .add(HTTP_CONTEXT_KEY)
-            .add(QUADS_FORMAT_KEY)
-            .add(TRIPLES_FORMAT_KEY)
             .build();
 
     // property converter parses on the in-coming connection string
     static {
-        PROPERTY_CONVERTER_MAP.put(CONTACT_POINT_KEY, (key, value) -> value);
+        PROPERTY_CONVERTER_MAP.put(ENDPOINT_KEY, (key, value) -> value);
         PROPERTY_CONVERTER_MAP.put(PORT_KEY, ConnectionProperties::toUnsigned);
         PROPERTY_CONVERTER_MAP.put(DATASET_KEY, (key, value) -> value);
         PROPERTY_CONVERTER_MAP.put(DESTINATION_KEY, (key, value) -> value);
@@ -96,18 +83,13 @@ public class SparqlConnectionProperties extends ConnectionProperties {
         PROPERTY_CONVERTER_MAP.put(PARSE_CHECK_SPARQL_KEY, ConnectionProperties::toBoolean);
         PROPERTY_CONVERTER_MAP.put(ACCEPT_HEADER_ASK_QUERY_KEY, (key, value) -> value);
         PROPERTY_CONVERTER_MAP.put(ACCEPT_HEADER_DATASET_KEY, (key, value) -> value);
-        PROPERTY_CONVERTER_MAP.put(ACCEPT_HEADER_GRAPH_KEY, (key, value) -> value);
         PROPERTY_CONVERTER_MAP.put(ACCEPT_HEADER_QUERY_KEY, (key, value) -> value);
         PROPERTY_CONVERTER_MAP.put(ACCEPT_HEADER_SELECT_QUERY_KEY, (key, value) -> value);
-        PROPERTY_CONVERTER_MAP.put(GSP_ENDPOINT_KEY, (key, value) -> value);
-        PROPERTY_CONVERTER_MAP.put(QUADS_FORMAT_KEY, (key, value) -> value);
-        PROPERTY_CONVERTER_MAP.put(TRIPLES_FORMAT_KEY, (key, value) -> value);
     }
 
-    // TODO: AN-547 revisit
     static {
         DEFAULT_PROPERTIES_MAP.put(PORT_KEY, DEFAULT_PORT);
-        DEFAULT_PROPERTIES_MAP.put(CONTACT_POINT_KEY, "");
+        DEFAULT_PROPERTIES_MAP.put(ENDPOINT_KEY, "");
         DEFAULT_PROPERTIES_MAP.put(DATASET_KEY, "");
         DEFAULT_PROPERTIES_MAP.put(QUERY_ENDPOINT_KEY, "");
         DEFAULT_PROPERTIES_MAP.put(DESTINATION_KEY, "");
@@ -147,7 +129,7 @@ public class SparqlConnectionProperties extends ConnectionProperties {
      * @return The connection contact point.
      */
     public String getContactPoint() {
-        return getProperty(CONTACT_POINT_KEY);
+        return getProperty(ENDPOINT_KEY);
     }
 
     /**
@@ -157,8 +139,8 @@ public class SparqlConnectionProperties extends ConnectionProperties {
      * @throws SQLException if value is invalid.
      */
     public void setContactPoint(@NonNull final String contactPoint) throws SQLException {
-        setProperty(CONTACT_POINT_KEY,
-                (String) PROPERTY_CONVERTER_MAP.get(CONTACT_POINT_KEY).convert(CONTACT_POINT_KEY, contactPoint));
+        setProperty(ENDPOINT_KEY,
+                (String) PROPERTY_CONVERTER_MAP.get(ENDPOINT_KEY).convert(ENDPOINT_KEY, contactPoint));
     }
 
     /**
@@ -285,27 +267,6 @@ public class SparqlConnectionProperties extends ConnectionProperties {
     }
 
     /**
-     * Gets the HTTP accept:header used to fetch RDF graph using SPARQL Graph Store Protocol.
-     *
-     * @return The HTTP accept:header.
-     */
-    public String getAcceptHeaderGraph() {
-        return getProperty(ACCEPT_HEADER_GRAPH_KEY);
-    }
-
-    /**
-     * Sets the HTTP accept:header used to fetch RDF graph using SPARQL Graph Store Protocol.
-     *
-     * @param acceptHeaderGraph The HTTP endpoint.
-     * @throws SQLException if value is invalid.
-     */
-    public void setAcceptHeaderGraph(@NonNull final String acceptHeaderGraph) throws SQLException {
-        setProperty(ACCEPT_HEADER_GRAPH_KEY,
-                (String) PROPERTY_CONVERTER_MAP.get(ACCEPT_HEADER_GRAPH_KEY).convert(ACCEPT_HEADER_GRAPH_KEY,
-                        acceptHeaderGraph));
-    }
-
-    /**
      * Gets the HTTP accept:header used when making SPARQL Protocol query if no query specific setting is available.
      *
      * @return The HTTP accept:header.
@@ -406,70 +367,6 @@ public class SparqlConnectionProperties extends ConnectionProperties {
     }
 
     /**
-     * Gets the name of the SPARQL GraphStore Protocol endpoint
-     *
-     * @return The HTTP name of the SPARQL GraphStore Protocol endpoint
-     */
-    public String getGspEndpoint() {
-        return getProperty(GSP_ENDPOINT_KEY);
-    }
-
-    /**
-     * Sets the name of the SPARQL GraphStore Protocol endpoint
-     *
-     * @param gspEndpoint The endpoint.
-     * @throws SQLException if value is invalid.
-     */
-    public void setGspEndpoint(@NonNull final String gspEndpoint) throws SQLException {
-        setProperty(GSP_ENDPOINT_KEY,
-                (String) PROPERTY_CONVERTER_MAP.get(GSP_ENDPOINT_KEY).convert(GSP_ENDPOINT_KEY,
-                        gspEndpoint));
-    }
-
-
-    /**
-     * Gets the format for sending RDF Datasets to the remote server.
-     *
-     * @return The HTTP accept:header.
-     */
-    public String getQuadsFormat() {
-        return getProperty(QUADS_FORMAT_KEY);
-    }
-
-    /**
-     * Sets the format for sending RDF Datasets to the remote server.
-     *
-     * @param quadsFormat The flag.
-     * @throws SQLException if value is invalid.
-     */
-    public void setQuadsFormat(@NonNull final String quadsFormat) throws SQLException {
-        setProperty(QUADS_FORMAT_KEY,
-                (String) PROPERTY_CONVERTER_MAP.get(QUADS_FORMAT_KEY).convert(QUADS_FORMAT_KEY,
-                        quadsFormat));
-    }
-
-    /**
-     * Gets the format for sending RDF Datasets to the remote server.
-     *
-     * @return The HTTP accept:header.
-     */
-    public String getTriplesFormat() {
-        return getProperty(TRIPLES_FORMAT_KEY);
-    }
-
-    /**
-     * Sets the format for sending RDF Datasets to the remote server.
-     *
-     * @param triplesFormat The flag.
-     * @throws SQLException if value is invalid.
-     */
-    public void setTriplesFormat(@NonNull final String triplesFormat) throws SQLException {
-        setProperty(TRIPLES_FORMAT_KEY,
-                (String) PROPERTY_CONVERTER_MAP.get(TRIPLES_FORMAT_KEY).convert(TRIPLES_FORMAT_KEY,
-                        triplesFormat));
-    }
-
-    /**
      * Gets the region.
      *
      * @return The region.
@@ -513,7 +410,6 @@ public class SparqlConnectionProperties extends ConnectionProperties {
             }
         }
 
-        // TODO: AN-547 this may change when we revisit ConnectionProperties
         if ("".equals(getContactPoint()) || getPort() < 0) {
             throw missingConnectionPropertyError("The CONTACT_POINT and PORT_KEY fields must be" +
                     " provided");

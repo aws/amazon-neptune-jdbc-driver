@@ -46,7 +46,7 @@ public class SparqlConnectionTest {
     private static Properties sparqlProperties() {
         final Properties properties = new Properties();
         properties.put(ConnectionProperties.AUTH_SCHEME_KEY, AuthScheme.None); // set default to None
-        properties.put(SparqlConnectionProperties.CONTACT_POINT_KEY, HOSTNAME);
+        properties.put(SparqlConnectionProperties.ENDPOINT_KEY, HOSTNAME);
         properties.put(SparqlConnectionProperties.PORT_KEY, PORT);
         properties.put(SparqlConnectionProperties.DATASET_KEY, DATASET);
         properties.put(SparqlConnectionProperties.QUERY_ENDPOINT_KEY, QUERY_ENDPOINT);
@@ -108,7 +108,7 @@ public class SparqlConnectionTest {
         final Properties timeoutProperties = new Properties();
         timeoutProperties.put(ConnectionProperties.AUTH_SCHEME_KEY, AuthScheme.None); // set default to None
         // setting to non-routable IP for timeout
-        timeoutProperties.put(SparqlConnectionProperties.CONTACT_POINT_KEY, "http://10.255.255.1");
+        timeoutProperties.put(SparqlConnectionProperties.ENDPOINT_KEY, "http://10.255.255.1");
         timeoutProperties.put(SparqlConnectionProperties.PORT_KEY, 1234);
         timeoutProperties.put(SparqlConnectionProperties.DATASET_KEY, "timeout");
         timeoutProperties.put(SparqlConnectionProperties.QUERY_ENDPOINT_KEY, "query");
@@ -119,7 +119,7 @@ public class SparqlConnectionTest {
 
         final Properties invalidProperties = new Properties();
         invalidProperties.put(ConnectionProperties.AUTH_SCHEME_KEY, AuthScheme.None); // set default to None
-        invalidProperties.put(SparqlConnectionProperties.CONTACT_POINT_KEY, HOSTNAME);
+        invalidProperties.put(SparqlConnectionProperties.ENDPOINT_KEY, HOSTNAME);
         invalidProperties.put(SparqlConnectionProperties.PORT_KEY, 1234);
         invalidProperties.put(SparqlConnectionProperties.DATASET_KEY, "invalid");
         invalidProperties.put(SparqlConnectionProperties.QUERY_ENDPOINT_KEY, "query");
