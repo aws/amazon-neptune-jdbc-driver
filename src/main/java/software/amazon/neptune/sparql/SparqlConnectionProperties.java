@@ -31,7 +31,7 @@ import java.util.Properties;
 import java.util.Set;
 
 public class SparqlConnectionProperties extends ConnectionProperties {
-    // currently this require the full url with "http://" or "https://"
+    // currently this requires the full url with "http://" or "https://"
     // e.g. enter "https://your-neptune-endpoint"
     public static final String ENDPOINT_KEY = "endpointURL";
     public static final String PORT_KEY = "port";

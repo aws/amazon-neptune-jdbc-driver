@@ -34,7 +34,6 @@ import java.util.Map;
  */
 public class OpenCypherResultSetGetTables extends ResultSetGetTables implements java.sql.ResultSet {
     private static final Map<String, Type> COLUMN_TYPE_MAP = new HashMap<>();
-    // TODO getTables() JavaDoc description has less properties listed, should this reflect that?
     static {
         COLUMN_TYPE_MAP.put("TABLE_CAT", InternalTypeSystem.TYPE_SYSTEM.STRING());
         COLUMN_TYPE_MAP.put("TABLE_SCHEM", InternalTypeSystem.TYPE_SYSTEM.STRING());
