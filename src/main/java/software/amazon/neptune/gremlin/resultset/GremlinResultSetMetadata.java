@@ -17,7 +17,6 @@
 package software.amazon.neptune.gremlin.resultset;
 
 import software.amazon.neptune.gremlin.GremlinTypeMapping;
-import software.amazon.neptune.opencypher.OpenCypherTypeMapping;
 import java.sql.SQLException;
 import java.util.List;
 
@@ -65,6 +64,6 @@ public class GremlinResultSetMetadata extends software.amazon.jdbc.ResultSetMeta
     @Override
     public String getColumnClassName(final int column) throws SQLException {
         verifyColumnIndex(column);
-        return OpenCypherTypeMapping.BOLT_TO_JAVA_TYPE_MAP.get(getColumnGremlinType(column)).getName();
+        return getColumnGremlinType(column).getName();
     }
 }

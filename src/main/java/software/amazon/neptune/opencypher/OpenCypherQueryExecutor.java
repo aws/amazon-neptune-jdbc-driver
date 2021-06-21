@@ -30,8 +30,8 @@ import software.amazon.jdbc.utilities.AuthScheme;
 import software.amazon.jdbc.utilities.QueryExecutor;
 import software.amazon.jdbc.utilities.SqlError;
 import software.amazon.jdbc.utilities.SqlState;
+import software.amazon.neptune.common.gremlindatamodel.GraphSchema;
 import software.amazon.neptune.common.gremlindatamodel.MetadataCache;
-import software.amazon.neptune.common.gremlindatamodel.NodeColumnInfo;
 import software.amazon.neptune.opencypher.resultset.OpenCypherResultSet;
 import software.amazon.neptune.opencypher.resultset.OpenCypherResultSetGetCatalogs;
 import software.amazon.neptune.opencypher.resultset.OpenCypherResultSetGetColumns;
@@ -187,9 +187,9 @@ public class OpenCypherQueryExecutor extends QueryExecutor {
                     MetadataCache.PathType.Bolt);
         }
 
-        final List<NodeColumnInfo> nodeColumnInfoList =
+        final List<GraphSchema> graphSchemaList =
                 MetadataCache.getFilteredCacheNodeColumnInfos(tableName);
-        return new OpenCypherResultSetGetTables(statement, nodeColumnInfoList,
+        return new OpenCypherResultSetGetTables(statement, graphSchemaList,
                 MetadataCache.getFilteredResultSetInfoWithoutRowsForTables(tableName));
     }
 
@@ -244,9 +244,9 @@ public class OpenCypherQueryExecutor extends QueryExecutor {
                     MetadataCache.PathType.Bolt);
         }
 
-        final List<NodeColumnInfo> nodeColumnInfoList =
+        final List<GraphSchema> graphSchemaList =
                 MetadataCache.getFilteredCacheNodeColumnInfos(nodes);
-        return new OpenCypherResultSetGetColumns(statement, nodeColumnInfoList,
+        return new OpenCypherResultSetGetColumns(statement, graphSchemaList,
                 MetadataCache.getFilteredResultSetInfoWithoutRowsForColumns(nodes));
     }
 

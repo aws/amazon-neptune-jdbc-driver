@@ -23,6 +23,7 @@ import software.amazon.neptune.NeptunePreparedStatementTestHelper;
 import software.amazon.neptune.gremlin.mock.MockGremlinDatabase;
 import java.io.IOException;
 import java.sql.SQLException;
+
 import static software.amazon.neptune.gremlin.GremlinHelper.getProperties;
 
 public class GremlinPreparedStatementTest extends GremlinStatementTestBase {

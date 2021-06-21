@@ -27,8 +27,8 @@ import software.amazon.jdbc.utilities.AuthScheme;
 import software.amazon.jdbc.utilities.QueryExecutor;
 import software.amazon.jdbc.utilities.SqlError;
 import software.amazon.jdbc.utilities.SqlState;
+import software.amazon.neptune.common.gremlindatamodel.GraphSchema;
 import software.amazon.neptune.common.gremlindatamodel.MetadataCache;
-import software.amazon.neptune.common.gremlindatamodel.NodeColumnInfo;
 import software.amazon.neptune.gremlin.resultset.GremlinResultSet;
 import software.amazon.neptune.gremlin.resultset.GremlinResultSetGetCatalogs;
 import software.amazon.neptune.gremlin.resultset.GremlinResultSetGetColumns;
@@ -41,11 +41,9 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -62,11 +60,16 @@ public class GremlinQueryExecutor extends QueryExecutor {
     private final GremlinConnectionProperties gremlinConnectionProperties;
     private CompletableFuture<org.apache.tinkerpop.gremlin.driver.ResultSet> completableFuture;
 
-    GremlinQueryExecutor(final GremlinConnectionProperties gremlinConnectionProperties) {
+    /**
+     * GremlinQueryExecutor constructor.
+     *
+     * @param gremlinConnectionProperties GremlinConnectionProperties for use in the executor.
+     */
+    public GremlinQueryExecutor(final GremlinConnectionProperties gremlinConnectionProperties) {
         this.gremlinConnectionProperties = gremlinConnectionProperties;
     }
 
-    private static Cluster.Builder createClusterBuilder(final GremlinConnectionProperties properties)
+    protected static Cluster.Builder createClusterBuilder(final GremlinConnectionProperties properties)
             throws SQLException {
         final Cluster.Builder builder = Cluster.build();
 
@@ -182,7 +185,8 @@ public class GremlinQueryExecutor extends QueryExecutor {
         return builder;
     }
 
-    private static Cluster getCluster(final GremlinConnectionProperties gremlinConnectionProperties) throws SQLException {
+    protected static Cluster getCluster(final GremlinConnectionProperties gremlinConnectionProperties)
+            throws SQLException {
         if (cluster == null ||
                 !propertiesEqual(previousGremlinConnectionProperties, gremlinConnectionProperties)) {
             previousGremlinConnectionProperties = gremlinConnectionProperties;
@@ -203,7 +207,8 @@ public class GremlinQueryExecutor extends QueryExecutor {
         }
     }
 
-    private static Client getClient(final GremlinConnectionProperties gremlinConnectionProperties) throws SQLException {
+    protected static Client getClient(final GremlinConnectionProperties gremlinConnectionProperties)
+            throws SQLException {
         synchronized (CLUSTER_LOCK) {
             cluster = getCluster(gremlinConnectionProperties);
             return cluster.connect().init();
@@ -232,13 +237,13 @@ public class GremlinQueryExecutor extends QueryExecutor {
         final Cluster tempCluster =
                 GremlinQueryExecutor.createClusterBuilder(gremlinConnectionProperties).maxWaitForConnection(timeout)
                         .create();
-        final Client client = tempCluster.connect();
-        client.init();
+        final Client tempClient = tempCluster.connect();
+        tempClient.init();
 
         try {
             // Neptune doesn't support arbitrary math queries, but the below command is valid in Gremlin and is basically
             // saying return 0.
-            final CompletableFuture<List<Result>> tempCompletableFuture = client.submit("g.inject(0)").all();
+            final CompletableFuture<List<Result>> tempCompletableFuture = tempClient.submit("g.inject(0)").all();
             tempCompletableFuture.get(timeout, TimeUnit.SECONDS);
             return true;
         } catch (final RuntimeException ignored) {
@@ -280,15 +285,20 @@ public class GremlinQueryExecutor extends QueryExecutor {
     @Override
     public java.sql.ResultSet executeGetTables(final java.sql.Statement statement, final String tableName)
             throws SQLException {
+        // TODO: Update this caching mechanism, should try to make this automatic or something.
         if (!MetadataCache.isMetadataCached()) {
+            // TODO AN-576: Temp isValid check. Find a better solution inside the export tool to check if connection is valid.
+            if (!statement.getConnection().isValid(3000)) {
+                throw new SQLException("Failed to execute getTables, could not connect to database.");
+            }
             MetadataCache.updateCache(gremlinConnectionProperties.getContactPoint(), null,
                     (gremlinConnectionProperties.getAuthScheme() == AuthScheme.IAMSigV4),
                     MetadataCache.PathType.Gremlin);
         }
 
-        final List<NodeColumnInfo> nodeColumnInfoList =
+        final List<GraphSchema> graphSchemaList =
                 MetadataCache.getFilteredCacheNodeColumnInfos(tableName);
-        return new GremlinResultSetGetTables(statement, nodeColumnInfoList,
+        return new GremlinResultSetGetTables(statement, graphSchemaList,
                 MetadataCache.getFilteredResultSetInfoWithoutRowsForTables(tableName));
     }
 
@@ -338,14 +348,18 @@ public class GremlinQueryExecutor extends QueryExecutor {
     public java.sql.ResultSet executeGetColumns(final java.sql.Statement statement, final String nodes)
             throws SQLException {
         if (!MetadataCache.isMetadataCached()) {
+            // TODO AN-576: Temp isValid check. Find a better solution inside the export tool to check if connection is valid.
+            if (!statement.getConnection().isValid(3000)) {
+                throw new SQLException("Failed to execute getTables, could not connect to database.");
+            }
             MetadataCache.updateCache(gremlinConnectionProperties.getContactPoint(), null,
                     (gremlinConnectionProperties.getAuthScheme() == AuthScheme.IAMSigV4),
                     MetadataCache.PathType.Gremlin);
         }
 
-        final List<NodeColumnInfo> nodeColumnInfoList =
+        final List<GraphSchema> graphSchemaList =
                 MetadataCache.getFilteredCacheNodeColumnInfos(nodes);
-        return new GremlinResultSetGetColumns(statement, nodeColumnInfoList,
+        return new GremlinResultSetGetColumns(statement, graphSchemaList,
                 MetadataCache.getFilteredResultSetInfoWithoutRowsForColumns(nodes));
     }
 
@@ -359,9 +373,10 @@ public class GremlinQueryExecutor extends QueryExecutor {
             completableFuture = client.submitAsync(query);
         }
 
+
         final List<Result> results = completableFuture.get().all().get();
         final List<Map<String, Object>> rows = new ArrayList<>();
-        final Set<String> columns = new HashSet<>();
+        final Map<String, Class<?>> columns = new HashMap<>();
         for (final Object result : results.stream().map(Result::getObject).collect(Collectors.toList())) {
             if (!(result instanceof LinkedHashMap)) {
                 // Best way to handle it seems to be to issue a warning.
@@ -381,12 +396,22 @@ public class GremlinQueryExecutor extends QueryExecutor {
             rows.add(row);
 
             // Get columns from row and put in columns List if they aren't already in there.
-            columns.addAll(row.keySet());
+            for (final String key : row.keySet()) {
+                if (!columns.containsKey(key)) {
+                    final Object value = row.get(key);
+                    if (GremlinTypeMapping.checkContains(value.getClass())) {
+                        columns.put(key, value.getClass());
+                    } else {
+                        columns.put(key, String.class);
+                    }
+                } else if (columns.get(key) != row.get(key)) {
+                    columns.put(key, String.class);
+                }
+            }
         }
 
-        client.close();
-        final List<String> columnsList = new ArrayList<>(columns);
-        return (T) new GremlinResultSet.ResultSetInfoWithRows(rows, columnsList);
+        final List<String> listColumns = new ArrayList<>(columns.keySet());
+        return (T) new GremlinResultSet.ResultSetInfoWithRows(rows, columns, listColumns);
     }
 
     @Override

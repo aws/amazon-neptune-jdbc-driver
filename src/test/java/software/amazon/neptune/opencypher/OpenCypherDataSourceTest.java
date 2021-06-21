@@ -16,7 +16,6 @@
 
 package software.amazon.neptune.opencypher;
 
-import org.apache.log4j.Level;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
@@ -97,9 +96,6 @@ class OpenCypherDataSourceTest {
 
         Assertions.assertDoesNotThrow(() -> dataSource.setLoginTimeout(50));
         Assertions.assertEquals(50, dataSource.getLoginTimeout());
-
-        Assertions.assertDoesNotThrow(() -> dataSource.setLogLevel(Level.ERROR));
-        Assertions.assertEquals(Level.ERROR, dataSource.getLogLevel());
 
         Assertions.assertDoesNotThrow(() -> dataSource.setUseEncryption(true));
         Assertions.assertEquals(true, dataSource.getUseEncryption());

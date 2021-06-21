@@ -23,12 +23,14 @@ import software.amazon.neptune.NeptuneStatementTestHelper;
 import software.amazon.neptune.gremlin.mock.MockGremlinDatabase;
 import java.io.IOException;
 import java.sql.SQLException;
+
 import static software.amazon.neptune.gremlin.GremlinHelper.getProperties;
 
 public class GremlinStatementTest extends GremlinStatementTestBase {
     private static final String HOSTNAME = "localhost";
     private static final int PORT = 8181; // Mock server uses 8181.
     private static final int MAX_CONTENT_LENGTH = 500000; // Took from PropertyGraphSerializationModule.
+    private static final int MAX_CONNECT_ATTEMPTS = 10;
     private static NeptuneStatementTestHelper neptuneStatementTestHelper;
 
     @BeforeEach
@@ -39,6 +41,18 @@ public class GremlinStatementTest extends GremlinStatementTestBase {
                         new GremlinConnectionProperties(getProperties(HOSTNAME, PORT, MAX_CONTENT_LENGTH)));
         neptuneStatementTestHelper =
                 new NeptuneStatementTestHelper(connection.createStatement(), getLongQuery(), QUICK_QUERY);
+
+        boolean valid = false;
+        for (int i = 0; i < MAX_CONNECT_ATTEMPTS; i++) {
+            if (connection.isValid(1)) {
+                valid = true;
+                break;
+            }
+        }
+
+        if (!valid) {
+            throw new SQLException("Failed to establish a connection to the database.");
+        }
     }
 
     /**

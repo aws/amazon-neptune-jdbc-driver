@@ -197,6 +197,7 @@ repositories {
     flatDir {
         dir 'amazon-neptune-tools/neptune-export/target'
         dir 'amazon-neptune-tools/neptune-gremlin-client/gremlin-client/target'
+        dir 'sql-gremlin/target'
     }
 }
 
@@ -225,10 +226,13 @@ subprojects {
 
 dependencies {
     // Local neptune-export library
+    // TODO: switch this to a shaded jar and remove the dependencies.
     implementation('com.amazonaws:neptune-export:1.0-SNAPSHOT')
     implementation(':neptune-export:1.0-SNAPSHOT')
     implementation('com.amazonaws:gremlin-client:1.0-SNAPSHOT')
     implementation(':gremlin-client:1.0-SNAPSHOT')
+    implementation('org.twilmes:sql-gremlin')
+    implementation(':sql-gremlin')
 
     // neptune-export dependencies
     compile group: 'com.github.rvesse', name: 'airline', version: '2.8.0'
@@ -243,6 +247,7 @@ dependencies {
     compile group: 'com.amazonaws', name: 'amazon-neptune-sparql-java-sigv4', version: amazonSigv4SignerVersion
     compile group: 'com.amazonaws', name: 'amazon-neptune-sigv4-signer', version: amazonSigv4SignerVersion
     compile group: 'com.amazonaws', name: 'amazon-neptune-gremlin-java-sigv4', version: amazonSigv4SignerVersion
+    testImplementation group: 'com.massisframework', name: 'j-text-utils', version: '0.3.4'
 
     // Might need tinkerpop, also shade exclude for testing???
     // compile group: 'org.apache.tinkerpop', name: 'gremlin-groovy', version: gremlinVersion
@@ -272,6 +277,7 @@ dependencies {
     implementation group: 'com.puppycrawl.tools', name: 'checkstyle', version: puppyCrawlVersion
     compile group: 'com.google.code.findbugs', name: 'annotations', version: findBugsVersion
     testImplementation group: 'com.puppycrawl.tools', name: 'checkstyle', version: puppyCrawlVersion
+    testImplementation 'org.codehaus.janino:janino:3.1.0'
     testCompile group: 'com.google.code.findbugs', name: 'annotations', version: findBugsVersion
 
     // Testing
@@ -300,6 +306,8 @@ dependencies {
     // https://mvnrepository.com/artifact/org.apache.jena/jena-fuseki-main
     testImplementation group: 'org.apache.jena', name: 'jena-fuseki-main', version: '3.17.0'
 
+
+    testCompile 'com.github.javafaker:javafaker:0.12'
 }
 
 shadowJar {
@@ -309,6 +317,7 @@ shadowJar {
     // todo: exclude
     dependencies {
         exclude(dependency('org.slf4j:.*'))
+        exclude(dependency('org.codehaus.janino::'))
         // exclude(dependency('org.apache.logging.log4j:.*:.*'))
     }
 }

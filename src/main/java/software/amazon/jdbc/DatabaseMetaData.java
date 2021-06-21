@@ -96,7 +96,7 @@ public abstract class DatabaseMetaData implements java.sql.DatabaseMetaData {
 
     @Override
     public String getIdentifierQuoteString() {
-        return "\"";
+        return "`";
     }
 
     @Override

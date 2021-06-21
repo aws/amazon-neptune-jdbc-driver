@@ -19,7 +19,7 @@ package software.amazon.neptune.opencypher.utilities;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import org.junit.jupiter.api.Assertions;
-import software.amazon.neptune.common.gremlindatamodel.NodeColumnInfo;
+import software.amazon.neptune.common.gremlindatamodel.GraphSchema;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -61,34 +61,36 @@ public class OpenCypherGetColumnUtilities {
             "    } ]\n" +
             "  } ]\n" +
             "}";
-    public static final List<NodeColumnInfo> NODE_COLUMN_INFOS = ImmutableList.of(
-            new NodeColumnInfo(
-                    ImmutableList.of("A", "B", "C"), ImmutableList.of(
-                    ImmutableMap.of(
-                            "property", "name",
-                            "dataType", "String",
-                            "isMultiValue", false,
-                            "isNullable", false),
-                    ImmutableMap.of(
-                            "property", "email",
-                            "dataType", "String",
-                            "isMultiValue", false,
-                            "isNullable", false)
-            )
+    public static final List<GraphSchema> NODE_COLUMN_INFOS = ImmutableList.of(
+            new GraphSchema(
+                    ImmutableList.of("A", "B", "C"),
+                    ImmutableList.of(
+                            ImmutableMap.of(
+                                    "property", "name",
+                                    "dataType", "String",
+                                    "isMultiValue", false,
+                                    "isNullable", false),
+                            ImmutableMap.of(
+                                    "property", "email",
+                                    "dataType", "String",
+                                    "isMultiValue", false,
+                                    "isNullable", false)
+                    )
             ),
-            new NodeColumnInfo(
-                    ImmutableList.of("A", "B", "C", "D"), ImmutableList.of(
-                    ImmutableMap.of(
-                            "property", "age",
-                            "dataType", "Integer",
-                            "isMultiValue", false,
-                            "isNullable", false),
-                    ImmutableMap.of(
-                            "property", "email",
-                            "dataType", "String",
-                            "isMultiValue", false,
-                            "isNullable", false)
-            )
+            new GraphSchema(
+                    ImmutableList.of("A", "B", "C", "D"),
+                    ImmutableList.of(
+                            ImmutableMap.of(
+                                    "property", "age",
+                                    "dataType", "Integer",
+                                    "isMultiValue", false,
+                                    "isNullable", false),
+                            ImmutableMap.of(
+                                    "property", "email",
+                                    "dataType", "String",
+                                    "isMultiValue", false,
+                                    "isNullable", false)
+                    )
             )
     );
 

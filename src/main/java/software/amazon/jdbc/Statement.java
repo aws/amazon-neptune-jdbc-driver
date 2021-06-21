@@ -87,6 +87,7 @@ public class Statement implements java.sql.Statement {
         if (!this.isClosed.getAndSet(true)) {
             LOGGER.debug("Cancelling running queries.");
             try {
+                // TODO: Only cancel if query currently in progress?
                 queryExecutor.cancelQuery();
             } catch (final SQLException e) {
                 LOGGER.warn("Error occurred while closing Statement. Failed to cancel running query: '"

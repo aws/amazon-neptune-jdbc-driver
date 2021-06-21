@@ -41,10 +41,11 @@ public class MockGremlinDatabase {
     public static void startGraph() throws IOException, InterruptedException {
         final String output = runCommand(START_COMMAND);
         if (output.startsWith("Server already running with PID")) {
+            System.out.println("Restarting");
             stopGraph();
             startGraph();
         }
-        Thread.sleep(8000);
+        Thread.sleep(10000);
     }
 
     /**
@@ -54,7 +55,7 @@ public class MockGremlinDatabase {
      */
     public static void stopGraph() throws IOException, InterruptedException {
         runCommand(STOP_COMMAND);
-        Thread.sleep(8000);
+        Thread.sleep(10000);
     }
 
     private static String runCommand(final String command) throws IOException {

@@ -23,7 +23,7 @@ import software.amazon.jdbc.utilities.JdbcType;
 import software.amazon.jdbc.utilities.SqlError;
 import software.amazon.jdbc.utilities.SqlState;
 import software.amazon.neptune.common.ResultSetInfoWithoutRows;
-import software.amazon.neptune.common.gremlindatamodel.NodeColumnInfo;
+import software.amazon.neptune.common.gremlindatamodel.GraphSchema;
 import java.sql.DatabaseMetaData;
 import java.sql.Date;
 import java.sql.SQLException;
@@ -142,21 +142,21 @@ public abstract class ResultSetGetColumns extends software.amazon.jdbc.ResultSet
      * ResultSetGetColumns constructor, initializes super class.
      *
      * @param statement                Statement Object.
-     * @param nodeColumnInfos          List of NodeColumnInfo Objects.
+     * @param graphSchemas          List of GraphSchema Objects.
      * @param resultSetInfoWithoutRows ResultSetInfoWithoutRows Object.
      */
-    public ResultSetGetColumns(final Statement statement, final List<NodeColumnInfo> nodeColumnInfos,
+    public ResultSetGetColumns(final Statement statement, final List<GraphSchema> graphSchemas,
                                final ResultSetInfoWithoutRows resultSetInfoWithoutRows)
             throws SQLException {
         super(statement, resultSetInfoWithoutRows.getColumns(), resultSetInfoWithoutRows.getRowCount());
-        for (final NodeColumnInfo nodeColumnInfo : nodeColumnInfos) {
+        for (final GraphSchema graphSchema : graphSchemas) {
             int i = 1;
-            for (final Map<String, Object> property : nodeColumnInfo.getProperties()) {
+            for (final Map<String, Object> property : graphSchema.getProperties()) {
                 // Add defaults.
                 final Map<String, Object> map = new HashMap<>(CONVERSION_MAP);
 
                 // Set table name.
-                map.put("TABLE_NAME", ResultSetGetTables.nodeListToString(nodeColumnInfo.getLabels()));
+                map.put("TABLE_NAME", ResultSetGetTables.nodeListToString(graphSchema.getLabels()));
 
                 // Get column type.
                 final String dataType = property.get("dataType").toString();

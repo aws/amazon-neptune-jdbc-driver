@@ -17,7 +17,7 @@
 package software.amazon.neptune.sparql.resultset;
 
 import software.amazon.neptune.common.ResultSetInfoWithoutRows;
-import software.amazon.neptune.common.gremlindatamodel.NodeColumnInfo;
+import software.amazon.neptune.common.gremlindatamodel.GraphSchema;
 import software.amazon.neptune.common.gremlindatamodel.resultset.ResultSetGetTables;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
@@ -48,13 +48,13 @@ public class SparqlResultSetGetTables extends ResultSetGetTables implements java
      * ResultSetGetTables constructor, initializes super class.
      *
      * @param statement                Statement Object.
-     * @param nodeColumnInfos          List of NodeColumnInfo Objects.
+     * @param graphSchemas             List of NodeColumnInfo Objects.
      * @param resultSetInfoWithoutRows ResultSetInfoWithoutRows Object.
      */
     public SparqlResultSetGetTables(final Statement statement,
-                                    final List<NodeColumnInfo> nodeColumnInfos,
+                                    final List<GraphSchema> graphSchemas,
                                     final ResultSetInfoWithoutRows resultSetInfoWithoutRows) {
-        super(statement, nodeColumnInfos, resultSetInfoWithoutRows);
+        super(statement, graphSchemas, resultSetInfoWithoutRows);
     }
 
     @Override

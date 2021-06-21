@@ -72,13 +72,14 @@ public class SchemaHelperGremlinDataModelTest {
         testFiles.forEach(tf -> testFilesFullPath.add(extendedRoot.toAbsolutePath().toString() + "/" + tf));
         OpenCypherGetColumnUtilities.createFiles(extendedRoot, testFiles);
 
-        final List<NodeColumnInfo> nodeColumnInfoList = new ArrayList<>();
+        final List<GraphSchema> graphSchemaList = new ArrayList<>();
+        final List<GraphSchema> edgeSchemaList = new ArrayList<>();
         testFilesFullPath
                 .forEach(testFileFullPath -> SchemaHelperGremlinDataModel
-                        .parseFile(testFileFullPath, nodeColumnInfoList));
-        Assertions.assertEquals(nodeColumnInfoList.size(), OpenCypherGetColumnUtilities.NODE_COLUMN_INFOS.size());
-        for (final NodeColumnInfo nodeColumnInfo : nodeColumnInfoList) {
-            Assertions.assertTrue(OpenCypherGetColumnUtilities.NODE_COLUMN_INFOS.contains(nodeColumnInfo));
+                        .parseFile(testFileFullPath, graphSchemaList, edgeSchemaList));
+        Assertions.assertEquals(graphSchemaList.size(), OpenCypherGetColumnUtilities.NODE_COLUMN_INFOS.size());
+        for (final GraphSchema graphSchema : graphSchemaList) {
+            Assertions.assertTrue(OpenCypherGetColumnUtilities.NODE_COLUMN_INFOS.contains(graphSchema));
         }
     }
 }

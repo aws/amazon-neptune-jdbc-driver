@@ -20,7 +20,6 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.protocol.HttpClientContext;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.protocol.HttpContext;
-import org.apache.log4j.Level;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -65,7 +64,6 @@ public class SparqlConnectionPropertiesTest {
     void testDefaultValues() throws SQLException {
         connectionProperties = new SparqlConnectionProperties();
         Assertions.assertEquals("", connectionProperties.getDataset());
-        Assertions.assertEquals(SparqlConnectionProperties.DEFAULT_LOG_LEVEL, connectionProperties.getLogLevel());
         Assertions.assertEquals(SparqlConnectionProperties.DEFAULT_CONNECTION_TIMEOUT_MILLIS,
                 connectionProperties.getConnectionTimeoutMillis());
         Assertions.assertEquals(SparqlConnectionProperties.DEFAULT_CONNECTION_RETRY_COUNT,
@@ -81,19 +79,6 @@ public class SparqlConnectionPropertiesTest {
         connectionProperties = new SparqlConnectionProperties();
         connectionProperties.setApplicationName(testValue);
         Assertions.assertEquals(testValue, connectionProperties.getApplicationName());
-
-        // the constructor test with DESTINATION properties properly set to avoid throws
-        setInitialDestinationProperty(connectionProperties);
-        final Properties properties = new Properties();
-        properties.putAll(connectionProperties);
-        assertDoesNotThrowOnNewConnectionProperties(properties);
-    }
-
-    @Test
-    void testLogLevel() throws SQLException {
-        connectionProperties = new SparqlConnectionProperties();
-        connectionProperties.setLogLevel(Level.ERROR);
-        Assertions.assertEquals(Level.ERROR, connectionProperties.getLogLevel());
 
         // the constructor test with DESTINATION properties properly set to avoid throws
         setInitialDestinationProperty(connectionProperties);

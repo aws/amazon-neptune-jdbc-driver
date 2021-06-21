@@ -24,7 +24,7 @@ public class GremlinStatementTestBase extends NeptuneStatementTestHelperBase {
     private static int currentIndex = 0;
 
     static {
-        QUICK_QUERY = "1+1";
+        QUICK_QUERY = "g.V().valueMap()";
     }
 
     protected static String getLongQuery() {

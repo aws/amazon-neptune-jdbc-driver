@@ -14,16 +14,16 @@
  *
  */
 
-package software.amazon.neptune.gremlin.resultset;
+package software.amazon.neptune.gremlin.sql;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.twilmes.sql.gremlin.processor.SingleQueryExecutor;
 import software.amazon.jdbc.utilities.SqlError;
 import software.amazon.jdbc.utilities.SqlState;
-import software.amazon.neptune.common.ResultSetInfoWithoutRows;
 import software.amazon.neptune.gremlin.GremlinTypeMapping;
+import software.amazon.neptune.gremlin.resultset.GremlinResultSet;
+import software.amazon.neptune.gremlin.resultset.GremlinResultSetMetadata;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -31,40 +31,42 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-/**
- * Gremlin ResultSet class.
- */
-public class GremlinResultSet extends software.amazon.jdbc.ResultSet implements java.sql.ResultSet {
-    private static final Logger LOGGER = LoggerFactory.getLogger(GremlinResultSet.class);
-    private final List<String> columns;
-    private final List<Map<String, Object>> rows;
-    private final Map<String, Class<?>> columnTypes;
-    private boolean wasNull = false;
+import static software.amazon.neptune.gremlin.GremlinTypeMapping.GREMLIN_TO_JDBC_TYPE_MAP;
 
-    /**
-     * GremlinResultSet constructor, initializes super class.
-     *
-     * @param statement     Statement Object.
-     * @param resultSetInfo ResultSetInfoWithRows Object.
-     */
-    public GremlinResultSet(final java.sql.Statement statement, final ResultSetInfoWithRows resultSetInfo) {
-        super(statement, resultSetInfo.getColumns(), resultSetInfo.getRows().size());
-        this.columns = resultSetInfo.getColumns();
-        this.rows = resultSetInfo.getRows();
-        this.columnTypes = resultSetInfo.getColumnsTypes();
+public class SqlGremlinResultSet extends software.amazon.jdbc.ResultSet implements java.sql.ResultSet {
+    private static final Logger LOGGER = LoggerFactory.getLogger(GremlinResultSet.class);
+    private static final Map<String, Class<?>> SQL_GREMLIN_COLUMN_TYPE_TO_JAVA_TYPE = new HashMap<>();
+
+    static {
+        GREMLIN_TO_JDBC_TYPE_MAP.keySet().forEach(gremlinType -> {
+            SQL_GREMLIN_COLUMN_TYPE_TO_JAVA_TYPE.put(gremlinType.getName().toLowerCase(), gremlinType);
+        });
     }
 
+    private final List<String> columns;
+    private final List<List<Object>> rows;
+    private final List<String> columnTypes;
+    private boolean wasNull = false;
+    private final GremlinResultSetMetadata gremlinResultSetMetadata;
+
     /**
      * GremlinResultSet constructor, initializes super class.
      *
-     * @param statement     Statement Object.
-     * @param resultSetInfo ResultSetInfoWithoutRows Object.
+     * @param statement   Statement Object.
+     * @param queryResult SqlGremlinQueryResult Object.
      */
-    public GremlinResultSet(final java.sql.Statement statement, final ResultSetInfoWithoutRows resultSetInfo) {
-        super(statement, resultSetInfo.getColumns(), resultSetInfo.getRowCount());
-        this.columns = resultSetInfo.getColumns();
-        this.columnTypes = new HashMap<>();
-        this.rows = null;
+    public SqlGremlinResultSet(final java.sql.Statement statement,
+                               final SingleQueryExecutor.SqlGremlinQueryResult queryResult) {
+        super(statement, queryResult.getColumns(), queryResult.getRows().size());
+        this.columns = queryResult.getColumns();
+        this.rows = queryResult.getRows();
+        this.columnTypes = queryResult.getColumnTypes();
+
+        final List<Class<?>> rowTypes = new ArrayList<>();
+        for (final String columnType : columnTypes) {
+            rowTypes.add(SQL_GREMLIN_COLUMN_TYPE_TO_JAVA_TYPE.getOrDefault(columnType.toLowerCase(), String.class));
+        }
+        gremlinResultSetMetadata = new GremlinResultSetMetadata(columns, rowTypes);
     }
 
     @Override
@@ -89,11 +91,7 @@ public class GremlinResultSet extends software.amazon.jdbc.ResultSet implements 
 
     @Override
     protected ResultSetMetaData getResultMetadata() throws SQLException {
-        final List<Class<?>> rowTypes = new ArrayList<>();
-        for (final String column : columns) {
-            rowTypes.add(columnTypes.getOrDefault(column, String.class));
-        }
-        return new GremlinResultSetMetadata(columns, rowTypes);
+        return gremlinResultSetMetadata;
     }
 
     protected Object getConvertedValue(final int columnIndex) throws SQLException {
@@ -113,9 +111,8 @@ public class GremlinResultSet extends software.amazon.jdbc.ResultSet implements 
         }
         validateRowColumn(columnIndex);
 
-        final String colName = columns.get(columnIndex - 1);
-        final Map<String, Object> row = rows.get(getRowIndex());
-        final Object value = row.getOrDefault(colName, null);
+        // Look for row index within rows, then grab column index from there (note: 1 based indexing of JDBC hence -1).
+        final Object value = rows.get(getRowIndex()).get(columnIndex - 1);
         wasNull = (value == null);
 
         return value;
@@ -126,13 +123,5 @@ public class GremlinResultSet extends software.amazon.jdbc.ResultSet implements 
         LOGGER.trace("Getting column {} as an Object using provided Map.", columnIndex);
         final Object value = getValue(columnIndex);
         return getObject(columnIndex, map.get(GremlinTypeMapping.getJDBCType(value.getClass()).name()));
-    }
-
-    @AllArgsConstructor
-    @Getter
-    public static class ResultSetInfoWithRows {
-        private final List<Map<String, Object>> rows;
-        private final Map<String, Class<?>> columnsTypes;
-        private final List<String> columns;
     }
 }
