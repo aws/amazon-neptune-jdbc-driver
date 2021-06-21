@@ -72,7 +72,7 @@ public class SparqlResultSetGetColumnsTest {
     public static void initialize() throws SQLException {
         PROPERTIES.put(SparqlConnectionProperties.AUTH_SCHEME_KEY, AuthScheme.None); // reverse default to None
         // Make up fake endpoint since we aren't actually connection.
-        PROPERTIES.putIfAbsent(SparqlConnectionProperties.CONTACT_POINT_KEY,
+        PROPERTIES.putIfAbsent(SparqlConnectionProperties.ENDPOINT_KEY,
                 "http://localhost");
         PROPERTIES.putIfAbsent(SparqlConnectionProperties.PORT_KEY,
                 123);

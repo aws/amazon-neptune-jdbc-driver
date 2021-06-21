@@ -55,7 +55,7 @@ public class SparqlManualNeptuneVerificationTest {
     private static Properties authProperties() {
         final Properties properties = new Properties();
         properties.put(ConnectionProperties.AUTH_SCHEME_KEY, AuthScheme.IAMSigV4);
-        properties.put(SparqlConnectionProperties.CONTACT_POINT_KEY, NEPTUNE_HOSTNAME);
+        properties.put(SparqlConnectionProperties.ENDPOINT_KEY, NEPTUNE_HOSTNAME);
         properties.put(SparqlConnectionProperties.PORT_KEY, NEPTUNE_DEFAULT_PORT);
         properties.put(SparqlConnectionProperties.QUERY_ENDPOINT_KEY, NEPTUNE_QUERY_ENDPOINT);
         return properties;
