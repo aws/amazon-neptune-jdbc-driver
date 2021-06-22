@@ -34,7 +34,6 @@ import java.util.Map;
  */
 public class OpenCypherResultSetGetTables extends ResultSetGetTables implements java.sql.ResultSet {
     private static final Map<String, Type> COLUMN_TYPE_MAP = new HashMap<>();
-
     static {
         COLUMN_TYPE_MAP.put("TABLE_CAT", InternalTypeSystem.TYPE_SYSTEM.STRING());
         COLUMN_TYPE_MAP.put("TABLE_SCHEM", InternalTypeSystem.TYPE_SYSTEM.STRING());
@@ -67,6 +66,7 @@ public class OpenCypherResultSetGetTables extends ResultSetGetTables implements 
         final List<String> orderedColumns = getColumns();
         final List<Type> rowTypes = new ArrayList<>();
         for (int i = 0; i < orderedColumns.size(); i++) {
+            // TODO Didn't use the above map?
             rowTypes.add(InternalTypeSystem.TYPE_SYSTEM.STRING());
         }
         return new OpenCypherResultSetMetadata(orderedColumns, rowTypes);

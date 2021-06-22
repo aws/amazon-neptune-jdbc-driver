@@ -105,7 +105,7 @@ public abstract class ResultSet implements java.sql.ResultSet {
 
     @Override
     public boolean next() throws SQLException {
-        // Increment row index, if it exceeds capacity, set it to 1 after the last element.
+        // Increment row index, if it exceeds capacity, set it to one after the last element.
         if (++this.rowIndex >= rowCount) {
             this.rowIndex = rowCount;
         }
@@ -247,7 +247,7 @@ public abstract class ResultSet implements java.sql.ResultSet {
 
     @Override
     public int findColumn(final String columnLabel) throws SQLException {
-        final int index = columns.indexOf(columnLabel) ;
+        final int index = columns.indexOf(columnLabel);
         if (index < 0) {
             throw SqlError.createSQLException(
                     LOGGER,
@@ -300,6 +300,12 @@ public abstract class ResultSet implements java.sql.ResultSet {
     }
 
     @Override
+    public BigDecimal getBigDecimal(final int columnIndex) throws SQLException {
+        LOGGER.trace("Getting column {} as a BigDecimal.", columnIndex);
+        return JavaToJdbcTypeConverter.toBigDecimal(getConvertedValue(columnIndex));
+    }
+
+    @Override
     public String getString(final int columnIndex) throws SQLException {
         LOGGER.trace("Getting column {} as a String.", columnIndex);
         return JavaToJdbcTypeConverter.toString(getConvertedValue(columnIndex));
@@ -331,7 +337,7 @@ public abstract class ResultSet implements java.sql.ResultSet {
 
     @Override
     public Timestamp getTimestamp(final int columnIndex, final Calendar cal) throws SQLException {
-        LOGGER.trace("Getting column {} as a Tiemstamp.", columnIndex);
+        LOGGER.trace("Getting column {} as a Timestamp.", columnIndex);
         return JavaToJdbcTypeConverter.toTimestamp(getConvertedValue(columnIndex), cal);
     }
 
@@ -386,11 +392,6 @@ public abstract class ResultSet implements java.sql.ResultSet {
     }
 
     // Add default not supported for all types.
-    @Override
-    public BigDecimal getBigDecimal(final int columnIndex) throws SQLException {
-        throw SqlError.createSQLFeatureNotSupportedException(LOGGER);
-    }
-
     @Override
     public BigDecimal getBigDecimal(final int columnIndex, final int scale) throws SQLException {
         throw SqlError.createSQLFeatureNotSupportedException(LOGGER);

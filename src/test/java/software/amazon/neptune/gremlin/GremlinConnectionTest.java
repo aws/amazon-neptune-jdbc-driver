@@ -69,6 +69,12 @@ public class GremlinConnectionTest {
     @Test
     void testIsValid() throws SQLException {
         Assertions.assertTrue(connection.isValid(1));
+
+        final Throwable negativeTimeout = Assertions.assertThrows(SQLException.class,
+                () -> connection.isValid(-1));
+        Assertions.assertEquals("Timeout value must be greater than or equal to 0",
+                negativeTimeout.getMessage());
+
         final java.sql.Connection invalidConnection = new GremlinConnection(
                 new GremlinConnectionProperties(getProperties(HOSTNAME, 1234)));
         Assertions.assertFalse(invalidConnection.isValid(1));

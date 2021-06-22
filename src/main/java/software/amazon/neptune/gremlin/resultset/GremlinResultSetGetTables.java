@@ -32,7 +32,7 @@ import java.util.Map;
  */
 public class GremlinResultSetGetTables extends ResultSetGetTables implements java.sql.ResultSet {
     private static final Map<String, Class<?>> COLUMN_TYPE_MAP = new HashMap<>();
-
+    // TODO getTables() JavaDoc description has less properties listed, should this reflect that?
     static {
         // TODO AN-577 move this stuff to common.
         COLUMN_TYPE_MAP.put("TABLE_CAT", String.class);
@@ -65,8 +65,8 @@ public class GremlinResultSetGetTables extends ResultSetGetTables implements jav
     protected ResultSetMetaData getResultMetadata() {
         final List<String> orderedColumns = getColumns();
         final List<Class<?>> rowTypes = new ArrayList<>();
-        for (int i = 0; i < orderedColumns.size(); i++) {
-            rowTypes.add(COLUMN_TYPE_MAP.get(orderedColumns.get(i)));
+        for (String orderedColumn : orderedColumns) {
+            rowTypes.add(COLUMN_TYPE_MAP.get(orderedColumn));
         }
         return new GremlinResultSetMetadata(orderedColumns, rowTypes);
     }

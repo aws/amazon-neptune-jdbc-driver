@@ -40,8 +40,8 @@ public class NeptuneStatementTestHelper extends NeptuneStatementTestHelperBase {
      * Function to test cancelling query while execution in progress.
      */
     public void testCancelQueryWhileExecuteInProgress() {
-        // Wait 50 milliseconds before attempting to cancel.
-        launchCancelThread(50, statement);
+        // Wait 100 milliseconds before attempting to cancel.
+        launchCancelThread(100, statement);
         HelperFunctions.expectFunctionThrows(SqlError.QUERY_CANCELED, () -> statement.execute(longQuery));
         waitCancelToComplete();
     }
@@ -50,8 +50,8 @@ public class NeptuneStatementTestHelper extends NeptuneStatementTestHelperBase {
      * Function to test cancelling query twice.
      */
     public void testCancelQueryTwice() {
-        // Wait 50 milliseconds before attempting to cancel.
-        launchCancelThread(50, statement);
+        // Wait 100 milliseconds before attempting to cancel.
+        launchCancelThread(100, statement);
         HelperFunctions.expectFunctionThrows(SqlError.QUERY_CANCELED, () -> statement.execute(longQuery));
         waitCancelToComplete();
         launchCancelThread(1, statement);

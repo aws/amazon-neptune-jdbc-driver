@@ -91,7 +91,7 @@ public abstract class QueryExecutor {
      * Function to get schema.
      *
      * @param statement java.sql.Statement Object required for result set.
-     * @return java.sql.ResulSet Object containing schemas.
+     * @return java.sql.ResultSet Object containing schemas.
      * @throws SQLException if query execution fails, or it was cancelled.
      */
     public abstract java.sql.ResultSet executeGetSchemas(final java.sql.Statement statement)
@@ -101,7 +101,7 @@ public abstract class QueryExecutor {
      * Function to get catalogs.
      *
      * @param statement java.sql.Statement Object required for result set.
-     * @return java.sql.ResulSet Object containing catalogs.
+     * @return java.sql.ResultSet Object containing catalogs.
      * @throws SQLException if query execution fails, or it was cancelled.
      */
     public abstract java.sql.ResultSet executeGetCatalogs(final java.sql.Statement statement)
@@ -111,7 +111,7 @@ public abstract class QueryExecutor {
      * Function to get table types.
      *
      * @param statement java.sql.Statement Object required for result set.
-     * @return java.sql.ResulSet Object containing table types.
+     * @return java.sql.ResultSet Object containing table types.
      * @throws SQLException if query execution fails, or it was cancelled.
      */
     public abstract java.sql.ResultSet executeGetTableTypes(final java.sql.Statement statement)
@@ -122,7 +122,7 @@ public abstract class QueryExecutor {
      *
      * @param statement java.sql.Statement Object required for result set.
      * @param nodes     String containing nodes to get schema for.
-     * @return java.sql.ResulSet Object containing columns.
+     * @return java.sql.ResultSet Object containing columns.
      * @throws SQLException if query execution fails, or it was cancelled.
      */
     public abstract java.sql.ResultSet executeGetColumns(final java.sql.Statement statement, final String nodes)
