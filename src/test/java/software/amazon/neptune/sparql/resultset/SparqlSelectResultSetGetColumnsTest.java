@@ -35,7 +35,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
-public class SparqlResultSetGetColumnsTest {
+public class SparqlSelectResultSetGetColumnsTest {
     protected static final Properties PROPERTIES = new Properties();
     private static final Map<String, Map<String, Map<String, Object>>> COLUMNS = new HashMap<>();
     private static java.sql.Statement statement;

@@ -16,6 +16,8 @@
 
 package software.amazon.neptune.sparql.resultset;
 
+import org.apache.jena.atlas.iterator.PeekIterator;
+import org.apache.jena.graph.Triple;
 import org.apache.jena.query.Query;
 import org.apache.jena.query.QueryExecution;
 import org.apache.jena.query.QueryFactory;
@@ -115,6 +117,7 @@ public class SparqlResultSetTest {
         Assertions.assertThrows(SQLException.class, () -> resultSet.getTimestamp(columnIdx));
         Assertions.assertThrows(SQLException.class, () -> resultSet.getTime(columnIdx));
         Assertions.assertThrows(SQLException.class, () -> resultSet.getDate(columnIdx));
+        Assertions.assertThrows(SQLException.class, () -> resultSet.getString(0));
     }
 
     // helper function for testing queries with Java Integer outputs
@@ -127,6 +130,7 @@ public class SparqlResultSetTest {
         Assertions.assertEquals(expectedValue, resultSet.getInt(columnIdx));
         Assertions.assertEquals(expectedValue, resultSet.getLong(columnIdx));
         Assertions.assertEquals(String.valueOf(expectedValue), resultSet.getString(columnIdx));
+        Assertions.assertThrows(SQLException.class, () -> resultSet.getString(0));
     }
 
     // to printout result in format of Jena ResultSet
@@ -146,11 +150,6 @@ public class SparqlResultSetTest {
     @AfterEach
     void shutdown() throws SQLException {
         connection.close();
-    }
-
-    @Test
-    void testStringType() throws SQLException {
-        testStringResultTypes(SparqlMockDataQuery.STRING_QUERY, "John Smith", 2);
     }
 
     @Test
@@ -183,6 +182,15 @@ public class SparqlResultSetTest {
     }
 
     @Test
+    void testStringType() throws SQLException {
+        testStringResultTypes(SparqlMockDataQuery.STRING_QUERY, "http://somewhere/JohnSmith", 1);
+        testStringResultTypes(SparqlMockDataQuery.STRING_QUERY, "John Smith", 2);
+        testStringResultTypes(SparqlMockDataQuery.CONSTRUCT_STRING_QUERY, "http://www.w3.org/2001/vcard-rdf/3.0#FN", 1);
+        testStringResultTypes(SparqlMockDataQuery.CONSTRUCT_STRING_QUERY, "http://somewhere/JohnSmith", 2);
+        testStringResultTypes(SparqlMockDataQuery.CONSTRUCT_STRING_QUERY, "John Smith", 3);
+    }
+
+    @Test
     void testBooleanType() throws SQLException {
         final java.sql.ResultSet resultSet = statement.executeQuery(SparqlMockDataQuery.BOOL_QUERY);
         Assertions.assertTrue(resultSet.next());
@@ -199,6 +207,22 @@ public class SparqlResultSetTest {
     }
 
     @Test
+    void testConstructBooleanType() throws SQLException {
+        final java.sql.ResultSet resultSet = statement.executeQuery(SparqlMockDataQuery.CONSTRUCT_BOOL_QUERY);
+        Assertions.assertTrue(resultSet.next());
+        Assertions.assertTrue(resultSet.getBoolean(3));
+        Assertions.assertEquals(String.valueOf(true), resultSet.getString(3));
+        Assertions.assertThrows(SQLException.class, () -> resultSet.getByte(3));
+        Assertions.assertThrows(SQLException.class, () -> resultSet.getShort(3));
+        Assertions.assertThrows(SQLException.class, () -> resultSet.getLong(3));
+        Assertions.assertThrows(SQLException.class, () -> resultSet.getBigDecimal(3));
+        Assertions.assertThrows(SQLException.class, () -> resultSet.getDouble(3));
+        Assertions.assertThrows(SQLException.class, () -> resultSet.getFloat(3));
+        Assertions.assertThrows(SQLException.class, () -> resultSet.getInt(3));
+        Assertions.assertThrows(SQLException.class, () -> resultSet.getTimestamp(3));
+    }
+
+    @Test
     void testByteType() throws SQLException {
         final java.sql.ResultSet resultSet = statement.executeQuery(SparqlMockDataQuery.BYTE_QUERY);
         Assertions.assertTrue(resultSet.next());
@@ -207,6 +231,17 @@ public class SparqlResultSetTest {
         Assertions.assertEquals(127, resultSet.getInt(2));
         Assertions.assertEquals(127L, resultSet.getLong(2));
         Assertions.assertEquals(String.valueOf(127), resultSet.getString(2));
+    }
+
+    @Test
+    void testConstructByteType() throws SQLException {
+        final java.sql.ResultSet resultSet = statement.executeQuery(SparqlMockDataQuery.CONSTRUCT_BYTE_QUERY);
+        Assertions.assertTrue(resultSet.next());
+        Assertions.assertEquals((byte) 127, resultSet.getByte(3));
+        Assertions.assertEquals((short) 127, resultSet.getShort(3));
+        Assertions.assertEquals(127, resultSet.getInt(3));
+        Assertions.assertEquals(127L, resultSet.getLong(3));
+        Assertions.assertEquals(String.valueOf(127), resultSet.getString(3));
     }
 
     @Test
@@ -221,8 +256,20 @@ public class SparqlResultSetTest {
     }
 
     @Test
+    void testConstructShortType() throws SQLException {
+        final java.sql.ResultSet resultSet = statement.executeQuery(SparqlMockDataQuery.CONSTRUCT_SHORT_QUERY);
+        Assertions.assertTrue(resultSet.next());
+        Assertions.assertEquals((byte) 32767, resultSet.getByte(3));
+        Assertions.assertEquals((short) 32767, resultSet.getShort(3));
+        Assertions.assertEquals(32767, resultSet.getInt(3));
+        Assertions.assertEquals(32767L, resultSet.getLong(3));
+        Assertions.assertEquals(String.valueOf(32767), resultSet.getString(3));
+    }
+
+    @Test
     void testIntegerSmallType() throws SQLException {
         testIntegerResultTypes(SparqlMockDataQuery.INTEGER_SMALL_QUERY, 25, 2);
+        testIntegerResultTypes(SparqlMockDataQuery.CONSTRUCT_INTEGER_SMALL_QUERY, 25, 3);
     }
 
     @Test
@@ -242,6 +289,22 @@ public class SparqlResultSetTest {
     }
 
     @Test
+    void testConstructIntegerLargeType() throws SQLException {
+        final BigInteger expectedValue = new BigInteger("18446744073709551615");
+        final java.sql.ResultSet resultSet = statement.executeQuery(SparqlMockDataQuery.CONSTRUCT_INTEGER_LARGE_QUERY);
+        Assertions.assertTrue(resultSet.next());
+        Assertions.assertEquals(expectedValue.byteValue(), resultSet.getByte(3));
+        Assertions.assertEquals(expectedValue.shortValue(), resultSet.getShort(3));
+        Assertions.assertEquals(expectedValue.intValue(), resultSet.getInt(3));
+        Assertions.assertEquals(expectedValue.doubleValue(), resultSet.getDouble(3));
+        Assertions.assertEquals(expectedValue.floatValue(), resultSet.getFloat(3));
+        Assertions.assertEquals(expectedValue.longValue(), resultSet.getLong(3));
+        Assertions.assertEquals(expectedValue, resultSet.getObject(3));
+        Assertions.assertEquals(String.valueOf(expectedValue), resultSet.getString(3));
+        Assertions.assertThrows(SQLException.class, () -> resultSet.getBoolean(3));
+    }
+
+    @Test
     void testLongType() throws SQLException {
         final java.sql.ResultSet resultSet = statement.executeQuery(SparqlMockDataQuery.LONG_QUERY);
         Assertions.assertTrue(resultSet.next());
@@ -256,8 +319,23 @@ public class SparqlResultSetTest {
     }
 
     @Test
+    void testConstructLongType() throws SQLException {
+        final java.sql.ResultSet resultSet = statement.executeQuery(SparqlMockDataQuery.CONSTRUCT_LONG_QUERY);
+        Assertions.assertTrue(resultSet.next());
+        Assertions.assertEquals((byte) 3000000000L, resultSet.getByte(3));
+        Assertions.assertEquals((short) 3000000000L, resultSet.getShort(3));
+        Assertions.assertEquals((int) 3000000000L, resultSet.getInt(3));
+        Assertions.assertEquals(3000000000L, resultSet.getLong(3));
+        Assertions.assertEquals(String.valueOf(3000000000L), resultSet.getString(3));
+        Assertions.assertEquals(new java.sql.Date(3000000000L), resultSet.getDate(3));
+        Assertions.assertEquals(new java.sql.Time(3000000000L).toLocalTime(), resultSet.getTime(3).toLocalTime());
+        Assertions.assertEquals(new java.sql.Timestamp(3000000000L), resultSet.getTimestamp(3));
+    }
+
+    @Test
     void testIntType() throws SQLException {
         testIntegerResultTypes(SparqlMockDataQuery.INT_QUERY, -100, 2);
+        testIntegerResultTypes(SparqlMockDataQuery.CONSTRUCT_INT_QUERY, -100, 3);
     }
 
     @Test
@@ -279,6 +357,24 @@ public class SparqlResultSetTest {
     }
 
     @Test
+    void testConstructBigDecimalType() throws SQLException {
+        final BigDecimal expectedValue = new BigDecimal("180.5");
+        final java.sql.ResultSet resultSet =
+                statement.executeQuery(SparqlMockDataQuery.CONSTRUCT_DECIMAL_QUERY);
+        Assertions.assertTrue(resultSet.next());
+        Assertions.assertEquals(expectedValue, resultSet.getBigDecimal(3));
+        Assertions.assertEquals(String.valueOf(expectedValue), resultSet.getString(3));
+        Assertions.assertEquals(expectedValue.byteValue(), resultSet.getByte(3));
+        Assertions.assertEquals(expectedValue.shortValue(), resultSet.getShort(3));
+        Assertions.assertEquals(expectedValue.intValue(), resultSet.getInt(3));
+        Assertions.assertEquals(expectedValue.floatValue(), resultSet.getFloat(3));
+        Assertions.assertEquals(expectedValue.doubleValue(), resultSet.getDouble(3));
+        Assertions.assertEquals(expectedValue.longValue(), resultSet.getLong(3));
+        Assertions.assertThrows(SQLException.class, () -> resultSet.getBoolean(3));
+        Assertions.assertThrows(SQLException.class, () -> resultSet.getTimestamp(3));
+    }
+
+    @Test
     void testDoubleType() throws SQLException {
         final java.sql.ResultSet resultSet =
                 statement.executeQuery(SparqlMockDataQuery.DOUBLE_QUERY);
@@ -292,6 +388,22 @@ public class SparqlResultSetTest {
         Assertions.assertEquals(String.valueOf(100000.00), resultSet.getString(2));
         Assertions.assertThrows(SQLException.class, () -> resultSet.getBoolean(2));
         Assertions.assertThrows(SQLException.class, () -> resultSet.getTimestamp(2));
+    }
+
+    @Test
+    void testConstructDoubleType() throws SQLException {
+        final java.sql.ResultSet resultSet =
+                statement.executeQuery(SparqlMockDataQuery.CONSTRUCT_DOUBLE_QUERY);
+        Assertions.assertTrue(resultSet.next());
+        Assertions.assertEquals(100000.00f, resultSet.getFloat(3));
+        Assertions.assertEquals(100000.00, resultSet.getDouble(3));
+        Assertions.assertEquals((byte) 100000.00, resultSet.getByte(3));
+        Assertions.assertEquals((short) 100000.00, resultSet.getShort(3));
+        Assertions.assertEquals((int) 100000.00, resultSet.getInt(3));
+        Assertions.assertEquals((long) 100000.00, resultSet.getLong(3));
+        Assertions.assertEquals(String.valueOf(100000.00), resultSet.getString(3));
+        Assertions.assertThrows(SQLException.class, () -> resultSet.getBoolean(3));
+        Assertions.assertThrows(SQLException.class, () -> resultSet.getTimestamp(3));
     }
 
     @Test
@@ -310,18 +422,36 @@ public class SparqlResultSetTest {
     }
 
     @Test
+    void testConstructFloatType() throws SQLException {
+        final java.sql.ResultSet resultSet = statement.executeQuery(SparqlMockDataQuery.CONSTRUCT_FLOAT_QUERY);
+        Assertions.assertTrue(resultSet.next());
+        Assertions.assertEquals(80.5f, resultSet.getFloat(3));
+        Assertions.assertEquals(80.5, resultSet.getDouble(3));
+        Assertions.assertEquals((byte) 80.5, resultSet.getByte(3));
+        Assertions.assertEquals((short) 80.5, resultSet.getShort(3));
+        Assertions.assertEquals((int) 80.5, resultSet.getInt(3));
+        Assertions.assertEquals((long) 80.5, resultSet.getLong(3));
+        Assertions.assertEquals(String.valueOf(80.5f), resultSet.getString(3));
+        Assertions.assertThrows(SQLException.class, () -> resultSet.getBoolean(3));
+        Assertions.assertThrows(SQLException.class, () -> resultSet.getTimestamp(3));
+    }
+
+    @Test
     void testUnsignedByteType() throws SQLException {
         testIntegerResultTypes(SparqlMockDataQuery.UNSIGNED_BYTE_QUERY, 200, 2);
+        testIntegerResultTypes(SparqlMockDataQuery.CONSTRUCT_UNSIGNED_BYTE_QUERY, 200, 3);
     }
 
     @Test
     void testUnsignedShortType() throws SQLException {
         testIntegerResultTypes(SparqlMockDataQuery.UNSIGNED_SHORT_QUERY, 300, 2);
+        testIntegerResultTypes(SparqlMockDataQuery.CONSTRUCT_UNSIGNED_SHORT_QUERY, 300, 3);
     }
 
     @Test
     void testUnsignedIntType() throws SQLException {
         testIntegerResultTypes(SparqlMockDataQuery.UNSIGNED_INT_QUERY, 65600, 2);
+        testIntegerResultTypes(SparqlMockDataQuery.CONSTRUCT_UNSIGNED_INT_QUERY, 65600, 3);
     }
 
     @Test
@@ -334,6 +464,18 @@ public class SparqlResultSetTest {
         Assertions.assertEquals((int) 4294970000L, resultSet.getInt(2));
         Assertions.assertEquals(4294970000L, resultSet.getLong(2));
         Assertions.assertEquals(String.valueOf(4294970000L), resultSet.getString(2));
+    }
+
+    @Test
+    void testConstructUnsignedLongSmallType() throws SQLException {
+        final java.sql.ResultSet resultSet =
+                statement.executeQuery(SparqlMockDataQuery.CONSTRUCT_UNSIGNED_LONG_SMALL_QUERY);
+        Assertions.assertTrue(resultSet.next());
+        Assertions.assertEquals((byte) 4294970000L, resultSet.getByte(3));
+        Assertions.assertEquals((short) 4294970000L, resultSet.getShort(3));
+        Assertions.assertEquals((int) 4294970000L, resultSet.getInt(3));
+        Assertions.assertEquals(4294970000L, resultSet.getLong(3));
+        Assertions.assertEquals(String.valueOf(4294970000L), resultSet.getString(3));
     }
 
     @Test
@@ -354,11 +496,32 @@ public class SparqlResultSetTest {
     }
 
     @Test
-    void testRangedIntegerTypes() throws SQLException {
+    void testConstructUnsignedLongLargeType() throws SQLException {
+        final BigInteger expectedValue = new BigInteger("18446744073709551615");
+        final java.sql.ResultSet resultSet =
+                statement.executeQuery(SparqlMockDataQuery.CONSTRUCT_UNSIGNED_LONG_LARGE_QUERY);
+        Assertions.assertTrue(resultSet.next());
+        Assertions.assertEquals(expectedValue.byteValue(), resultSet.getByte(3));
+        Assertions.assertEquals(expectedValue.shortValue(), resultSet.getShort(3));
+        Assertions.assertEquals(expectedValue.intValue(), resultSet.getInt(3));
+        Assertions.assertEquals(expectedValue.doubleValue(), resultSet.getDouble(3));
+        Assertions.assertEquals(expectedValue.floatValue(), resultSet.getFloat(3));
+        Assertions.assertEquals(expectedValue.longValue(), resultSet.getLong(3));
+        Assertions.assertEquals(expectedValue, resultSet.getObject(3));
+        Assertions.assertEquals(String.valueOf(expectedValue), resultSet.getString(3));
+        Assertions.assertThrows(SQLException.class, () -> resultSet.getBoolean(3));
+    }
+
+    @Test
+    void testSmallRangedIntegerTypes() throws SQLException {
         testIntegerResultTypes(SparqlMockDataQuery.POSITIVE_INTEGER_QUERY, 5, 2);
         testIntegerResultTypes(SparqlMockDataQuery.NON_NEGATIVE_INTEGER_QUERY, 1, 2);
         testIntegerResultTypes(SparqlMockDataQuery.NEGATIVE_INTEGER_QUERY, -5, 2);
         testIntegerResultTypes(SparqlMockDataQuery.NON_POSITIVE_INTEGER_QUERY, -1, 2);
+        testIntegerResultTypes(SparqlMockDataQuery.CONSTRUCT_POSITIVE_INTEGER_QUERY, 5, 3);
+        testIntegerResultTypes(SparqlMockDataQuery.CONSTRUCT_NON_NEGATIVE_INTEGER_QUERY, 1, 3);
+        testIntegerResultTypes(SparqlMockDataQuery.CONSTRUCT_NEGATIVE_INTEGER_QUERY, -5, 3);
+        testIntegerResultTypes(SparqlMockDataQuery.CONSTRUCT_NON_POSITIVE_INTEGER_QUERY, -1, 3);
     }
 
     @Test
@@ -377,6 +540,21 @@ public class SparqlResultSetTest {
     }
 
     @Test
+    void testConstructDateType() throws SQLException {
+        final ResultSet resultSet = statement.executeQuery(SparqlMockDataQuery.CONSTRUCT_DATE_QUERY);
+        Assertions.assertTrue(resultSet.next());
+        Assertions.assertEquals("1996-01-01", resultSet.getString(3));
+        Assertions.assertEquals(java.sql.Date.valueOf("1996-01-01"), resultSet.getDate(3));
+        Assertions.assertThrows(SQLException.class, () -> resultSet.getBoolean(3));
+        Assertions.assertThrows(SQLException.class, () -> resultSet.getByte(3));
+        Assertions.assertThrows(SQLException.class, () -> resultSet.getShort(3));
+        Assertions.assertThrows(SQLException.class, () -> resultSet.getInt(3));
+        Assertions.assertThrows(SQLException.class, () -> resultSet.getLong(3));
+        Assertions.assertThrows(SQLException.class, () -> resultSet.getFloat(3));
+        Assertions.assertThrows(SQLException.class, () -> resultSet.getDouble(3));
+    }
+
+    @Test
     void testTimeType() throws SQLException {
         final java.sql.ResultSet resultSet = statement.executeQuery(SparqlMockDataQuery.TIME_QUERY);
         Assertions.assertTrue(resultSet.next());
@@ -389,6 +567,21 @@ public class SparqlResultSetTest {
         Assertions.assertThrows(SQLException.class, () -> resultSet.getLong(2));
         Assertions.assertThrows(SQLException.class, () -> resultSet.getFloat(2));
         Assertions.assertThrows(SQLException.class, () -> resultSet.getDouble(2));
+    }
+
+    @Test
+    void testConstructTimeType() throws SQLException {
+        final java.sql.ResultSet resultSet = statement.executeQuery(SparqlMockDataQuery.CONSTRUCT_TIME_QUERY);
+        Assertions.assertTrue(resultSet.next());
+        Assertions.assertEquals("22:10:10", resultSet.getString(3));
+        Assertions.assertEquals(java.sql.Time.valueOf("22:10:10"), resultSet.getTime(3));
+        Assertions.assertThrows(SQLException.class, () -> resultSet.getBoolean(3));
+        Assertions.assertThrows(SQLException.class, () -> resultSet.getByte(3));
+        Assertions.assertThrows(SQLException.class, () -> resultSet.getShort(3));
+        Assertions.assertThrows(SQLException.class, () -> resultSet.getInt(3));
+        Assertions.assertThrows(SQLException.class, () -> resultSet.getLong(3));
+        Assertions.assertThrows(SQLException.class, () -> resultSet.getFloat(3));
+        Assertions.assertThrows(SQLException.class, () -> resultSet.getDouble(3));
     }
 
     @Test
@@ -409,6 +602,23 @@ public class SparqlResultSetTest {
     }
 
     @Test
+    void testConstructDateTimeType() throws SQLException {
+        final java.sql.ResultSet resultSet =
+                statement.executeQuery(SparqlMockDataQuery.CONSTRUCT_DATE_TIME_QUERY);
+        Assertions.assertTrue(resultSet.next());
+        Assertions.assertEquals("2020-01-01 00:10:10.0", resultSet.getString(3));
+        Assertions.assertEquals(java.sql.Time.valueOf("00:10:10"), resultSet.getTime(3));
+        Assertions.assertEquals(java.sql.Date.valueOf("2020-01-01"), resultSet.getDate(3));
+        Assertions.assertThrows(SQLException.class, () -> resultSet.getBoolean(3));
+        Assertions.assertThrows(SQLException.class, () -> resultSet.getByte(3));
+        Assertions.assertThrows(SQLException.class, () -> resultSet.getShort(3));
+        Assertions.assertThrows(SQLException.class, () -> resultSet.getInt(3));
+        Assertions.assertThrows(SQLException.class, () -> resultSet.getLong(3));
+        Assertions.assertThrows(SQLException.class, () -> resultSet.getFloat(3));
+        Assertions.assertThrows(SQLException.class, () -> resultSet.getDouble(3));
+    }
+
+    @Test
     void testDateTimeStampType() throws SQLException {
         final java.sql.ResultSet resultSet =
                 statement.executeQuery(SparqlMockDataQuery.DATE_TIME_STAMP_QUERY);
@@ -423,6 +633,23 @@ public class SparqlResultSetTest {
         Assertions.assertThrows(SQLException.class, () -> resultSet.getLong(2));
         Assertions.assertThrows(SQLException.class, () -> resultSet.getFloat(2));
         Assertions.assertThrows(SQLException.class, () -> resultSet.getDouble(2));
+    }
+
+    @Test
+    void testConstructDateTimeStampType() throws SQLException {
+        final java.sql.ResultSet resultSet =
+                statement.executeQuery(SparqlMockDataQuery.CONSTRUCT_DATE_TIME_STAMP_QUERY);
+        Assertions.assertTrue(resultSet.next());
+        Assertions.assertEquals("2020-01-01T06:10:10Z[UTC]", resultSet.getString(3));
+        Assertions.assertEquals(java.sql.Time.valueOf("06:10:10"), resultSet.getTime(3));
+        Assertions.assertEquals(java.sql.Date.valueOf("2020-01-01"), resultSet.getDate(3));
+        Assertions.assertThrows(SQLException.class, () -> resultSet.getBoolean(3));
+        Assertions.assertThrows(SQLException.class, () -> resultSet.getByte(3));
+        Assertions.assertThrows(SQLException.class, () -> resultSet.getShort(3));
+        Assertions.assertThrows(SQLException.class, () -> resultSet.getInt(3));
+        Assertions.assertThrows(SQLException.class, () -> resultSet.getLong(3));
+        Assertions.assertThrows(SQLException.class, () -> resultSet.getFloat(3));
+        Assertions.assertThrows(SQLException.class, () -> resultSet.getDouble(3));
     }
 
     @Test
@@ -443,23 +670,44 @@ public class SparqlResultSetTest {
     }
 
     @Test
+    void testConstructGYearType() throws SQLException {
+        final java.sql.ResultSet resultSet =
+                statement.executeQuery(SparqlMockDataQuery.CONSTRUCT_G_YEAR_QUERY);
+        Assertions.assertTrue(resultSet.next());
+        Assertions.assertEquals("2020", resultSet.getString(3));
+        Assertions.assertEquals((byte) Integer.parseInt("2020"), resultSet.getByte(3));
+        Assertions.assertEquals(new BigDecimal("2020"), resultSet.getBigDecimal(3));
+        Assertions.assertEquals(Integer.parseInt("2020"), resultSet.getInt(3));
+        Assertions.assertEquals(Short.parseShort("2020"), resultSet.getShort(3));
+        Assertions.assertEquals(Long.parseLong("2020"), resultSet.getLong(3));
+        Assertions.assertEquals(Double.parseDouble("2020"), resultSet.getLong(3));
+        Assertions.assertEquals(Float.parseFloat("2020"), resultSet.getFloat(3));
+        Assertions.assertThrows(SQLException.class, () -> resultSet.getTimestamp(3));
+        Assertions.assertThrows(SQLException.class, () -> resultSet.getBoolean(3));
+    }
+
+    @Test
     void testGMonthType() throws SQLException {
         testStringResultTypes(SparqlMockDataQuery.G_MONTH_QUERY, "--10", 2);
+        testStringResultTypes(SparqlMockDataQuery.CONSTRUCT_G_MONTH_QUERY, "--10", 3);
     }
 
     @Test
     void testGDayType() throws SQLException {
         testStringResultTypes(SparqlMockDataQuery.G_DAY_QUERY, "---20", 2);
+        testStringResultTypes(SparqlMockDataQuery.CONSTRUCT_G_DAY_QUERY, "---20", 3);
     }
 
     @Test
     void testGYearMonthType() throws SQLException {
         testStringResultTypes(SparqlMockDataQuery.G_YEAR_MONTH_QUERY, "2020-06", 2);
+        testStringResultTypes(SparqlMockDataQuery.CONSTRUCT_G_YEAR_MONTH_QUERY, "2020-06", 3);
     }
 
     @Test
     void testGMonthDayType() throws SQLException {
         testStringResultTypes(SparqlMockDataQuery.G_MONTH_DAY_QUERY, "--06-01", 2);
+        testStringResultTypes(SparqlMockDataQuery.CONSTRUCT_G_MONTH_DAY_QUERY, "--06-01", 3);
     }
 
     @Test
@@ -467,6 +715,47 @@ public class SparqlResultSetTest {
         testStringResultTypes(SparqlMockDataQuery.DURATION_QUERY, "P30D", 2);
         testStringResultTypes(SparqlMockDataQuery.YEAR_MONTH_DURATION_QUERY, "P2M", 2);
         testStringResultTypes(SparqlMockDataQuery.DAY_TIME_DURATION_QUERY, "P5D", 2);
+
+        testStringResultTypes(SparqlMockDataQuery.CONSTRUCT_DURATION_QUERY, "P30D", 3);
+        testStringResultTypes(SparqlMockDataQuery.CONSTRUCT_YEAR_MONTH_DURATION_QUERY, "P2M", 3);
+        testStringResultTypes(SparqlMockDataQuery.CONSTRUCT_DAY_TIME_DURATION_QUERY, "P5D", 3);
+    }
+
+    @Test
+    void testEmptySelectResult() throws SQLException {
+        final java.sql.ResultSet resultSet =
+                statement.executeQuery(SparqlMockDataQuery.EMPTY_SELECT_RESULT_QUERY);
+        Assertions.assertThrows(SQLException.class, () -> resultSet.getString(2));
+    }
+
+    @Test
+    void testAskQueryType() throws SQLException {
+        final java.sql.ResultSet resultSet =
+                statement.executeQuery(SparqlMockDataQuery.ASK_QUERY);
+        Assertions.assertTrue(resultSet.next());
+        Assertions.assertTrue(resultSet.getBoolean(1));
+        Assertions.assertEquals(String.valueOf(true), resultSet.getString(1));
+        Assertions.assertThrows(SQLException.class, () -> resultSet.getByte(1));
+        Assertions.assertThrows(SQLException.class, () -> resultSet.getShort(1));
+        Assertions.assertThrows(SQLException.class, () -> resultSet.getLong(1));
+        Assertions.assertThrows(SQLException.class, () -> resultSet.getBigDecimal(1));
+        Assertions.assertThrows(SQLException.class, () -> resultSet.getDouble(1));
+        Assertions.assertThrows(SQLException.class, () -> resultSet.getFloat(1));
+        Assertions.assertThrows(SQLException.class, () -> resultSet.getInt(1));
+        Assertions.assertThrows(SQLException.class, () -> resultSet.getTimestamp(1));
+        Assertions.assertThrows(SQLException.class, () -> resultSet.getString(2));
+        Assertions.assertFalse(resultSet.next());
+    }
+
+    // DESCRIBE and CONSTRUCT share ResultSet formats, so we just use this to test that this query type works
+    @Test
+    void testDescribeQueryType() throws SQLException {
+        final java.sql.ResultSet resultSet = statement.executeQuery("DESCRIBE <http://somewhere/JohnSmith>");
+        while (resultSet.next()) {
+            Assertions.assertNotNull(resultSet.getString(1));
+            Assertions.assertNotNull(resultSet.getString(2));
+            Assertions.assertNotNull(resultSet.getString(3));
+        }
     }
 
     @Test
@@ -553,11 +842,77 @@ public class SparqlResultSetTest {
 
     @Test
     @Disabled
+    void testAskQueryThroughRDFConnection() {
+        // TODO: testing types through Jena RDF class, not through our driver, to be deleted after completing Sparql
+        final RDFConnectionRemoteBuilder builder = RDFConnectionRemote.create()
+                .destination(SparqlMockServer.urlDataset())
+                // Query only.
+                .queryEndpoint("/query")
+                .updateEndpoint("/update");
+
+        // queries the database
+        final Query query = QueryFactory.create("ASK { }");
+        final RDFConnection rdfConnection = builder.build();
+        final QueryExecution queryExecution = rdfConnection.query(query);
+        System.out.println(queryExecution.execAsk());
+    }
+
+    @Test
+    @Disabled
+    void testConstructQueryThroughRDFConnection() {
+        // TODO: testing types through Jena RDF class, not through our driver, to be deleted after completing Sparql
+        final RDFConnectionRemoteBuilder builder = RDFConnectionRemote.create()
+                .destination(SparqlMockServer.urlDataset())
+                // Query only.
+                .queryEndpoint("/query")
+                .updateEndpoint("/update");
+
+        // queries the database
+        final Query query = QueryFactory.create("CONSTRUCT WHERE { ?s ?p ?o . }");
+        final RDFConnection rdfConnection = builder.build();
+        final QueryExecution queryExecution = rdfConnection.query(query);
+        //System.out.println(queryExecution.execConstruct());
+        final PeekIterator<Triple> triples = PeekIterator.create(queryExecution.execConstructTriples());
+        while (triples.hasNext()) {
+            // System.out.println(triples.next());
+            System.out.println(triples.next());
+        }
+        //System.out.println(queryExecution.execConstructQuads());
+    }
+
+    @Test
+    @Disabled
+    void testDescribeQueryThroughRDFConnection() {
+        // TODO: testing types through Jena RDF class, not through our driver, to be deleted after completing Sparql
+        final RDFConnectionRemoteBuilder builder = RDFConnectionRemote.create()
+                .destination(SparqlMockServer.urlDataset())
+                // Query only.
+                .queryEndpoint("/query")
+                .updateEndpoint("/update");
+
+        // queries the database
+        final Query query = QueryFactory.create("DESCRIBE ?o WHERE { ?s ?p ?o . }");
+        final RDFConnection rdfConnection = builder.build();
+        final QueryExecution queryExecution = rdfConnection.query(query);
+        //System.out.println(queryExecution.execConstruct());
+        final PeekIterator<Triple> triples = PeekIterator.create(queryExecution.execDescribeTriples());
+        while (triples.hasNext()) {
+            // System.out.println(triples.next());
+            System.out.println(triples.next());
+        }
+        //System.out.println(queryExecution.execConstructQuads());
+    }
+
+    @Test
+    @Disabled
     void testQueryThroughJDBCResult() throws SQLException {
         // TODO: to be deleted
-        final String query = "SELECT * { ?s ?p ?o } LIMIT 100";
-        final SparqlResultSet result = (SparqlResultSet) statement.executeQuery(query);
+        final String query =
+                "SELECT ?x ?fname WHERE {?x  <http://www.w3.org/2001/vcard-rdf/3.0#FN>  ?fname FILTER(ISNUMERIC(?fname))}";
+        final SparqlSelectResultSet result = (SparqlSelectResultSet) statement.executeQuery(query);
         printJenaResultSetOut(query);
+        System.out.println(result.getResultMetadata().getColumnName(2));
+        System.out.println(result.next());
 
         // next() increments the RowIndex everytime it is called (see ResultSet)
         // Assertions.assertTrue(result.next());

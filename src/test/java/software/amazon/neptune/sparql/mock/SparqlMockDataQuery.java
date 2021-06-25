@@ -75,4 +75,68 @@ public class SparqlMockDataQuery {
             "SELECT ?x ?dayTimeDuration WHERE {?x  <http://somewhere/peopleInfo#dayTimeDuration>  ?dayTimeDuration}";
     public static final String PREDICATE_QUERY =
             "SELECT ?fname ?x WHERE {?x  <http://www.w3.org/2001/vcard-rdf/3.0#FN>  ?fname}";
+    public static final String EMPTY_SELECT_RESULT_QUERY =
+            "SELECT ?x ?fname WHERE {?x  <http://www.w3.org/2001/vcard-rdf/3.0#FN>  ?fname FILTER(ISNUMERIC(?fname))}";
+
+    public static final String CONSTRUCT_STRING_QUERY =
+            "CONSTRUCT WHERE {?x  <http://www.w3.org/2001/vcard-rdf/3.0#FN>  ?fname}";
+    public static final String CONSTRUCT_BOOL_QUERY = "CONSTRUCT WHERE {?x  <http://somewhere/peopleInfo#bool>  ?bool}";
+    public static final String CONSTRUCT_BYTE_QUERY = "CONSTRUCT WHERE {?x  <http://somewhere/peopleInfo#byte>  ?byte}";
+    public static final String CONSTRUCT_SHORT_QUERY =
+            "CONSTRUCT WHERE {?x  <http://somewhere/peopleInfo#short>  ?short}";
+    public static final String CONSTRUCT_INTEGER_SMALL_QUERY =
+            "CONSTRUCT WHERE {?x  <http://somewhere/peopleInfo#integerSm>  ?integerSm}";
+    public static final String CONSTRUCT_INTEGER_LARGE_QUERY =
+            "CONSTRUCT WHERE {?x  <http://somewhere/peopleInfo#integerLg>  ?integerLg}";
+    public static final String CONSTRUCT_LONG_QUERY = "CONSTRUCT WHERE {?x  <http://somewhere/peopleInfo#long>  ?long}";
+    public static final String CONSTRUCT_INT_QUERY = "CONSTRUCT WHERE {?x  <http://somewhere/peopleInfo#int>  ?int}";
+    public static final String CONSTRUCT_DECIMAL_QUERY =
+            "CONSTRUCT WHERE {?x  <http://somewhere/peopleInfo#decimal>  ?decimal}";
+    public static final String CONSTRUCT_DOUBLE_QUERY =
+            "CONSTRUCT WHERE {?x  <http://somewhere/peopleInfo#double>  ?double}";
+    public static final String CONSTRUCT_FLOAT_QUERY =
+            "CONSTRUCT WHERE {?x  <http://somewhere/peopleInfo#float>  ?float}";
+    // NOTE: all unsigned XSD classes are wrapped into Java Integer or Long depending on size by the Jena library
+    public static final String CONSTRUCT_UNSIGNED_BYTE_QUERY =
+            "CONSTRUCT WHERE {?x  <http://somewhere/peopleInfo#unsignedByte>  ?unsignedByte}";
+    public static final String CONSTRUCT_UNSIGNED_SHORT_QUERY =
+            "CONSTRUCT WHERE {?x  <http://somewhere/peopleInfo#unsignedShort>  ?unsignedShort}";
+    public static final String CONSTRUCT_UNSIGNED_INT_QUERY =
+            "CONSTRUCT WHERE {?x  <http://somewhere/peopleInfo#unsignedInt>  ?unsignedInt}";
+    public static final String CONSTRUCT_UNSIGNED_LONG_SMALL_QUERY =
+            "CONSTRUCT WHERE {?x  <http://somewhere/peopleInfo#unsignedLongSm>  ?unsignedLongSm}";
+    public static final String CONSTRUCT_UNSIGNED_LONG_LARGE_QUERY =
+            "CONSTRUCT WHERE {?x  <http://somewhere/peopleInfo#unsignedLongLg>  ?unsignedLongLg}";
+    public static final String CONSTRUCT_POSITIVE_INTEGER_QUERY =
+            "CONSTRUCT WHERE {?x  <http://somewhere/peopleInfo#positiveInteger>  ?positiveInteger}";
+    public static final String CONSTRUCT_NON_NEGATIVE_INTEGER_QUERY =
+            "CONSTRUCT WHERE {?x  <http://somewhere/peopleInfo#nonNegativeInteger>  ?nonNegativeInteger}";
+    public static final String CONSTRUCT_NEGATIVE_INTEGER_QUERY =
+            "CONSTRUCT WHERE {?x  <http://somewhere/peopleInfo#negativeInteger>  ?negativeInteger}";
+    public static final String CONSTRUCT_NON_POSITIVE_INTEGER_QUERY =
+            "CONSTRUCT WHERE {?x  <http://somewhere/peopleInfo#nonPositiveInteger>  ?nonPositiveInteger}";
+    public static final String CONSTRUCT_DATE_QUERY = "CONSTRUCT WHERE {?x  <http://somewhere/peopleInfo#date>  ?date}";
+    public static final String CONSTRUCT_TIME_QUERY = "CONSTRUCT WHERE {?x  <http://somewhere/peopleInfo#time>  ?time}";
+    public static final String CONSTRUCT_DATE_TIME_QUERY =
+            "CONSTRUCT WHERE {?x  <http://somewhere/peopleInfo#dateTime>  ?dateTime}";
+    public static final String CONSTRUCT_DATE_TIME_STAMP_QUERY =
+            "CONSTRUCT WHERE {?x  <http://somewhere/peopleInfo#dateTimeStamp>  ?dateTimeStamp}";
+    public static final String CONSTRUCT_G_YEAR_QUERY =
+            "CONSTRUCT WHERE {?x  <http://somewhere/peopleInfo#gYear>  ?gYear}";
+    public static final String CONSTRUCT_G_MONTH_QUERY =
+            "CONSTRUCT WHERE {?x  <http://somewhere/peopleInfo#gMonth>  ?gMonth}";
+    public static final String CONSTRUCT_G_DAY_QUERY =
+            "CONSTRUCT WHERE {?x  <http://somewhere/peopleInfo#gDay>  ?gDay}";
+    public static final String CONSTRUCT_G_YEAR_MONTH_QUERY =
+            "CONSTRUCT WHERE {?x  <http://somewhere/peopleInfo#gYearMonth>  ?gYearMonth}";
+    public static final String CONSTRUCT_G_MONTH_DAY_QUERY =
+            "CONSTRUCT WHERE {?x  <http://somewhere/peopleInfo#gMonthDay>  ?gMonthDay}";
+    public static final String CONSTRUCT_DURATION_QUERY =
+            "CONSTRUCT WHERE {?x  <http://somewhere/peopleInfo#duration>  ?duration}";
+    public static final String CONSTRUCT_YEAR_MONTH_DURATION_QUERY =
+            "CONSTRUCT WHERE {?x  <http://somewhere/peopleInfo#yearMonthDuration>  ?yearMonthDuration}";
+    public static final String CONSTRUCT_DAY_TIME_DURATION_QUERY =
+            "CONSTRUCT WHERE {?x  <http://somewhere/peopleInfo#dayTimeDuration>  ?dayTimeDuration}";
+
+    public static final String ASK_QUERY = "ASK {}";
 }
