@@ -218,10 +218,17 @@ public class SparqlQueryExecutor extends QueryExecutor {
      */
     @Override
     public ResultSet executeQuery(final String sparql, final Statement statement) throws SQLException {
+        final Constructor<?> constructor = createConstructorBasedOnQueryType(sparql);
+        return runCancellableQuery(constructor, statement, sparql);
+    }
+
+    /**
+     * Private function to get constructor based on the given query type
+     */
+    private Constructor<?> createConstructorBasedOnQueryType(final String sparql) throws SQLException {
         final Constructor<?> constructor;
+        final Query query = QueryFactory.create(sparql);
         try {
-            // TODO better way to abstract ResultSetInfoWithRows?
-            final Query query = QueryFactory.create(sparql);
             switch (query.queryType()) {
                 case SELECT:
                     constructor = SparqlSelectResultSet.class
@@ -248,7 +255,7 @@ public class SparqlQueryExecutor extends QueryExecutor {
                     SqlState.INVALID_QUERY_EXPRESSION,
                     SqlError.QUERY_FAILED, e);
         }
-        return runCancellableQuery(constructor, statement, sparql);
+        return constructor;
     }
 
     /**
@@ -321,10 +328,23 @@ public class SparqlQueryExecutor extends QueryExecutor {
             }
             queryExecution = rdfConnection.query(query);
         }
-        // TODO: Change execution based on query types: queryExecution.getQuery().queryType() - use switch case?
-        //  Will also need to add additional query result & result metadata classes
-        Object sparqlResultSet = null;
+
         final QueryType queryType = queryExecution.getQuery().queryType();
+        final Object sparqlResultSet = getResultSetBasedOnQueryType(queryType);
+
+        synchronized (queryExecutionLock) {
+            queryExecution.close();
+            queryExecution = null;
+        }
+
+        return (T) sparqlResultSet;
+    }
+
+    /**
+     * Private function to get result set based on the given query type
+     */
+    private Object getResultSetBasedOnQueryType(final QueryType queryType) throws SQLException {
+        final Object sparqlResultSet;
         switch (queryType) {
             case SELECT:
                 final org.apache.jena.query.ResultSet selectResult = queryExecution.execSelect();
@@ -363,12 +383,7 @@ public class SparqlQueryExecutor extends QueryExecutor {
                         .createSQLException(LOGGER, SqlState.INVALID_QUERY_EXPRESSION, SqlError.INVALID_QUERY);
         }
 
-        synchronized (queryExecutionLock) {
-            queryExecution.close();
-            queryExecution = null;
-        }
-
-        return (T) sparqlResultSet;
+        return sparqlResultSet;
     }
 
     @Override

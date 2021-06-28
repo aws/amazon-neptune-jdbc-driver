@@ -192,18 +192,7 @@ public class SparqlTypeMapping {
     static class DateTimeConverter implements Converter<Timestamp> {
         @Override
         public Timestamp convert(final Object value) throws SQLException {
-            if (value instanceof Literal) {
-                final Literal valueLiteral = (Literal) value;
-                return convert((XSDDateTime) valueLiteral.getValue());
-            } else if (value instanceof LiteralLabel) {
-                final LiteralLabel valueLiteralLabel = (LiteralLabel) value;
-                return convert((XSDDateTime) valueLiteralLabel.getValue());
-            } else {
-                throw SqlError.createSQLException(
-                        LOGGER,
-                        SqlState.DATA_EXCEPTION,
-                        SqlError.UNSUPPORTED_RESULT_SET_TYPE);
-            }
+            return convert(getDateTimeValueBasedOnType(value));
         }
 
         public Timestamp convert(final XSDDateTime value) {
@@ -215,18 +204,7 @@ public class SparqlTypeMapping {
     static class DateTimeStampConverter implements Converter<ZonedDateTime> {
         @Override
         public ZonedDateTime convert(final Object value) throws SQLException {
-            if (value instanceof Literal) {
-                final Literal valueLiteral = (Literal) value;
-                return convert((XSDDateTime) valueLiteral.getValue());
-            } else if (value instanceof LiteralLabel) {
-                final LiteralLabel valueLiteralLabel = (LiteralLabel) value;
-                return convert((XSDDateTime) valueLiteralLabel.getValue());
-            } else {
-                throw SqlError.createSQLException(
-                        LOGGER,
-                        SqlState.DATA_EXCEPTION,
-                        SqlError.UNSUPPORTED_TYPE);
-            }
+            return convert(getDateTimeValueBasedOnType(value));
         }
 
         public ZonedDateTime convert(final XSDDateTime value) {
@@ -238,18 +216,7 @@ public class SparqlTypeMapping {
     static class DateConverter implements Converter<Date> {
         @Override
         public Date convert(final Object value) throws SQLException {
-            if (value instanceof Literal) {
-                final Literal valueLiteral = (Literal) value;
-                return convert(valueLiteral.getLexicalForm());
-            } else if (value instanceof LiteralLabel) {
-                final LiteralLabel valueLiteralLabel = (LiteralLabel) value;
-                return convert(valueLiteralLabel.getLexicalForm());
-            } else {
-                throw SqlError.createSQLException(
-                        LOGGER,
-                        SqlState.DATA_EXCEPTION,
-                        SqlError.UNSUPPORTED_TYPE);
-            }
+            return convert(getStringValueBasedOnType(value));
         }
 
         public Date convert(final String value) {
@@ -260,18 +227,7 @@ public class SparqlTypeMapping {
     static class TimeConverter implements Converter<Time> {
         @Override
         public Time convert(final Object value) throws SQLException {
-            if (value instanceof Literal) {
-                final Literal valueLiteral = (Literal) value;
-                return convert(valueLiteral.getLexicalForm());
-            } else if (value instanceof LiteralLabel) {
-                final LiteralLabel valueLiteralLabel = (LiteralLabel) value;
-                return convert(valueLiteralLabel.getLexicalForm());
-            } else {
-                throw SqlError.createSQLException(
-                        LOGGER,
-                        SqlState.DATA_EXCEPTION,
-                        SqlError.UNSUPPORTED_TYPE);
-            }
+            return convert(getStringValueBasedOnType(value));
         }
 
         public Time convert(final String value) {
@@ -283,22 +239,37 @@ public class SparqlTypeMapping {
     static class DurationConverter implements Converter<String> {
         @Override
         public String convert(final Object value) throws SQLException {
-            if (value instanceof Literal) {
-                final Literal valueLiteral = (Literal) value;
-                return convert(valueLiteral.getLexicalForm());
-            } else if (value instanceof LiteralLabel) {
-                final LiteralLabel valueLiteralLabel = (LiteralLabel) value;
-                return convert(valueLiteralLabel.getLexicalForm());
-            } else {
-                throw SqlError.createSQLException(
-                        LOGGER,
-                        SqlState.DATA_EXCEPTION,
-                        SqlError.UNSUPPORTED_TYPE);
-            }
+            return getStringValueBasedOnType(value);
         }
+    }
 
-        public String convert(final String value) {
-            return value;
+    private static XSDDateTime getDateTimeValueBasedOnType(final Object value) throws SQLException {
+        if (value instanceof Literal) {
+            final Literal valueLiteral = (Literal) value;
+            return (XSDDateTime) valueLiteral.getValue();
+        } else if (value instanceof LiteralLabel) {
+            final LiteralLabel valueLiteralLabel = (LiteralLabel) value;
+            return (XSDDateTime) valueLiteralLabel.getValue();
+        } else {
+            throw SqlError.createSQLException(
+                    LOGGER,
+                    SqlState.DATA_EXCEPTION,
+                    SqlError.UNSUPPORTED_TYPE);
+        }
+    }
+
+    private static String getStringValueBasedOnType(final Object value) throws SQLException {
+        if (value instanceof Literal) {
+            final Literal valueLiteral = (Literal) value;
+            return valueLiteral.getLexicalForm();
+        } else if (value instanceof LiteralLabel) {
+            final LiteralLabel valueLiteralLabel = (LiteralLabel) value;
+            return valueLiteralLabel.getLexicalForm();
+        } else {
+            throw SqlError.createSQLException(
+                    LOGGER,
+                    SqlState.DATA_EXCEPTION,
+                    SqlError.UNSUPPORTED_TYPE);
         }
     }
 
