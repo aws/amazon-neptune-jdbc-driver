@@ -26,8 +26,6 @@ import org.apache.jena.rdf.model.RDFNode;
 import org.neo4j.driver.internal.types.InternalTypeSystem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import software.amazon.jdbc.utilities.SqlError;
-import software.amazon.jdbc.utilities.SqlState;
 import software.amazon.neptune.common.ResultSetInfoWithoutRows;
 import software.amazon.neptune.sparql.SparqlTypeMapping;
 import java.sql.ResultSetMetaData;
@@ -96,13 +94,6 @@ public class SparqlSelectResultSet extends SparqlResultSet {
 
     private RDFNode getValue(final int columnIndex) throws SQLException {
         verifyOpen();
-        if (rows.isEmpty()) {
-            // TODO: AN-562 is this the best error to throw to address empty result lists?
-            throw SqlError.createSQLException(
-                    LOGGER,
-                    SqlState.DATA_EXCEPTION,
-                    SqlError.UNSUPPORTED_RESULT_SET_TYPE);
-        }
         validateRowColumn(columnIndex);
 
         final String colName = columns.get(columnIndex - 1);

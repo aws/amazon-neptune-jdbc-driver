@@ -43,9 +43,6 @@ public class SparqlTypeMapping {
             new HashMap<>();
     public static final Converter<Timestamp> DATE_TIME_CONVERTER = new DateTimeConverter();
     public static final Converter<ZonedDateTime> DATE_TIME_STAMP_CONVERTER = new DateTimeStampConverter();
-    public static final Converter<Date> DATE_CONVERTER = new DateConverter();
-    public static final Converter<Time> TIME_CONVERTER = new TimeConverter();
-    public static final Converter<String> DURATION_CONVERTER = new DurationConverter();
     private static final Logger LOGGER = LoggerFactory.getLogger(SparqlTypeMapping.class);
 
     static {
@@ -73,11 +70,13 @@ public class SparqlTypeMapping {
         SPARQL_LITERAL_TO_JAVA_TYPE_MAP.put(XSDDatatype.XSDduration, String.class);
         SPARQL_LITERAL_TO_JAVA_TYPE_MAP.put(XSDDatatype.XSDstring, String.class);
 
-        SPARQL_LITERAL_TO_JAVA_TRANSFORM_MAP.put(XSDDatatype.XSDtime, TIME_CONVERTER);
-        SPARQL_LITERAL_TO_JAVA_TRANSFORM_MAP.put(XSDDatatype.XSDdate, DATE_CONVERTER);
+        SPARQL_LITERAL_TO_JAVA_TRANSFORM_MAP
+                .put(XSDDatatype.XSDtime, (Object value) -> Time.valueOf(getStringValueBasedOnType(value)));
+        SPARQL_LITERAL_TO_JAVA_TRANSFORM_MAP
+                .put(XSDDatatype.XSDdate, (Object value) -> Date.valueOf(getStringValueBasedOnType(value)));
         SPARQL_LITERAL_TO_JAVA_TRANSFORM_MAP.put(XSDDatatype.XSDdateTime, DATE_TIME_CONVERTER);
         SPARQL_LITERAL_TO_JAVA_TRANSFORM_MAP.put(XSDDatatype.XSDdateTimeStamp, DATE_TIME_STAMP_CONVERTER);
-        SPARQL_LITERAL_TO_JAVA_TRANSFORM_MAP.put(XSDDatatype.XSDduration, DURATION_CONVERTER);
+        SPARQL_LITERAL_TO_JAVA_TRANSFORM_MAP.put(XSDDatatype.XSDduration, SparqlTypeMapping::getStringValueBasedOnType);
         // NOTE: Gregorian date types are not supported currently due to incompatibility with java and JDBC datatype,
         // currently returning as String
 
@@ -174,6 +173,36 @@ public class SparqlTypeMapping {
         return SPARQL_LITERAL_TO_JAVA_TRANSFORM_MAP.containsKey(sparqlDatatype);
     }
 
+    private static XSDDateTime getDateTimeValueBasedOnType(final Object value) throws SQLException {
+        if (value instanceof Literal) {
+            final Literal valueLiteral = (Literal) value;
+            return (XSDDateTime) valueLiteral.getValue();
+        } else if (value instanceof LiteralLabel) {
+            final LiteralLabel valueLiteralLabel = (LiteralLabel) value;
+            return (XSDDateTime) valueLiteralLabel.getValue();
+        } else {
+            throw SqlError.createSQLException(
+                    LOGGER,
+                    SqlState.DATA_EXCEPTION,
+                    SqlError.UNSUPPORTED_TYPE);
+        }
+    }
+
+    private static String getStringValueBasedOnType(final Object value) throws SQLException {
+        if (value instanceof Literal) {
+            final Literal valueLiteral = (Literal) value;
+            return valueLiteral.getLexicalForm();
+        } else if (value instanceof LiteralLabel) {
+            final LiteralLabel valueLiteralLabel = (LiteralLabel) value;
+            return valueLiteralLabel.getLexicalForm();
+        } else {
+            throw SqlError.createSQLException(
+                    LOGGER,
+                    SqlState.DATA_EXCEPTION,
+                    SqlError.UNSUPPORTED_TYPE);
+        }
+    }
+
     /**
      * Converter interface to convert a Value type to a Java type.
      *
@@ -212,65 +241,4 @@ public class SparqlTypeMapping {
             return calendarTime.toZonedDateTime().withZoneSameInstant(ZoneId.of("UTC"));
         }
     }
-
-    static class DateConverter implements Converter<Date> {
-        @Override
-        public Date convert(final Object value) throws SQLException {
-            return convert(getStringValueBasedOnType(value));
-        }
-
-        public Date convert(final String value) {
-            return Date.valueOf(value);
-        }
-    }
-
-    static class TimeConverter implements Converter<Time> {
-        @Override
-        public Time convert(final Object value) throws SQLException {
-            return convert(getStringValueBasedOnType(value));
-        }
-
-        public Time convert(final String value) {
-            return Time.valueOf(value);
-        }
-    }
-
-    // TODO inline this?
-    static class DurationConverter implements Converter<String> {
-        @Override
-        public String convert(final Object value) throws SQLException {
-            return getStringValueBasedOnType(value);
-        }
-    }
-
-    private static XSDDateTime getDateTimeValueBasedOnType(final Object value) throws SQLException {
-        if (value instanceof Literal) {
-            final Literal valueLiteral = (Literal) value;
-            return (XSDDateTime) valueLiteral.getValue();
-        } else if (value instanceof LiteralLabel) {
-            final LiteralLabel valueLiteralLabel = (LiteralLabel) value;
-            return (XSDDateTime) valueLiteralLabel.getValue();
-        } else {
-            throw SqlError.createSQLException(
-                    LOGGER,
-                    SqlState.DATA_EXCEPTION,
-                    SqlError.UNSUPPORTED_TYPE);
-        }
-    }
-
-    private static String getStringValueBasedOnType(final Object value) throws SQLException {
-        if (value instanceof Literal) {
-            final Literal valueLiteral = (Literal) value;
-            return valueLiteral.getLexicalForm();
-        } else if (value instanceof LiteralLabel) {
-            final LiteralLabel valueLiteralLabel = (LiteralLabel) value;
-            return valueLiteralLabel.getLexicalForm();
-        } else {
-            throw SqlError.createSQLException(
-                    LOGGER,
-                    SqlState.DATA_EXCEPTION,
-                    SqlError.UNSUPPORTED_TYPE);
-        }
-    }
-
 }

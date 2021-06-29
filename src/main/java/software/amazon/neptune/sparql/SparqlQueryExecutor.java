@@ -351,10 +351,7 @@ public class SparqlQueryExecutor extends QueryExecutor {
                 final List<QuerySolution> selectRows = new ArrayList<>();
                 final List<String> columns = selectResult.getResultVars();
 
-                while (selectResult.hasNext()) {
-                    final QuerySolution querySolution = selectResult.next();
-                    selectRows.add(querySolution);
-                }
+                selectResult.forEachRemaining(selectRows::add);
                 sparqlResultSet = new SparqlSelectResultSet.ResultSetInfoWithRows(selectRows, columns);
                 break;
             case ASK:
@@ -364,25 +361,20 @@ public class SparqlQueryExecutor extends QueryExecutor {
                 final PeekIterator<Triple> constructResult = PeekIterator.create(queryExecution.execConstructTriples());
                 final List<Triple> constructRows = new ArrayList<>();
 
-                while (constructResult.hasNext()) {
-                    constructRows.add(constructResult.next());
-                }
+                constructResult.forEachRemaining(constructRows::add);
                 sparqlResultSet = new SparqlTriplesResultSet.ResultSetInfoWithRows(constructRows);
                 break;
             case DESCRIBE:
                 final PeekIterator<Triple> describeResult = PeekIterator.create(queryExecution.execDescribeTriples());
                 final List<Triple> describeRows = new ArrayList<>();
 
-                while (describeResult.hasNext()) {
-                    describeRows.add(describeResult.next());
-                }
+                describeResult.forEachRemaining(describeRows::add);
                 sparqlResultSet = new SparqlTriplesResultSet.ResultSetInfoWithRows(describeRows);
                 break;
             default:
                 throw SqlError
                         .createSQLException(LOGGER, SqlState.INVALID_QUERY_EXPRESSION, SqlError.INVALID_QUERY);
         }
-
         return sparqlResultSet;
     }
 
