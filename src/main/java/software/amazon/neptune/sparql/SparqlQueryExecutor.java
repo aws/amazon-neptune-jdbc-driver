@@ -27,8 +27,13 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.protocol.HttpContext;
+import org.apache.jena.atlas.iterator.PeekIterator;
+import org.apache.jena.graph.Triple;
+import org.apache.jena.query.Query;
 import org.apache.jena.query.QueryExecution;
+import org.apache.jena.query.QueryFactory;
 import org.apache.jena.query.QuerySolution;
+import org.apache.jena.query.QueryType;
 import org.apache.jena.rdfconnection.RDFConnection;
 import org.apache.jena.rdfconnection.RDFConnectionRemote;
 import org.apache.jena.rdfconnection.RDFConnectionRemoteBuilder;
@@ -40,12 +45,14 @@ import software.amazon.jdbc.utilities.SqlError;
 import software.amazon.jdbc.utilities.SqlState;
 import software.amazon.neptune.common.ResultSetInfoWithoutRows;
 import software.amazon.neptune.common.gremlindatamodel.resultset.ResultSetGetTables;
-import software.amazon.neptune.sparql.resultset.SparqlResultSet;
+import software.amazon.neptune.sparql.resultset.SparqlAskResultSet;
 import software.amazon.neptune.sparql.resultset.SparqlResultSetGetCatelogs;
 import software.amazon.neptune.sparql.resultset.SparqlResultSetGetColumns;
 import software.amazon.neptune.sparql.resultset.SparqlResultSetGetSchemas;
 import software.amazon.neptune.sparql.resultset.SparqlResultSetGetTableTypes;
 import software.amazon.neptune.sparql.resultset.SparqlResultSetGetTables;
+import software.amazon.neptune.sparql.resultset.SparqlSelectResultSet;
+import software.amazon.neptune.sparql.resultset.SparqlTriplesResultSet;
 import java.lang.reflect.Constructor;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -211,17 +218,44 @@ public class SparqlQueryExecutor extends QueryExecutor {
      */
     @Override
     public ResultSet executeQuery(final String sparql, final Statement statement) throws SQLException {
+        final Constructor<?> constructor = createConstructorBasedOnQueryType(sparql);
+        return runCancellableQuery(constructor, statement, sparql);
+    }
+
+    /**
+     * Private function to get constructor based on the given query type
+     */
+    private Constructor<?> createConstructorBasedOnQueryType(final String sparql) throws SQLException {
         final Constructor<?> constructor;
+        final Query query = QueryFactory.create(sparql);
         try {
-            constructor = SparqlResultSet.class
-                    .getConstructor(java.sql.Statement.class, SparqlResultSet.ResultSetInfoWithRows.class);
+            switch (query.queryType()) {
+                case SELECT:
+                    constructor = SparqlSelectResultSet.class
+                            .getConstructor(java.sql.Statement.class,
+                                    SparqlSelectResultSet.ResultSetInfoWithRows.class);
+                    break;
+                case ASK:
+                    constructor = SparqlAskResultSet.class
+                            .getConstructor(java.sql.Statement.class, SparqlAskResultSet.ResultSetInfoWithRows.class);
+                    break;
+                case CONSTRUCT:
+                case DESCRIBE:
+                    constructor = SparqlTriplesResultSet.class
+                            .getConstructor(java.sql.Statement.class,
+                                    SparqlTriplesResultSet.ResultSetInfoWithRows.class);
+                    break;
+                default:
+                    throw SqlError
+                            .createSQLException(LOGGER, SqlState.INVALID_QUERY_EXPRESSION, SqlError.INVALID_QUERY);
+            }
         } catch (final NoSuchMethodException e) {
             throw SqlError.createSQLException(
                     LOGGER,
                     SqlState.INVALID_QUERY_EXPRESSION,
                     SqlError.QUERY_FAILED, e);
         }
-        return runCancellableQuery(constructor, statement, sparql);
+        return constructor;
     }
 
     /**
@@ -294,19 +328,9 @@ public class SparqlQueryExecutor extends QueryExecutor {
             }
             queryExecution = rdfConnection.query(query);
         }
-        // TODO: MAKE NEW TICKET - Change execution based on query types: queryExecution.getQuery().queryType()
-        //  Will also need to add additional query result & result metadata classes
-        final org.apache.jena.query.ResultSet result = queryExecution.execSelect();
-        final List<QuerySolution> rows = new ArrayList<>();
-        final List<String> columns = result.getResultVars();
 
-        while (result.hasNext()) {
-            final QuerySolution querySolution = result.next();
-            rows.add(querySolution);
-        }
-
-        final SparqlResultSet.ResultSetInfoWithRows sparqlResultSet =
-                new SparqlResultSet.ResultSetInfoWithRows(result, rows, columns);
+        final QueryType queryType = queryExecution.getQuery().queryType();
+        final Object sparqlResultSet = getResultSetBasedOnQueryType(queryType);
 
         synchronized (queryExecutionLock) {
             queryExecution.close();
@@ -314,6 +338,44 @@ public class SparqlQueryExecutor extends QueryExecutor {
         }
 
         return (T) sparqlResultSet;
+    }
+
+    /**
+     * Private function to get result set based on the given query type
+     */
+    private Object getResultSetBasedOnQueryType(final QueryType queryType) throws SQLException {
+        final Object sparqlResultSet;
+        switch (queryType) {
+            case SELECT:
+                final org.apache.jena.query.ResultSet selectResult = queryExecution.execSelect();
+                final List<QuerySolution> selectRows = new ArrayList<>();
+                final List<String> columns = selectResult.getResultVars();
+
+                selectResult.forEachRemaining(selectRows::add);
+                sparqlResultSet = new SparqlSelectResultSet.ResultSetInfoWithRows(selectRows, columns);
+                break;
+            case ASK:
+                sparqlResultSet = new SparqlAskResultSet.ResultSetInfoWithRows(queryExecution.execAsk());
+                break;
+            case CONSTRUCT:
+                final PeekIterator<Triple> constructResult = PeekIterator.create(queryExecution.execConstructTriples());
+                final List<Triple> constructRows = new ArrayList<>();
+
+                constructResult.forEachRemaining(constructRows::add);
+                sparqlResultSet = new SparqlTriplesResultSet.ResultSetInfoWithRows(constructRows);
+                break;
+            case DESCRIBE:
+                final PeekIterator<Triple> describeResult = PeekIterator.create(queryExecution.execDescribeTriples());
+                final List<Triple> describeRows = new ArrayList<>();
+
+                describeResult.forEachRemaining(describeRows::add);
+                sparqlResultSet = new SparqlTriplesResultSet.ResultSetInfoWithRows(describeRows);
+                break;
+            default:
+                throw SqlError
+                        .createSQLException(LOGGER, SqlState.INVALID_QUERY_EXPRESSION, SqlError.INVALID_QUERY);
+        }
+        return sparqlResultSet;
     }
 
     @Override

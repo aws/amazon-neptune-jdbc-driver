@@ -13,7 +13,7 @@
     <info:long rdf:datatype='http://www.w3.org/2001/XMLSchema#long'>3000000000</info:long>
     <info:integerSm rdf:datatype='http://www.w3.org/2001/XMLSchema#integer'>25</info:integerSm>
     <info:integerLg rdf:datatype='http://www.w3.org/2001/XMLSchema#integer'>18446744073709551615</info:integerLg>
-    <info:decimal rdf:datatype='http://www.w3.org/2001/XMLSchema#decimal'>180.5</info:decimal>
+    <info:decimal rdf:datatype='http://www.w3.org/2001/XMLSchema#decimal'>180.5555</info:decimal>
     <info:double rdf:datatype='http://www.w3.org/2001/XMLSchema#double'>100000.00</info:double>
     <info:float rdf:datatype='http://www.w3.org/2001/XMLSchema#float'>80.5</info:float>
     <info:unsignedByte rdf:datatype='http://www.w3.org/2001/XMLSchema#unsignedByte'>200</info:unsignedByte>

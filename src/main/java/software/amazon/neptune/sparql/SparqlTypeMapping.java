@@ -18,11 +18,15 @@ package software.amazon.neptune.sparql;
 
 import org.apache.jena.datatypes.xsd.XSDDatatype;
 import org.apache.jena.datatypes.xsd.XSDDateTime;
+import org.apache.jena.graph.impl.LiteralLabel;
 import org.apache.jena.rdf.model.Literal;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import software.amazon.jdbc.utilities.JdbcType;
+import software.amazon.jdbc.utilities.SqlError;
+import software.amazon.jdbc.utilities.SqlState;
 import java.sql.Date;
+import java.sql.SQLException;
 import java.sql.Time;
 import java.sql.Timestamp;
 import java.time.ZoneId;
@@ -39,8 +43,6 @@ public class SparqlTypeMapping {
             new HashMap<>();
     public static final Converter<Timestamp> DATE_TIME_CONVERTER = new DateTimeConverter();
     public static final Converter<ZonedDateTime> DATE_TIME_STAMP_CONVERTER = new DateTimeStampConverter();
-    public static final Converter<Date> DATE_CONVERTER = new DateConverter();
-    public static final Converter<Time> TIME_CONVERTER = new TimeConverter();
     private static final Logger LOGGER = LoggerFactory.getLogger(SparqlTypeMapping.class);
 
     static {
@@ -68,12 +70,13 @@ public class SparqlTypeMapping {
         SPARQL_LITERAL_TO_JAVA_TYPE_MAP.put(XSDDatatype.XSDduration, String.class);
         SPARQL_LITERAL_TO_JAVA_TYPE_MAP.put(XSDDatatype.XSDstring, String.class);
 
-        SPARQL_LITERAL_TO_JAVA_TRANSFORM_MAP.put(XSDDatatype.XSDtime, TIME_CONVERTER);
-        SPARQL_LITERAL_TO_JAVA_TRANSFORM_MAP.put(XSDDatatype.XSDdate, DATE_CONVERTER);
+        SPARQL_LITERAL_TO_JAVA_TRANSFORM_MAP
+                .put(XSDDatatype.XSDtime, (Object value) -> Time.valueOf(getStringValueBasedOnType(value)));
+        SPARQL_LITERAL_TO_JAVA_TRANSFORM_MAP
+                .put(XSDDatatype.XSDdate, (Object value) -> Date.valueOf(getStringValueBasedOnType(value)));
         SPARQL_LITERAL_TO_JAVA_TRANSFORM_MAP.put(XSDDatatype.XSDdateTime, DATE_TIME_CONVERTER);
         SPARQL_LITERAL_TO_JAVA_TRANSFORM_MAP.put(XSDDatatype.XSDdateTimeStamp, DATE_TIME_STAMP_CONVERTER);
-        SPARQL_LITERAL_TO_JAVA_TRANSFORM_MAP.put(XSDDatatype.XSDduration, Literal::getLexicalForm);
-        SPARQL_LITERAL_TO_JAVA_TRANSFORM_MAP.put(XSDDatatype.XSDstring, Literal::getLexicalForm);
+        SPARQL_LITERAL_TO_JAVA_TRANSFORM_MAP.put(XSDDatatype.XSDduration, SparqlTypeMapping::getStringValueBasedOnType);
         // NOTE: Gregorian date types are not supported currently due to incompatibility with java and JDBC datatype,
         // currently returning as String
 
@@ -170,6 +173,36 @@ public class SparqlTypeMapping {
         return SPARQL_LITERAL_TO_JAVA_TRANSFORM_MAP.containsKey(sparqlDatatype);
     }
 
+    private static XSDDateTime getDateTimeValueBasedOnType(final Object value) throws SQLException {
+        if (value instanceof Literal) {
+            final Literal valueLiteral = (Literal) value;
+            return (XSDDateTime) valueLiteral.getValue();
+        } else if (value instanceof LiteralLabel) {
+            final LiteralLabel valueLiteralLabel = (LiteralLabel) value;
+            return (XSDDateTime) valueLiteralLabel.getValue();
+        } else {
+            throw SqlError.createSQLException(
+                    LOGGER,
+                    SqlState.DATA_EXCEPTION,
+                    SqlError.UNSUPPORTED_TYPE);
+        }
+    }
+
+    private static String getStringValueBasedOnType(final Object value) throws SQLException {
+        if (value instanceof Literal) {
+            final Literal valueLiteral = (Literal) value;
+            return valueLiteral.getLexicalForm();
+        } else if (value instanceof LiteralLabel) {
+            final LiteralLabel valueLiteralLabel = (LiteralLabel) value;
+            return valueLiteralLabel.getLexicalForm();
+        } else {
+            throw SqlError.createSQLException(
+                    LOGGER,
+                    SqlState.DATA_EXCEPTION,
+                    SqlError.UNSUPPORTED_TYPE);
+        }
+    }
+
     /**
      * Converter interface to convert a Value type to a Java type.
      *
@@ -182,13 +215,13 @@ public class SparqlTypeMapping {
          * @param value Input value to convert.
          * @return Converted value.
          */
-        T convert(Literal value);
+        T convert(Object value) throws SQLException;
     }
 
     static class DateTimeConverter implements Converter<Timestamp> {
         @Override
-        public Timestamp convert(final Literal value) {
-            return convert((XSDDateTime) value.getValue());
+        public Timestamp convert(final Object value) throws SQLException {
+            return convert(getDateTimeValueBasedOnType(value));
         }
 
         public Timestamp convert(final XSDDateTime value) {
@@ -199,8 +232,8 @@ public class SparqlTypeMapping {
     // Converts from XSD DateTimeStamp to Java ZonedDateTime in UTC
     static class DateTimeStampConverter implements Converter<ZonedDateTime> {
         @Override
-        public ZonedDateTime convert(final Literal value) {
-            return convert((XSDDateTime) value.getValue());
+        public ZonedDateTime convert(final Object value) throws SQLException {
+            return convert(getDateTimeValueBasedOnType(value));
         }
 
         public ZonedDateTime convert(final XSDDateTime value) {
@@ -208,27 +241,4 @@ public class SparqlTypeMapping {
             return calendarTime.toZonedDateTime().withZoneSameInstant(ZoneId.of("UTC"));
         }
     }
-
-    static class DateConverter implements Converter<Date> {
-        @Override
-        public Date convert(final Literal value) {
-            return convert(value.getLexicalForm());
-        }
-
-        public Date convert(final String value) {
-            return Date.valueOf(value);
-        }
-    }
-
-    static class TimeConverter implements Converter<Time> {
-        @Override
-        public Time convert(final Literal value) {
-            return convert(value.getLexicalForm());
-        }
-
-        public Time convert(final String value) {
-            return Time.valueOf(value);
-        }
-    }
-
 }
