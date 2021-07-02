@@ -38,9 +38,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class SparqlTriplesResultSet extends SparqlResultSet {
-    public static final String TRIPLES_COLUMN_NAME_SUBJECT = "Subject";
-    public static final String TRIPLES_COLUMN_NAME_PREDICATE = "Predicate";
-    public static final String TRIPLES_COLUMN_NAME_OBJECT = "Object";
+    public static final String TRIPLES_COLUMN_LABEL_SUBJECT = "Subject";
+    public static final String TRIPLES_COLUMN_LABEL_PREDICATE = "Predicate";
+    public static final String TRIPLES_COLUMN_LABEL_OBJECT = "Object";
+    public static final List<String> TRIPLES_COLUMN_LIST = ImmutableList
+            .of(TRIPLES_COLUMN_LABEL_SUBJECT, TRIPLES_COLUMN_LABEL_PREDICATE, TRIPLES_COLUMN_LABEL_OBJECT);
     public static final int TRIPLES_COLUMN_INDEX_SUBJECT = 1;
     public static final int TRIPLES_COLUMN_INDEX_PREDICATE = 2;
     public static final int TRIPLES_COLUMN_INDEX_OBJECT = 3;
@@ -48,6 +50,7 @@ public class SparqlTriplesResultSet extends SparqlResultSet {
     private static final Logger LOGGER = LoggerFactory.getLogger(SparqlTriplesResultSet.class);
     private final List<Triple> rows;
     private final List<String> columns;
+    private final List<Object> columnTypes;
 
     /**
      * SparqlResultSet constructor, initializes super class.
@@ -56,10 +59,10 @@ public class SparqlTriplesResultSet extends SparqlResultSet {
      * @param resultSetInfo ResultSetInfoWithRows Object.
      */
     public SparqlTriplesResultSet(final Statement statement, final ResultSetInfoWithRows resultSetInfo) {
-        // TODO: fix metadata promotion
         super(statement, resultSetInfo.getColumns(), resultSetInfo.getRows().size());
         this.rows = resultSetInfo.getRows();
         this.columns = resultSetInfo.getColumns();
+        this.columnTypes = resultSetInfo.getColumnTypes();
     }
 
     /**
@@ -72,6 +75,7 @@ public class SparqlTriplesResultSet extends SparqlResultSet {
         super(statement, resultSetInfoWithoutRows.getColumns(), resultSetInfoWithoutRows.getRowCount());
         this.rows = null;
         this.columns = resultSetInfoWithoutRows.getColumns();
+        this.columnTypes = null;
     }
 
     @Override
@@ -104,13 +108,6 @@ public class SparqlTriplesResultSet extends SparqlResultSet {
 
     private Node getValue(final int columnIndex) throws SQLException {
         verifyOpen();
-        if (rows.isEmpty()) {
-            // TODO: AN-562 is this the best error to throw to address empty result lists?
-            throw SqlError.createSQLException(
-                    LOGGER,
-                    SqlState.DATA_EXCEPTION,
-                    SqlError.UNSUPPORTED_RESULT_SET_TYPE);
-        }
         validateRowColumn(columnIndex);
 
         final Triple row = rows.get(getRowIndex());
@@ -126,25 +123,16 @@ public class SparqlTriplesResultSet extends SparqlResultSet {
 
     @Override
     protected ResultSetMetaData getResultMetadata() throws SQLException {
-        final List<Object> rowTypes = new ArrayList<>();
         if (rows.isEmpty()) {
             // TODO: AN-562 see other ways to address empty result lists
+            final List<Object> emptyColumnTypes = new ArrayList<>();
             for (int i = 1; i <= 3; i++) {
-                rowTypes.add(InternalTypeSystem.TYPE_SYSTEM.STRING());
+                emptyColumnTypes.add(InternalTypeSystem.TYPE_SYSTEM.STRING());
             }
+            return new SparqlResultSetMetadata(columns, emptyColumnTypes);
         } else {
-            for (int i = 1; i <= 3; i++) {
-                // TODO: AN-562 find efficient type promotion with row looping
-                final Triple row = rows.get(0);
-                final Node node = getNodeFromColumnIndex(row, i);
-                if (node == null) {
-                    rowTypes.add(null);
-                } else {
-                    rowTypes.add(node.isLiteral() ? node.getLiteral().getDatatype() : node.getClass());
-                }
-            }
+            return new SparqlResultSetMetadata(columns, this.columnTypes);
         }
-        return new SparqlResultSetMetadata(columns, rowTypes);
     }
 
     // get the Node of a row of Triple based on given column index
@@ -173,7 +161,7 @@ public class SparqlTriplesResultSet extends SparqlResultSet {
     @Getter
     public static class ResultSetInfoWithRows {
         private final List<Triple> rows;
-        private final List<String> columns = ImmutableList
-                .of(TRIPLES_COLUMN_NAME_SUBJECT, TRIPLES_COLUMN_NAME_PREDICATE, TRIPLES_COLUMN_NAME_OBJECT);
+        private final List<String> columns = TRIPLES_COLUMN_LIST;
+        private final List<Object> columnTypes;
     }
 }

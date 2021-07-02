@@ -69,22 +69,6 @@ public class SparqlConnectionTest {
         SparqlMockServer.ctlAfterClass();
     }
 
-    /**
-     * Function to get a start database before each test.
-     */
-    @BeforeEach
-    public void ctlBeforeTest() {
-        SparqlMockServer.ctlBeforeTest();
-    }
-
-    /**
-     * Function to get a tear down database after each test.
-     */
-    @AfterEach
-    public void ctlAfterTest() {
-        SparqlMockServer.ctlAfterTest();
-    }
-
     @BeforeEach
     void initialize() throws SQLException {
         connection = new SparqlConnection(new SparqlConnectionProperties(sparqlProperties()));
@@ -95,7 +79,6 @@ public class SparqlConnectionTest {
         connection.close();
     }
 
-    // TODO: AN-527 abstract this test after completing connection properties? - it's similar across all 3 executors
     @Test
     void testIsValid() throws SQLException {
         Assertions.assertTrue(connection.isValid(1));

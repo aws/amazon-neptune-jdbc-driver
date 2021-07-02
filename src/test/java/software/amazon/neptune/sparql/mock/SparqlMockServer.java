@@ -159,7 +159,7 @@ public class SparqlMockServer {
      * Function to get root url.
      * @return root url
      */
-    public static final String urlRoot() {
+    public static String urlRoot() {
         return "http://localhost:" + port() + "/";
     }
 
@@ -167,7 +167,7 @@ public class SparqlMockServer {
      * Function to get database path.
      * @return database path
      */
-    public static final String datasetPath() {
+    public static String datasetPath() {
         return "/mock";
     }
 
@@ -175,7 +175,7 @@ public class SparqlMockServer {
      * Function to get full database url.
      * @return full database url
      */
-    public static final String urlDataset() {
+    public static String urlDataset() {
         return "http://localhost:" + port() + datasetPath();
     }
 
@@ -183,7 +183,7 @@ public class SparqlMockServer {
      * Function to get update api.
      * @return update url
      */
-    public static final String serviceUpdate() {
+    public static String serviceUpdate() {
         return "http://localhost:" + port() + datasetPath() + "/update";
     }
 
@@ -191,7 +191,7 @@ public class SparqlMockServer {
      * Function to get query api.
      * @return query url
      */
-    public static final String serviceQuery() {
+    public static String serviceQuery() {
         return "http://localhost:" + port() + datasetPath() + "/query";
     }
 
@@ -199,7 +199,7 @@ public class SparqlMockServer {
      * Function to get data api.
      * @return dataGSP url
      */
-    public static final String serviceGSP() {
+    public static String serviceGSP() {
         return "http://localhost:" + port() + datasetPath() + "/data";
     }
 

@@ -81,7 +81,7 @@ public class SparqlSelectResultSetGetColumnsTest {
     }
 
     @Test
-    void generateOpenCypherResultSetGetColumnsManuallyTest() throws Exception {
+    void generateSparqlResultSetGetColumnsManuallyTest() throws Exception {
         final ResultSet resultSet =
                 new SparqlResultSetGetColumns(statement, OpenCypherGetColumnUtilities.NODE_COLUMN_INFOS,
                         new ResultSetInfoWithoutRows(OpenCypherGetColumnUtilities.NODE_COLUMN_INFOS.size(),

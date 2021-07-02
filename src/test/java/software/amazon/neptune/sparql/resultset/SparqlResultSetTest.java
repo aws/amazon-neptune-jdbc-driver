@@ -867,12 +867,14 @@ public class SparqlResultSetTest {
     @Disabled
     void testQueryThroughJDBCResult() throws SQLException {
         // TODO: to be deleted
+        // final String query =
+        //         "SELECT ?x ?fname WHERE {?x  <http://www.w3.org/2001/vcard-rdf/3.0#FN>  ?fname FILTER(ISNUMERIC(?fname))}";
         final String query =
-                "SELECT ?x ?fname WHERE {?x  <http://www.w3.org/2001/vcard-rdf/3.0#FN>  ?fname FILTER(ISNUMERIC(?fname))}";
+                "SELECT ?s ?p ?o WHERE {?s ?p ?o}";
         final SparqlSelectResultSet result = (SparqlSelectResultSet) statement.executeQuery(query);
         printJenaResultSetOut(query);
-        System.out.println(result.getResultMetadata().getColumnName(SELECT_RESULT_INDEX));
-        System.out.println(result.next());
+        //System.out.println(result.getResultMetadata().getColumnName(SELECT_RESULT_INDEX));
+        //System.out.println(result.next());
 
         // next() increments the RowIndex everytime it is called (see ResultSet)
         // Assertions.assertTrue(result.next());
@@ -882,6 +884,30 @@ public class SparqlResultSetTest {
             System.out.println("|STRING VALUE  | " + result.getConvertedValue(3));
             System.out.println("|CONVERT VALUE | " + result.getConvertedValue(3));
             System.out.println("|VALUE CLASS   | " + result.getConvertedValue(3).getClass());
+        }
+
+        Assertions.assertFalse(result.next());
+    }
+
+    @Test
+    @Disabled
+    void testConstructQueryThroughJDBCResult() throws SQLException {
+        // TODO: to be deleted
+        final String query =
+                "CONSTRUCT WHERE {?s ?p ?o}";
+        final java.sql.ResultSet result = statement.executeQuery(query);
+        //printJenaResultSetOut(query);
+        //System.out.println(result.getResultMetadata().getColumnName(SELECT_RESULT_INDEX));
+        //System.out.println(result.next());
+
+        // next() increments the RowIndex everytime it is called (see ResultSet)
+        // Assertions.assertTrue(result.next());
+
+        while (result.next()) {
+            System.out.println("[--------------NEW ROW--------------]");
+            //            System.out.println("|STRING VALUE  | " + result.getConvertedValue(3));
+            //            System.out.println("|CONVERT VALUE | " + result.getConvertedValue(3));
+            System.out.println("|VALUE CLASS   | " + result.getObject(3).getClass());
         }
 
         Assertions.assertFalse(result.next());

@@ -34,19 +34,6 @@ public abstract class SparqlResultSet extends software.amazon.jdbc.ResultSet {
     }
 
     @Override
-    protected int getDriverFetchSize() throws SQLException {
-        // TODO: AN-562 possibly raise error instead of leaving as a comment
-        // Can't be done based on implementation.
-        return 0;
-    }
-
-    @Override
-    protected void setDriverFetchSize(final int rows) {
-        // TODO: AN-562 possibly raise error instead of leaving as a comment
-        // Can't be done based on implementation.
-    }
-
-    @Override
     public boolean wasNull() throws SQLException {
         return this.wasNull;
     }

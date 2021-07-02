@@ -50,7 +50,9 @@ public class SparqlManualNeptuneVerificationTest {
     private static final String NEPTUNE_QUERY_ENDPOINT = "sparql";
     private static final String NEPTUNE_DESTINATION_STRING =
             String.format("%s:%d", NEPTUNE_HOSTNAME, NEPTUNE_DEFAULT_PORT);
+    private static java.sql.Statement statement;
     private java.sql.Connection authConnection;
+    private java.sql.DatabaseMetaData databaseMetaData;
 
     private static Properties authProperties() {
         final Properties properties = new Properties();
@@ -63,15 +65,24 @@ public class SparqlManualNeptuneVerificationTest {
 
     @BeforeEach
     void initialize() throws SQLException {
-        // TODO: add result getters after implementing ResultSet
         authConnection = new SparqlConnection(new SparqlConnectionProperties(authProperties()));
+        statement = authConnection.createStatement();
+        databaseMetaData = authConnection.getMetaData();
     }
 
     @Test
     @Disabled
     void testSigV4Auth() throws SQLException {
-        // TODO: add additional assertions for result getters
         Assertions.assertTrue(authConnection.isValid(1));
+        final String query = "SELECT ?s ?p ?o WHERE {?s ?p ?o}";
+        final java.sql.ResultSet resultSet = statement.executeQuery(query);
+        while (resultSet.next()) {
+            Assertions.assertNotNull(resultSet.getString(1));
+            Assertions.assertNotNull(resultSet.getString(2));
+            Assertions.assertNotNull(resultSet.getString(3));
+        }
+        final java.sql.ResultSet metadataResultSet = databaseMetaData.getColumns(null, null, null, null);
+        Assertions.assertFalse(metadataResultSet.next());
     }
 
     @Test

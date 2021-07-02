@@ -19,8 +19,6 @@ package software.amazon.neptune.sparql;
 import org.apache.jena.rdfconnection.RDFConnection;
 import org.apache.jena.rdfconnection.RDFConnectionRemote;
 import org.apache.jena.rdfconnection.RDFConnectionRemoteBuilder;
-import org.apache.jena.update.UpdateFactory;
-import org.apache.jena.update.UpdateRequest;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -54,18 +52,16 @@ public class SparqlStatementTest extends SparqlStatementTestBase {
     @BeforeAll
     public static void ctlBeforeClass() throws SQLException {
         SparqlMockServer.ctlBeforeClass();
+
         final RDFConnectionRemoteBuilder builder = RDFConnectionRemote.create()
                 .destination(SparqlMockServer.urlDataset())
                 // Query only.
                 .queryEndpoint("/query")
                 .updateEndpoint("/update");
 
-        // inserts data into the database
-        final UpdateRequest update = UpdateFactory.create("PREFIX : <http://example/> INSERT DATA { :s :p 123 }");
-
-        // connects to database, updates the database
+        // load dataset in
         try (final RDFConnection conn = builder.build()) {
-            conn.update(update);
+            conn.load("src/test/java/software/amazon/neptune/sparql/mock/sparql_mock_data.rdf");
         }
 
         final java.sql.Connection connection =

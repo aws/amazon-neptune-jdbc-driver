@@ -23,6 +23,6 @@ public class SparqlStatementTestBase {
     static {
         QUICK_QUERY = "SELECT * { ?s ?p ?o } LIMIT 100";
         // TODO put in long query for cancellation testing after implementing ResultSet
-        LONG_QUERY = "TODO";
+        LONG_QUERY = "TODO?";
     }
 }

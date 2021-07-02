@@ -89,17 +89,6 @@ public class OpenCypherResultSet extends software.amazon.jdbc.ResultSet implemen
     }
 
     @Override
-    protected int getDriverFetchSize() throws SQLException {
-        // Do we want to update this or statement?
-        return 0;
-    }
-
-    @Override
-    protected void setDriverFetchSize(final int rows) {
-        // Do we want to update this or statement?
-    }
-
-    @Override
     public boolean wasNull() throws SQLException {
         return wasNull;
     }
@@ -130,6 +119,7 @@ public class OpenCypherResultSet extends software.amazon.jdbc.ResultSet implemen
     private Value getValue(final int columnIndex) throws SQLException {
         verifyOpen();
         if (rows == null) {
+            // TODO: change exception error type
             throw SqlError.createSQLException(
                     LOGGER,
                     SqlState.DATA_EXCEPTION,
