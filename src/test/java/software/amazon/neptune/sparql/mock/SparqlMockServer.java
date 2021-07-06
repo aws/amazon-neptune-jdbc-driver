@@ -22,9 +22,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -50,7 +50,6 @@ import org.apache.jena.system.Txn;
 import org.apache.jena.update.Update;
 import org.apache.jena.update.UpdateExecutionFactory;
 import org.apache.jena.update.UpdateProcessor;
-
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static software.amazon.neptune.sparql.mock.SparqlMockServer.ServerScope.CLASS;
@@ -92,7 +91,7 @@ import static software.amazon.neptune.sparql.mock.SparqlMockServer.ServerScope.T
  * {@literal @Before}      public void ctlBeforeTest()         { FusekiTestServer.ctlBeforeTest(); }
  * {@literal @After}       public void ctlAfterTest()          { FusekiTestServer.ctlAfterTest(); }
  * </pre>
- *
+ * <p>
  * Much of this machinery is unnecessary for just running a server in the background:
  *
  * <pre>
@@ -138,25 +137,29 @@ public class SparqlMockServer {
     // Note: it is important to cleanly close a PoolingHttpClient across server restarts
     // otherwise the pooled connections remain for the old server.
 
-    /*package : for import static */ enum ServerScope { SUITE, CLASS, TEST }
     private static ServerScope serverScope = ServerScope.CLASS;
     private static int currentPort = WebLib.choosePort();
+    // Whether to use a transaction on the dataset or to use SPARQL Update.
+    private static DatasetGraph dsgTesting;
+    private static boolean clearDSGDirectly = true;
+    // reference count of start/stop server
+    private static AtomicInteger countServer = new AtomicInteger();
+    private static FusekiServer server = null;
+
+    // Abstraction that runs a SPARQL server for tests.
 
     /**
      * Returns currently used port
+     *
      * @return the currently used port.
      */
     public static int port() {
         return currentPort;
     }
 
-    // Whether to use a transaction on the dataset or to use SPARQL Update.
-    private static DatasetGraph dsgTesting;
-    private static boolean clearDSGDirectly = true;
-
-    // Abstraction that runs a SPARQL server for tests.
     /**
      * Function to get root url.
+     *
      * @return root url
      */
     public static String urlRoot() {
@@ -165,6 +168,7 @@ public class SparqlMockServer {
 
     /**
      * Function to get database path.
+     *
      * @return database path
      */
     public static String datasetPath() {
@@ -173,6 +177,7 @@ public class SparqlMockServer {
 
     /**
      * Function to get full database url.
+     *
      * @return full database url
      */
     public static String urlDataset() {
@@ -181,6 +186,7 @@ public class SparqlMockServer {
 
     /**
      * Function to get update api.
+     *
      * @return update url
      */
     public static String serviceUpdate() {
@@ -189,6 +195,7 @@ public class SparqlMockServer {
 
     /**
      * Function to get query api.
+     *
      * @return query url
      */
     public static String serviceQuery() {
@@ -197,6 +204,7 @@ public class SparqlMockServer {
 
     /**
      * Function to get data api.
+     *
      * @return dataGSP url
      */
     public static String serviceGSP() {
@@ -207,7 +215,7 @@ public class SparqlMockServer {
      * Setup for the tests by allocating a Fuseki instance to work with
      */
     public static void ctlBeforeTestSuite() {
-        if ( serverScope == SUITE  ) {
+        if (serverScope == SUITE) {
             setPoolingHttpClient();
             allocServer();
         }
@@ -216,8 +224,8 @@ public class SparqlMockServer {
     /**
      * Setup for the tests by allocating a Fuseki instance to work with
      */
-    public static void ctlAfterTestSuite()  {
-        if ( serverScope == SUITE  ) {
+    public static void ctlAfterTestSuite() {
+        if (serverScope == SUITE) {
             freeServer();
             resetDefaultHttpClient();
         }
@@ -227,7 +235,7 @@ public class SparqlMockServer {
      * Setup for the tests by allocating a Fuseki instance to work with
      */
     public static void ctlBeforeClass() {
-        if ( serverScope == CLASS  ) {
+        if (serverScope == CLASS) {
             setPoolingHttpClient();
             allocServer();
         }
@@ -237,7 +245,7 @@ public class SparqlMockServer {
      * Clean up after tests by de-allocating the Fuseki instance
      */
     public static void ctlAfterClass() {
-        if ( serverScope == CLASS  ) {
+        if (serverScope == CLASS) {
             freeServer();
             resetDefaultHttpClient();
         }
@@ -247,7 +255,7 @@ public class SparqlMockServer {
      * Placeholder.
      */
     public static void ctlBeforeTest() {
-        if ( serverScope == TEST  ) {
+        if (serverScope == TEST) {
             setPoolingHttpClient();
             allocServer();
         }
@@ -257,7 +265,7 @@ public class SparqlMockServer {
      * Clean up after each test by resetting the Fuseki dataset
      */
     public static void ctlAfterTest() {
-        if ( serverScope == TEST  ) {
+        if (serverScope == TEST) {
             freeServer();
             resetDefaultHttpClient();
         } else {
@@ -265,42 +273,63 @@ public class SparqlMockServer {
         }
     }
 
-    /** Set a PoolingHttpClient */
+    /**
+     * Setup for the tests by allocating a Fuseki instance to work with
+     */
+    public static void ctlBeforeEach() {
+        setPoolingHttpClient();
+        allocServer();
+    }
+
+    /**
+     * Clean up after tests by de-allocating the Fuseki instance
+     */
+    public static void ctlAfterEach() {
+        freeServer();
+        resetDefaultHttpClient();
+    }
+
+    /**
+     * Set a PoolingHttpClient
+     */
     public static void setPoolingHttpClient() {
         setHttpClient(HttpOp.createPoolingHttpClient());
     }
 
-    /** Restore the original setup */
+    /**
+     * Restore the original setup
+     */
     private static void resetDefaultHttpClient() {
         setHttpClient(HttpOp.createDefaultHttpClient());
     }
 
-    /** Set the HttpClient - close the old one if appropriate */
+    /**
+     * Set the HttpClient - close the old one if appropriate
+     */
     public static void setHttpClient(final HttpClient newHttpClient) {
         final HttpClient hc = HttpOp.getDefaultHttpClient();
-        if ( hc instanceof CloseableHttpClient ) {
+        if (hc instanceof CloseableHttpClient) {
             IO.close((CloseableHttpClient) hc);
         }
         HttpOp.setDefaultHttpClient(newHttpClient);
     }
 
-    // reference count of start/stop server
-    private static AtomicInteger countServer = new AtomicInteger();
-    private static FusekiServer server        = null;
-
-    /*package*/ static void allocServer() {
-        if ( countServer.getAndIncrement() == 0 ) {
+    /*package*/
+    static void allocServer() {
+        if (countServer.getAndIncrement() == 0) {
             setupServer(true);
         }
     }
 
-    /*package*/ static void freeServer() {
-        if ( countServer.decrementAndGet() == 0 ) {
+    /*package*/
+    static void freeServer() {
+        if (countServer.decrementAndGet() == 0) {
             teardownServer();
         }
     }
 
-    /*package*/ static void setupServer(final boolean updateable) {
+    /*package*/
+    static void setupServer(final boolean updateable) {
         dsgTesting = DatasetGraphFactory.createTxnMem();
         server = FusekiServer.create()
                 .add(datasetPath(), dsgTesting)
@@ -310,18 +339,20 @@ public class SparqlMockServer {
                 .start();
     }
 
-    /*package*/ static void teardownServer() {
-        if ( server != null ) {
+    /*package*/
+    static void teardownServer() {
+        if (server != null) {
             server.stop();
             server = null;
         }
     }
 
-    /*package*/ static void resetServer() {
+    /*package*/
+    static void resetServer() {
         if (countServer.get() == 0) {
             throw new RuntimeException("No server started!");
         }
-        if ( clearDSGDirectly ) {
+        if (clearDSGDirectly) {
             Txn.executeWrite(dsgTesting, () -> dsgTesting.clear());
         } else {
             final Update clearRequest = new UpdateDrop(Target.ALL);
@@ -329,10 +360,14 @@ public class SparqlMockServer {
             try {
                 proc.execute();
             } catch (Throwable e) {
-                e.printStackTrace(); throw e;
+                e.printStackTrace();
+                throw e;
             }
         }
     }
+
+    /*package : for import static */
+    enum ServerScope { SUITE, CLASS, TEST }
 
     // ---- Helper code.
 

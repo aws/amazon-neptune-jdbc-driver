@@ -28,6 +28,10 @@ import org.apache.jena.rdf.model.RDFNode;
 import org.apache.jena.rdfconnection.RDFConnection;
 import org.apache.jena.rdfconnection.RDFConnectionRemote;
 import org.apache.jena.rdfconnection.RDFConnectionRemoteBuilder;
+import org.apache.jena.update.UpdateExecutionFactory;
+import org.apache.jena.update.UpdateFactory;
+import org.apache.jena.update.UpdateProcessor;
+import org.apache.jena.update.UpdateRequest;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
@@ -40,6 +44,7 @@ import software.amazon.jdbc.utilities.ConnectionProperties;
 import software.amazon.jdbc.utilities.JdbcType;
 import software.amazon.neptune.sparql.SparqlConnection;
 import software.amazon.neptune.sparql.SparqlConnectionProperties;
+import software.amazon.neptune.sparql.SparqlStatementTestBase;
 import software.amazon.neptune.sparql.mock.SparqlMockDataQuery;
 import software.amazon.neptune.sparql.mock.SparqlMockServer;
 import java.math.BigDecimal;
@@ -911,6 +916,30 @@ public class SparqlResultSetTest {
         }
 
         Assertions.assertFalse(result.next());
+    }
+
+    @Test
+    void testUpdateQuery() throws SQLException {
+        final String updateString =
+                "PREFIX : <http://example/> INSERT DATA { :s :p \"string\" }; INSERT DATA { :s :p \"string2\"};";
+        final RDFConnectionRemoteBuilder builder = RDFConnectionRemote.create()
+                .destination(SparqlMockServer.urlDataset())
+                .queryEndpoint("/query")
+                .updateEndpoint("/update");
+
+        final UpdateRequest update =
+                UpdateFactory.create(SparqlStatementTestBase.LONG_UPDATE);
+
+        try (final RDFConnection conn = builder.build()) {
+            final UpdateProcessor updateProcessor =
+                    UpdateExecutionFactory.createRemote(update, "http://localhost:" + PORT + "/mock/update");
+            updateProcessor.execute();
+            //conn.update(update);
+        }
+
+        final String query =
+                "SELECT ?s ?p ?o WHERE {?s ?p ?o}";
+        printJenaResultSetOut(query);
     }
 
 }

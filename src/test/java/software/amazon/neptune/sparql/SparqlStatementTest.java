@@ -19,8 +19,10 @@ package software.amazon.neptune.sparql;
 import org.apache.jena.rdfconnection.RDFConnection;
 import org.apache.jena.rdfconnection.RDFConnectionRemote;
 import org.apache.jena.rdfconnection.RDFConnectionRemoteBuilder;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
+import org.apache.jena.update.UpdateFactory;
+import org.apache.jena.update.UpdateRequest;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import software.amazon.jdbc.utilities.AuthScheme;
 import software.amazon.jdbc.utilities.ConnectionProperties;
@@ -45,43 +47,117 @@ public class SparqlStatementTest extends SparqlStatementTestBase {
         properties.put(SparqlConnectionProperties.QUERY_ENDPOINT_KEY, QUERY_ENDPOINT);
         return properties;
     }
+    //
+    //    /**
+    //     * Function to start the mock server before testing.
+    //     */
+    //    @BeforeAll
+    //    public static void ctlBeforeClass() throws SQLException {
+    //        SparqlMockServer.ctlBeforeClass();
+    //    }
+    //
+    //    /**
+    //     * Function to tear down server after testing.
+    //     */
+    //    @AfterAll
+    //    public static void ctlAfterClass() {
+    //        SparqlMockServer.ctlAfterClass();
+    //    }
 
     /**
      * Function to start the mock server before testing.
      */
-    @BeforeAll
-    public static void ctlBeforeClass() throws SQLException {
-        SparqlMockServer.ctlBeforeClass();
+    @BeforeEach
+    public void initializeHelper() throws SQLException {
+        SparqlMockServer.ctlBeforeEach();
+        //        final RDFConnectionRemoteBuilder builder = RDFConnectionRemote.create()
+        //                .destination(SparqlMockServer.urlDataset())
+        //                // Query only.
+        //                .queryEndpoint("/query")
+        //                .updateEndpoint("/update");
+        //
+        //        final UpdateRequest update =
+        //                UpdateFactory.create(SparqlStatementTestBase.LONG_UPDATE);
+        //
+        //        // load dataset in
+        //        try (final RDFConnection conn = builder.build()) {
+        //            conn.load("src/test/java/software/amazon/neptune/sparql/mock/sparql_mock_data.rdf");
+        //            conn.update(update);
+        //        }
+        //
+        //        final java.sql.Connection connection =
+        //                new SparqlConnection(
+        //                        new SparqlConnectionProperties(sparqlProperties()));
+        //        neptuneStatementTestHelper =
+        //                new NeptuneStatementTestHelper(connection.createStatement(), LONG_QUERY, QUICK_QUERY);
+    }
 
+    /**
+     * Function to tear down server after testing.
+     */
+    @AfterEach
+    public void ctlAfterTest() {
+        SparqlMockServer.ctlAfterEach();
+    }
+
+    @Test
+    void testCancelQueryWithoutExecute() {
+        neptuneStatementTestHelper.testCancelQueryWithoutExecute();
+    }
+
+    @Test
+    void testCancelQueryWhileExecuteInProgress() throws SQLException {
         final RDFConnectionRemoteBuilder builder = RDFConnectionRemote.create()
                 .destination(SparqlMockServer.urlDataset())
                 // Query only.
                 .queryEndpoint("/query")
                 .updateEndpoint("/update");
 
+        final UpdateRequest update =
+                UpdateFactory.create(SparqlStatementTestBase.LONG_UPDATE);
+
+        final String query = "SELECT ?s ?p ?o WHERE { ?s ?p ?o FILTER(CONTAINS(LCASE(?o), \"string\")) }";
+
         // load dataset in
         try (final RDFConnection conn = builder.build()) {
             conn.load("src/test/java/software/amazon/neptune/sparql/mock/sparql_mock_data.rdf");
+            conn.update(update);
+        }
+
+        final java.sql.Connection connection = new SparqlConnection(
+                new SparqlConnectionProperties(sparqlProperties()));
+        neptuneStatementTestHelper =
+                new NeptuneStatementTestHelper(connection.createStatement(), query, QUICK_QUERY);
+
+        neptuneStatementTestHelper.testCancelQueryWhileExecuteInProgress();
+    }
+
+    @Test
+    void testCancelQueryTwice() throws SQLException {
+        final RDFConnectionRemoteBuilder builder = RDFConnectionRemote.create()
+                .destination(SparqlMockServer.urlDataset())
+                // Query only.
+                .queryEndpoint("/query")
+                .updateEndpoint("/update");
+
+        final UpdateRequest update =
+                UpdateFactory.create(SparqlStatementTestBase.LONG_UPDATE_TWO);
+
+        // load dataset in
+        try (final RDFConnection conn = builder.build()) {
+            conn.load("src/test/java/software/amazon/neptune/sparql/mock/sparql_mock_data.rdf");
+            conn.update(update);
+            // conn.queryResultSet(QueryFactory.create(query), ResultSetFormatter::out);
         }
 
         final java.sql.Connection connection =
                 new SparqlConnection(
                         new SparqlConnectionProperties(sparqlProperties()));
+
         neptuneStatementTestHelper =
                 new NeptuneStatementTestHelper(connection.createStatement(), LONG_QUERY, QUICK_QUERY);
-    }
 
-    /**
-     * Function to tear down server after testing.
-     */
-    @AfterAll
-    public static void ctlAfterClass() {
-        SparqlMockServer.ctlAfterClass();
-    }
-
-    @Test
-    void testCancelQueryWithoutExecute() {
-        neptuneStatementTestHelper.testCancelQueryWithoutExecute();
+        neptuneStatementTestHelper.testCancelQueryTwice();
     }
 
     @Test

@@ -39,6 +39,8 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import software.amazon.jdbc.utilities.AuthScheme;
 import software.amazon.jdbc.utilities.ConnectionProperties;
+import java.sql.Connection;
+import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.Properties;
 
@@ -47,9 +49,11 @@ public class SparqlManualNeptuneVerificationTest {
     private static final String NEPTUNE_HOSTNAME =
             "https://iam-auth-test-lyndon.cluster-cdubgfjknn5r.us-east-1.neptune.amazonaws.com";
     private static final int NEPTUNE_DEFAULT_PORT = 8182;
+    private static final String AUTH = "IamSigV4";
     private static final String NEPTUNE_QUERY_ENDPOINT = "sparql";
     private static final String NEPTUNE_DESTINATION_STRING =
             String.format("%s:%d", NEPTUNE_HOSTNAME, NEPTUNE_DEFAULT_PORT);
+    private static final String CONNECTION_STRING = String.format("jdbc:neptune:sparql://%s;queryEndpoint=%s;authScheme=%s;",NEPTUNE_HOSTNAME, NEPTUNE_QUERY_ENDPOINT, AUTH);
     private static java.sql.Statement statement;
     private java.sql.Connection authConnection;
     private java.sql.DatabaseMetaData databaseMetaData;
@@ -68,6 +72,14 @@ public class SparqlManualNeptuneVerificationTest {
         authConnection = new SparqlConnection(new SparqlConnectionProperties(authProperties()));
         statement = authConnection.createStatement();
         databaseMetaData = authConnection.getMetaData();
+    }
+
+    @Test
+    @Disabled
+    void testBasicIamAuth() throws Exception {
+        System.out.println(CONNECTION_STRING);
+        final Connection connection = DriverManager.getConnection(CONNECTION_STRING);
+        Assertions.assertTrue(connection.isValid(1));
     }
 
     @Test

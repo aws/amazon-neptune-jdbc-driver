@@ -26,6 +26,8 @@ import software.amazon.neptune.gremlin.GremlinConnectionProperties;
 import software.amazon.neptune.gremlin.sql.SqlGremlinConnection;
 import software.amazon.neptune.opencypher.OpenCypherConnection;
 import software.amazon.neptune.opencypher.OpenCypherConnectionProperties;
+import software.amazon.neptune.sparql.SparqlConnection;
+import software.amazon.neptune.sparql.SparqlConnectionProperties;
 import javax.annotation.Nullable;
 import java.sql.DriverManager;
 import java.sql.SQLException;
@@ -41,6 +43,7 @@ public class NeptuneDriver extends Driver implements java.sql.Driver {
     private static final String OPENCYPHER = "opencypher";
     private static final String GREMLIN = "gremlin";
     private static final String SQL_GREMLIN = "sqlgremlin";
+    private static final String SPARQL = "sparql";
 
     static {
         try {
@@ -54,7 +57,8 @@ public class NeptuneDriver extends Driver implements java.sql.Driver {
     private final Map<String, Class<?>> connectionMap = ImmutableMap.of(
             "opencypher", OpenCypherConnection.class,
             "gremlin", GremlinConnection.class,
-            "sqlgremlin", SqlGremlinConnection.class);
+            "sqlgremlin", SqlGremlinConnection.class,
+            "sparql", SparqlConnection.class);
 
     @Override
     public boolean acceptsURL(final @Nullable String url) throws SQLException {
@@ -99,6 +103,9 @@ public class NeptuneDriver extends Driver implements java.sql.Driver {
         if (GREMLIN.equalsIgnoreCase(language) || SQL_GREMLIN.equalsIgnoreCase(language)) {
             return new GremlinConnectionProperties(properties);
         }
+        if (SPARQL.equalsIgnoreCase(language)) {
+            return new SparqlConnectionProperties(properties);
+        }
         // TODO - implement for other languages
         return new OpenCypherConnectionProperties(properties);
     }
@@ -110,6 +117,9 @@ public class NeptuneDriver extends Driver implements java.sql.Driver {
         }
         if (GREMLIN.equalsIgnoreCase(language) || SQL_GREMLIN.equalsIgnoreCase(language)) {
             return GremlinConnectionProperties.CONTACT_POINT_KEY;
+        }
+        if (SPARQL.equalsIgnoreCase(language)) {
+            return SparqlConnectionProperties.ENDPOINT_KEY;
         }
         // TODO - implement for other languages
         return OpenCypherConnectionProperties.ENDPOINT_KEY;
