@@ -919,6 +919,7 @@ public class SparqlResultSetTest {
     }
 
     @Test
+    @Disabled
     void testUpdateQuery() throws SQLException {
         final String updateString =
                 "PREFIX : <http://example/> INSERT DATA { :s :p \"string\" }; INSERT DATA { :s :p \"string2\"};";

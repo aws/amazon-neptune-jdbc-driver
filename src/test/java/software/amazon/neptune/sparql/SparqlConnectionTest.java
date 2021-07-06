@@ -29,6 +29,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import software.amazon.jdbc.utilities.AuthScheme;
 import software.amazon.jdbc.utilities.ConnectionProperties;
@@ -114,6 +115,7 @@ public class SparqlConnectionTest {
 
     // TODO: AN-528 proof of concept tests for mock database - modify/remove later
     @Test
+    @Disabled
     void testMockConnection() {
         final RDFConnectionRemoteBuilder builder = RDFConnectionRemote.create()
                 .destination(SparqlMockServer.urlDataset())
@@ -136,6 +138,7 @@ public class SparqlConnectionTest {
 
     // TODO: AN-528 proof of concept tests for mock database - modify/remove later
     @Test
+    @Disabled
     void testMockConnection2() {
         final String req = "" +
                 "SELECT ?x " +

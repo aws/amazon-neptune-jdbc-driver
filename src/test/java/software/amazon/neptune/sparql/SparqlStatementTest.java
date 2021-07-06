@@ -70,26 +70,27 @@ public class SparqlStatementTest extends SparqlStatementTestBase {
     @BeforeEach
     public void initializeHelper() throws SQLException {
         SparqlMockServer.ctlBeforeEach();
-        //        final RDFConnectionRemoteBuilder builder = RDFConnectionRemote.create()
-        //                .destination(SparqlMockServer.urlDataset())
-        //                // Query only.
-        //                .queryEndpoint("/query")
-        //                .updateEndpoint("/update");
-        //
-        //        final UpdateRequest update =
-        //                UpdateFactory.create(SparqlStatementTestBase.LONG_UPDATE);
-        //
-        //        // load dataset in
-        //        try (final RDFConnection conn = builder.build()) {
-        //            conn.load("src/test/java/software/amazon/neptune/sparql/mock/sparql_mock_data.rdf");
-        //            conn.update(update);
-        //        }
-        //
-        //        final java.sql.Connection connection =
-        //                new SparqlConnection(
-        //                        new SparqlConnectionProperties(sparqlProperties()));
-        //        neptuneStatementTestHelper =
-        //                new NeptuneStatementTestHelper(connection.createStatement(), LONG_QUERY, QUICK_QUERY);
+        final RDFConnectionRemoteBuilder builder = RDFConnectionRemote.create()
+                .destination(SparqlMockServer.urlDataset())
+                // Query only.
+                .queryEndpoint("/query")
+                .updateEndpoint("/update");
+
+        final UpdateRequest update =
+                UpdateFactory.create(SparqlStatementTestBase.LONG_UPDATE);
+
+        // load dataset in
+        try (final RDFConnection conn = builder.build()) {
+            conn.load("src/test/java/software/amazon/neptune/sparql/mock/sparql_mock_data.rdf");
+            conn.update(update);
+        }
+
+        final java.sql.Connection connection =
+                new SparqlConnection(
+                        new SparqlConnectionProperties(sparqlProperties()));
+
+        neptuneStatementTestHelper =
+                new NeptuneStatementTestHelper(connection.createStatement(), LONG_QUERY, QUICK_QUERY);
     }
 
     /**
@@ -106,57 +107,7 @@ public class SparqlStatementTest extends SparqlStatementTestBase {
     }
 
     @Test
-    void testCancelQueryWhileExecuteInProgress() throws SQLException {
-        final RDFConnectionRemoteBuilder builder = RDFConnectionRemote.create()
-                .destination(SparqlMockServer.urlDataset())
-                // Query only.
-                .queryEndpoint("/query")
-                .updateEndpoint("/update");
-
-        final UpdateRequest update =
-                UpdateFactory.create(SparqlStatementTestBase.LONG_UPDATE);
-
-        final String query = "SELECT ?s ?p ?o WHERE { ?s ?p ?o FILTER(CONTAINS(LCASE(?o), \"string\")) }";
-
-        // load dataset in
-        try (final RDFConnection conn = builder.build()) {
-            conn.load("src/test/java/software/amazon/neptune/sparql/mock/sparql_mock_data.rdf");
-            conn.update(update);
-        }
-
-        final java.sql.Connection connection = new SparqlConnection(
-                new SparqlConnectionProperties(sparqlProperties()));
-        neptuneStatementTestHelper =
-                new NeptuneStatementTestHelper(connection.createStatement(), query, QUICK_QUERY);
-
-        neptuneStatementTestHelper.testCancelQueryWhileExecuteInProgress();
-    }
-
-    @Test
     void testCancelQueryTwice() throws SQLException {
-        final RDFConnectionRemoteBuilder builder = RDFConnectionRemote.create()
-                .destination(SparqlMockServer.urlDataset())
-                // Query only.
-                .queryEndpoint("/query")
-                .updateEndpoint("/update");
-
-        final UpdateRequest update =
-                UpdateFactory.create(SparqlStatementTestBase.LONG_UPDATE_TWO);
-
-        // load dataset in
-        try (final RDFConnection conn = builder.build()) {
-            conn.load("src/test/java/software/amazon/neptune/sparql/mock/sparql_mock_data.rdf");
-            conn.update(update);
-            // conn.queryResultSet(QueryFactory.create(query), ResultSetFormatter::out);
-        }
-
-        final java.sql.Connection connection =
-                new SparqlConnection(
-                        new SparqlConnectionProperties(sparqlProperties()));
-
-        neptuneStatementTestHelper =
-                new NeptuneStatementTestHelper(connection.createStatement(), LONG_QUERY, QUICK_QUERY);
-
         neptuneStatementTestHelper.testCancelQueryTwice();
     }
 
