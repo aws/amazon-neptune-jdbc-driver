@@ -47,32 +47,15 @@ public class SparqlStatementTest extends SparqlStatementTestBase {
         properties.put(SparqlConnectionProperties.QUERY_ENDPOINT_KEY, QUERY_ENDPOINT);
         return properties;
     }
-    //
-    //    /**
-    //     * Function to start the mock server before testing.
-    //     */
-    //    @BeforeAll
-    //    public static void ctlBeforeClass() throws SQLException {
-    //        SparqlMockServer.ctlBeforeClass();
-    //    }
-    //
-    //    /**
-    //     * Function to tear down server after testing.
-    //     */
-    //    @AfterAll
-    //    public static void ctlAfterClass() {
-    //        SparqlMockServer.ctlAfterClass();
-    //    }
 
     /**
      * Function to start the mock server before testing.
      */
     @BeforeEach
-    public void initializeHelper() throws SQLException {
+    public void initializeMockServer() throws SQLException {
         SparqlMockServer.ctlBeforeEach();
         final RDFConnectionRemoteBuilder builder = RDFConnectionRemote.create()
                 .destination(SparqlMockServer.urlDataset())
-                // Query only.
                 .queryEndpoint("/query")
                 .updateEndpoint("/update");
 
@@ -97,7 +80,7 @@ public class SparqlStatementTest extends SparqlStatementTestBase {
      * Function to tear down server after testing.
      */
     @AfterEach
-    public void ctlAfterTest() {
+    public void shutdownMockServer() {
         SparqlMockServer.ctlAfterEach();
     }
 
@@ -107,7 +90,8 @@ public class SparqlStatementTest extends SparqlStatementTestBase {
     }
 
     @Test
-    void testCancelQueryTwice() throws SQLException {
+    // TODO: Address inconsistency issue in ticket AN-597
+    void testCancelQueryTwice() {
         neptuneStatementTestHelper.testCancelQueryTwice();
     }
 
@@ -115,5 +99,4 @@ public class SparqlStatementTest extends SparqlStatementTestBase {
     void testCancelQueryAfterExecuteComplete() {
         neptuneStatementTestHelper.testCancelQueryAfterExecuteComplete();
     }
-
 }

@@ -58,7 +58,7 @@ public class SparqlConnectionTest {
      * Function to start the mock server before testing.
      */
     @BeforeAll
-    public static void ctlBeforeClass() {
+    public static void initializeMockServer() {
         SparqlMockServer.ctlBeforeClass();
     }
 
@@ -66,7 +66,7 @@ public class SparqlConnectionTest {
      * Function to tear down server after testing.
      */
     @AfterAll
-    public static void ctlAfterClass() {
+    public static void shutdownMockServer() {
         SparqlMockServer.ctlAfterClass();
     }
 

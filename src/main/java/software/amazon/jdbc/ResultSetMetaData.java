@@ -68,58 +68,65 @@ public abstract class ResultSetMetaData implements java.sql.ResultSetMetaData {
         return columns.size();
     }
 
-    // TODO: AN-562 Investigate refactoring for adding constants and/or changing if/else statements to cases
     @Override
     public int getColumnDisplaySize(final int column) throws SQLException {
         verifyColumnIndex(column);
 
         final int type = getColumnType(column);
-        if (type == Types.BIT) {
-            return 1;
-        } else if (type == Types.VARCHAR) {
-            return 0;
-        } else if (type == Types.DOUBLE || type == Types.REAL || type == Types.DECIMAL) {
-            return 25;
-        } else if (type == Types.DATE) {
-            return 24;
-        } else if (type == Types.TIME) {
-            return 24;
-        } else if (type == Types.TIMESTAMP) {
-            return 24;
-        } else if (type == Types.BIGINT || type == Types.INTEGER || type == Types.SMALLINT || type == Types.TINYINT) {
-            return 20;
-        } else if (type == Types.NULL) {
-            return 0;
-        } else {
-            LOGGER.warn(String.format("Unsupported data type for getColumnDisplaySize(%d).", type));
-            return 0;
+        switch (type) {
+            case Types.BIT:
+                return 1;
+            case Types.VARCHAR:
+            case Types.NULL:
+                return 0;
+            case Types.DOUBLE:
+            case Types.FLOAT:
+            case Types.REAL:
+            case Types.DECIMAL:
+                return 25;
+            case Types.DATE:
+            case Types.TIME:
+            case Types.TIMESTAMP:
+                return 24;
+            case Types.BIGINT:
+            case Types.INTEGER:
+            case Types.SMALLINT:
+            case Types.TINYINT:
+                return 20;
+            default:
+                LOGGER.warn(String.format("Unsupported data type for getColumnDisplaySize(%d).", type));
+                return 0;
         }
     }
 
     @Override
     public int getPrecision(final int column) throws SQLException {
         verifyColumnIndex(column);
-
         final int type = getColumnType(column);
-        if (type == Types.BIT) {
-            return 1;
-        } else if (type == Types.VARCHAR) {
-            return 256;
-        } else if (type == Types.DOUBLE || type == Types.REAL || type == Types.DECIMAL) {
-            return 15;
-        } else if (type == Types.DATE) {
-            return 24;
-        } else if (type == Types.TIME) {
-            return 24;
-        } else if (type == Types.TIMESTAMP) {
-            return 24;
-        } else if (type == Types.BIGINT || type == Types.INTEGER || type == Types.SMALLINT || type == Types.TINYINT) {
-            return 19;
-        } else if (type == Types.NULL) {
-            return 0;
-        } else {
-            LOGGER.warn(String.format("Unsupported data type for getPrecision(%d).", type));
-            return 0;
+        switch (type) {
+            case Types.BIT:
+                return 1;
+            case Types.VARCHAR:
+                return 256;
+            case Types.NULL:
+                return 0;
+            case Types.DOUBLE:
+            case Types.FLOAT:
+            case Types.REAL:
+            case Types.DECIMAL:
+                return 15;
+            case Types.DATE:
+            case Types.TIME:
+            case Types.TIMESTAMP:
+                return 24;
+            case Types.BIGINT:
+            case Types.INTEGER:
+            case Types.SMALLINT:
+            case Types.TINYINT:
+                return 19;
+            default:
+                LOGGER.warn(String.format("Unsupported data type for getPrecision(%d).", type));
+                return 0;
         }
     }
 
@@ -128,14 +135,18 @@ public abstract class ResultSetMetaData implements java.sql.ResultSetMetaData {
         verifyColumnIndex(column);
 
         final int columnType = getColumnType(column);
-        if ((columnType == Types.DOUBLE) || (columnType == Types.REAL) || (columnType == Types.DECIMAL)) {
-            // 15 significant digits after decimal.
-            return 15;
-        } else if (columnType == Types.FLOAT) {
-            // 6 Sig significant digits after decimal.
-            return 6;
+        switch (columnType) {
+            case Types.DOUBLE:
+            case Types.FLOAT:
+            case Types.DECIMAL:
+                // 15 significant digits after decimal.
+                return 15;
+            case Types.REAL:
+                // 6 Sig significant digits after decimal.
+                return 6;
+            default:
+                return 0;
         }
-        return 0;
     }
 
     @Override

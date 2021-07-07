@@ -56,69 +56,6 @@ import static software.amazon.neptune.sparql.mock.SparqlMockServer.ServerScope.C
 import static software.amazon.neptune.sparql.mock.SparqlMockServer.ServerScope.SUITE;
 import static software.amazon.neptune.sparql.mock.SparqlMockServer.ServerScope.TEST;
 
-/**
- * Manage a single server for use with tests. It supports three modes:
- * <ul>
- * <li>One server for a whole test suite
- * <li>One server per test class
- * <li>One server per individual test
- * </ul>
- * One server per individual test can be troublesome due to connections not closing down
- * fast enough (left in TCP state {@code TIME_WAIT} which is 2 minutes) and also can be
- * slow. One server per test class is a good compromise.
- * <p>
- * The data in the server is always reseet between tests.
- * <p>
- * Using a connection pooling HttpClient (see {@link HttpOp#createPoolingHttpClient()}) is
- * important, both for test performance and for reducing the TCP connection load on the
- * operating system.
- * <p>
- * Usage:
- * </p>
- * <p>
- * In the test suite, put:
- *
- * <pre>
- *  {@literal @BeforeClass} static public void beforeSuiteClass() { FusekiTestServer.ctlBeforeTestSuite(); }
- *  {@literal @AfterClass}  static public void afterSuiteClass()  { FusekiTestServer.ctlAfterTestSuite(); }
- * </pre>
- * <p>
- * In the test class, put:
- *
- * <pre>
- * {@literal @BeforeClass} public static void ctlBeforeClass() { FusekiTestServer.ctlBeforeClass(); }
- * {@literal @AfterClass}  public static void ctlAfterClass()  { FusekiTestServer.ctlAfterClass(); }
- * {@literal @Before}      public void ctlBeforeTest()         { FusekiTestServer.ctlBeforeTest(); }
- * {@literal @After}       public void ctlAfterTest()          { FusekiTestServer.ctlAfterTest(); }
- * </pre>
- * <p>
- * Much of this machinery is unnecessary for just running a server in the background:
- *
- * <pre>
- *   private static FusekiServer server;
- *   private static DatasetGraph serverdsg = DatasetGraphFactory.createTxnMem();
- *
- *   &#64;BeforeClass
- *   public static void beforeClass() {
- *       server = FusekiServer.create()
- *           .setPort(....)
- *           .add("/ds", serverdsg)
- *           .build()
- *           .start();
- *   }
- *
- *   &#64;Before
- *   public void beforeTest() {
- *       // Clear up data in server servers
- *       Txn.executeWrite(serverdsg, (){@literal ->}serverdsg.clear());
- *   }
- *
- *   &#64;AfterClass
- *   public static void afterClass() {
- *       server.stop();
- *   }
- * </pre>
- */
 public class SparqlMockServer {
     /* Cut&Paste versions:
 
@@ -370,5 +307,4 @@ public class SparqlMockServer {
     enum ServerScope { SUITE, CLASS, TEST }
 
     // ---- Helper code.
-
 }

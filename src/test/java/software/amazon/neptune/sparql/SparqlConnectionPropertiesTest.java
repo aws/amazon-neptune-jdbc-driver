@@ -50,7 +50,7 @@ public class SparqlConnectionPropertiesTest {
     // set the DESTINATION properties properly to avoid throws on tests not related to the exception
     private void setInitialDestinationProperty(final SparqlConnectionProperties connectionProperties)
             throws SQLException {
-        connectionProperties.setContactPoint(HOSTNAME);
+        connectionProperties.setEndpoint(HOSTNAME);
         connectionProperties.setPort(PORT);
         connectionProperties.setDataset(ENDPOINT);
     }
@@ -117,8 +117,8 @@ public class SparqlConnectionPropertiesTest {
     void testContactPoint() throws SQLException {
         final String testValue = "test contact point";
         connectionProperties = new SparqlConnectionProperties();
-        connectionProperties.setContactPoint(testValue);
-        Assertions.assertEquals(testValue, connectionProperties.getContactPoint());
+        connectionProperties.setEndpoint(testValue);
+        Assertions.assertEquals(testValue, connectionProperties.getEndpoint());
 
         // the constructor test with DESTINATION properties properly set to avoid throws
         setInitialDestinationProperty(connectionProperties);

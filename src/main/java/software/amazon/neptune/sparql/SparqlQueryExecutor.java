@@ -186,9 +186,14 @@ public class SparqlQueryExecutor extends QueryExecutor {
         return rdfConnection;
     }
 
+    /**
+     * Function to return max fetch size.
+     *
+     * @return Max fetch size (Integer max value).
+     */
     @Override
     public int getMaxFetchSize() {
-        return 0;
+        return Integer.MAX_VALUE;
     }
 
     /**
@@ -203,7 +208,7 @@ public class SparqlQueryExecutor extends QueryExecutor {
             final RDFConnection tempConn =
                     SparqlQueryExecutor.createRDFBuilder(sparqlConnectionProperties).build();
             final QueryExecution executeQuery = tempConn.query("SELECT * { ?s ?p ?o } LIMIT 0");
-            // the 2nd parameter controls the timeout for the whole query execution
+            // The 2nd parameter controls the timeout for the whole query execution.
             executeQuery.setTimeout(timeout, TimeUnit.SECONDS, timeout, TimeUnit.SECONDS);
             executeQuery.execSelect();
             return true;
@@ -383,6 +388,7 @@ public class SparqlQueryExecutor extends QueryExecutor {
         final List<String> tempColumns = new ArrayList<>(columns);
         final Map<String, Object> tempColumnType = new LinkedHashMap<>();
 
+        // TODO: Revisit type promotion in performance testing ticket
         while (selectResult.hasNext()) {
             final QuerySolution row = selectResult.next();
             selectRows.add(row);
@@ -396,22 +402,18 @@ public class SparqlQueryExecutor extends QueryExecutor {
                 final Object nodeType = node.isLiteral() ? node.asLiteral().getDatatype() : node.getClass();
                 if (!tempColumnType.containsKey(column)) {
                     tempColumnType.put(column, nodeType);
-                    // remove if org.apache.jena.rdf.model.impl.ResourceImpl?
-                } else if (!nodeType.equals(tempColumnType.get(column))) {
+                    // Another possibility is to remove if is org.apache.jena.rdf.model.impl.ResourceImpl type.
+                } else if (nodeType == null || !nodeType.equals(tempColumnType.get(column))) {
                     tempColumnType.put(column, String.class);
-                    // remove column from list if it is string type
+                    // Remove column from list if it is string type.
                     tempColumnIterator.remove();
                 }
             }
         }
 
-        System.out.println(tempColumnType);
-
-        // create new map to return column type
+        // Create new map to return column type.
         final Map<String, Object> selectColumnType = new LinkedHashMap<>();
-        for (String column : columns) {
-            selectColumnType.put(column, tempColumnType.getOrDefault(column, String.class));
-        }
+        columns.forEach(c -> selectColumnType.put(c, tempColumnType.getOrDefault(c, String.class)));
 
         return new SparqlSelectResultSet.ResultSetInfoWithRows(selectRows, columns,
                 new ArrayList<>(selectColumnType.values()));
@@ -440,21 +442,16 @@ public class SparqlQueryExecutor extends QueryExecutor {
 
                 if (!tempColumnType.containsKey(column)) {
                     tempColumnType.put(column, nodeType);
-                } else {
-                    assert nodeType != null;
-                    if (!nodeType.equals(tempColumnType.get(column))) {
-                        tempColumnType.put(column, String.class);
-                        tempColumnIterator.remove();
-                    }
+                } else if (nodeType == null || !nodeType.equals(tempColumnType.get(column))) {
+                    tempColumnType.put(column, String.class);
+                    tempColumnIterator.remove();
                 }
             }
         }
 
         final Map<String, Object> triplesColumnType = new LinkedHashMap<>();
-
-        for (String column : SparqlTriplesResultSet.TRIPLES_COLUMN_LIST) {
-            triplesColumnType.put(column, tempColumnType.getOrDefault(column, String.class));
-        }
+        SparqlTriplesResultSet.TRIPLES_COLUMN_LIST
+                .forEach(c -> triplesColumnType.put(c, tempColumnType.getOrDefault(c, String.class)));
 
         return new SparqlTriplesResultSet.ResultSetInfoWithRows(describeRows,
                 new ArrayList<>(triplesColumnType.values()));
@@ -489,7 +486,7 @@ public class SparqlQueryExecutor extends QueryExecutor {
         synchronized (queryExecutionLock) {
             if (queryExecution != null) {
                 queryExecution.abort();
-                // TODO check in later tickets if adding close() affects anything or if we need any additional guards,
+                // TODO: Check in later tickets if adding close() affects anything or if we need any additional guards,
                 //  as its implementation does have null checks
                 queryExecution.close();
                 queryExecution = null;

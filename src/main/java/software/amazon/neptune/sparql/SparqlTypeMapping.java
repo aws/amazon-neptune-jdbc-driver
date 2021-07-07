@@ -111,8 +111,7 @@ public class SparqlTypeMapping {
         SPARQL_JAVA_TO_JDBC_TYPE_MAP.put(Short.class, JdbcType.SMALLINT);
         SPARQL_JAVA_TO_JDBC_TYPE_MAP.put(Integer.class, JdbcType.INTEGER);
         SPARQL_JAVA_TO_JDBC_TYPE_MAP.put(Long.class, JdbcType.BIGINT);
-        // TODO: AN-562 Investigate and see if this needs to be changed to JdbcType.REAL
-        SPARQL_JAVA_TO_JDBC_TYPE_MAP.put(Float.class, JdbcType.FLOAT);
+        SPARQL_JAVA_TO_JDBC_TYPE_MAP.put(Float.class, JdbcType.REAL);
         SPARQL_JAVA_TO_JDBC_TYPE_MAP.put(Double.class, JdbcType.DOUBLE);
         SPARQL_JAVA_TO_JDBC_TYPE_MAP.put(java.util.Date.class, JdbcType.DATE);
         SPARQL_JAVA_TO_JDBC_TYPE_MAP.put(java.sql.Date.class, JdbcType.DATE);

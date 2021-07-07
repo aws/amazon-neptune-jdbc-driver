@@ -54,17 +54,15 @@ public class SparqlDatabaseMetadataTest {
      * Function to start the mock server and populate database before testing.
      */
     @BeforeAll
-    public static void ctlBeforeClass() throws SQLException {
+    public static void initializeMockServer() throws SQLException {
         SparqlMockServer.ctlBeforeClass();
 
-        // TODO: refactor this data insertion else where (e.g. mock server)?
         // insert into the database here
         // Query only.
         final RDFConnectionRemoteBuilder rdfConnBuilder = RDFConnectionRemote.create()
                 .destination(SparqlMockServer.urlDataset())
                 // Query only.
-                .queryEndpoint("/query")
-                .updateEndpoint("/update");
+                .queryEndpoint("/query");
 
         // load dataset in
         try (final RDFConnection conn = rdfConnBuilder.build()) {
@@ -76,7 +74,7 @@ public class SparqlDatabaseMetadataTest {
      * Function to tear down server after testing.
      */
     @AfterAll
-    public static void ctlAfterClass() {
+    public static void shutdownMockServer() {
         SparqlMockServer.ctlAfterClass();
     }
 
@@ -113,5 +111,4 @@ public class SparqlDatabaseMetadataTest {
         Assertions.assertEquals("TABLE", resultSet.getString(1));
         Assertions.assertFalse(resultSet.next());
     }
-
 }

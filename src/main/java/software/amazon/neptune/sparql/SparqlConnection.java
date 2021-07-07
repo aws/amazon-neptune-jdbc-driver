@@ -41,7 +41,7 @@ public class SparqlConnection extends software.amazon.jdbc.Connection implements
 
     @Override
     protected void doClose() {
-
+        SparqlQueryExecutor.close();
     }
 
     @Override
