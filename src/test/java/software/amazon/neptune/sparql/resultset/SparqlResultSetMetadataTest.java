@@ -44,6 +44,7 @@ import java.util.List;
 import java.util.Properties;
 
 public class SparqlResultSetMetadataTest {
+    // TODO: Test cases may change when we address type promotion in performance ticket.
     private static final String HOSTNAME = "http://localhost";
     private static final String DATASET = "mock";
     private static final String QUERY_ENDPOINT = "query";
@@ -56,6 +57,9 @@ public class SparqlResultSetMetadataTest {
             "SELECT ?s ?x ?fname WHERE {?x  <http://www.w3.org/2001/vcard-rdf/3.0#FN>  ?fname}";
     private static final List<SparqlResultSetMetadataTest.MetadataTestHelper> METADATA_TEST_HELPER =
             ImmutableList.of(
+                    new SparqlResultSetMetadataTest.MetadataTestHelper(SparqlMockDataQuery.ALL_DATA_TWO_COLUMNS_QUERY,
+                            0, 256, 0, true, false, java.sql.Types.VARCHAR, String.class.getTypeName(),
+                            String.class.toString()),
                     new SparqlResultSetMetadataTest.MetadataTestHelper(SparqlMockDataQuery.STRING_QUERY,
                             0, 256, 0, true, false, java.sql.Types.VARCHAR, String.class.getTypeName(),
                             XSDDatatype.XSDstring.toString()),
@@ -78,7 +82,7 @@ public class SparqlResultSetMetadataTest {
                             25, 15, 15, false, true, java.sql.Types.DOUBLE, Double.class.getTypeName(),
                             XSDDatatype.XSDdouble.toString()),
                     new SparqlResultSetMetadataTest.MetadataTestHelper(SparqlMockDataQuery.FLOAT_QUERY,
-                            25, 15, 15, false, true, java.sql.Types.REAL, Float.class.getTypeName(),
+                            25, 15, 6, false, true, java.sql.Types.REAL, Float.class.getTypeName(),
                             XSDDatatype.XSDfloat.toString()),
                     new SparqlResultSetMetadataTest.MetadataTestHelper(SparqlMockDataQuery.DATE_QUERY,
                             24, 24, 0, false, false, java.sql.Types.DATE, java.sql.Date.class.getTypeName(),
@@ -97,7 +101,7 @@ public class SparqlResultSetMetadataTest {
                             XSDDatatype.XSDduration.toString()),
                     new SparqlResultSetMetadataTest.MetadataTestHelper(SparqlMockDataQuery.PREDICATE_QUERY,
                             0, 256, 0, true, false, java.sql.Types.VARCHAR, String.class.getTypeName(),
-                            org.apache.jena.rdf.model.impl.ResourceImpl.class.toString())
+                            org.apache.jena.graph.Node_URI.class.toString())
             );
     private static final List<SparqlResultSetMetadataTest.MetadataTestHelper> CONSTRUCT_METADATA_TEST_HELPER =
             ImmutableList.of(
@@ -124,7 +128,7 @@ public class SparqlResultSetMetadataTest {
                             25, 15, 15, false, true, java.sql.Types.DOUBLE, Double.class.getTypeName(),
                             XSDDatatype.XSDdouble.toString()),
                     new SparqlResultSetMetadataTest.MetadataTestHelper(SparqlMockDataQuery.CONSTRUCT_FLOAT_QUERY,
-                            25, 15, 15, false, true, java.sql.Types.REAL, Float.class.getTypeName(),
+                            25, 15, 6, false, true, java.sql.Types.REAL, Float.class.getTypeName(),
                             XSDDatatype.XSDfloat.toString()),
                     new SparqlResultSetMetadataTest.MetadataTestHelper(SparqlMockDataQuery.CONSTRUCT_DATE_QUERY,
                             24, 24, 0, false, false, java.sql.Types.DATE, java.sql.Date.class.getTypeName(),
@@ -160,16 +164,14 @@ public class SparqlResultSetMetadataTest {
      * Function to start the mock server and populate database before testing.
      */
     @BeforeAll
-    public static void ctlBeforeClass() throws SQLException {
+    public static void initializeMockServer() throws SQLException {
         SparqlMockServer.ctlBeforeClass();
 
-        // TODO: refactor this data insertion else where (e.g. mock server)?
         // insert into the database here
         rdfConnBuilder = RDFConnectionRemote.create()
                 .destination(SparqlMockServer.urlDataset())
                 // Query only.
-                .queryEndpoint("/query")
-                .updateEndpoint("/update");
+                .queryEndpoint("/query");
 
         // load dataset in
         try (final RDFConnection conn = rdfConnBuilder.build()) {
@@ -181,7 +183,7 @@ public class SparqlResultSetMetadataTest {
      * Function to tear down server after testing.
      */
     @AfterAll
-    public static void ctlAfterClass() {
+    public static void shutdownMockServer() {
         SparqlMockServer.ctlAfterClass();
     }
 

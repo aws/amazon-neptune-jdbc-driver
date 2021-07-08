@@ -16,14 +16,6 @@
 
 package software.amazon.neptune.sparql;
 
-import org.apache.jena.query.Query;
-import org.apache.jena.query.QueryFactory;
-import org.apache.jena.query.ResultSetFormatter;
-import org.apache.jena.rdfconnection.RDFConnection;
-import org.apache.jena.rdfconnection.RDFConnectionRemote;
-import org.apache.jena.rdfconnection.RDFConnectionRemoteBuilder;
-import org.apache.jena.update.UpdateFactory;
-import org.apache.jena.update.UpdateRequest;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
@@ -57,7 +49,7 @@ public class SparqlConnectionTest {
      * Function to start the mock server before testing.
      */
     @BeforeAll
-    public static void ctlBeforeClass() {
+    public static void initializeMockServer() {
         SparqlMockServer.ctlBeforeClass();
     }
 
@@ -65,24 +57,8 @@ public class SparqlConnectionTest {
      * Function to tear down server after testing.
      */
     @AfterAll
-    public static void ctlAfterClass() {
+    public static void shutdownMockServer() {
         SparqlMockServer.ctlAfterClass();
-    }
-
-    /**
-     * Function to get a start database before each test.
-     */
-    @BeforeEach
-    public void ctlBeforeTest() {
-        SparqlMockServer.ctlBeforeTest();
-    }
-
-    /**
-     * Function to get a tear down database after each test.
-     */
-    @AfterEach
-    public void ctlAfterTest() {
-        SparqlMockServer.ctlAfterTest();
     }
 
     @BeforeEach
@@ -95,7 +71,6 @@ public class SparqlConnectionTest {
         connection.close();
     }
 
-    // TODO: AN-527 abstract this test after completing connection properties? - it's similar across all 3 executors
     @Test
     void testIsValid() throws SQLException {
         Assertions.assertTrue(connection.isValid(1));
@@ -127,49 +102,5 @@ public class SparqlConnectionTest {
         final java.sql.Connection invalidConnection = new SparqlConnection(
                 new SparqlConnectionProperties(invalidProperties));
         Assertions.assertFalse(invalidConnection.isValid(1));
-    }
-
-    // TODO: AN-528 proof of concept tests for mock database - modify/remove later
-    @Test
-    void testMockConnection() {
-        final RDFConnectionRemoteBuilder builder = RDFConnectionRemote.create()
-                .destination(SparqlMockServer.urlDataset())
-                // Query only.
-                .queryEndpoint("/query")
-                .updateEndpoint("/update");
-
-        // inserts data into the database
-        final UpdateRequest update = UpdateFactory.create("PREFIX : <http://example/> INSERT DATA { :s :p 123 }");
-        // queries the database
-        final Query query = QueryFactory.create("SELECT * { ?s ?p ?o } LIMIT 100");
-
-        // connects to database, updates the database, then query it
-        try (final RDFConnection conn = builder.build()) {
-            System.out.println(conn.isClosed());
-            conn.update(update);
-            conn.queryResultSet(query, ResultSetFormatter::out);
-        }
-    }
-
-    // TODO: AN-528 proof of concept tests for mock database - modify/remove later
-    @Test
-    void testMockConnection2() {
-        final String req = "" +
-                "SELECT ?x " +
-                "WHERE { ?x  <http://www.w3.org/2001/vcard-rdf/3.0#FN>  \"John Smith\" }";
-
-        final RDFConnectionRemoteBuilder builder = RDFConnectionRemote.create()
-                .destination(SparqlMockServer.urlDataset())
-                // Query only.
-                .queryEndpoint("/query")
-                .updateEndpoint("/update");
-
-        final Query query = QueryFactory.create(req);
-
-        // Whether the connection can be reused depends on the details of the implementation.
-        // See example 5.
-        try (final RDFConnection conn = builder.build()) {
-            conn.queryResultSet(query, ResultSetFormatter::out);
-        }
     }
 }

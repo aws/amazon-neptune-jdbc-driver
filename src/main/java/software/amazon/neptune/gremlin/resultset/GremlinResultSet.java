@@ -72,17 +72,6 @@ public class GremlinResultSet extends software.amazon.jdbc.ResultSet implements 
     }
 
     @Override
-    protected int getDriverFetchSize() throws SQLException {
-        // Can't be done based on implementation.
-        return 0;
-    }
-
-    @Override
-    protected void setDriverFetchSize(final int rows) {
-        // Can't be done based on implementation.
-    }
-
-    @Override
     public boolean wasNull() throws SQLException {
         return wasNull;
     }

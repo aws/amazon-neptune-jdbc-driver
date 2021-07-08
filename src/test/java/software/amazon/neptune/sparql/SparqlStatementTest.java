@@ -21,8 +21,8 @@ import org.apache.jena.rdfconnection.RDFConnectionRemote;
 import org.apache.jena.rdfconnection.RDFConnectionRemoteBuilder;
 import org.apache.jena.update.UpdateFactory;
 import org.apache.jena.update.UpdateRequest;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import software.amazon.jdbc.utilities.AuthScheme;
 import software.amazon.jdbc.utilities.ConnectionProperties;
@@ -51,26 +51,27 @@ public class SparqlStatementTest extends SparqlStatementTestBase {
     /**
      * Function to start the mock server before testing.
      */
-    @BeforeAll
-    public static void ctlBeforeClass() throws SQLException {
-        SparqlMockServer.ctlBeforeClass();
+    @BeforeEach
+    public void initializeMockServer() throws SQLException {
+        SparqlMockServer.ctlBeforeEach();
         final RDFConnectionRemoteBuilder builder = RDFConnectionRemote.create()
                 .destination(SparqlMockServer.urlDataset())
-                // Query only.
                 .queryEndpoint("/query")
                 .updateEndpoint("/update");
 
-        // inserts data into the database
-        final UpdateRequest update = UpdateFactory.create("PREFIX : <http://example/> INSERT DATA { :s :p 123 }");
+        final UpdateRequest update =
+                UpdateFactory.create(SparqlStatementTestBase.LONG_UPDATE);
 
-        // connects to database, updates the database
+        // load dataset in
         try (final RDFConnection conn = builder.build()) {
+            conn.load("src/test/java/software/amazon/neptune/sparql/mock/sparql_mock_data.rdf");
             conn.update(update);
         }
 
         final java.sql.Connection connection =
                 new SparqlConnection(
                         new SparqlConnectionProperties(sparqlProperties()));
+
         neptuneStatementTestHelper =
                 new NeptuneStatementTestHelper(connection.createStatement(), LONG_QUERY, QUICK_QUERY);
     }
@@ -78,9 +79,9 @@ public class SparqlStatementTest extends SparqlStatementTestBase {
     /**
      * Function to tear down server after testing.
      */
-    @AfterAll
-    public static void ctlAfterClass() {
-        SparqlMockServer.ctlAfterClass();
+    @AfterEach
+    public void shutdownMockServer() {
+        SparqlMockServer.ctlAfterEach();
     }
 
     @Test
@@ -89,8 +90,13 @@ public class SparqlStatementTest extends SparqlStatementTestBase {
     }
 
     @Test
+    // TODO: Address inconsistency issue in ticket AN-597
+    void testCancelQueryTwice() {
+        neptuneStatementTestHelper.testCancelQueryTwice();
+    }
+
+    @Test
     void testCancelQueryAfterExecuteComplete() {
         neptuneStatementTestHelper.testCancelQueryAfterExecuteComplete();
     }
-
 }

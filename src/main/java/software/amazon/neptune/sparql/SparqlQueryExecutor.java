@@ -28,12 +28,14 @@ import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.protocol.HttpContext;
 import org.apache.jena.atlas.iterator.PeekIterator;
+import org.apache.jena.graph.Node;
 import org.apache.jena.graph.Triple;
 import org.apache.jena.query.Query;
 import org.apache.jena.query.QueryExecution;
 import org.apache.jena.query.QueryFactory;
 import org.apache.jena.query.QuerySolution;
 import org.apache.jena.query.QueryType;
+import org.apache.jena.rdf.model.RDFNode;
 import org.apache.jena.rdfconnection.RDFConnection;
 import org.apache.jena.rdfconnection.RDFConnectionRemote;
 import org.apache.jena.rdfconnection.RDFConnectionRemoteBuilder;
@@ -58,7 +60,10 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 public class SparqlQueryExecutor extends QueryExecutor {
@@ -181,9 +186,14 @@ public class SparqlQueryExecutor extends QueryExecutor {
         return rdfConnection;
     }
 
+    /**
+     * Function to return max fetch size.
+     *
+     * @return Max fetch size (Integer max value).
+     */
     @Override
     public int getMaxFetchSize() {
-        return 0;
+        return Integer.MAX_VALUE;
     }
 
     /**
@@ -198,7 +208,7 @@ public class SparqlQueryExecutor extends QueryExecutor {
             final RDFConnection tempConn =
                     SparqlQueryExecutor.createRDFBuilder(sparqlConnectionProperties).build();
             final QueryExecution executeQuery = tempConn.query("SELECT * { ?s ?p ?o } LIMIT 0");
-            // the 2nd parameter controls the timeout for the whole query execution
+            // The 2nd parameter controls the timeout for the whole query execution.
             executeQuery.setTimeout(timeout, TimeUnit.SECONDS, timeout, TimeUnit.SECONDS);
             executeQuery.execSelect();
             return true;
@@ -227,8 +237,8 @@ public class SparqlQueryExecutor extends QueryExecutor {
      */
     private Constructor<?> createConstructorBasedOnQueryType(final String sparql) throws SQLException {
         final Constructor<?> constructor;
-        final Query query = QueryFactory.create(sparql);
         try {
+            final Query query = QueryFactory.create(sparql);
             switch (query.queryType()) {
                 case SELECT:
                     constructor = SparqlSelectResultSet.class
@@ -249,7 +259,7 @@ public class SparqlQueryExecutor extends QueryExecutor {
                     throw SqlError
                             .createSQLException(LOGGER, SqlState.INVALID_QUERY_EXPRESSION, SqlError.INVALID_QUERY);
             }
-        } catch (final NoSuchMethodException e) {
+        } catch (final Exception e) {
             throw SqlError.createSQLException(
                     LOGGER,
                     SqlState.INVALID_QUERY_EXPRESSION,
@@ -348,28 +358,18 @@ public class SparqlQueryExecutor extends QueryExecutor {
         switch (queryType) {
             case SELECT:
                 final org.apache.jena.query.ResultSet selectResult = queryExecution.execSelect();
-                final List<QuerySolution> selectRows = new ArrayList<>();
-                final List<String> columns = selectResult.getResultVars();
-
-                selectResult.forEachRemaining(selectRows::add);
-                sparqlResultSet = new SparqlSelectResultSet.ResultSetInfoWithRows(selectRows, columns);
+                sparqlResultSet = getSelectResultSet(selectResult);
                 break;
             case ASK:
                 sparqlResultSet = new SparqlAskResultSet.ResultSetInfoWithRows(queryExecution.execAsk());
                 break;
             case CONSTRUCT:
                 final PeekIterator<Triple> constructResult = PeekIterator.create(queryExecution.execConstructTriples());
-                final List<Triple> constructRows = new ArrayList<>();
-
-                constructResult.forEachRemaining(constructRows::add);
-                sparqlResultSet = new SparqlTriplesResultSet.ResultSetInfoWithRows(constructRows);
+                sparqlResultSet = getTriplesResultSet(constructResult);
                 break;
             case DESCRIBE:
                 final PeekIterator<Triple> describeResult = PeekIterator.create(queryExecution.execDescribeTriples());
-                final List<Triple> describeRows = new ArrayList<>();
-
-                describeResult.forEachRemaining(describeRows::add);
-                sparqlResultSet = new SparqlTriplesResultSet.ResultSetInfoWithRows(describeRows);
+                sparqlResultSet = getTriplesResultSet(describeResult);
                 break;
             default:
                 throw SqlError
@@ -378,12 +378,118 @@ public class SparqlQueryExecutor extends QueryExecutor {
         return sparqlResultSet;
     }
 
+    /**
+     * Private function to get select result set
+     */
+    private Object getSelectResultSet(final org.apache.jena.query.ResultSet selectResult) {
+        final List<QuerySolution> selectRows = new ArrayList<>();
+        final List<String> columns = selectResult.getResultVars();
+
+        final List<String> tempColumns = new ArrayList<>(columns);
+        final Map<String, Object> tempColumnType = new LinkedHashMap<>();
+
+        // TODO: Revisit type promotion in performance testing ticket
+        while (selectResult.hasNext()) {
+            final QuerySolution row = selectResult.next();
+            selectRows.add(row);
+            final Iterator<String> tempColumnIterator = tempColumns.iterator();
+            while (tempColumnIterator.hasNext()) {
+                final String column = tempColumnIterator.next();
+                final RDFNode rdfNode = row.get(column);
+                if (rdfNode == null) {
+                    continue;
+                }
+                final Node node = rdfNode.asNode();
+                getColumnType(tempColumnType, tempColumnIterator, node, column);
+            }
+        }
+
+        // Create new map to return column type.
+        final Map<String, Object> selectColumnType = new LinkedHashMap<>();
+        columns.forEach(c -> selectColumnType.put(c, tempColumnType.getOrDefault(c, String.class)));
+
+        return new SparqlSelectResultSet.ResultSetInfoWithRows(selectRows, columns,
+                new ArrayList<>(selectColumnType.values()));
+    }
+
+    /**
+     * Private function to get Triples result set
+     */
+    private Object getTriplesResultSet(final PeekIterator<Triple> triplesResult) throws SQLException {
+        final List<Triple> describeRows = new ArrayList<>();
+
+        final List<String> tempColumns = new ArrayList<>(SparqlTriplesResultSet.TRIPLES_COLUMN_LIST);
+        final Map<String, Object> tempColumnType = new LinkedHashMap<>();
+
+        while (triplesResult.hasNext()) {
+            final Triple row = triplesResult.next();
+            describeRows.add(row);
+            final Iterator<String> tempColumnIterator = tempColumns.iterator();
+            while (tempColumnIterator.hasNext()) {
+                final String column = tempColumnIterator.next();
+                final Node node = getNodeFromColumnName(row, column);
+                if (node == null) {
+                    continue;
+                }
+                getColumnType(tempColumnType, tempColumnIterator, node, column);
+            }
+        }
+
+        final Map<String, Object> triplesColumnType = new LinkedHashMap<>();
+        SparqlTriplesResultSet.TRIPLES_COLUMN_LIST
+                .forEach(c -> triplesColumnType.put(c, tempColumnType.getOrDefault(c, String.class)));
+
+        return new SparqlTriplesResultSet.ResultSetInfoWithRows(describeRows,
+                new ArrayList<>(triplesColumnType.values()));
+    }
+
+    /**
+     * Private function to get node type from result set
+     */
+    private void getColumnType(final Map<String, Object> tempColumnType, final Iterator<String> tempColumnIterator,
+                               final Node node, final String column) {
+        final Object nodeType = node.isLiteral() ? node.getLiteral().getDatatype() : node.getClass();
+        if (!tempColumnType.containsKey(column)) {
+            tempColumnType.put(column, nodeType);
+            // For Node, the resource type is org.apache.jena.graph.Node_URI instead of org.apache.jena.rdf.model.impl.ResourceImpl
+            // Another possibility is to remove if is org.apache.jena.graph.Node_URI type.
+        } else if (nodeType == null || !nodeType.equals(tempColumnType.get(column))) {
+            tempColumnType.put(column, String.class);
+            // Remove column from list if it is string type.
+            tempColumnIterator.remove();
+        }
+    }
+
+    /**
+     * Private function to get Node from Triples result set column label
+     */
+    private Node getNodeFromColumnName(final Triple row, final String column) throws SQLException {
+        final Node node;
+        switch (column) {
+            case SparqlTriplesResultSet.TRIPLES_COLUMN_LABEL_PREDICATE:
+                node = row.getPredicate();
+                break;
+            case SparqlTriplesResultSet.TRIPLES_COLUMN_LABEL_SUBJECT:
+                node = row.getSubject();
+                break;
+            case SparqlTriplesResultSet.TRIPLES_COLUMN_LABEL_OBJECT:
+                node = row.getObject();
+                break;
+            default:
+                throw SqlError
+                        .createSQLException(LOGGER, SqlState.DATA_EXCEPTION, SqlError.INVALID_COLUMN_LABEL,
+                                column);
+        }
+
+        return node;
+    }
+
     @Override
     protected void performCancel() throws SQLException {
         synchronized (queryExecutionLock) {
             if (queryExecution != null) {
                 queryExecution.abort();
-                // TODO check in later tickets if adding close() affects anything or if we need any additional guards,
+                // TODO: Check in later tickets if adding close() affects anything or if we need any additional guards,
                 //  as its implementation does have null checks
                 queryExecution.close();
                 queryExecution = null;

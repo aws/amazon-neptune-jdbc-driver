@@ -23,7 +23,6 @@ import org.apache.jena.datatypes.xsd.XSDDatatype;
 import org.apache.jena.query.QuerySolution;
 import org.apache.jena.rdf.model.Literal;
 import org.apache.jena.rdf.model.RDFNode;
-import org.neo4j.driver.internal.types.InternalTypeSystem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import software.amazon.neptune.common.ResultSetInfoWithoutRows;
@@ -33,11 +32,13 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class SparqlSelectResultSet extends SparqlResultSet {
     private static final Logger LOGGER = LoggerFactory.getLogger(SparqlSelectResultSet.class);
     private final List<QuerySolution> rows;
     private final List<String> columns;
+    private final List<Object> columnTypes;
 
     /**
      * SparqlResultSet constructor, initializes super class.
@@ -46,10 +47,10 @@ public class SparqlSelectResultSet extends SparqlResultSet {
      * @param resultSetInfo ResultSetInfoWithRows Object.
      */
     public SparqlSelectResultSet(final Statement statement, final ResultSetInfoWithRows resultSetInfo) {
-        // TODO: fix metadata promotion
         super(statement, resultSetInfo.getColumns(), resultSetInfo.getRows().size());
         this.rows = resultSetInfo.getRows();
         this.columns = resultSetInfo.getColumns();
+        this.columnTypes = resultSetInfo.getColumnTypes();
     }
 
     /**
@@ -62,6 +63,7 @@ public class SparqlSelectResultSet extends SparqlResultSet {
         super(statement, resultSetInfoWithoutRows.getColumns(), resultSetInfoWithoutRows.getRowCount());
         this.rows = null;
         this.columns = resultSetInfoWithoutRows.getColumns();
+        this.columnTypes = columns.stream().map(c -> String.class).collect(Collectors.toList());
     }
 
     @Override
@@ -112,25 +114,16 @@ public class SparqlSelectResultSet extends SparqlResultSet {
 
     @Override
     protected ResultSetMetaData getResultMetadata() throws SQLException {
-        final List<Object> rowTypes = new ArrayList<>();
         if (rows.isEmpty()) {
             // TODO: AN-562 see other ways to address empty result lists
+            final List<Object> emptyColumnTypes = new ArrayList<>();
             for (final String column : columns) {
-                rowTypes.add(InternalTypeSystem.TYPE_SYSTEM.STRING());
+                emptyColumnTypes.add(String.class);
             }
+            return new SparqlResultSetMetadata(columns, emptyColumnTypes);
         } else {
-            for (final String column : columns) {
-                // TODO: AN-562 find efficient type promotion with row looping
-                final QuerySolution row = rows.get(0);
-                final RDFNode node = row.get(column);
-                if (node == null) {
-                    rowTypes.add(null);
-                } else {
-                    rowTypes.add(node.isLiteral() ? node.asLiteral().getDatatype() : node.getClass());
-                }
-            }
+            return new SparqlResultSetMetadata(columns, this.columnTypes);
         }
-        return new SparqlResultSetMetadata(columns, rowTypes);
     }
 
     @AllArgsConstructor
@@ -138,5 +131,6 @@ public class SparqlSelectResultSet extends SparqlResultSet {
     public static class ResultSetInfoWithRows {
         private final List<QuerySolution> rows;
         private final List<String> columns;
+        private final List<Object> columnTypes;
     }
 }

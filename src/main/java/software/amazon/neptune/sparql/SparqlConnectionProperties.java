@@ -39,10 +39,10 @@ public class SparqlConnectionProperties extends ConnectionProperties {
     public static final String DATASET_KEY = "dataset";
     public static final String DESTINATION_KEY = "destination";
     // The query endpoints for sparql database
-    // as a read-only driver we don't support update or the graph store protocol endpoints
+    // as a read-only driver we only support the query endpoint
     public static final String QUERY_ENDPOINT_KEY = "queryEndpoint";
     public static final String REGION_KEY = "region";
-    // RDF Connection builder has the default: "application/sparql-results+json, application/sparql-results+xml;q=0.9,
+    // RDFConnection builder has default header: "application/sparql-results+json, application/sparql-results+xml;q=0.9,
     // text/tab-separated-values;q=0.7, text/csv;q=0.5, application/json;q=0.2, application/xml;q=0.2, */*;q=0.1"
     public static final String ACCEPT_HEADER_QUERY_KEY = "acceptHeaderQuery";
     public static final String ACCEPT_HEADER_ASK_QUERY_KEY = "acceptHeaderAskQuery";
@@ -124,27 +124,27 @@ public class SparqlConnectionProperties extends ConnectionProperties {
     }
 
     /**
-     * Gets the connection contact point.
+     * Gets the connection endpoint.
      *
-     * @return The connection contact point.
+     * @return The connection endpoint.
      */
-    public String getContactPoint() {
+    public String getEndpoint() {
         return getProperty(ENDPOINT_KEY);
     }
 
     /**
-     * Sets the connection contact point.
+     * Sets the connection endpoint.
      *
-     * @param contactPoint The connection contact point.
+     * @param endpoint The connection endpoint.
      * @throws SQLException if value is invalid.
      */
-    public void setContactPoint(@NonNull final String contactPoint) throws SQLException {
+    public void setEndpoint(@NonNull final String endpoint) throws SQLException {
         setProperty(ENDPOINT_KEY,
-                (String) PROPERTY_CONVERTER_MAP.get(ENDPOINT_KEY).convert(ENDPOINT_KEY, contactPoint));
+                (String) PROPERTY_CONVERTER_MAP.get(ENDPOINT_KEY).convert(ENDPOINT_KEY, endpoint));
     }
 
     /**
-     * Gets the port that the Gremlin Servers will be listening on.
+     * Gets the port that the Sparql Servers will be listening on.
      *
      * @return The port.
      */
@@ -153,7 +153,7 @@ public class SparqlConnectionProperties extends ConnectionProperties {
     }
 
     /**
-     * Sets the port that the Gremlin Servers will be listening on.
+     * Sets the port that the Sparql Servers will be listening on.
      *
      * @param port The port.
      */
@@ -214,9 +214,9 @@ public class SparqlConnectionProperties extends ConnectionProperties {
     }
 
     /**
-     * Sets the connection endpoint.
+     * Sets the query endpoint.
      *
-     * @param queryEndpoint The connection endpoint.
+     * @param queryEndpoint The query endpoint.
      * @throws SQLException if value is invalid.
      */
     public void setQueryEndpoint(@NonNull final String queryEndpoint) throws SQLException {
@@ -288,7 +288,7 @@ public class SparqlConnectionProperties extends ConnectionProperties {
     }
 
     /**
-     * Gets the HTTP accept:header used when making SPARQL Protocol query if no query specific setting is available.
+     * Gets the HTTP accept:header used when making SPARQL Protocol SELECT query if no query specific setting is available.
      *
      * @return The HTTP accept:header.
      */
@@ -297,7 +297,7 @@ public class SparqlConnectionProperties extends ConnectionProperties {
     }
 
     /**
-     * Sets the HTTP accept:header used when making SPARQL Protocol query if no query specific setting is available.
+     * Sets the HTTP accept:header used when making SPARQL Protocol SELECT query if no query specific setting is available.
      *
      * @param acceptHeaderSelectQuery The HTTP accept:header.
      * @throws SQLException if value is invalid.
@@ -348,7 +348,7 @@ public class SparqlConnectionProperties extends ConnectionProperties {
     }
 
     /**
-     * Gets the flag for whether to check SPARQL queries and SPARQL updates provided as a string
+     * Gets the flag for whether to check SPARQL queries are provided as a string
      *
      * @return The HTTP accept:header.
      */
@@ -357,7 +357,7 @@ public class SparqlConnectionProperties extends ConnectionProperties {
     }
 
     /**
-     * Sets the flag for whether to check SPARQL queries and SPARQL updates provided as a string
+     * Sets the flag for whether to check SPARQL queries are provided as a string
      *
      * @param parseCheckSparql The flag.
      * @throws SQLException if value is invalid.
@@ -410,12 +410,12 @@ public class SparqlConnectionProperties extends ConnectionProperties {
             }
         }
 
-        if ("".equals(getContactPoint()) || getPort() < 0) {
-            throw missingConnectionPropertyError("The CONTACT_POINT and PORT_KEY fields must be" +
+        if ("".equals(getEndpoint()) || getPort() < 0) {
+            throw missingConnectionPropertyError("The ENDPOINT_KEY and PORT_KEY fields must be" +
                     " provided");
         }
 
-        String destination = String.format("%s:%d", getContactPoint(), getPort());
+        String destination = String.format("%s:%d", getEndpoint(), getPort());
 
         if (!"".equals(getDataset())) {
             destination = String.format("%s/%s", destination, getDataset());

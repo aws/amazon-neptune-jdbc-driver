@@ -17,6 +17,7 @@
 package software.amazon.neptune.sparql.mock;
 
 public class SparqlMockDataQuery {
+    public static final String ALL_DATA_TWO_COLUMNS_QUERY = "SELECT ?p ?o WHERE {?s ?p ?o}";
     public static final String STRING_QUERY =
             "SELECT ?x ?fname WHERE {?x <http://www.w3.org/2001/vcard-rdf/3.0#FN> ?fname}";
     public static final String BOOL_QUERY = "SELECT ?x ?bool WHERE {?x <http://somewhere/peopleInfo#bool> ?bool}";
