@@ -24,7 +24,6 @@ import org.apache.jena.datatypes.xsd.XSDDatatype;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.Triple;
 import org.apache.jena.graph.impl.LiteralLabel;
-import org.neo4j.driver.internal.types.InternalTypeSystem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import software.amazon.jdbc.utilities.SqlError;
@@ -36,6 +35,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class SparqlTriplesResultSet extends SparqlResultSet {
     public static final String TRIPLES_COLUMN_LABEL_SUBJECT = "Subject";
@@ -75,7 +75,7 @@ public class SparqlTriplesResultSet extends SparqlResultSet {
         super(statement, resultSetInfoWithoutRows.getColumns(), resultSetInfoWithoutRows.getRowCount());
         this.rows = null;
         this.columns = resultSetInfoWithoutRows.getColumns();
-        this.columnTypes = null;
+        this.columnTypes = columns.stream().map(c -> String.class).collect(Collectors.toList());
     }
 
     @Override
@@ -127,7 +127,7 @@ public class SparqlTriplesResultSet extends SparqlResultSet {
             // TODO: AN-562 see other ways to address empty result lists
             final List<Object> emptyColumnTypes = new ArrayList<>();
             for (int i = 1; i <= 3; i++) {
-                emptyColumnTypes.add(InternalTypeSystem.TYPE_SYSTEM.STRING());
+                emptyColumnTypes.add(String.class);
             }
             return new SparqlResultSetMetadata(columns, emptyColumnTypes);
         } else {

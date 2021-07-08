@@ -23,7 +23,6 @@ import org.apache.jena.datatypes.xsd.XSDDatatype;
 import org.apache.jena.query.QuerySolution;
 import org.apache.jena.rdf.model.Literal;
 import org.apache.jena.rdf.model.RDFNode;
-import org.neo4j.driver.internal.types.InternalTypeSystem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import software.amazon.neptune.common.ResultSetInfoWithoutRows;
@@ -33,6 +32,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class SparqlSelectResultSet extends SparqlResultSet {
     private static final Logger LOGGER = LoggerFactory.getLogger(SparqlSelectResultSet.class);
@@ -63,7 +63,7 @@ public class SparqlSelectResultSet extends SparqlResultSet {
         super(statement, resultSetInfoWithoutRows.getColumns(), resultSetInfoWithoutRows.getRowCount());
         this.rows = null;
         this.columns = resultSetInfoWithoutRows.getColumns();
-        this.columnTypes = null;
+        this.columnTypes = columns.stream().map(c -> String.class).collect(Collectors.toList());
     }
 
     @Override
@@ -118,7 +118,7 @@ public class SparqlSelectResultSet extends SparqlResultSet {
             // TODO: AN-562 see other ways to address empty result lists
             final List<Object> emptyColumnTypes = new ArrayList<>();
             for (final String column : columns) {
-                emptyColumnTypes.add(InternalTypeSystem.TYPE_SYSTEM.STRING());
+                emptyColumnTypes.add(String.class);
             }
             return new SparqlResultSetMetadata(columns, emptyColumnTypes);
         } else {

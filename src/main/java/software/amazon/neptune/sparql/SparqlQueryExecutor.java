@@ -395,19 +395,12 @@ public class SparqlQueryExecutor extends QueryExecutor {
             final Iterator<String> tempColumnIterator = tempColumns.iterator();
             while (tempColumnIterator.hasNext()) {
                 final String column = tempColumnIterator.next();
-                final RDFNode node = row.get(column);
-                if (node == null) {
+                final RDFNode rdfNode = row.get(column);
+                if (rdfNode == null) {
                     continue;
                 }
-                final Object nodeType = node.isLiteral() ? node.asLiteral().getDatatype() : node.getClass();
-                if (!tempColumnType.containsKey(column)) {
-                    tempColumnType.put(column, nodeType);
-                    // Another possibility is to remove if is org.apache.jena.rdf.model.impl.ResourceImpl type.
-                } else if (nodeType == null || !nodeType.equals(tempColumnType.get(column))) {
-                    tempColumnType.put(column, String.class);
-                    // Remove column from list if it is string type.
-                    tempColumnIterator.remove();
-                }
+                final Node node = rdfNode.asNode();
+                getColumnType(tempColumnType, tempColumnIterator, node, column);
             }
         }
 
@@ -438,14 +431,7 @@ public class SparqlQueryExecutor extends QueryExecutor {
                 if (node == null) {
                     continue;
                 }
-                final Object nodeType = node.isLiteral() ? node.getLiteral().getDatatype() : node.getClass();
-
-                if (!tempColumnType.containsKey(column)) {
-                    tempColumnType.put(column, nodeType);
-                } else if (nodeType == null || !nodeType.equals(tempColumnType.get(column))) {
-                    tempColumnType.put(column, String.class);
-                    tempColumnIterator.remove();
-                }
+                getColumnType(tempColumnType, tempColumnIterator, node, column);
             }
         }
 
@@ -455,6 +441,27 @@ public class SparqlQueryExecutor extends QueryExecutor {
 
         return new SparqlTriplesResultSet.ResultSetInfoWithRows(describeRows,
                 new ArrayList<>(triplesColumnType.values()));
+    }
+
+    /**
+     * Private function to get node type from result set
+     */
+    private void getColumnType(final Map<String, Object> tempColumnType, final Iterator<String> tempColumnIterator,
+                               final Node node, final String column) {
+        if (node == null) {
+            return;
+        }
+        final Object nodeType = node.isLiteral() ? node.getLiteral().getDatatype() : node.getClass();
+
+        if (!tempColumnType.containsKey(column)) {
+            tempColumnType.put(column, nodeType);
+            // For Node, the resource type is org.apache.jena.graph.Node_URI instead of org.apache.jena.rdf.model.impl.ResourceImpl
+            // Another possibility is to remove if is org.apache.jena.graph.Node_URI type.
+        } else if (nodeType == null || !nodeType.equals(tempColumnType.get(column))) {
+            tempColumnType.put(column, String.class);
+            // Remove column from list if it is string type.
+            tempColumnIterator.remove();
+        }
     }
 
     /**

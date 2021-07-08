@@ -101,7 +101,7 @@ public class SparqlResultSetMetadataTest {
                             XSDDatatype.XSDduration.toString()),
                     new SparqlResultSetMetadataTest.MetadataTestHelper(SparqlMockDataQuery.PREDICATE_QUERY,
                             0, 256, 0, true, false, java.sql.Types.VARCHAR, String.class.getTypeName(),
-                            org.apache.jena.rdf.model.impl.ResourceImpl.class.toString())
+                            org.apache.jena.graph.Node_URI.class.toString())
             );
     private static final List<SparqlResultSetMetadataTest.MetadataTestHelper> CONSTRUCT_METADATA_TEST_HELPER =
             ImmutableList.of(
@@ -167,13 +167,11 @@ public class SparqlResultSetMetadataTest {
     public static void initializeMockServer() throws SQLException {
         SparqlMockServer.ctlBeforeClass();
 
-        // TODO: refactor this data insertion else where (e.g. mock server)?
         // insert into the database here
         rdfConnBuilder = RDFConnectionRemote.create()
                 .destination(SparqlMockServer.urlDataset())
                 // Query only.
-                .queryEndpoint("/query")
-                .updateEndpoint("/update");
+                .queryEndpoint("/query");
 
         // load dataset in
         try (final RDFConnection conn = rdfConnBuilder.build()) {

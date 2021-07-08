@@ -44,7 +44,6 @@ public class SparqlResultSetMetadata extends software.amazon.jdbc.ResultSetMetaD
      * @return Bolt Type Object for column.
      */
     protected Object getColumnSparqlType(final int column) throws SQLException {
-        // TODO: verify column index here too?
         verifyColumnIndex(column);
         // see if there are Sparql representation of mixed result
         return columnTypes.get(column - 1);
@@ -65,7 +64,6 @@ public class SparqlResultSetMetadata extends software.amazon.jdbc.ResultSetMetaD
     @Override
     public String getColumnClassName(final int column) throws SQLException {
         verifyColumnIndex(column);
-        System.out.println(getColumnSparqlType(column));
         return SparqlTypeMapping.getJavaType(getColumnSparqlType(column)).getName();
     }
 }

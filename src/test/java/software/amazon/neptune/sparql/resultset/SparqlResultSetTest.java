@@ -16,45 +16,25 @@
 
 package software.amazon.neptune.sparql.resultset;
 
-import org.apache.jena.atlas.iterator.PeekIterator;
-import org.apache.jena.graph.Triple;
-import org.apache.jena.query.Query;
-import org.apache.jena.query.QueryExecution;
-import org.apache.jena.query.QueryFactory;
-import org.apache.jena.query.QuerySolution;
-import org.apache.jena.query.ResultSetFormatter;
-import org.apache.jena.rdf.model.Literal;
-import org.apache.jena.rdf.model.RDFNode;
 import org.apache.jena.rdfconnection.RDFConnection;
 import org.apache.jena.rdfconnection.RDFConnectionRemote;
 import org.apache.jena.rdfconnection.RDFConnectionRemoteBuilder;
-import org.apache.jena.update.UpdateExecutionFactory;
-import org.apache.jena.update.UpdateFactory;
-import org.apache.jena.update.UpdateProcessor;
-import org.apache.jena.update.UpdateRequest;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import software.amazon.jdbc.utilities.AuthScheme;
 import software.amazon.jdbc.utilities.ConnectionProperties;
-import software.amazon.jdbc.utilities.JdbcType;
 import software.amazon.neptune.sparql.SparqlConnection;
 import software.amazon.neptune.sparql.SparqlConnectionProperties;
-import software.amazon.neptune.sparql.SparqlStatementTestBase;
 import software.amazon.neptune.sparql.mock.SparqlMockDataQuery;
 import software.amazon.neptune.sparql.mock.SparqlMockServer;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Time;
-import java.sql.Timestamp;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Properties;
 
 public class SparqlResultSetTest {
@@ -76,7 +56,6 @@ public class SparqlResultSetTest {
     private static final Long EXPECTED_UNSIGNED_LONG_VALUE = 4294970000L;
     private static final String EXPECTED_YEAR_VALUE = "2020";
     private static java.sql.Connection connection;
-    private static RDFConnectionRemoteBuilder rdfConnBuilder;
     private static java.sql.Statement statement;
 
     private static Properties sparqlProperties() {
@@ -97,9 +76,9 @@ public class SparqlResultSetTest {
         SparqlMockServer.ctlBeforeClass();
 
         // insert into the database here
-        rdfConnBuilder = RDFConnectionRemote.create()
+        // Query only.
+        final RDFConnectionRemoteBuilder rdfConnBuilder = RDFConnectionRemote.create()
                 .destination(SparqlMockServer.urlDataset())
-                // Query only.
                 .queryEndpoint("/query");
 
         // load dataset in
@@ -151,14 +130,6 @@ public class SparqlResultSetTest {
         Assertions.assertThrows(SQLException.class, () -> resultSet.getFloat(columnIdx));
         Assertions.assertThrows(SQLException.class, () -> resultSet.getDouble(columnIdx));
         Assertions.assertThrows(SQLException.class, () -> resultSet.getBigDecimal(columnIdx));
-    }
-
-    // to printout result in format of Jena ResultSet
-    private static void printJenaResultSetOut(final String query) {
-        final Query jenaQuery = QueryFactory.create(query);
-        try (final RDFConnection conn = rdfConnBuilder.build()) {
-            conn.queryResultSet(jenaQuery, ResultSetFormatter::out);
-        }
     }
 
     @BeforeEach
@@ -710,7 +681,7 @@ public class SparqlResultSetTest {
         Assertions.assertFalse(resultSet.next());
     }
 
-    // DESCRIBE and CONSTRUCT share ResultSet formats, so we just use this to test that this query type works
+    // DESCRIBE and CONSTRUCT share ResultSet formats, so we just use this to test that this query type works.
     @Test
     void testDescribeQueryType() throws SQLException {
         final java.sql.ResultSet resultSet = statement.executeQuery("DESCRIBE <http://somewhere/JohnSmith>");
@@ -719,225 +690,5 @@ public class SparqlResultSetTest {
             Assertions.assertNotNull(resultSet.getString(PREDICATE_COLUMN_INDEX));
             Assertions.assertNotNull(resultSet.getString(OBJECT_COLUMN_INDEX));
         }
-    }
-
-    @Test
-    @Disabled
-    void testQueryThroughRDFConnection() {
-        // TODO: testing types through Jena RDF class, not through our driver, to be deleted after completing Sparql
-        final RDFConnectionRemoteBuilder builder = RDFConnectionRemote.create()
-                .destination(SparqlMockServer.urlDataset())
-                // Query only.
-                .queryEndpoint("/query")
-                .updateEndpoint("/update");
-
-        // queries the database
-        final Query query = QueryFactory.create("SELECT * { ?s ?p ?o } LIMIT 100");
-        // final UpdateRequest update =
-        //         UpdateFactory.create("PREFIX : <http://example/> PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> " +
-        //                 "INSERT DATA { :s :p \"2014-10-01T00:10:10\"^^xsd:dateTime }");
-
-        // connects to database, updates the database, then query it
-        try (final RDFConnection conn = builder.build()) {
-            // conn.update(update);
-            conn.queryResultSet(query, ResultSetFormatter::out);
-        }
-
-        final RDFConnection rdfConnection = builder.build();
-        final QueryExecution queryExecution = rdfConnection.query(query);
-        final org.apache.jena.query.ResultSet result = queryExecution.execSelect();
-
-        final Map<Class<?>, JdbcType> sparqlJavaToJdbcMap = new HashMap<>();
-        sparqlJavaToJdbcMap.put(String.class, JdbcType.VARCHAR);
-        sparqlJavaToJdbcMap.put(Boolean.class, JdbcType.BIT);
-        sparqlJavaToJdbcMap.put(byte[].class, JdbcType.VARCHAR);
-        sparqlJavaToJdbcMap.put(Byte.class, JdbcType.TINYINT);
-        sparqlJavaToJdbcMap.put(Short.class, JdbcType.SMALLINT);
-        sparqlJavaToJdbcMap.put(Integer.class, JdbcType.INTEGER);
-        sparqlJavaToJdbcMap.put(Long.class, JdbcType.BIGINT);
-        // Should this be JdbcType.REAL?
-        sparqlJavaToJdbcMap.put(Float.class, JdbcType.FLOAT);
-        sparqlJavaToJdbcMap.put(Double.class, JdbcType.DOUBLE);
-        sparqlJavaToJdbcMap.put(java.util.Date.class, JdbcType.DATE);
-        sparqlJavaToJdbcMap.put(java.sql.Date.class, JdbcType.DATE);
-        sparqlJavaToJdbcMap.put(Time.class, JdbcType.TIME);
-        sparqlJavaToJdbcMap.put(Timestamp.class, JdbcType.TIMESTAMP);
-
-        // BigInteger to BIGINT?
-        sparqlJavaToJdbcMap.put(java.math.BigInteger.class, JdbcType.BIGINT);
-        sparqlJavaToJdbcMap.put(java.math.BigDecimal.class, JdbcType.DECIMAL);
-
-        final Map<Class<?>, Class<?>> sparqlToJavaMap = new HashMap<>();
-        sparqlToJavaMap.put(org.apache.jena.datatypes.xsd.XSDDateTime.class, java.sql.Timestamp.class);
-
-        while (result.hasNext()) {
-            final QuerySolution querySolution = result.next();
-            final RDFNode node = querySolution.get("o");
-            System.out.println("|NODE CLASS                   | " + node.getClass());
-            if (node.isLiteral()) {
-                System.out.println("[--------------NEW ROW : LITERAL--------------]");
-                final Literal literal = node.asLiteral();
-                Class<?> javaClass = literal.getDatatype().getJavaClass();
-                if (javaClass == null) {
-                    javaClass = literal.getValue().getClass();
-                }
-                System.out.println("|FINAL CLASS                  | " + javaClass);
-                System.out.println("|INSIDE JAVA-JDBC MAP?        | " +
-                        sparqlJavaToJdbcMap.containsKey(javaClass));
-                System.out.println("|INSIDE SPARQL-JAVA MAP?      | " +
-                        sparqlToJavaMap.containsKey(javaClass));
-                System.out.println("|VALUE                        | " + literal.getValue());
-                System.out.println("|VALUE LEXICAL(String)        | " + literal.getLexicalForm());
-                System.out.println("|LITERAL CLASS                | " + literal.getClass());
-                System.out.println("|getValue().getClass()        | " + literal.getValue().getClass());
-                System.out.println("|getDatatype()                | " + literal.getDatatype());
-                System.out.println("|getDatatypeURI()             | " + literal.getDatatypeURI());
-                System.out.println("|getDatatype().getClass()     | " + literal.getDatatype().getClass());
-                System.out.println("|getDatatype().getJavaClass() | " + literal.getDatatype().getJavaClass());
-            } else {
-                System.out.println("[--------------NEW ROW : RESOURCE NODE--------------]");
-                System.out.println(node.getClass() + ": " + node);
-            }
-        }
-
-        System.out.println("[--------------DONE--------------]");
-    }
-
-    @Test
-    @Disabled
-    void testAskQueryThroughRDFConnection() {
-        // TODO: testing types through Jena RDF class, not through our driver, to be deleted after completing Sparql
-        final RDFConnectionRemoteBuilder builder = RDFConnectionRemote.create()
-                .destination(SparqlMockServer.urlDataset())
-                // Query only.
-                .queryEndpoint("/query")
-                .updateEndpoint("/update");
-
-        // queries the database
-        final Query query = QueryFactory.create("ASK { }");
-        final RDFConnection rdfConnection = builder.build();
-        final QueryExecution queryExecution = rdfConnection.query(query);
-        System.out.println(queryExecution.execAsk());
-    }
-
-    @Test
-    @Disabled
-    void testConstructQueryThroughRDFConnection() {
-        // TODO: testing types through Jena RDF class, not through our driver, to be deleted after completing Sparql
-        final RDFConnectionRemoteBuilder builder = RDFConnectionRemote.create()
-                .destination(SparqlMockServer.urlDataset())
-                // Query only.
-                .queryEndpoint("/query")
-                .updateEndpoint("/update");
-
-        // queries the database
-        final Query query = QueryFactory.create("CONSTRUCT WHERE { ?s ?p ?o . }");
-        final RDFConnection rdfConnection = builder.build();
-        final QueryExecution queryExecution = rdfConnection.query(query);
-        //System.out.println(queryExecution.execConstruct());
-        final PeekIterator<Triple> triples = PeekIterator.create(queryExecution.execConstructTriples());
-        while (triples.hasNext()) {
-            // System.out.println(triples.next());
-            System.out.println(triples.next());
-        }
-        //System.out.println(queryExecution.execConstructQuads());
-    }
-
-    @Test
-    @Disabled
-    void testDescribeQueryThroughRDFConnection() {
-        // TODO: testing types through Jena RDF class, not through our driver, to be deleted after completing Sparql
-        final RDFConnectionRemoteBuilder builder = RDFConnectionRemote.create()
-                .destination(SparqlMockServer.urlDataset())
-                // Query only.
-                .queryEndpoint("/query")
-                .updateEndpoint("/update");
-
-        // queries the database
-        final Query query = QueryFactory.create("DESCRIBE ?o WHERE { ?s ?p ?o . }");
-        final RDFConnection rdfConnection = builder.build();
-        final QueryExecution queryExecution = rdfConnection.query(query);
-        //System.out.println(queryExecution.execConstruct());
-        final PeekIterator<Triple> triples = PeekIterator.create(queryExecution.execDescribeTriples());
-        while (triples.hasNext()) {
-            // System.out.println(triples.next());
-            System.out.println(triples.next());
-        }
-        //System.out.println(queryExecution.execConstructQuads());
-    }
-
-    @Test
-    @Disabled
-    void testQueryThroughJDBCResult() throws SQLException {
-        // TODO: to be deleted
-        // final String query =
-        //         "SELECT ?x ?fname WHERE {?x  <http://www.w3.org/2001/vcard-rdf/3.0#FN>  ?fname FILTER(ISNUMERIC(?fname))}";
-        final String query =
-                "SELECT ?s ?p ?o WHERE {?s ?p ?o}";
-        final SparqlSelectResultSet result = (SparqlSelectResultSet) statement.executeQuery(query);
-        printJenaResultSetOut(query);
-        //System.out.println(result.getResultMetadata().getColumnName(SELECT_RESULT_INDEX));
-        //System.out.println(result.next());
-
-        // next() increments the RowIndex everytime it is called (see ResultSet)
-        // Assertions.assertTrue(result.next());
-
-        while (result.next()) {
-            System.out.println("[--------------NEW ROW--------------]");
-            System.out.println("|STRING VALUE  | " + result.getConvertedValue(3));
-            System.out.println("|CONVERT VALUE | " + result.getConvertedValue(3));
-            System.out.println("|VALUE CLASS   | " + result.getConvertedValue(3).getClass());
-        }
-
-        Assertions.assertFalse(result.next());
-    }
-
-    @Test
-    @Disabled
-    void testConstructQueryThroughJDBCResult() throws SQLException {
-        // TODO: to be deleted
-        final String query =
-                "CONSTRUCT WHERE {?s ?p ?o}";
-        final java.sql.ResultSet result = statement.executeQuery(query);
-        //printJenaResultSetOut(query);
-        //System.out.println(result.getResultMetadata().getColumnName(SELECT_RESULT_INDEX));
-        //System.out.println(result.next());
-
-        // next() increments the RowIndex everytime it is called (see ResultSet)
-        // Assertions.assertTrue(result.next());
-
-        while (result.next()) {
-            System.out.println("[--------------NEW ROW--------------]");
-            //            System.out.println("|STRING VALUE  | " + result.getConvertedValue(3));
-            //            System.out.println("|CONVERT VALUE | " + result.getConvertedValue(3));
-            System.out.println("|VALUE CLASS   | " + result.getObject(3).getClass());
-        }
-
-        Assertions.assertFalse(result.next());
-    }
-
-    @Test
-    @Disabled
-    void testUpdateQuery() throws SQLException {
-        final String updateString =
-                "PREFIX : <http://example/> INSERT DATA { :s :p \"string\" }; INSERT DATA { :s :p \"string2\"};";
-        final RDFConnectionRemoteBuilder builder = RDFConnectionRemote.create()
-                .destination(SparqlMockServer.urlDataset())
-                .queryEndpoint("/query")
-                .updateEndpoint("/update");
-
-        final UpdateRequest update =
-                UpdateFactory.create(SparqlStatementTestBase.LONG_UPDATE);
-
-        try (final RDFConnection conn = builder.build()) {
-            final UpdateProcessor updateProcessor =
-                    UpdateExecutionFactory.createRemote(update, "http://localhost:" + PORT + "/mock/update");
-            updateProcessor.execute();
-            //conn.update(update);
-        }
-
-        final String query =
-                "SELECT ?s ?p ?o WHERE {?s ?p ?o}";
-        printJenaResultSetOut(query);
     }
 }

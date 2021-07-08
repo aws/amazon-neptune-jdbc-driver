@@ -119,7 +119,7 @@ public class OpenCypherResultSet extends software.amazon.jdbc.ResultSet implemen
     private Value getValue(final int columnIndex) throws SQLException {
         verifyOpen();
         if (rows == null) {
-            // TODO: change exception error type
+            // TODO: investigate and change exception error type if needed
             throw SqlError.createSQLException(
                     LOGGER,
                     SqlState.DATA_EXCEPTION,

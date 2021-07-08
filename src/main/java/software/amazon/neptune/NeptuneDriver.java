@@ -106,7 +106,6 @@ public class NeptuneDriver extends Driver implements java.sql.Driver {
         if (SPARQL.equalsIgnoreCase(language)) {
             return new SparqlConnectionProperties(properties);
         }
-        // TODO - implement for other languages
         return new OpenCypherConnectionProperties(properties);
     }
 
@@ -121,7 +120,6 @@ public class NeptuneDriver extends Driver implements java.sql.Driver {
         if (SPARQL.equalsIgnoreCase(language)) {
             return SparqlConnectionProperties.ENDPOINT_KEY;
         }
-        // TODO - implement for other languages
         return OpenCypherConnectionProperties.ENDPOINT_KEY;
     }
 }

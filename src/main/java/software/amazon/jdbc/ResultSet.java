@@ -68,7 +68,6 @@ public abstract class ResultSet implements java.sql.ResultSet {
 
     protected abstract void doClose() throws SQLException;
 
-    // TODO: warn or throw?
     protected int getDriverFetchSize() throws SQLException {
         LOGGER.warn("Feature is not supported");
         return 0;
