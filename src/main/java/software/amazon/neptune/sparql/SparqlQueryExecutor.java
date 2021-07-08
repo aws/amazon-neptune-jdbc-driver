@@ -448,11 +448,7 @@ public class SparqlQueryExecutor extends QueryExecutor {
      */
     private void getColumnType(final Map<String, Object> tempColumnType, final Iterator<String> tempColumnIterator,
                                final Node node, final String column) {
-        if (node == null) {
-            return;
-        }
         final Object nodeType = node.isLiteral() ? node.getLiteral().getDatatype() : node.getClass();
-
         if (!tempColumnType.containsKey(column)) {
             tempColumnType.put(column, nodeType);
             // For Node, the resource type is org.apache.jena.graph.Node_URI instead of org.apache.jena.rdf.model.impl.ResourceImpl
