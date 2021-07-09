@@ -52,6 +52,15 @@ public class SparqlConnectionProperties extends ConnectionProperties {
     public static final String HTTP_CLIENT_KEY = "httpClient";
     public static final String HTTP_CONTEXT_KEY = "httpContext";
     public static final int DEFAULT_PORT = 8182; // Neptune default port
+    // Because RDFConnection builder does not include all the Neptune supported media-types in its default header, we
+    // are adding them into DEFAULT_PROPERTIES_MAP. These also include the media-types supported by Jena
+    // QueryExecution, the query engine we use.
+    public static final String NEPTUNE_ACCEPTED_HEADERS =
+            "application/rdf+xml, application/n-triples, text/turtle, text/plain, application/n-quads, " +
+                    "text/x-nquads, text/turtle, application/trig, text/n3, application/ld+json, application/trix, " +
+                    "application/x-binary-rdf, application/sparql-results+json, application/sparql-results+xml;q=0.9, " +
+                    "text/tab-separated-values;q=0.7, text/csv;q=0.5, application/json;q=0.2, application/xml;q=0.2, " +
+                    "*/*;q=0.1";
     public static final Map<String, Object> DEFAULT_PROPERTIES_MAP = new HashMap<>();
     private static final Map<String, ConnectionProperties.PropertyConverter<?>> PROPERTY_CONVERTER_MAP =
             new HashMap<>();
@@ -94,6 +103,7 @@ public class SparqlConnectionProperties extends ConnectionProperties {
         DEFAULT_PROPERTIES_MAP.put(QUERY_ENDPOINT_KEY, "");
         DEFAULT_PROPERTIES_MAP.put(DESTINATION_KEY, "");
         DEFAULT_PROPERTIES_MAP.put(REGION_KEY, "");
+        DEFAULT_PROPERTIES_MAP.put(ACCEPT_HEADER_QUERY_KEY, NEPTUNE_ACCEPTED_HEADERS);
     }
 
     /**
