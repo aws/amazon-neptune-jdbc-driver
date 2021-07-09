@@ -23,6 +23,7 @@ import org.apache.jena.update.UpdateFactory;
 import org.apache.jena.update.UpdateRequest;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import software.amazon.jdbc.utilities.AuthScheme;
 import software.amazon.jdbc.utilities.ConnectionProperties;
@@ -89,8 +90,10 @@ public class SparqlStatementTest extends SparqlStatementTestBase {
         neptuneStatementTestHelper.testCancelQueryWithoutExecute();
     }
 
+    // TODO: Disabling this test due to query timing inconsistency across different machines leading to failed test.
+    //  Will address this issue in ticket AN-597
     @Test
-    // TODO: Address inconsistency issue in ticket AN-597
+    @Disabled
     void testCancelQueryTwice() {
         neptuneStatementTestHelper.testCancelQueryTwice();
     }
