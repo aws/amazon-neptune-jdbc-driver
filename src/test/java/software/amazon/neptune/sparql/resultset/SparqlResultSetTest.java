@@ -75,13 +75,12 @@ public class SparqlResultSetTest {
     public static void initializeMockServer() throws SQLException {
         SparqlMockServer.ctlBeforeClass();
 
-        // insert into the database here
         // Query only.
         final RDFConnectionRemoteBuilder rdfConnBuilder = RDFConnectionRemote.create()
                 .destination(SparqlMockServer.urlDataset())
                 .queryEndpoint("/query");
 
-        // load dataset in
+        // Load dataset in.
         try (final RDFConnection conn = rdfConnBuilder.build()) {
             conn.load("src/test/java/software/amazon/neptune/sparql/mock/sparql_mock_data.rdf");
         }
@@ -177,9 +176,9 @@ public class SparqlResultSetTest {
         testStringResultTypes(SparqlMockDataQuery.STRING_QUERY, "http://somewhere/JohnSmith", 1);
         testStringResultTypes(SparqlMockDataQuery.STRING_QUERY, "John Smith", SELECT_RESULT_INDEX);
         testStringResultTypes(SparqlMockDataQuery.CONSTRUCT_STRING_QUERY,
-                "http://www.w3.org/2001/vcard-rdf/3.0#FN", SUBJECT_COLUMN_INDEX);
+                "http://somewhere/JohnSmith", SUBJECT_COLUMN_INDEX);
         testStringResultTypes(SparqlMockDataQuery.CONSTRUCT_STRING_QUERY,
-                "http://somewhere/JohnSmith", PREDICATE_COLUMN_INDEX);
+                "http://www.w3.org/2001/vcard-rdf/3.0#FN", PREDICATE_COLUMN_INDEX);
         testStringResultTypes(SparqlMockDataQuery.CONSTRUCT_STRING_QUERY,
                 "John Smith", OBJECT_COLUMN_INDEX);
     }
