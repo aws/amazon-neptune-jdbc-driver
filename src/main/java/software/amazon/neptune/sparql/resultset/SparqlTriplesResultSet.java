@@ -140,10 +140,10 @@ public class SparqlTriplesResultSet extends SparqlResultSet {
         Node node = null;
         switch (columnIndex) {
             case 1:
-                node = row.getPredicate();
+                node = row.getSubject();
                 break;
             case 2:
-                node = row.getSubject();
+                node = row.getPredicate();
                 break;
             case 3:
                 node = row.getObject();
