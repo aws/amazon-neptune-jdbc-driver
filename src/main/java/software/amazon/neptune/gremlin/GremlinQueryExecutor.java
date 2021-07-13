@@ -69,7 +69,14 @@ public class GremlinQueryExecutor extends QueryExecutor {
         this.gremlinConnectionProperties = gremlinConnectionProperties;
     }
 
-    protected static Cluster.Builder createClusterBuilder(final GremlinConnectionProperties properties)
+    /**
+     * Function to create a cluster builder for Gremlin.
+     *
+     * @param properties Connection properties to use.
+     * @return Cluster builder based on connection properties.
+     * @throws SQLException if internal functions in the properties fail.
+     */
+    public static Cluster.Builder createClusterBuilder(final GremlinConnectionProperties properties)
             throws SQLException {
         final Cluster.Builder builder = Cluster.build();
 
@@ -372,7 +379,6 @@ public class GremlinQueryExecutor extends QueryExecutor {
         synchronized (completableFutureLock) {
             completableFuture = client.submitAsync(query);
         }
-
 
         final List<Result> results = completableFuture.get().all().get();
         final List<Map<String, Object>> rows = new ArrayList<>();
