@@ -23,24 +23,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.twilmes.sql.gremlin.SqlToGremlin;
 import org.twilmes.sql.gremlin.processor.SingleQueryExecutor;
-import org.twilmes.sql.gremlin.schema.SchemaConfig;
-import org.twilmes.sql.gremlin.schema.TableColumn;
-import org.twilmes.sql.gremlin.schema.TableConfig;
-import org.twilmes.sql.gremlin.schema.TableRelationship;
-import software.amazon.jdbc.utilities.AuthScheme;
 import software.amazon.jdbc.utilities.SqlError;
 import software.amazon.jdbc.utilities.SqlState;
-import software.amazon.neptune.common.gremlindatamodel.GraphSchema;
-import software.amazon.neptune.common.gremlindatamodel.MetadataCache;
 import software.amazon.neptune.gremlin.GremlinConnectionProperties;
 import software.amazon.neptune.gremlin.GremlinQueryExecutor;
 import java.lang.reflect.Constructor;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
 
 import static org.apache.tinkerpop.gremlin.process.traversal.AnonymousTraversalSource.traversal;
 
@@ -97,67 +87,11 @@ public class SqlGremlinQueryExecutor extends GremlinQueryExecutor {
     private static SqlToGremlin getSqlToGremlin(final GremlinConnectionProperties gremlinConnectionProperties)
             throws SQLException {
         if (sqlToGremlin == null) {
-            sqlToGremlin = new SqlToGremlin(getSqlGremlinGraphSchema(gremlinConnectionProperties),
+            sqlToGremlin = new SqlToGremlin(
+                    SqlGremlinGraphSchemaHelper.getSchemaConfig(gremlinConnectionProperties),
                     getGraphTraversalSource(gremlinConnectionProperties));
         }
         return sqlToGremlin;
-    }
-
-    // TODO AN-540: Look into a caching mechanism for this to improve performance when we have time to revisit this.
-
-    /**
-     * Function to get schema of graph in terms that sql-gremlin can understand.
-     *
-     * @param gremlinConnectionProperties Connection properties.
-     * @return SchemaConfig Object for Graph.
-     * @throws SQLException If issue is encountered and schema cannot be determined.
-     */
-    public static SchemaConfig getSqlGremlinGraphSchema(final GremlinConnectionProperties gremlinConnectionProperties)
-            throws SQLException {
-        if (!MetadataCache.isMetadataCached()) {
-            MetadataCache.updateCache(gremlinConnectionProperties.getContactPoint(), null,
-                    (gremlinConnectionProperties.getAuthScheme() == AuthScheme.IAMSigV4),
-                    MetadataCache.PathType.Gremlin);
-        }
-
-        final List<GraphSchema> nodeSchema = MetadataCache.getNodeSchemaList();
-        final List<GraphSchema> edgeSchema = MetadataCache.getEdgeSchemaList();
-
-
-        // Get Node table information.
-        final List<TableConfig> tableConfigList = new ArrayList<>();
-        for (final GraphSchema graphSchema : nodeSchema) {
-            final TableConfig tableConfig = new TableConfig();
-            final List<TableColumn> tableColumns = new ArrayList<>();
-            for (final Map<String, Object> properties : graphSchema.getProperties()) {
-                final TableColumn tableColumn = new TableColumn();
-                tableColumn.setType(properties.get("dataType").toString().toLowerCase());
-                tableColumn.setName((String) properties.get("property"));
-                tableColumn.setPropertyName(null);
-                tableColumns.add(tableColumn);
-            }
-            tableConfig.setName(String.join(":", graphSchema.getLabels()));
-            tableConfig.setColumns(tableColumns);
-            tableConfigList.add(tableConfig);
-        }
-
-        // Get Edge table information.
-        final List<TableRelationship> tableRelationshipList = new ArrayList<>();
-        for (final GraphSchema graphSchema : edgeSchema) {
-            final TableRelationship tableRelationship = new TableRelationship();
-            // TODO AN-540: Gremlin export tool does not extract this info. Need to revisit during Tableau integration.
-            tableRelationship.setFkTable(null);
-            tableRelationship.setInTable(null);
-            tableRelationship.setOutTable(null);
-            tableRelationship.setEdgeLabel(String.join(":", graphSchema.getLabels()));
-            tableRelationshipList.add(tableRelationship);
-        }
-
-        final SchemaConfig schemaConfig = new SchemaConfig();
-        schemaConfig.setTables(tableConfigList);
-        schemaConfig.setRelationships(tableRelationshipList);
-
-        return schemaConfig;
     }
 
     /**

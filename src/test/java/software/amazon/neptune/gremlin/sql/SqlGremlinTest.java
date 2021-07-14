@@ -156,8 +156,7 @@ public class SqlGremlinTest {
         properties.put(PORT_KEY, PORT);
         properties.put(ENABLE_SSL_KEY, true);
 
-        final SchemaConfig schemaConfig =
-                SqlGremlinQueryExecutor.getSqlGremlinGraphSchema(new GremlinConnectionProperties(properties));
+        final SchemaConfig schemaConfig = SqlGremlinGraphSchemaHelper.getSchemaConfig(new GremlinConnectionProperties(properties));
         final SqlToGremlin sqlToGremlin = new SqlToGremlin(schemaConfig, getGraphTraversalSource());
 
         runQueryPrintResults("SELECT * FROM Person", sqlToGremlin);
