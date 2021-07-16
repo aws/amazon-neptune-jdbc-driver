@@ -46,8 +46,8 @@ public class SqlGremlinResultSet extends software.amazon.jdbc.ResultSet implemen
     private final List<String> columns;
     private final List<List<Object>> rows;
     private final List<String> columnTypes;
-    private boolean wasNull = false;
     private final GremlinResultSetMetadata gremlinResultSetMetadata;
+    private boolean wasNull = false;
 
     /**
      * GremlinResultSet constructor, initializes super class.
@@ -71,6 +71,51 @@ public class SqlGremlinResultSet extends software.amazon.jdbc.ResultSet implemen
 
     @Override
     protected void doClose() throws SQLException {
+    }
+
+    // invoke getResult --> get one, it's good, if not, check if we are waiting for next batch or we are empty
+    // how to pass the thread
+    //    @Override
+    //    public boolean next() throws SQLException {
+    //        // pass this object over to interrupt
+    //        // think about timing here --> might need to synchronous
+    //        // lock, check if empty, unlock
+    //        // on other side, lock, assert empty, unlock, interrupt
+    //        Thread.currentThread().interrupt();
+    //        // Increment row index, if it exceeds capacity, set it to one after the last element.
+    //        if (++this.rowIndex >= rowCount) {
+    //            this.rowIndex = rowCount;
+    //        }
+    //        return (this.rowIndex < rowCount);
+    //    }
+
+    // unsupported
+    //    @Override
+    //    public boolean isLast() throws SQLException {
+    //        verifyOpen();
+    //        return (getRowIndex() == (rowCount - 1));
+    //    }
+
+    // unsupported
+    //    @Override
+    //    public boolean isAfterLast() throws SQLException {
+    //        return (getRowIndex() >= rowCount);
+    //    }
+
+    // completely unsupported
+    @Override
+    public boolean absolute(final int row) throws SQLException {
+        verifyOpen();
+        if (row < 1) {
+            throw SqlError.createSQLFeatureNotSupportedException(LOGGER);
+        } else if (getRowIndex() > row) {
+            throw SqlError.createSQLFeatureNotSupportedException(LOGGER);
+        }
+
+        while ((getRowIndex() < row) && next()) {
+            continue;
+        }
+        return !isBeforeFirst() && !isAfterLast();
     }
 
     @Override
