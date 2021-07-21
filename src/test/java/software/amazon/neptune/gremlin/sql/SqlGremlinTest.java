@@ -31,7 +31,6 @@ import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSo
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.twilmes.sql.gremlin.SqlToGremlin;
-import org.twilmes.sql.gremlin.processor.SingleQueryExecutor;
 import org.twilmes.sql.gremlin.schema.SchemaConfig;
 import software.amazon.jdbc.utilities.AuthScheme;
 import software.amazon.jdbc.utilities.ConnectionProperties;
@@ -117,8 +116,8 @@ public class SqlGremlinTest {
     @Disabled
     void test() throws SQLException {
         final SqlToGremlin sqlToGremlin = new SqlToGremlin(null, getGraphTraversalSource());
-        runQueryPrintResults("SELECT * FROM Person", sqlToGremlin);
-        runQueryPrintResults("SELECT cat FROM Person", sqlToGremlin);
+        //runQueryPrintResults("SELECT * FROM Person", sqlToGremlin);
+        //runQueryPrintResults("SELECT cat FROM Person", sqlToGremlin);
     }
 
     @Test
@@ -156,40 +155,51 @@ public class SqlGremlinTest {
         properties.put(PORT_KEY, PORT);
         properties.put(ENABLE_SSL_KEY, true);
 
-        final SchemaConfig schemaConfig = SqlGremlinGraphSchemaHelper.getSchemaConfig(new GremlinConnectionProperties(properties));
+        final SchemaConfig schemaConfig =
+                SqlGremlinGraphSchemaHelper.getSchemaConfig(new GremlinConnectionProperties(properties));
         final SqlToGremlin sqlToGremlin = new SqlToGremlin(schemaConfig, getGraphTraversalSource());
+        final java.sql.Connection connection = new SqlGremlinConnection(new GremlinConnectionProperties(properties));
+        final java.sql.Statement statement = connection.createStatement();
 
-        runQueryPrintResults("SELECT * FROM Person", sqlToGremlin);
+        //        runQueryPrintResults("SELECT * FROM Person", statement);
+        runQueryPrintResults("SELECT category FROM websiteGroup", statement);
+        //        runQueryPrintResults("SELECT lastName FROM Person", statement);
 
-        schemaConfig.getTables().forEach(table -> {
-            final String tableName = table.getName();
-            table.getColumns().forEach(column -> {
-                try {
-                    runQueryPrintResults(String.format("SELECT %s FROM %s", column.getName(), tableName), sqlToGremlin);
-                } catch (final SQLException throwables) {
-                    throwables.printStackTrace();
-                }
-            });
-        });
+        //        schemaConfig.getTables().forEach(table -> {
+        //            final String tableName = table.getName();
+        //            table.getColumns().forEach(column -> {
+        //                try {
+        //                    runQueryPrintResults(String.format("SELECT %s FROM %s", column.getName(), tableName), statement);
+        //                } catch (final SQLException throwables) {
+        //                    throwables.printStackTrace();
+        //                }
+        //            });
+        //        });
+        //        schemaConfig.getTables().forEach(table -> {
+        //            System.out.println("TABLE: " + table.getName());
+        //            table.getColumns().forEach(column -> {
+        //                System.out.println("COLUMN: " + column.getName());
+        //            });
+        //        });
     }
 
-    void runQueryPrintResults(final String query, final SqlToGremlin sqlToGremlin) throws SQLException {
-        System.out.println("Executing query: " + query);
-        final SingleQueryExecutor.SqlGremlinQueryResult queryResult = sqlToGremlin.execute(query);
-        final List<String> columns = queryResult.getColumns();
-        final List<List<String>> rows = rowResultToString(queryResult);
-        final Object[][] rowObjects = new Object[rows.size()][];
-        final String[] colString = new String[columns.size()];
-        for (int i = 0; i < columns.size(); i++) {
-            colString[i] = columns.get(i);
-        }
-        for (int i = 0; i < rows.size(); i++) {
-            rowObjects[i] = rows.get(i) == null ? null : rows.get(i).toArray();
-        }
-
-        final TextTable tt = new TextTable(colString, rowObjects);
-        tt.printTable();
-    }
+    //    void runQueryPrintResults(final String query, final SqlToGremlin sqlToGremlin) throws SQLException {
+    //        System.out.println("Executing query: " + query);
+    //        final SingleQueryExecutor.SqlGremlinQueryResult queryResult = sqlToGremlin.execute(query);
+    //        final List<String> columns = queryResult.getColumns();
+    //        final List<List<String>> rows = rowResultToString(queryResult);
+    //        final Object[][] rowObjects = new Object[rows.size()][];
+    //        final String[] colString = new String[columns.size()];
+    //        for (int i = 0; i < columns.size(); i++) {
+    //            colString[i] = columns.get(i);
+    //        }
+    //        for (int i = 0; i < rows.size(); i++) {
+    //            rowObjects[i] = rows.get(i) == null ? null : rows.get(i).toArray();
+    //        }
+    //
+    //        final TextTable tt = new TextTable(colString, rowObjects);
+    //        tt.printTable();
+    //    }
 
     void runQueryPrintResults(final String query, final java.sql.Statement statement) throws SQLException {
         System.out.println("Executing query: " + query);
@@ -200,11 +210,11 @@ public class SqlGremlinTest {
             columns.add(resultSet.getMetaData().getColumnName(i));
         }
 
-        while (resultSet.next()) {
-            for (int i = 1; i <= columnCount; i++) {
-                System.out.println(resultSet.getString(i));
-            }
-        }
+        //        while (resultSet.next()) {
+        //            for (int i = 1; i <= columnCount; i++) {
+        //                System.out.println(resultSet.getString(i));
+        //            }
+        //        }
 
         final List<List<Object>> rows = new ArrayList<>();
         while (resultSet.next()) {
@@ -228,29 +238,29 @@ public class SqlGremlinTest {
         tt.printTable();
     }
 
-    List<List<String>> rowResultToString(final SingleQueryExecutor.SqlGremlinQueryResult result) {
-        final List<List<Object>> rows = result.getRows();
-        final List<List<String>> stringRows = new ArrayList<>();
-        for (final List<Object> row : rows) {
-            final List<String> list = new ArrayList<>();
-            for (final Object obj : row) {
-                if (obj != null) {
-                    if (obj instanceof Object[]) {
-                        final Object[] object = (Object[]) obj;
-                        for (final Object o : object) {
-                            list.add(o == null ? null : o.toString());
-                        }
-                    } else {
-                        list.add(obj.toString());
-                    }
-                } else {
-                    list.add(null);
-                }
-            }
-            stringRows.add(list);
-        }
-        return stringRows;
-    }
+    //    List<List<String>> rowResultToString(final SingleQueryExecutor.SqlGremlinQueryResult result) {
+    //        final List<List<Object>> rows = result.getRows();
+    //        final List<List<String>> stringRows = new ArrayList<>();
+    //        for (final List<Object> row : rows) {
+    //            final List<String> list = new ArrayList<>();
+    //            for (final Object obj : row) {
+    //                if (obj != null) {
+    //                    if (obj instanceof Object[]) {
+    //                        final Object[] object = (Object[]) obj;
+    //                        for (final Object o : object) {
+    //                            list.add(o == null ? null : o.toString());
+    //                        }
+    //                    } else {
+    //                        list.add(obj.toString());
+    //                    }
+    //                } else {
+    //                    list.add(null);
+    //                }
+    //            }
+    //            stringRows.add(list);
+    //        }
+    //        return stringRows;
+    //    }
 
     void printVertexes() {
         System.out.println("Input vertexes:");

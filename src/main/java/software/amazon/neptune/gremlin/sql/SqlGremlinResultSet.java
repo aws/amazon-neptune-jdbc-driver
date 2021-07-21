@@ -44,10 +44,14 @@ public class SqlGremlinResultSet extends software.amazon.jdbc.ResultSet implemen
     }
 
     private final List<String> columns;
-    private final List<List<Object>> rows;
     private final List<String> columnTypes;
     private final GremlinResultSetMetadata gremlinResultSetMetadata;
+    private final SingleQueryExecutor.SqlGremlinQueryResult sqlQueryResult;
+    private List<List<Object>> rows;
+    // a single row that's taken when we use getResult();
+    private List<Object> row;
     private boolean wasNull = false;
+    private int tempResCounter = 1;
 
     /**
      * GremlinResultSet constructor, initializes super class.
@@ -57,10 +61,13 @@ public class SqlGremlinResultSet extends software.amazon.jdbc.ResultSet implemen
      */
     public SqlGremlinResultSet(final java.sql.Statement statement,
                                final SingleQueryExecutor.SqlGremlinQueryResult queryResult) {
-        super(statement, queryResult.getColumns(), queryResult.getRows().size());
+        // 0 for row count?
+        super(statement, queryResult.getColumns(), 1);
         this.columns = queryResult.getColumns();
-        this.rows = queryResult.getRows();
+        // cast here? or null until we get result by calling next?
+        this.row = null;
         this.columnTypes = queryResult.getColumnTypes();
+        this.sqlQueryResult = queryResult;
 
         final List<Class<?>> rowTypes = new ArrayList<>();
         for (final String columnType : columnTypes) {
@@ -75,58 +82,52 @@ public class SqlGremlinResultSet extends software.amazon.jdbc.ResultSet implemen
 
     // invoke getResult --> get one, it's good, if not, check if we are waiting for next batch or we are empty
     // how to pass the thread
-    //    @Override
-    //    public boolean next() throws SQLException {
-    //        // pass this object over to interrupt
-    //        // think about timing here --> might need to synchronous
-    //        // lock, check if empty, unlock
-    //        // on other side, lock, assert empty, unlock, interrupt
-    //        Thread.currentThread().interrupt();
-    //        // Increment row index, if it exceeds capacity, set it to one after the last element.
-    //        if (++this.rowIndex >= rowCount) {
-    //            this.rowIndex = rowCount;
-    //        }
-    //        return (this.rowIndex < rowCount);
-    //    }
+    @Override
+    public boolean next() throws SQLException {
+        // pass this object over to interrupt
+        // think about timing here --> might need to synchronous
+        // lock, check if empty, unlock
+        // on other side, lock, assert empty, unlock, interrupt
+        // Thread.currentThread().interrupt();
+        // if the entire result is empty we just return false
 
-    // unsupported
-    //    @Override
-    //    public boolean isLast() throws SQLException {
-    //        verifyOpen();
-    //        return (getRowIndex() == (rowCount - 1));
-    //    }
+        // should next check if it is empty? or let the executor check then return null which we return false here?
+        final Object res = sqlQueryResult.getResult();
+        if (res == null) {
+            System.out.println("next() NO MORE RESULT");
+            return false;
+        }
+        this.row = (List<Object>) res;
+        System.out.println("next() GOT RESULT #" + tempResCounter + ": " + this.row);
+        tempResCounter++;
+        return true;
+    }
 
-    // unsupported
-    //    @Override
-    //    public boolean isAfterLast() throws SQLException {
-    //        return (getRowIndex() >= rowCount);
-    //    }
+    @Override
+    public boolean isLast() throws SQLException {
+        throw SqlError.createSQLFeatureNotSupportedException(LOGGER);
+    }
 
-    // completely unsupported
+    @Override
+    public boolean isAfterLast() throws SQLException {
+        throw SqlError.createSQLFeatureNotSupportedException(LOGGER);
+    }
+
     @Override
     public boolean absolute(final int row) throws SQLException {
-        verifyOpen();
-        if (row < 1) {
-            throw SqlError.createSQLFeatureNotSupportedException(LOGGER);
-        } else if (getRowIndex() > row) {
-            throw SqlError.createSQLFeatureNotSupportedException(LOGGER);
-        }
-
-        while ((getRowIndex() < row) && next()) {
-            continue;
-        }
-        return !isBeforeFirst() && !isAfterLast();
+        throw SqlError.createSQLFeatureNotSupportedException(LOGGER);
     }
 
     @Override
+    // TODO use fetch size for page size?
     protected int getDriverFetchSize() throws SQLException {
-        // Can't be done based on implementation.
-        return 0;
+        return sqlQueryResult.getPageSize();
     }
 
     @Override
+    // TODO use fetch size for page size?
     protected void setDriverFetchSize(final int rows) {
-        // Can't be done based on implementation.
+        sqlQueryResult.setPageSize(rows);
     }
 
     @Override
@@ -148,16 +149,16 @@ public class SqlGremlinResultSet extends software.amazon.jdbc.ResultSet implemen
 
     private Object getValue(final int columnIndex) throws SQLException {
         verifyOpen();
-        if (rows == null) {
+        if (row == null) {
             throw SqlError.createSQLException(
                     LOGGER,
                     SqlState.DATA_EXCEPTION,
                     SqlError.UNSUPPORTED_RESULT_SET_TYPE);
         }
-        validateRowColumn(columnIndex);
+        // validateRowColumn(columnIndex);
 
         // Look for row index within rows, then grab column index from there (note: 1 based indexing of JDBC hence -1).
-        final Object value = rows.get(getRowIndex()).get(columnIndex - 1);
+        final Object value = row.get(columnIndex - 1);
         wasNull = (value == null);
 
         return value;
