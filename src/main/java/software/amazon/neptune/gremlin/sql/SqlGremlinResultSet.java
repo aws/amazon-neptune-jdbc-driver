@@ -47,11 +47,9 @@ public class SqlGremlinResultSet extends software.amazon.jdbc.ResultSet implemen
     private final List<String> columnTypes;
     private final GremlinResultSetMetadata gremlinResultSetMetadata;
     private final SingleQueryExecutor.SqlGremlinQueryResult sqlQueryResult;
-    private List<List<Object>> rows;
-    // a single row that's taken when we use getResult();
+    // a single row that's assigned when we use getResult() in next();
     private List<Object> row;
     private boolean wasNull = false;
-    private int tempResCounter = 1;
 
     /**
      * GremlinResultSet constructor, initializes super class.
@@ -61,10 +59,10 @@ public class SqlGremlinResultSet extends software.amazon.jdbc.ResultSet implemen
      */
     public SqlGremlinResultSet(final java.sql.Statement statement,
                                final SingleQueryExecutor.SqlGremlinQueryResult queryResult) {
-        // 0 for row count?
+        // 1 for row count as placeholder
         super(statement, queryResult.getColumns(), 1);
         this.columns = queryResult.getColumns();
-        // cast here? or null until we get result by calling next?
+        // null until we get result by calling next
         this.row = null;
         this.columnTypes = queryResult.getColumnTypes();
         this.sqlQueryResult = queryResult;
@@ -80,26 +78,13 @@ public class SqlGremlinResultSet extends software.amazon.jdbc.ResultSet implemen
     protected void doClose() throws SQLException {
     }
 
-    // invoke getResult --> get one, it's good, if not, check if we are waiting for next batch or we are empty
-    // how to pass the thread
     @Override
     public boolean next() throws SQLException {
-        // pass this object over to interrupt
-        // think about timing here --> might need to synchronous
-        // lock, check if empty, unlock
-        // on other side, lock, assert empty, unlock, interrupt
-        // Thread.currentThread().interrupt();
-        // if the entire result is empty we just return false
-
-        // should next check if it is empty? or let the executor check then return null which we return false here?
         final Object res = sqlQueryResult.getResult();
         if (res == null) {
-            System.out.println("next() NO MORE RESULT");
             return false;
         }
         this.row = (List<Object>) res;
-        System.out.println("next() GOT RESULT #" + tempResCounter + ": " + this.row);
-        tempResCounter++;
         return true;
     }
 
@@ -121,13 +106,12 @@ public class SqlGremlinResultSet extends software.amazon.jdbc.ResultSet implemen
     @Override
     // TODO use fetch size for page size?
     protected int getDriverFetchSize() throws SQLException {
-        return sqlQueryResult.getPageSize();
+        return 0;
     }
 
     @Override
     // TODO use fetch size for page size?
     protected void setDriverFetchSize(final int rows) {
-        sqlQueryResult.setPageSize(rows);
     }
 
     @Override
@@ -155,7 +139,6 @@ public class SqlGremlinResultSet extends software.amazon.jdbc.ResultSet implemen
                     SqlState.DATA_EXCEPTION,
                     SqlError.UNSUPPORTED_RESULT_SET_TYPE);
         }
-        // validateRowColumn(columnIndex);
 
         // Look for row index within rows, then grab column index from there (note: 1 based indexing of JDBC hence -1).
         final Object value = row.get(columnIndex - 1);
