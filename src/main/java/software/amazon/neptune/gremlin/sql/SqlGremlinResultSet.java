@@ -47,7 +47,7 @@ public class SqlGremlinResultSet extends software.amazon.jdbc.ResultSet implemen
     private final List<String> columnTypes;
     private final GremlinResultSetMetadata gremlinResultSetMetadata;
     private final SingleQueryExecutor.SqlGremlinQueryResult sqlQueryResult;
-    // a single row that's assigned when we use getResult() in next();
+    // A single row that's assigned when we use getResult() in next().
     private List<Object> row;
     private boolean wasNull = false;
 
@@ -59,10 +59,10 @@ public class SqlGremlinResultSet extends software.amazon.jdbc.ResultSet implemen
      */
     public SqlGremlinResultSet(final java.sql.Statement statement,
                                final SingleQueryExecutor.SqlGremlinQueryResult queryResult) {
-        // 1 for row count as placeholder
+        // 1 for row count as placeholder.
         super(statement, queryResult.getColumns(), 1);
         this.columns = queryResult.getColumns();
-        // null until we get result by calling next
+        // Null until we get result by calling next.
         this.row = null;
         this.columnTypes = queryResult.getColumnTypes();
         this.sqlQueryResult = queryResult;
@@ -79,9 +79,12 @@ public class SqlGremlinResultSet extends software.amazon.jdbc.ResultSet implemen
     }
 
     @Override
-    public boolean next() throws SQLException {
-        final Object res = sqlQueryResult.getResult();
-        if (res == null) {
+    public boolean next() {
+        final Object res;
+        try {
+            res = sqlQueryResult.getResult();
+        } catch (SQLException e) {
+            LOGGER.trace("No more results.");
             return false;
         }
         this.row = (List<Object>) res;
@@ -140,7 +143,7 @@ public class SqlGremlinResultSet extends software.amazon.jdbc.ResultSet implemen
                     SqlError.UNSUPPORTED_RESULT_SET_TYPE);
         }
 
-        // Look for row index within rows, then grab column index from there (note: 1 based indexing of JDBC hence -1).
+        // Grab value in row using column index (note: 1 based indexing of JDBC hence -1).
         final Object value = row.get(columnIndex - 1);
         wasNull = (value == null);
 
