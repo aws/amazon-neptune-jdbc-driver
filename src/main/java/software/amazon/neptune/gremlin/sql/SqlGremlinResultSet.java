@@ -20,7 +20,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.twilmes.sql.gremlin.processor.SingleQueryExecutor;
 import software.amazon.jdbc.utilities.SqlError;
-import software.amazon.jdbc.utilities.SqlState;
 import software.amazon.neptune.gremlin.GremlinTypeMapping;
 import software.amazon.neptune.gremlin.resultset.GremlinResultSet;
 import software.amazon.neptune.gremlin.resultset.GremlinResultSetMetadata;
