@@ -136,12 +136,6 @@ public class SqlGremlinResultSet extends software.amazon.jdbc.ResultSet implemen
 
     private Object getValue(final int columnIndex) throws SQLException {
         verifyOpen();
-        if (row == null) {
-            throw SqlError.createSQLException(
-                    LOGGER,
-                    SqlState.DATA_EXCEPTION,
-                    SqlError.UNSUPPORTED_RESULT_SET_TYPE);
-        }
 
         // Grab value in row using column index (note: 1 based indexing of JDBC hence -1).
         final Object value = row.get(columnIndex - 1);
