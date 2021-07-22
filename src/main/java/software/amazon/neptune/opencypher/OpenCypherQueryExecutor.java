@@ -52,8 +52,13 @@ public class OpenCypherQueryExecutor extends QueryExecutor {
     private final Object sessionLock = new Object();
     private Session session = null;
 
-    OpenCypherQueryExecutor(final OpenCypherConnectionProperties openCypherConnectionProperties) {
+    OpenCypherQueryExecutor(final OpenCypherConnectionProperties openCypherConnectionProperties) throws SQLException {
         this.openCypherConnectionProperties = openCypherConnectionProperties;
+        if (openCypherConnectionProperties.getAuthScheme().equals(AuthScheme.IAMSigV4)
+                && (System.getenv().get("SERVICE_REGION") == null)) {
+            throw new SQLException(
+                    "SERVICE_REGION environment variable must be set for IAMSigV4 authentication.");
+        }
     }
 
     /**
@@ -184,7 +189,7 @@ public class OpenCypherQueryExecutor extends QueryExecutor {
         if (!MetadataCache.isMetadataCached()) {
             MetadataCache.updateCache(openCypherConnectionProperties.getEndpoint(), null,
                     (openCypherConnectionProperties.getAuthScheme() == AuthScheme.IAMSigV4),
-                    MetadataCache.PathType.Bolt);
+                    MetadataCache.PathType.Bolt, null);
         }
 
         final List<GraphSchema> graphSchemaList =
@@ -241,7 +246,7 @@ public class OpenCypherQueryExecutor extends QueryExecutor {
         if (!MetadataCache.isMetadataCached()) {
             MetadataCache.updateCache(openCypherConnectionProperties.getEndpoint(), null,
                     (openCypherConnectionProperties.getAuthScheme() == AuthScheme.IAMSigV4),
-                    MetadataCache.PathType.Bolt);
+                    MetadataCache.PathType.Bolt, null);
         }
 
         final List<GraphSchema> graphSchemaList =

@@ -143,6 +143,9 @@ public class GremlinConnectionProperties extends ConnectionProperties {
         DEFAULT_PROPERTIES_MAP.put(ENABLE_SSL_KEY, DEFAULT_ENABLE_SSL);
         DEFAULT_PROPERTIES_MAP.put(SSL_SKIP_VALIDATION_KEY, DEFAULT_SSL_SKIP_VALIDATION);
         DEFAULT_PROPERTIES_MAP.put(SERIALIZER_KEY, DEFAULT_SERIALIZER);
+        // Set to maximum value by default. Apparently max value is 1 GB.
+        // https://stackoverflow.com/questions/58055662/aws-neptune-io-netty-handler-codec-corruptedframeexception
+        DEFAULT_PROPERTIES_MAP.put(MAX_CONTENT_LENGTH_KEY, 1024 * 1024 * 1024);
     }
 
     /**
@@ -281,7 +284,8 @@ public class GremlinConnectionProperties extends ConnectionProperties {
         if (serializer instanceof MessageSerializer) {
             return (MessageSerializer) serializer;
         } else {
-            throw SqlError.createSQLException(LOGGER, SqlState.DATA_TYPE_TRANSFORM_VIOLATION, SqlError.INVALID_TYPE_CONVERSION,
+            throw SqlError.createSQLException(LOGGER, SqlState.DATA_TYPE_TRANSFORM_VIOLATION,
+                    SqlError.INVALID_TYPE_CONVERSION,
                     serializer.getClass().getCanonicalName(), MessageSerializer.class.getCanonicalName());
         }
     }
@@ -299,7 +303,8 @@ public class GremlinConnectionProperties extends ConnectionProperties {
         if (serializer instanceof Serializers) {
             return (Serializers) serializer;
         } else {
-            throw SqlError.createSQLException(LOGGER, SqlState.DATA_TYPE_TRANSFORM_VIOLATION, SqlError.INVALID_TYPE_CONVERSION,
+            throw SqlError.createSQLException(LOGGER, SqlState.DATA_TYPE_TRANSFORM_VIOLATION,
+                    SqlError.INVALID_TYPE_CONVERSION,
                     serializer.getClass().getCanonicalName(), Serializers.class.getCanonicalName());
         }
     }
@@ -1067,7 +1072,9 @@ public class GremlinConnectionProperties extends ConnectionProperties {
         if (getAuthScheme() != null && getAuthScheme().equals(AuthScheme.IAMSigV4)) {
             final String region = System.getenv().get("SERVICE_REGION");
             if (region == null) {
-                throw missingConnectionPropertyError(
+                // Log error here. If we throw here BI tools will assume we don't support the connection string.
+                // We need to throw later so a proper exception can be displayed.
+                LOGGER.error(
                         "A Region must be provided to use IAMSigV4 Authentication. Set the SERVICE_REGION environment variable to the appropriate region, such as 'us-east-1'.");
             }
 

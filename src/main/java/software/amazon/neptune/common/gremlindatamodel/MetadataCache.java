@@ -16,22 +16,44 @@
 
 package software.amazon.neptune.common.gremlindatamodel;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import org.apache.tinkerpop.gremlin.driver.Client;
+import org.apache.tinkerpop.gremlin.driver.Cluster;
+import org.apache.tinkerpop.gremlin.driver.Result;
+import org.apache.tinkerpop.gremlin.driver.ResultSet;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.twilmes.sql.gremlin.schema.SchemaConfig;
+import org.twilmes.sql.gremlin.schema.TableColumn;
+import org.twilmes.sql.gremlin.schema.TableConfig;
+import org.twilmes.sql.gremlin.schema.TableRelationship;
+import software.amazon.jdbc.utilities.AuthScheme;
+import software.amazon.jdbc.utilities.SqlError;
+import software.amazon.jdbc.utilities.SqlState;
 import software.amazon.neptune.common.ResultSetInfoWithoutRows;
 import software.amazon.neptune.common.gremlindatamodel.resultset.ResultSetGetColumns;
 import software.amazon.neptune.common.gremlindatamodel.resultset.ResultSetGetTables;
+import software.amazon.neptune.gremlin.GremlinConnectionProperties;
+import software.amazon.neptune.gremlin.GremlinQueryExecutor;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
 
 public class MetadataCache {
+    private static final Logger LOGGER = LoggerFactory.getLogger(MetadataCache.class);
     private static final Object LOCK = new Object();
     @Getter
     private static List<GraphSchema> nodeSchemaList = null;
     @Getter
     private static List<GraphSchema> edgeSchemaList = null;
+    @Getter
+    private static SchemaConfig schemaConfig = null;
 
     /**
      * Function to update the cache of the metadata.
@@ -39,21 +61,38 @@ public class MetadataCache {
      * @param endpoint Endpoint of target database.
      * @param nodes    Node list to use if any.
      * @param useIAM   Flag to use IAM or not.
+     * @param pathType Path type.
+     * @param gremlinConnectionProperties GremlinConnectionProperties to use. Only use for sql-gremlin.
      * @throws SQLException Thrown if error occurs during update.
      */
     public static void updateCache(final String endpoint,
                                    final String nodes,
                                    final boolean useIAM,
-                                   final PathType pathType) throws SQLException {
+                                   final PathType pathType,
+                                   final GremlinConnectionProperties gremlinConnectionProperties) throws SQLException {
         synchronized (LOCK) {
             try {
                 nodeSchemaList = new ArrayList<>();
                 edgeSchemaList = new ArrayList<>();
                 SchemaHelperGremlinDataModel
                         .getGraphSchema(endpoint, nodes, useIAM, pathType, nodeSchemaList, edgeSchemaList);
+                if (gremlinConnectionProperties != null) {
+                    schemaConfig = SchemaHelperGremlinDataModel.getSchemaConfig(gremlinConnectionProperties);
+                    for (TableRelationship tableRelationship: schemaConfig.getRelationships()) {
+                        for (GraphSchema graphSchema: nodeSchemaList) {
+                            for (String label: graphSchema.getLabels()) {
+                                if (label.toLowerCase().equals(tableRelationship.getOutTable().toLowerCase())
+                                        || label.toLowerCase().equals(tableRelationship.getInTable().toLowerCase())) {
+                                    graphSchema.addForeignKey(tableRelationship.getEdgeLabel());
+                                }
+                            }
+                        }
+                    }
+                }
             } catch (final IOException e) {
                 nodeSchemaList = null;
                 edgeSchemaList = null;
+                schemaConfig = null;
                 throw new SQLException(e.getMessage());
             }
         }

@@ -63,7 +63,7 @@ public abstract class Connection implements java.sql.Connection {
      *
      * @return QueryExecutor Object.
      */
-    public abstract QueryExecutor getQueryExecutor();
+    public abstract QueryExecutor getQueryExecutor() throws SQLException;
 
     /**
      * Function to get Driver name as a String.
@@ -134,6 +134,7 @@ public abstract class Connection implements java.sql.Connection {
 
     @Override
     public void setClientInfo(@NonNull final String name, final String value) throws SQLClientInfoException {
+        // TODO: Remove this and go through them.
         if (isClosed.get()) {
             throw SqlError.createSQLClientInfoException(
                     LOGGER,

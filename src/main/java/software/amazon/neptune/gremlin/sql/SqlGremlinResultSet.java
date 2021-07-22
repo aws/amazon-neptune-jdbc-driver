@@ -18,7 +18,7 @@ package software.amazon.neptune.gremlin.sql;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.twilmes.sql.gremlin.processor.SingleQueryExecutor;
+import org.twilmes.sql.gremlin.processor.executors.SingleQueryExecutor;
 import software.amazon.jdbc.utilities.SqlError;
 import software.amazon.jdbc.utilities.SqlState;
 import software.amazon.neptune.gremlin.GremlinTypeMapping;

@@ -47,7 +47,7 @@ public class SqlGremlinConnection extends GremlinConnection {
     }
 
     @Override
-    public QueryExecutor getQueryExecutor() {
+    public QueryExecutor getQueryExecutor() throws SQLException {
         return new SqlGremlinQueryExecutor(getGremlinConnectionProperties());
     }
 

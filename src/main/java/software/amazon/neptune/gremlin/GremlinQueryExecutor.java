@@ -65,8 +65,13 @@ public class GremlinQueryExecutor extends QueryExecutor {
      *
      * @param gremlinConnectionProperties GremlinConnectionProperties for use in the executor.
      */
-    public GremlinQueryExecutor(final GremlinConnectionProperties gremlinConnectionProperties) {
+    public GremlinQueryExecutor(final GremlinConnectionProperties gremlinConnectionProperties) throws SQLException {
         this.gremlinConnectionProperties = gremlinConnectionProperties;
+        if (gremlinConnectionProperties.getAuthScheme().equals(AuthScheme.IAMSigV4)
+                && (System.getenv().get("SERVICE_REGION") == null)) {
+            throw new SQLException(
+                    "SERVICE_REGION environment variable must be set for IAMSigV4 authentication.");
+        }
     }
 
     /**
@@ -253,7 +258,8 @@ public class GremlinQueryExecutor extends QueryExecutor {
             final CompletableFuture<List<Result>> tempCompletableFuture = tempClient.submit("g.inject(0)").all();
             tempCompletableFuture.get(timeout, TimeUnit.SECONDS);
             return true;
-        } catch (final RuntimeException ignored) {
+        } catch (final RuntimeException e) {
+            LOGGER.error("Connectiong to database failed.", e);
         }
         return false;
     }
@@ -300,7 +306,7 @@ public class GremlinQueryExecutor extends QueryExecutor {
             }
             MetadataCache.updateCache(gremlinConnectionProperties.getContactPoint(), null,
                     (gremlinConnectionProperties.getAuthScheme() == AuthScheme.IAMSigV4),
-                    MetadataCache.PathType.Gremlin);
+                    MetadataCache.PathType.Gremlin, null);
         }
 
         final List<GraphSchema> graphSchemaList =
@@ -361,7 +367,7 @@ public class GremlinQueryExecutor extends QueryExecutor {
             }
             MetadataCache.updateCache(gremlinConnectionProperties.getContactPoint(), null,
                     (gremlinConnectionProperties.getAuthScheme() == AuthScheme.IAMSigV4),
-                    MetadataCache.PathType.Gremlin);
+                    MetadataCache.PathType.Gremlin, null);
         }
 
         final List<GraphSchema> graphSchemaList =
