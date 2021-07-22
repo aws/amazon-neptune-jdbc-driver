@@ -20,7 +20,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.twilmes.sql.gremlin.processor.SingleQueryExecutor;
 import software.amazon.jdbc.utilities.SqlError;
-import software.amazon.jdbc.utilities.SqlState;
 import software.amazon.neptune.gremlin.GremlinTypeMapping;
 import software.amazon.neptune.gremlin.resultset.GremlinResultSet;
 import software.amazon.neptune.gremlin.resultset.GremlinResultSetMetadata;
@@ -44,10 +43,12 @@ public class SqlGremlinResultSet extends software.amazon.jdbc.ResultSet implemen
     }
 
     private final List<String> columns;
-    private final List<List<Object>> rows;
     private final List<String> columnTypes;
-    private boolean wasNull = false;
     private final GremlinResultSetMetadata gremlinResultSetMetadata;
+    private final SingleQueryExecutor.SqlGremlinQueryResult sqlQueryResult;
+    // A single row that's assigned when we use getResult() in next().
+    private List<Object> row;
+    private boolean wasNull = false;
 
     /**
      * GremlinResultSet constructor, initializes super class.
@@ -57,10 +58,13 @@ public class SqlGremlinResultSet extends software.amazon.jdbc.ResultSet implemen
      */
     public SqlGremlinResultSet(final java.sql.Statement statement,
                                final SingleQueryExecutor.SqlGremlinQueryResult queryResult) {
-        super(statement, queryResult.getColumns(), queryResult.getRows().size());
+        // 1 for row count as placeholder.
+        super(statement, queryResult.getColumns(), 1);
         this.columns = queryResult.getColumns();
-        this.rows = queryResult.getRows();
+        // Null until we get result by calling next.
+        this.row = null;
         this.columnTypes = queryResult.getColumnTypes();
+        this.sqlQueryResult = queryResult;
 
         final List<Class<?>> rowTypes = new ArrayList<>();
         for (final String columnType : columnTypes) {
@@ -74,14 +78,42 @@ public class SqlGremlinResultSet extends software.amazon.jdbc.ResultSet implemen
     }
 
     @Override
+    public boolean next() {
+        final Object res;
+        try {
+            res = sqlQueryResult.getResult();
+        } catch (SQLException e) {
+            LOGGER.trace("No more results.");
+            return false;
+        }
+        this.row = (List<Object>) res;
+        return true;
+    }
+
+    @Override
+    public boolean isLast() throws SQLException {
+        throw SqlError.createSQLFeatureNotSupportedException(LOGGER);
+    }
+
+    @Override
+    public boolean isAfterLast() throws SQLException {
+        throw SqlError.createSQLFeatureNotSupportedException(LOGGER);
+    }
+
+    @Override
+    public boolean absolute(final int row) throws SQLException {
+        throw SqlError.createSQLFeatureNotSupportedException(LOGGER);
+    }
+
+    @Override
+    // TODO use fetch size for page size?
     protected int getDriverFetchSize() throws SQLException {
-        // Can't be done based on implementation.
         return 0;
     }
 
     @Override
+    // TODO use fetch size for page size?
     protected void setDriverFetchSize(final int rows) {
-        // Can't be done based on implementation.
     }
 
     @Override
@@ -103,16 +135,9 @@ public class SqlGremlinResultSet extends software.amazon.jdbc.ResultSet implemen
 
     private Object getValue(final int columnIndex) throws SQLException {
         verifyOpen();
-        if (rows == null) {
-            throw SqlError.createSQLException(
-                    LOGGER,
-                    SqlState.DATA_EXCEPTION,
-                    SqlError.UNSUPPORTED_RESULT_SET_TYPE);
-        }
-        validateRowColumn(columnIndex);
 
-        // Look for row index within rows, then grab column index from there (note: 1 based indexing of JDBC hence -1).
-        final Object value = rows.get(getRowIndex()).get(columnIndex - 1);
+        // Grab value in row using column index (note: 1 based indexing of JDBC hence -1).
+        final Object value = row.get(columnIndex - 1);
         wasNull = (value == null);
 
         return value;
