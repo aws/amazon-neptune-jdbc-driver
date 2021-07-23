@@ -22,7 +22,7 @@ import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSo
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.twilmes.sql.gremlin.SqlToGremlin;
-import org.twilmes.sql.gremlin.processor.executors.SingleQueryExecutor;
+import org.twilmes.sql.gremlin.processor.executors.SqlGremlinQueryResult;
 import software.amazon.jdbc.utilities.AuthScheme;
 import software.amazon.jdbc.utilities.SqlError;
 import software.amazon.jdbc.utilities.SqlState;
@@ -63,6 +63,50 @@ public class SqlGremlinQueryExecutor extends GremlinQueryExecutor {
             throw new SQLException(
                     "SERVICE_REGION environment variable must be set for IAMSigV4 authentication.");
         }
+    }
+
+    /**
+     * Function to release the SqlGremlinQueryExecutor resources.
+     */
+    public static void close() {
+        try {
+            synchronized (TRAVERSAL_LOCK) {
+                if (graphTraversalSource != null) {
+                    graphTraversalSource.close();
+                }
+                graphTraversalSource = null;
+            }
+        } catch (final Exception e) {
+            LOGGER.warn("Failed to close traversal source", e);
+        }
+        GremlinQueryExecutor.close();
+    }
+
+    private static GraphTraversalSource getGraphTraversalSource(
+            final GremlinConnectionProperties gremlinConnectionProperties)
+            throws SQLException {
+        synchronized (TRAVERSAL_LOCK) {
+            if (graphTraversalSource == null) {
+                graphTraversalSource =
+                        traversal().withRemote(DriverRemoteConnection.using(getClient(gremlinConnectionProperties)));
+            }
+        }
+        return graphTraversalSource;
+
+    }
+
+    private static SqlToGremlin getSqlToGremlin(final GremlinConnectionProperties gremlinConnectionProperties)
+            throws SQLException {
+        if (!MetadataCache.isMetadataCached()) {
+            MetadataCache.updateCache(gremlinConnectionProperties.getContactPoint(), null,
+                    (gremlinConnectionProperties.getAuthScheme() == AuthScheme.IAMSigV4),
+                    MetadataCache.PathType.Gremlin, gremlinConnectionProperties);
+        }
+        if (sqlToGremlin == null) {
+            sqlToGremlin = new SqlToGremlin(MetadataCache.getSchemaConfig(),
+                    getGraphTraversalSource(gremlinConnectionProperties));
+        }
+        return sqlToGremlin;
     }
 
     /**
@@ -120,45 +164,6 @@ public class SqlGremlinQueryExecutor extends GremlinQueryExecutor {
     }
 
     /**
-     * Function to release the SqlGremlinQueryExecutor resources.
-     */
-    public static void close() {
-        try {
-            synchronized (TRAVERSAL_LOCK) {
-                if (graphTraversalSource != null) {
-                    graphTraversalSource.close();
-                }
-                graphTraversalSource = null;
-            }
-        } catch (final Exception e) {
-            LOGGER.warn("Failed to close traversal source", e);
-        }
-        GremlinQueryExecutor.close();
-    }
-
-    private static GraphTraversalSource getGraphTraversalSource(
-            final GremlinConnectionProperties gremlinConnectionProperties)
-            throws SQLException {
-        synchronized (TRAVERSAL_LOCK) {
-            if (graphTraversalSource == null) {
-                graphTraversalSource =
-                        traversal().withRemote(DriverRemoteConnection.using(getClient(gremlinConnectionProperties)));
-            }
-        }
-        return graphTraversalSource;
-
-    }
-
-    private static SqlToGremlin getSqlToGremlin(final GremlinConnectionProperties gremlinConnectionProperties)
-            throws SQLException {
-        if (sqlToGremlin == null) {
-            sqlToGremlin = new SqlToGremlin(MetadataCache.getSchemaConfig(),
-                    getGraphTraversalSource(gremlinConnectionProperties));
-        }
-        return sqlToGremlin;
-    }
-
-    /**
      * Function to execute query.
      *
      * @param sql       Query to execute.
@@ -171,7 +176,7 @@ public class SqlGremlinQueryExecutor extends GremlinQueryExecutor {
         final Constructor<?> constructor;
         try {
             constructor = SqlGremlinResultSet.class
-                    .getConstructor(java.sql.Statement.class, SingleQueryExecutor.SqlGremlinQueryResult.class);
+                    .getConstructor(java.sql.Statement.class, SqlGremlinQueryResult.class);
         } catch (final NoSuchMethodException e) {
             throw SqlError.createSQLException(
                     LOGGER,

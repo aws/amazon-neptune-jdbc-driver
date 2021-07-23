@@ -32,6 +32,7 @@ import org.twilmes.sql.gremlin.schema.SchemaConfig;
 import org.twilmes.sql.gremlin.schema.TableColumn;
 import org.twilmes.sql.gremlin.schema.TableConfig;
 import org.twilmes.sql.gremlin.schema.TableRelationship;
+import software.amazon.jdbc.utilities.AuthScheme;
 import software.amazon.jdbc.utilities.SqlError;
 import software.amazon.jdbc.utilities.SqlState;
 import software.amazon.neptune.gremlin.GremlinConnectionProperties;
@@ -256,7 +257,7 @@ public class SchemaHelperGremlinDataModel {
         return (T) obj;
     }
 
-    static SchemaConfig getSchemaConfig(final GremlinConnectionProperties gremlinConnectionProperties)
+    public static SchemaConfig getSchemaConfig(final GremlinConnectionProperties gremlinConnectionProperties)
             throws SQLException {
         final SchemaConfig schemaConfig = new SchemaConfig();
         schemaConfig.setTables(getTableConfigs(MetadataCache.getNodeSchemaList()));
