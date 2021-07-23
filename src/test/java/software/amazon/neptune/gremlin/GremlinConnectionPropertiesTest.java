@@ -459,7 +459,7 @@ class GremlinConnectionPropertiesTest extends ConnectionPropertiesTestBase {
     @Test
     void testMaxContentLength() throws SQLException {
         connectionProperties = new GremlinConnectionProperties();
-        Assertions.assertEquals(NO_DEFAULT_INT, connectionProperties.getMaxContentLength());
+        Assertions.assertEquals(1073741824, connectionProperties.getMaxContentLength());
         connectionProperties.setMaxContentLength(randomIntValue);
         Assertions.assertEquals(randomIntValue, connectionProperties.getMaxContentLength());
     }

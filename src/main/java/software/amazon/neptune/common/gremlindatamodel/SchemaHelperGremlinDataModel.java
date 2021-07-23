@@ -217,7 +217,7 @@ public class SchemaHelperGremlinDataModel {
             }
             final List<String> labels = new ArrayList<>();
             try {
-                labels.add(getValueCheckType(node, "label", ArrayList.class));
+                labels.addAll(getValueCheckType(node, "label", ArrayList.class));
             } catch (final Exception ignored) {
                 labels.add(getValueCheckType(node, "label", String.class));
             }

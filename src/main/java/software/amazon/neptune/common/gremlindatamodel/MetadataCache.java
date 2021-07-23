@@ -106,7 +106,7 @@ public class MetadataCache {
         synchronized (LOCK) {
             final List<GraphSchema> graphSchemas = new ArrayList<>();
             for (final GraphSchema graphSchema : nodeSchemaList) {
-                if (nodeFilter != null && !"%" .equals(nodeFilter)) {
+                if (nodeFilter != null && !"%".equals(nodeFilter)) {
                     if (Arrays.stream(nodeFilter.split(":"))
                             .allMatch(node -> graphSchema.getLabels().contains(node))) {
                         graphSchemas.add(graphSchema);
@@ -116,7 +116,7 @@ public class MetadataCache {
                 }
             }
             for (final GraphSchema graphSchema : edgeSchemaList) {
-                if (nodeFilter != null && !"%" .equals(nodeFilter)) {
+                if (nodeFilter != null && !"%".equals(nodeFilter)) {
                     if (Arrays.stream(nodeFilter.split(":"))
                             .allMatch(node -> graphSchema.getLabels().contains(node))) {
                         graphSchemas.add(graphSchema);
