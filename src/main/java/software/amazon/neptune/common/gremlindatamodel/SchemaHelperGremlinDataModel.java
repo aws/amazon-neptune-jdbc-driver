@@ -32,7 +32,6 @@ import org.twilmes.sql.gremlin.schema.SchemaConfig;
 import org.twilmes.sql.gremlin.schema.TableColumn;
 import org.twilmes.sql.gremlin.schema.TableConfig;
 import org.twilmes.sql.gremlin.schema.TableRelationship;
-import software.amazon.jdbc.utilities.AuthScheme;
 import software.amazon.jdbc.utilities.SqlError;
 import software.amazon.jdbc.utilities.SqlState;
 import software.amazon.neptune.gremlin.GremlinConnectionProperties;
@@ -257,6 +256,13 @@ public class SchemaHelperGremlinDataModel {
         return (T) obj;
     }
 
+    /**
+     * Function to get SchemaConfig with given connection properties.
+     *
+     * @param gremlinConnectionProperties Connection properties.
+     * @return SchemaConfig Object.
+     * @throws SQLException if getting the config fails.
+     */
     public static SchemaConfig getSchemaConfig(final GremlinConnectionProperties gremlinConnectionProperties)
             throws SQLException {
         final SchemaConfig schemaConfig = new SchemaConfig();

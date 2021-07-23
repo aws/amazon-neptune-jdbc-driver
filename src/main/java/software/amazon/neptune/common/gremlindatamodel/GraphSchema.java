@@ -38,6 +38,11 @@ public class GraphSchema {
         return nodeInfo.labels.equals(this.labels) && nodeInfo.properties.equals(this.properties);
     }
 
+    /**
+     * Add foreign key for given edge label.
+     *
+     * @param edgeLabel Edge label.
+     */
     public void addForeignKey(final String edgeLabel) {
         final Map<String, Object> property = new LinkedHashMap<>();
         property.put("property", edgeLabel.toUpperCase() + "_ID");
