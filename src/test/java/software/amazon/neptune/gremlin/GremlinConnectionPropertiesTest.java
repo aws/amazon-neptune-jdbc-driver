@@ -40,6 +40,7 @@ import static org.mockito.Mockito.mock;
 class GremlinConnectionPropertiesTest extends ConnectionPropertiesTestBase {
     private GremlinConnectionProperties connectionProperties;
     private int randomIntValue;
+    private static final int MAX_CONTENT_LENGTH = 1073741824;
 
     protected void assertDoesNotThrowOnNewConnectionProperties(final Properties properties) {
         Assertions.assertDoesNotThrow(() -> {
@@ -459,7 +460,7 @@ class GremlinConnectionPropertiesTest extends ConnectionPropertiesTestBase {
     @Test
     void testMaxContentLength() throws SQLException {
         connectionProperties = new GremlinConnectionProperties();
-        Assertions.assertEquals(1073741824, connectionProperties.getMaxContentLength());
+        Assertions.assertEquals(MAX_CONTENT_LENGTH, connectionProperties.getMaxContentLength());
         connectionProperties.setMaxContentLength(randomIntValue);
         Assertions.assertEquals(randomIntValue, connectionProperties.getMaxContentLength());
     }
