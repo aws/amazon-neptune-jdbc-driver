@@ -52,7 +52,7 @@ public class GremlinConnection extends software.amazon.jdbc.Connection implement
     }
 
     @Override
-    public QueryExecutor getQueryExecutor() {
+    public QueryExecutor getQueryExecutor() throws SQLException {
         return new GremlinQueryExecutor(getGremlinConnectionProperties());
     }
 

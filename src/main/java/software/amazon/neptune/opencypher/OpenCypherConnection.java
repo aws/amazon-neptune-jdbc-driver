@@ -52,7 +52,7 @@ public class OpenCypherConnection extends software.amazon.jdbc.Connection implem
     }
 
     @Override
-    public QueryExecutor getQueryExecutor() {
+    public QueryExecutor getQueryExecutor() throws SQLException {
         return new OpenCypherQueryExecutor(getOpenCypherConnectionProperties());
     }
 

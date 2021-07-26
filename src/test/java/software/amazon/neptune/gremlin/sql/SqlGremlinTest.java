@@ -30,8 +30,6 @@ import org.apache.tinkerpop.gremlin.driver.remote.DriverRemoteConnection;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
-import org.twilmes.sql.gremlin.SqlToGremlin;
-import org.twilmes.sql.gremlin.schema.SchemaConfig;
 import software.amazon.jdbc.utilities.AuthScheme;
 import software.amazon.jdbc.utilities.ConnectionProperties;
 import software.amazon.neptune.gremlin.GremlinConnection;
@@ -147,26 +145,23 @@ public class SqlGremlinTest {
         properties.put(PORT_KEY, PORT);
         properties.put(ENABLE_SSL_KEY, true);
 
-        final SchemaConfig schemaConfig =
-                SqlGremlinGraphSchemaHelper.getSchemaConfig(new GremlinConnectionProperties(properties));
-        final SqlToGremlin sqlToGremlin = new SqlToGremlin(schemaConfig, getGraphTraversalSource());
         final java.sql.Connection connection = new SqlGremlinConnection(new GremlinConnectionProperties(properties));
         final java.sql.Statement statement = connection.createStatement();
 
-        runQueryPrintResults("SELECT * FROM Person", statement);
-        runQueryPrintResults("SELECT category FROM websiteGroup", statement);
-        runQueryPrintResults("SELECT lastName FROM Person", statement);
-
-        schemaConfig.getTables().forEach(table -> {
-            final String tableName = table.getName();
-            table.getColumns().forEach(column -> {
-                try {
-                    runQueryPrintResults(String.format("SELECT %s FROM %s", column.getName(), tableName), statement);
-                } catch (final SQLException throwables) {
-                    throwables.printStackTrace();
-                }
-            });
-        });
+        runQueryPrintResults("SELECT category FROM websiteGroup LIMIT 5", statement);
+        runQueryPrintResults("SELECT title FROM website LIMIT 10", statement);
+        runQueryPrintResults("SELECT visited_id FROM website LIMIT 5", statement);
+        runQueryPrintResults("SELECT visited_id, title FROM website LIMIT 15", statement);
+        runQueryPrintResults("SELECT title, visited_id FROM website LIMIT 15", statement);
+        runQueryPrintResults("SELECT * FROM website LIMIT 10", statement);
+        runQueryPrintResults(
+                "SELECT `website`.`url` AS `url` FROM `website` INNER JOIN `transientId` ON " +
+                        "(`website`.`visited_id` = `transientId`.`visited_id`) LIMIT 5",
+                statement);
+        runQueryPrintResults(
+                "SELECT `transientId`.`os` AS `os` FROM `transientId` INNER JOIN `website` ON " +
+                        "(`website`.`visited_id` = `transientId`.`visited_id`) LIMIT 10",
+                statement);
     }
 
     void runQueryPrintResults(final String query, final java.sql.Statement statement) throws SQLException {

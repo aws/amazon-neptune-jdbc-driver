@@ -18,7 +18,7 @@ package software.amazon.neptune.gremlin.sql;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.twilmes.sql.gremlin.processor.SingleQueryExecutor;
+import org.twilmes.sql.gremlin.processor.executors.SqlGremlinQueryResult;
 import software.amazon.jdbc.utilities.SqlError;
 import software.amazon.neptune.gremlin.GremlinTypeMapping;
 import software.amazon.neptune.gremlin.resultset.GremlinResultSet;
@@ -45,7 +45,7 @@ public class SqlGremlinResultSet extends software.amazon.jdbc.ResultSet implemen
     private final List<String> columns;
     private final List<String> columnTypes;
     private final GremlinResultSetMetadata gremlinResultSetMetadata;
-    private final SingleQueryExecutor.SqlGremlinQueryResult sqlQueryResult;
+    private final SqlGremlinQueryResult sqlQueryResult;
     // A single row that's assigned when we use getResult() in next().
     private List<Object> row;
     private boolean wasNull = false;
@@ -57,7 +57,7 @@ public class SqlGremlinResultSet extends software.amazon.jdbc.ResultSet implemen
      * @param queryResult SqlGremlinQueryResult Object.
      */
     public SqlGremlinResultSet(final java.sql.Statement statement,
-                               final SingleQueryExecutor.SqlGremlinQueryResult queryResult) {
+                               final SqlGremlinQueryResult queryResult) {
         // 1 for row count as placeholder.
         super(statement, queryResult.getColumns(), 1);
         this.columns = queryResult.getColumns();

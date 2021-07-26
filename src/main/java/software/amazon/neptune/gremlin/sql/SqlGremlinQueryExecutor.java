@@ -22,15 +22,21 @@ import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSo
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.twilmes.sql.gremlin.SqlToGremlin;
-import org.twilmes.sql.gremlin.processor.SingleQueryExecutor;
+import org.twilmes.sql.gremlin.processor.executors.SqlGremlinQueryResult;
+import software.amazon.jdbc.utilities.AuthScheme;
 import software.amazon.jdbc.utilities.SqlError;
 import software.amazon.jdbc.utilities.SqlState;
+import software.amazon.neptune.common.gremlindatamodel.GraphSchema;
+import software.amazon.neptune.common.gremlindatamodel.MetadataCache;
 import software.amazon.neptune.gremlin.GremlinConnectionProperties;
 import software.amazon.neptune.gremlin.GremlinQueryExecutor;
+import software.amazon.neptune.gremlin.resultset.GremlinResultSetGetColumns;
+import software.amazon.neptune.gremlin.resultset.GremlinResultSetGetTables;
 import java.lang.reflect.Constructor;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.List;
 
 import static org.apache.tinkerpop.gremlin.process.traversal.AnonymousTraversalSource.traversal;
 
@@ -49,9 +55,14 @@ public class SqlGremlinQueryExecutor extends GremlinQueryExecutor {
      *
      * @param gremlinConnectionProperties GremlinConnectionProperties for connection.
      */
-    public SqlGremlinQueryExecutor(final GremlinConnectionProperties gremlinConnectionProperties) {
+    public SqlGremlinQueryExecutor(final GremlinConnectionProperties gremlinConnectionProperties) throws SQLException {
         super(gremlinConnectionProperties);
         this.gremlinConnectionProperties = gremlinConnectionProperties;
+        if (gremlinConnectionProperties.getAuthScheme().equals(AuthScheme.IAMSigV4)
+                && (System.getenv().get("SERVICE_REGION") == null)) {
+            throw new SQLException(
+                    "SERVICE_REGION environment variable must be set for IAMSigV4 authentication.");
+        }
     }
 
     /**
@@ -86,12 +97,70 @@ public class SqlGremlinQueryExecutor extends GremlinQueryExecutor {
 
     private static SqlToGremlin getSqlToGremlin(final GremlinConnectionProperties gremlinConnectionProperties)
             throws SQLException {
+        if (!MetadataCache.isMetadataCached()) {
+            MetadataCache.updateCache(gremlinConnectionProperties.getContactPoint(), null,
+                    (gremlinConnectionProperties.getAuthScheme() == AuthScheme.IAMSigV4),
+                    MetadataCache.PathType.Gremlin, gremlinConnectionProperties);
+        }
         if (sqlToGremlin == null) {
-            sqlToGremlin = new SqlToGremlin(
-                    SqlGremlinGraphSchemaHelper.getSchemaConfig(gremlinConnectionProperties),
+            sqlToGremlin = new SqlToGremlin(MetadataCache.getSchemaConfig(),
                     getGraphTraversalSource(gremlinConnectionProperties));
         }
         return sqlToGremlin;
+    }
+
+    /**
+     * Function to get table types.
+     *
+     * @param statement java.sql.Statement Object required for result set.
+     * @param nodes     String containing nodes to get schema for.
+     * @return java.sql.ResultSet Object containing columns.
+     */
+    @Override
+    public java.sql.ResultSet executeGetColumns(final java.sql.Statement statement, final String nodes)
+            throws SQLException {
+        if (!MetadataCache.isMetadataCached()) {
+            // TODO AN-576: Temp isValid check. Find a better solution inside the export tool to check if connection is valid.
+            if (!statement.getConnection().isValid(3000)) {
+                throw new SQLException("Failed to execute getTables, could not connect to database.");
+            }
+            MetadataCache.updateCache(gremlinConnectionProperties.getContactPoint(), null,
+                    (gremlinConnectionProperties.getAuthScheme() == AuthScheme.IAMSigV4),
+                    MetadataCache.PathType.Gremlin, gremlinConnectionProperties);
+        }
+
+        final List<GraphSchema> graphSchemaList =
+                MetadataCache.getFilteredCacheNodeColumnInfos(nodes);
+        return new GremlinResultSetGetColumns(statement, graphSchemaList,
+                MetadataCache.getFilteredResultSetInfoWithoutRowsForColumns(nodes));
+    }
+
+    /**
+     * Function to get tables.
+     *
+     * @param statement java.sql.Statement Object required for result set.
+     * @param tableName String table name with colon delimits.
+     * @return java.sql.ResultSet object returned from query execution.
+     * @throws SQLException if query execution fails, or it was cancelled.
+     */
+    @Override
+    public java.sql.ResultSet executeGetTables(final java.sql.Statement statement, final String tableName)
+            throws SQLException {
+        // TODO: Update this caching mechanism, should try to make this automatic or something.
+        if (!MetadataCache.isMetadataCached()) {
+            // TODO AN-576: Temp isValid check. Find a better solution inside the export tool to check if connection is valid.
+            if (!statement.getConnection().isValid(3000)) {
+                throw new SQLException("Failed to execute getTables, could not connect to database.");
+            }
+            MetadataCache.updateCache(gremlinConnectionProperties.getContactPoint(), null,
+                    (gremlinConnectionProperties.getAuthScheme() == AuthScheme.IAMSigV4),
+                    MetadataCache.PathType.Gremlin, gremlinConnectionProperties);
+        }
+
+        final List<GraphSchema> graphSchemaList =
+                MetadataCache.getFilteredCacheNodeColumnInfos(tableName);
+        return new GremlinResultSetGetTables(statement, graphSchemaList,
+                MetadataCache.getFilteredResultSetInfoWithoutRowsForTables(tableName));
     }
 
     /**
@@ -107,7 +176,7 @@ public class SqlGremlinQueryExecutor extends GremlinQueryExecutor {
         final Constructor<?> constructor;
         try {
             constructor = SqlGremlinResultSet.class
-                    .getConstructor(java.sql.Statement.class, SingleQueryExecutor.SqlGremlinQueryResult.class);
+                    .getConstructor(java.sql.Statement.class, SqlGremlinQueryResult.class);
         } catch (final NoSuchMethodException e) {
             throw SqlError.createSQLException(
                     LOGGER,
