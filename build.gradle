@@ -17,7 +17,7 @@ plugins {
 
 apply plugin: 'java'
 apply plugin: 'com.github.johnrengelman.shadow'
-group 'software.amazon.neptune.jdbc'
+group 'software.aws.neptune.jdbc'
 version '1.0-SNAPSHOT'
 description 'neptune-jdbc-driver'
 
