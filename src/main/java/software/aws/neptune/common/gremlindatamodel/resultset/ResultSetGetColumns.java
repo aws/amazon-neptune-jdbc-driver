@@ -181,7 +181,7 @@ public abstract class ResultSetGetColumns extends ResultSet
                 }
 
                 // TODO: These need to be verified for Tableau.
-                map.put("DECIMAL_DIGITS", 10);
+                map.put("DECIMAL_DIGITS", null);
                 map.put("NUM_PREC_RADIX", 10);
                 map.put("ORDINAL_POSITION", i++);
                 map.put("COLUMN_SIZE", 10);

@@ -92,13 +92,13 @@ public class SparqlDatabaseMetadataTest {
     @Test
     void testGetCatalogs() throws SQLException {
         final java.sql.ResultSet resultSet = databaseMetaData.getCatalogs();
-        Assertions.assertFalse(resultSet.next());
+        Assertions.assertTrue(resultSet.next());
     }
 
     @Test
     void testGetSchemas() throws SQLException {
         final java.sql.ResultSet resultSet = databaseMetaData.getSchemas();
-        Assertions.assertFalse(resultSet.next());
+        Assertions.assertTrue(resultSet.next());
     }
 
     @Test
