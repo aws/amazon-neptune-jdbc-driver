@@ -1,5 +1,4 @@
 (function propertiesbuilder(attr) {
-    logging.log("!!!!!!!!!!!!!!!!!!!!!!!");
     logging.log("entering propertiesBuilder");
     var strJSON = JSON.stringify(attr);
     logging.log("connectionProperties attr=" + strJSON);

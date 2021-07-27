@@ -21,7 +21,7 @@
         </customizations>
     </connection-customization>
     <connection-fields file='connection-fields.xml'/>
-<!--     <connection-dialog file='connection-dialog.tcd'/> -->
+    <connection-metadata file='connection-metadata.xml'/>
     <connection-resolver file="connectionResolver.tdr"/>
     <dialect file='dialect.tdd'/>
 </connector-plugin>

@@ -22,4 +22,6 @@
     </boolean-options>
   </field>
 
+  <field name="vendor1" label="Addition Connection Options" category="general" value-type="string" default-value="" optional="true"/>
+
 </connection-fields>

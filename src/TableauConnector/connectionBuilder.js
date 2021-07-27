@@ -1,7 +1,14 @@
 (function dsbuilder(attr){
-    logging.log("~~~~~~~~~~~~~~~~");
+    logging.log("entering urlBuilder");
+
     var urlBuilder = "jdbc:neptune:sqlgremlin://" + attr["server"] + ";port=" + attr["port"];
-    logging.log("~~~~~~~~~~~~~~~~=" + urlBuilder);
+
+    var additionalOptions = attr[connectionHelper.attributeVendor1];
+    if (additionalOptions) {
+        urlBuilder += ";" + additionalOptions;
+    }
+
+    logging.log("urlBuilder=" + urlBuilder);
     return [urlBuilder];
 })
 
