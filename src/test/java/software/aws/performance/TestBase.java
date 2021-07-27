@@ -34,7 +34,7 @@ import java.util.Objects;
 import java.util.Properties;
 
 public class TestBase {
-    private static final String YAML_DIR = "./src/test/java/software/amazon/performance/yaml";
+    private static final String YAML_DIR = "./src/test/java/software/aws/performance/yaml";
     private static final String[] YAML = new String[] { "yaml" };
 
     private static List<TestInfo> testConfigList = null;

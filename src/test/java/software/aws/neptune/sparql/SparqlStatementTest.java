@@ -65,7 +65,7 @@ public class SparqlStatementTest extends SparqlStatementTestBase {
 
         // load dataset in
         try (final RDFConnection conn = builder.build()) {
-            conn.load("src/test/java/software/amazon/neptune/sparql/mock/sparql_mock_data.rdf");
+            conn.load("src/test/java/software/aws/neptune/sparql/mock/sparql_mock_data.rdf");
             conn.update(update);
         }
 
