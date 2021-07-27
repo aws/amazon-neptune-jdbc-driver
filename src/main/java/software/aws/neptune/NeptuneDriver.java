@@ -77,7 +77,7 @@ public class NeptuneDriver extends Driver implements java.sql.Driver {
         if (!acceptsURL(url)) {
             return null;
         }
-
+        final java.sql.Connection connection;
         try {
             final String language = getLanguage(url, CONN_STRING_PATTERN);
             final Properties properties =
@@ -85,13 +85,20 @@ public class NeptuneDriver extends Driver implements java.sql.Driver {
             if (info != null) {
                 properties.putAll(info);
             }
-            return (java.sql.Connection) connectionMap.get(language)
+            connection = (java.sql.Connection) connectionMap.get(language)
                     .getConstructor(ConnectionProperties.class)
                     .newInstance(connectionProperties(language, properties));
+            if (connection.isValid(2)) {
+                return connection;
+            }
         } catch (final Exception e) {
+            if (e instanceof SQLException) {
+                throw (SQLException) e;
+            }
             LOGGER.error("Unexpected error while creating connection:", e);
             return null;
         }
+        throw new SQLException("Error, failed to connect to database. Check endpoint, port, and configuration.");
     }
 
     private ConnectionProperties connectionProperties(final String language, final Properties properties)

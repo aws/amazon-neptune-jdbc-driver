@@ -257,10 +257,14 @@ public class GremlinQueryExecutor extends QueryExecutor {
             // saying return 0.
             final CompletableFuture<List<Result>> tempCompletableFuture = tempClient.submit("g.inject(0)").all();
             tempCompletableFuture.get(timeout, TimeUnit.SECONDS);
+            tempClient.close();
+            tempCluster.close();
             return true;
         } catch (final RuntimeException e) {
-            LOGGER.error("Connectiong to database failed.", e);
+            LOGGER.error("Connecting to database failed.", e);
         }
+        tempClient.close();
+        tempCluster.close();
         return false;
     }
 
