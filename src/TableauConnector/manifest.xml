@@ -1,44 +1,27 @@
 <?xml version='1.0' encoding='utf-8' ?>
 
-<connector-plugin class='neptunejdbc' superclass='jdbc' plugin-version='1.13.0.0' name='OpenCypher' version='18.1' min-version-tableau='2020.1'>
+<connector-plugin class='neptunejdbc' superclass='jdbc' plugin-version='1.13.0.0' name='SQL via Gremlin' version='18.1' min-version-tableau='2020.3'>
     <vendor-information>
         <company name="Amazon Neptune"/>
-        <support-link url="https://github.com/opendistro-for-elasticsearch/sql"/>
-        <driver-download-link url="https://github.com/opendistro-for-elasticsearch/sql"/>
+        <support-link url="https://docs.aws.amazon.com/neptune/latest/userguide/intro.html"/>
+        <driver-download-link url="https://docs.aws.amazon.com/neptune/latest/userguide/intro.html"/>
     </vendor-information>
     <connection-customization class="neptunejdbc" enabled="true" version="10.0">
         <vendor name="Amazon Neptune"/>
-        <driver name="OpenCypher Connector"/>
+        <driver name="SQL via Gremlin Connector"/>
         <customizations>
-            <customization name="CAP_CREATE_TEMP_TABLES" value="no"/>
-            <customization name="CAP_SUPPRESS_DISCOVERY_QUERIES" value="yes" />
-            <customization name="CAP_SELECT_INTO" value="no"/>
-            <customization name="CAP_SELECT_TOP_INTO" value="no"/>
-            <customization name="CAP_QUERY_BOOLEXPR_TO_INTEXPR" value="no"/>
-            <customization name="CAP_QUERY_GROUP_BY_BOOL" value="yes"/>
-            <customization name="CAP_QUERY_GROUP_BY_DEGREE" value="yes"/>
-            <customization name="CAP_QUERY_SORT_BY" value="yes"/>
-            <customization name="CAP_QUERY_SUBQUERIES" value="yes"/>
-            <customization name="CAP_QUERY_TOP_N" value="yes"/>
-            <customization name="CAP_QUERY_TOP_SAMPLE" value="yes"/>
-            <customization name="CAP_QUERY_TOP_SAMPLE_PERCENT" value="yes"/>
-            <customization name="CAP_QUERY_WHERE_FALSE_METADATA" value="yes"/>
-            <customization name="CAP_QUERY_SUBQUERIES_WITH_TOP" value="yes"/>
-            <customization name="CAP_SUPPORTS_SPLIT_FROM_LEFT" value="no"/>
-            <customization name="CAP_SUPPORTS_SPLIT_FROM_RIGHT" value="no"/>
-            <customization name="CAP_QUERY_ALLOW_PARTIAL_AGGREGATION" value="no"/>
-            <customization name="CAP_QUERY_TIME_REQUIRES_CAST" value="yes"/>
-            <customization name="CAP_SUPPORTS_SPLIT_FROM_RIGHT" value="no"/>
-            <customization name="CAP_CONNECT_STORED_PROCEDURE" value="no"/>
-            <!--
-            CAP_SUPPRESS_GET_SERVER_TIME will fix the error while creating extract in tableau.
-            This can be removed when elasticsearch supports query without FROM clause.
-            For smore details: https://community.tableau.com/message/1092123?et=watches.email.thread#1092123
-            -->
-            <customization name="CAP_SUPPRESS_GET_SERVER_TIME" value="yes"/>
+            <customization name='CAP_CREATE_TEMP_TABLES' value='no'/>
+            <customization name='CAP_SUPPRESS_DISCOVERY_QUERIES' value='yes' />
+            <customization name='CAP_SUPPRESS_DISPLAY_LIMITATIONS' value='yes'/>
+            <customization name='CAP_QUERY_SUBQUERIES' value='yes'/>
+            <customization name='CAP_QUERY_SUBQUERIES_WITH_TOP' value='no'/>
+            <customization name='CAP_QUERY_TOP_N' value='no'/>
+            <customization name='CAP_QUERY_TOPSTYLE_LIMIT' value='no'/>
+            <customization name='CAP_QUERY_TOPSTYLE_TOP' value='no'/>
         </customizations>
     </connection-customization>
-    <connection-dialog file='connection-dialog.tcd'/>
+    <connection-fields file='connection-fields.xml'/>
+<!--     <connection-dialog file='connection-dialog.tcd'/> -->
     <connection-resolver file="connectionResolver.tdr"/>
     <dialect file='dialect.tdd'/>
 </connector-plugin>

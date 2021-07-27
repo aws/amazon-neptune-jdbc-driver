@@ -1,4 +1,6 @@
 (function propertiesbuilder(attr) {
+    logging.log("!!!!!!!!!!!!!!!!!!!!!!!");
+    logging.log("entering propertiesBuilder");
     var strJSON = JSON.stringify(attr);
     logging.log("connectionProperties attr=" + strJSON);
 
@@ -6,13 +8,13 @@
     var params = {};
 
     // Set keys for properties needed for connecting using JDBC
-    var AUTH_SCHEME_KEY = "AuthScheme";
-    var USE_ENCRYPTION_KEY = "UseEncryption";
+    var AUTH_SCHEME_KEY = "authScheme";
+    var USE_ENCRYPTION_KEY = "enableSsl";
 
     var authAttrValue = attr[connectionHelper.attributeAuthentication];
-    if (authAttrValue == "NONE")
+    if (authAttrValue == "auth-none")
         params[AUTH_SCHEME_KEY] = "None";
-    else if (authAttrValue == "AWS_SIGV4") {
+    else if (authAttrValue == "auth-user") {
         params[AUTH_SCHEME_KEY] = "IAMSigV4";
     }
 
