@@ -102,8 +102,8 @@ public class SparqlSelectResultSetGetColumnsTest {
         Assertions.assertTrue(resultSet.next());
         final int i = 1;
         do {
-            Assertions.assertNull(resultSet.getString(1));
-            Assertions.assertNull(resultSet.getString(2));
+            Assertions.assertEquals("catalog", resultSet.getString(1));
+            Assertions.assertEquals("gremlin", resultSet.getString(2));
             final String tableName = resultSet.getString(3);
             Assertions.assertTrue(COLUMNS.containsKey(tableName));
 

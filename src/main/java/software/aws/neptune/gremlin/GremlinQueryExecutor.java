@@ -385,7 +385,7 @@ public class GremlinQueryExecutor extends QueryExecutor {
     @SneakyThrows
     @Override
     @SuppressWarnings("unchecked")
-    protected <T> T runQuery(String query) throws SQLException {
+    protected <T> T runQuery(final String query) throws SQLException {
         final Client client = getClient(gremlinConnectionProperties);
 
         synchronized (completableFutureLock) {

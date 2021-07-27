@@ -148,13 +148,15 @@ public class OpenCypherDatabaseMetadataTest {
     @Test
     void testGetCatalogs() throws SQLException {
         final java.sql.ResultSet resultSet = databaseMetaData.getCatalogs();
-        Assertions.assertFalse(resultSet.next());
+        Assertions.assertTrue(resultSet.next());
+        // TODO: Fix this to check the value later.
     }
 
     @Test
     void testGetSchemas() throws SQLException {
         final java.sql.ResultSet resultSet = databaseMetaData.getSchemas();
-        Assertions.assertFalse(resultSet.next());
+        Assertions.assertTrue(resultSet.next());
+        // TODO: Fix this to check the value later.
     }
 
     @Test

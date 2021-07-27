@@ -19,11 +19,11 @@ package software.aws.neptune.gremlin.sql;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.twilmes.sql.gremlin.processor.executors.SqlGremlinQueryResult;
+import software.aws.jdbc.ResultSet;
 import software.aws.jdbc.utilities.SqlError;
 import software.aws.neptune.gremlin.GremlinTypeMapping;
 import software.aws.neptune.gremlin.resultset.GremlinResultSet;
 import software.aws.neptune.gremlin.resultset.GremlinResultSetMetadata;
-import software.aws.jdbc.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -83,7 +83,7 @@ public class SqlGremlinResultSet extends ResultSet implements java.sql.ResultSet
         final Object res;
         try {
             res = sqlQueryResult.getResult();
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
             LOGGER.trace("No more results.");
             return false;
         }

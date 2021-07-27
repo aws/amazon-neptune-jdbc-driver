@@ -191,10 +191,10 @@ public class SqlGremlinQueryExecutor extends GremlinQueryExecutor {
     @SneakyThrows
     @Override
     @SuppressWarnings("unchecked")
-    protected <T> T runQuery(String query) {
+    protected <T> T runQuery(final String query) {
         // TODO: AN-618 Fix this backtick conversion.
-        query = query.replaceAll("\"", "`");
-        return (T) getSqlToGremlin(gremlinConnectionProperties).execute(query);
+        final String backtickQuery = query.replaceAll("\"", "`");
+        return (T) getSqlToGremlin(gremlinConnectionProperties).execute(backtickQuery);
     }
 
     // TODO AN-540: Look into query cancellation.

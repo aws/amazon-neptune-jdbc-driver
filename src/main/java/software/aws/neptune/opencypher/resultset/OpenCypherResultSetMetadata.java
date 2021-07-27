@@ -17,8 +17,8 @@
 package software.aws.neptune.opencypher.resultset;
 
 import org.neo4j.driver.types.Type;
-import software.aws.neptune.opencypher.OpenCypherTypeMapping;
 import software.aws.jdbc.ResultSetMetaData;
+import software.aws.neptune.opencypher.OpenCypherTypeMapping;
 import java.sql.SQLException;
 import java.util.List;
 

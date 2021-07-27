@@ -18,11 +18,10 @@ package software.aws.neptune.sparql;
 
 import lombok.Getter;
 import lombok.NonNull;
+import software.aws.jdbc.Connection;
 import software.aws.jdbc.utilities.ConnectionProperties;
 import software.aws.jdbc.utilities.QueryExecutor;
 import software.aws.neptune.NeptuneDatabaseMetadata;
-import software.aws.jdbc.Connection;
-
 import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
 

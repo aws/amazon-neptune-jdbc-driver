@@ -22,9 +22,8 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import software.aws.jdbc.helpers.HelperFunctions;
-import software.aws.jdbc.utilities.SqlError;
 import software.aws.jdbc.utilities.ConnectionProperties;
-
+import software.aws.jdbc.utilities.SqlError;
 import java.io.IOException;
 import java.sql.DriverManager;
 import java.sql.SQLException;
@@ -49,13 +48,18 @@ public class GremlinIntegrationTest extends GremlinStatementTestBase {
     private static final String ENDPOINT = "iam-auth-test-lyndon.cluster-cdubgfjknn5r.us-east-1.neptune.amazonaws.com";
     private static final String AUTH = "IamSigV4";
     private static final String ENCRYPTION = "TRUE";
-    private static final String CONNECTION_STRING = String.format("jdbc:neptune:gremlin://%s;enableSsl=%s;authScheme=%s;",
-            ENDPOINT, ENCRYPTION, AUTH);
+    private static final String CONNECTION_STRING =
+            String.format("jdbc:neptune:gremlin://%s;enableSsl=%s;authScheme=%s;",
+                    ENDPOINT, ENCRYPTION, AUTH);
+    private static final String VERTEX_1 = "vertex1";
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    private static final Map<String, Object> VERTEX_1_MAP = new HashMap();
+    private static final String VERTEX_2 = "vertex2";
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    private static final Map<String, Object> VERTEX_2_MAP = new HashMap();
+    private static final Map<String, Object> ALL_MAP = new HashMap<>();
     private static java.sql.Connection connection;
 
-    private static final String VERTEX_1 = "vertex1";
-    @SuppressWarnings({ "unchecked", "rawtypes" })
-    private static final Map<String, Object> VERTEX_1_MAP = new HashMap();
     static {
         VERTEX_1_MAP.put("A", 1);
         VERTEX_1_MAP.put("B", 2);
@@ -63,15 +67,11 @@ public class GremlinIntegrationTest extends GremlinStatementTestBase {
         VERTEX_1_MAP.put("D", 4);
     }
 
-    private static final String VERTEX_2 = "vertex2";
-    @SuppressWarnings({ "unchecked", "rawtypes" })
-    private static final Map<String, Object> VERTEX_2_MAP = new HashMap();
     static {
         VERTEX_2_MAP.put("D", 1);
         VERTEX_2_MAP.put("E", 2);
     }
 
-    private static final Map<String, Object> ALL_MAP = new HashMap<>();
     static {
         ALL_MAP.putAll(VERTEX_1_MAP);
         ALL_MAP.putAll(VERTEX_2_MAP);
@@ -111,7 +111,7 @@ public class GremlinIntegrationTest extends GremlinStatementTestBase {
 
     private static void validateResultSetRows(final java.sql.ResultSet resultSet,
                                               final Map<String, Object> properties) throws SQLException {
-        for (String col : getActualColumns(resultSet)) {
+        for (final String col : getActualColumns(resultSet)) {
             Assertions.assertEquals(resultSet.getInt(col), properties.get(col));
         }
     }

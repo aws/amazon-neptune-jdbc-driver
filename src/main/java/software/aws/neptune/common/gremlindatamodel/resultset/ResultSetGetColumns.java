@@ -18,13 +18,13 @@ package software.aws.neptune.common.gremlindatamodel.resultset;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import software.aws.jdbc.ResultSet;
 import software.aws.jdbc.utilities.JavaToJdbcTypeConverter;
 import software.aws.jdbc.utilities.JdbcType;
 import software.aws.jdbc.utilities.SqlError;
 import software.aws.jdbc.utilities.SqlState;
 import software.aws.neptune.common.ResultSetInfoWithoutRows;
 import software.aws.neptune.common.gremlindatamodel.GraphSchema;
-import software.aws.jdbc.ResultSet;
 import java.sql.DatabaseMetaData;
 import java.sql.Date;
 import java.sql.SQLException;
@@ -143,7 +143,7 @@ public abstract class ResultSetGetColumns extends ResultSet
      * ResultSetGetColumns constructor, initializes super class.
      *
      * @param statement                Statement Object.
-     * @param graphSchemas          List of GraphSchema Objects.
+     * @param graphSchemas             List of GraphSchema Objects.
      * @param resultSetInfoWithoutRows ResultSetInfoWithoutRows Object.
      */
     public ResultSetGetColumns(final Statement statement, final List<GraphSchema> graphSchemas,

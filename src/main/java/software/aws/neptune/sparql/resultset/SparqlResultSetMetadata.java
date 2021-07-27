@@ -16,8 +16,8 @@
 
 package software.aws.neptune.sparql.resultset;
 
-import software.aws.neptune.sparql.SparqlTypeMapping;
 import software.aws.jdbc.ResultSetMetaData;
+import software.aws.neptune.sparql.SparqlTypeMapping;
 import java.sql.SQLException;
 import java.util.List;
 
