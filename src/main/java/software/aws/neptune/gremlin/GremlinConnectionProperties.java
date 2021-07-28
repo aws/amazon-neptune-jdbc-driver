@@ -1075,7 +1075,7 @@ public class GremlinConnectionProperties extends ConnectionProperties {
                 throw new SQLException(
                         "Error: SERVICE_REGION environment variable must be set to use IAM authentication. " +
                                 "Note, it must be accessible from BI tools if using a BI tool. " +
-                                "Example SERVICE_REGION=us-east=1.");
+                                "Example SERVICE_REGION=us-east-1.");
             }
 
             if (!getEnableSsl()) {

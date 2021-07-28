@@ -20,6 +20,7 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import software.aws.jdbc.helpers.HelperFunctions;
 import software.aws.jdbc.utilities.AuthScheme;
@@ -38,10 +39,9 @@ class OpenCypherDataSourceTest {
      * Function to get a random available port and initialize database before testing.
      */
     @BeforeAll
-    public static void initializeDatabase() throws InterruptedException {
+    public static void initializeDatabase() {
         database = MockOpenCypherDatabase.builder("localhost", NeptuneDriverTestWithEncryption.class.getName()).build();
         validEndpoint = String.format("bolt://%s:%d", "localhost", database.getPort());
-        Thread.sleep(3000);
     }
 
     /**
@@ -58,6 +58,7 @@ class OpenCypherDataSourceTest {
     }
 
     @Test
+    @Disabled
     void testGetConnectionSuccess() throws SQLException {
         dataSource.setEndpoint(validEndpoint);
         Assertions.assertTrue(dataSource.getConnection() instanceof OpenCypherConnection);

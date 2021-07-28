@@ -20,6 +20,7 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import software.aws.jdbc.helpers.HelperFunctions;
 import software.aws.jdbc.utilities.AuthScheme;
@@ -54,6 +55,7 @@ public class SparqlDataSourceTest {
     }
 
     @Test
+    @Disabled
     void testGetConnectionSuccess() throws SQLException {
         dataSource.setEndpoint(HOSTNAME);
         dataSource.setPort(SparqlMockServer.port());
