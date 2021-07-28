@@ -18,18 +18,19 @@ package software.aws.neptune.gremlin.mock;
 
 import org.apache.commons.lang3.SystemUtils;
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 
 public class MockGremlinDatabase {
-    private static final String WINDOWS_EXT = ".bat";
-    private static final String NIX_EXT = ".sh";
-    private static final String SERVER_COMMAND =
-            String.format(
-                    "./gremlin-server/target/apache-tinkerpop-gremlin-server-3.5.0-SNAPSHOT-standalone/bin/gremlin-server%s",
-                    SystemUtils.IS_OS_WINDOWS ? WINDOWS_EXT : NIX_EXT);
+    private static final String WINDOWS_SERVER = "gremlin-server.bat";
+    private static final String NIX_SERVER = "gremlin-server.sh";
+    private static final String SERVER_PATH =
+            "./gremlin-server/target/apache-tinkerpop-gremlin-server-3.5.0-SNAPSHOT-standalone/bin/";
+    private static final String SERVER_COMMAND = SERVER_PATH + NIX_SERVER;
     private static final String START_COMMAND = String.format("%s start", SERVER_COMMAND);
     private static final String STOP_COMMAND = String.format("%s stop", SERVER_COMMAND);
+    private static Process serverProcess = null;
 
 
     /**
@@ -59,8 +60,26 @@ public class MockGremlinDatabase {
     }
 
     private static String runCommand(final String command) throws IOException {
-        final Process p = Runtime.getRuntime().exec(command);
-        final BufferedReader input = new BufferedReader(new InputStreamReader(p.getInputStream()));
+        if (SystemUtils.IS_OS_WINDOWS) {
+            runWindowsCommand(command);
+        } else {
+            serverProcess = Runtime.getRuntime().exec(command);
+        }
+
+        final BufferedReader input = new BufferedReader(new InputStreamReader(serverProcess.getInputStream()));
         return input.readLine();
+    }
+
+    private static void runWindowsCommand(final String command) throws IOException {
+        if (command.equals(START_COMMAND)) {
+            final ProcessBuilder pb = new ProcessBuilder("cmd", "/c", WINDOWS_SERVER);
+            final File directoryFile = new File(SERVER_PATH);
+            pb.directory(directoryFile);
+            serverProcess = pb.start();
+        }
+
+        if (command.equals(STOP_COMMAND) && serverProcess != null) {
+            serverProcess.destroy();
+        }
     }
 }
