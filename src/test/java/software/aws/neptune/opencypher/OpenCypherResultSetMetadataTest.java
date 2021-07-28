@@ -24,7 +24,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.neo4j.driver.internal.types.InternalTypeSystem;
-import software.aws.jdbc.utilities.AuthScheme;
+import software.aws.neptune.jdbc.utilities.AuthScheme;
 import software.aws.neptune.opencypher.mock.MockOpenCypherDatabase;
 import software.aws.neptune.opencypher.mock.OpenCypherQueryLiterals;
 import java.sql.ResultSetMetaData;

@@ -16,8 +16,8 @@
 
 package software.aws.neptune;
 
-import software.aws.jdbc.Connection;
-import software.aws.jdbc.DatabaseMetaData;
+import software.aws.neptune.jdbc.Connection;
+import software.aws.neptune.jdbc.DatabaseMetaData;
 import java.sql.SQLException;
 
 public class NeptuneDatabaseMetadata extends DatabaseMetaData implements java.sql.DatabaseMetaData {

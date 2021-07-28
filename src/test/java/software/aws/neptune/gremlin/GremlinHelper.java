@@ -16,14 +16,14 @@
 
 package software.aws.neptune.gremlin;
 
-import software.aws.jdbc.utilities.AuthScheme;
-import software.aws.jdbc.utilities.ConnectionProperties;
 import software.aws.neptune.gremlin.resultset.GremlinResultSet;
-
+import software.aws.neptune.jdbc.utilities.AuthScheme;
+import software.aws.neptune.jdbc.utilities.ConnectionProperties;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Map;
 import java.util.Properties;
+
 import static software.aws.neptune.gremlin.GremlinConnectionProperties.CONTACT_POINT_KEY;
 import static software.aws.neptune.gremlin.GremlinConnectionProperties.ENABLE_SSL_KEY;
 import static software.aws.neptune.gremlin.GremlinConnectionProperties.MAX_CONTENT_LENGTH_KEY;
@@ -35,7 +35,7 @@ public class GremlinHelper {
      * Function to get properties for Gremlin connection.
      *
      * @param hostname hostname for properties.
-     * @param port port number for properties.
+     * @param port     port number for properties.
      * @return Properties for Gremlin connection.
      */
     public static Properties getProperties(final String hostname, final int port) {
@@ -47,11 +47,12 @@ public class GremlinHelper {
         properties.put(SSL_SKIP_VALIDATION_KEY, true);
         return properties;
     }
+
     /**
      * Function to get properties for Gremlin connection.
      *
-     * @param hostname hostname for properties.
-     * @param port port number for properties.
+     * @param hostname         hostname for properties.
+     * @param port             port number for properties.
      * @param maxContentLength max content length for properties.
      * @return Properties for Gremlin connection.
      */
@@ -63,7 +64,8 @@ public class GremlinHelper {
 
     /**
      * Function to construct Gremlin query that creates vertex.
-     * @param label Vertex label.
+     *
+     * @param label      Vertex label.
      * @param properties Map containing Vertex properties.
      * @return Gremlin query that creates vertex.
      */
@@ -71,7 +73,7 @@ public class GremlinHelper {
         final String q = "\"";
         final StringBuilder sb = new StringBuilder();
         sb.append("g.addV(").append(q).append(label).append(q).append(")");
-        for (Map.Entry<String, ?> entry : properties.entrySet()) {
+        for (final Map.Entry<String, ?> entry : properties.entrySet()) {
             sb.append(".property(")
                     .append(q).append(entry.getKey()).append(q)
                     .append(", ");
@@ -87,6 +89,7 @@ public class GremlinHelper {
 
     /**
      * Function to construct Gremlin query that gets vertex.
+     *
      * @param label Vertex label.
      * @return Gremlin query that gets vertex.
      */
@@ -96,6 +99,7 @@ public class GremlinHelper {
 
     /**
      * Function to construct Gremlin query that drops vertex.
+     *
      * @param label Vertex label.
      * @return Gremlin query that drops vertex.
      */
@@ -105,8 +109,9 @@ public class GremlinHelper {
 
     /**
      * Function that creates vertex.
+     *
      * @param connection Gremlin database connection.
-     * @param label Vertex label.
+     * @param label      Vertex label.
      * @param properties Map containing Vertex properties.
      * @throws SQLException if fails to create vertex.
      */
@@ -119,8 +124,9 @@ public class GremlinHelper {
 
     /**
      * Function that gets vertex.
+     *
      * @param connection Gremlin database connection.
-     * @param label Vertex label.
+     * @param label      Vertex label.
      * @return Gremlin result set containing vertex.
      * @throws SQLException if fails to get vertex.
      */
@@ -132,17 +138,19 @@ public class GremlinHelper {
 
     /**
      * Function that drops vertex.
+     *
      * @param connection Gremlin database connection.
-     * @param label Vertex label.
+     * @param label      Vertex label.
      * @throws SQLException if fails to drop vertex.
      */
     public static void dropVertex(final Connection connection,
-                                    final String label) throws SQLException {
+                                  final String label) throws SQLException {
         connection.createStatement().executeQuery(dropVertexQuery(label));
     }
 
     /**
      * Function that gets all data from database.
+     *
      * @param connection Gremlin database connection.
      * @return Gremlin result set containing vertex.
      * @throws SQLException if fails to get data.
@@ -154,6 +162,7 @@ public class GremlinHelper {
 
     /**
      * Function that drops all data from database.
+     *
      * @param connection Gremlin database connection.
      * @throws SQLException if fails to drop data.
      */

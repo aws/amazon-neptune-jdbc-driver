@@ -19,10 +19,10 @@ package software.aws.neptune.common.gremlindatamodel.resultset;
 import com.google.common.collect.ImmutableList;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import software.aws.jdbc.utilities.SqlError;
-import software.aws.jdbc.utilities.SqlState;
 import software.aws.neptune.common.ResultSetInfoWithoutRows;
 import software.aws.neptune.common.gremlindatamodel.GraphSchema;
+import software.aws.neptune.jdbc.utilities.SqlError;
+import software.aws.neptune.jdbc.utilities.SqlState;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
@@ -72,7 +72,7 @@ public abstract class ResultSetGetTables extends GenericResultSet implements jav
      * ResultSetGetTables constructor, initializes super class.
      *
      * @param statement                Statement Object.
-     * @param graphSchemas          List of GraphSchema Objects.
+     * @param graphSchemas             List of GraphSchema Objects.
      * @param resultSetInfoWithoutRows ResultSetInfoWithoutRows Object.
      */
     public ResultSetGetTables(final Statement statement,

@@ -18,13 +18,13 @@ package software.aws.neptune.common.gremlindatamodel.resultset;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import software.aws.jdbc.ResultSet;
-import software.aws.jdbc.utilities.JavaToJdbcTypeConverter;
-import software.aws.jdbc.utilities.JdbcType;
-import software.aws.jdbc.utilities.SqlError;
-import software.aws.jdbc.utilities.SqlState;
 import software.aws.neptune.common.ResultSetInfoWithoutRows;
 import software.aws.neptune.common.gremlindatamodel.GraphSchema;
+import software.aws.neptune.jdbc.ResultSet;
+import software.aws.neptune.jdbc.utilities.JavaToJdbcTypeConverter;
+import software.aws.neptune.jdbc.utilities.JdbcType;
+import software.aws.neptune.jdbc.utilities.SqlError;
+import software.aws.neptune.jdbc.utilities.SqlState;
 import java.sql.DatabaseMetaData;
 import java.sql.Date;
 import java.sql.SQLException;

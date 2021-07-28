@@ -22,7 +22,7 @@ import org.neo4j.driver.types.Node;
 import org.neo4j.driver.types.Point;
 import org.neo4j.driver.types.Relationship;
 import org.neo4j.driver.types.Type;
-import software.aws.jdbc.utilities.JdbcType;
+import software.aws.neptune.jdbc.utilities.JdbcType;
 import java.util.HashMap;
 import java.util.Map;
 

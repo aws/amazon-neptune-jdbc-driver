@@ -16,7 +16,7 @@
 
 package software.aws.neptune.common;
 
-import software.aws.jdbc.ResultSet;
+import software.aws.neptune.jdbc.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;

@@ -22,9 +22,9 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
-import software.aws.jdbc.helpers.HelperFunctions;
-import software.aws.jdbc.utilities.AuthScheme;
-import software.aws.jdbc.utilities.SqlError;
+import software.aws.neptune.jdbc.helpers.HelperFunctions;
+import software.aws.neptune.jdbc.utilities.AuthScheme;
+import software.aws.neptune.jdbc.utilities.SqlError;
 import software.aws.neptune.sparql.mock.SparqlMockServer;
 import java.sql.SQLException;
 

@@ -18,10 +18,10 @@ package software.aws.neptune.gremlin;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import software.aws.jdbc.DataSource;
-import software.aws.jdbc.utilities.AuthScheme;
-import software.aws.jdbc.utilities.SqlError;
 import software.aws.neptune.NeptuneDriver;
+import software.aws.neptune.jdbc.DataSource;
+import software.aws.neptune.jdbc.utilities.AuthScheme;
+import software.aws.neptune.jdbc.utilities.SqlError;
 import javax.sql.PooledConnection;
 import java.sql.Connection;
 import java.sql.DriverManager;

@@ -24,10 +24,10 @@ import org.apache.tinkerpop.gremlin.driver.ser.Serializers;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import software.aws.jdbc.helpers.HelperFunctions;
-import software.aws.jdbc.utilities.AuthScheme;
-import software.aws.jdbc.utilities.ConnectionProperties;
 import software.aws.neptune.ConnectionPropertiesTestBase;
+import software.aws.neptune.jdbc.helpers.HelperFunctions;
+import software.aws.neptune.jdbc.utilities.AuthScheme;
+import software.aws.neptune.jdbc.utilities.ConnectionProperties;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Properties;
@@ -38,9 +38,9 @@ import static org.mockito.Mockito.mock;
  * Test for GremlinConnectionProperties.
  */
 class GremlinConnectionPropertiesTest extends ConnectionPropertiesTestBase {
+    private static final int MAX_CONTENT_LENGTH = 1073741824;
     private GremlinConnectionProperties connectionProperties;
     private int randomIntValue;
-    private static final int MAX_CONTENT_LENGTH = 1073741824;
 
     protected void assertDoesNotThrowOnNewConnectionProperties(final Properties properties) {
         Assertions.assertDoesNotThrow(() -> {
