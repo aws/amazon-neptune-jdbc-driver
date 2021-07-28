@@ -18,10 +18,10 @@ package software.aws.neptune.opencypher;
 
 import lombok.Getter;
 import lombok.NonNull;
-import software.aws.jdbc.Connection;
-import software.aws.jdbc.utilities.ConnectionProperties;
-import software.aws.jdbc.utilities.QueryExecutor;
 import software.aws.neptune.NeptuneDatabaseMetadata;
+import software.aws.neptune.jdbc.Connection;
+import software.aws.neptune.jdbc.utilities.ConnectionProperties;
+import software.aws.neptune.jdbc.utilities.QueryExecutor;
 import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
 

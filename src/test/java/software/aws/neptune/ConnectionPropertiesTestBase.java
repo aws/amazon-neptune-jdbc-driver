@@ -18,8 +18,8 @@ package software.aws.neptune;
 
 import com.google.common.collect.ImmutableList;
 import org.junit.jupiter.api.Assertions;
-import software.aws.jdbc.utilities.AuthScheme;
-import software.aws.jdbc.utilities.ConnectionProperties;
+import software.aws.neptune.jdbc.utilities.AuthScheme;
+import software.aws.neptune.jdbc.utilities.ConnectionProperties;
 import software.aws.neptune.opencypher.OpenCypherConnectionProperties;
 import java.util.List;
 import java.util.Properties;

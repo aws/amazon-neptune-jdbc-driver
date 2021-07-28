@@ -16,8 +16,8 @@
 
 package software.aws.neptune.gremlin.resultset;
 
-import software.aws.jdbc.ResultSetMetaData;
 import software.aws.neptune.gremlin.GremlinTypeMapping;
+import software.aws.neptune.jdbc.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.List;
 

@@ -18,8 +18,8 @@ package software.aws.neptune;
 
 import lombok.AllArgsConstructor;
 import org.junit.jupiter.api.Assertions;
-import software.aws.jdbc.helpers.HelperFunctions;
-import software.aws.jdbc.utilities.SqlError;
+import software.aws.neptune.jdbc.helpers.HelperFunctions;
+import software.aws.neptune.jdbc.utilities.SqlError;
 
 @AllArgsConstructor
 public class NeptuneStatementTestHelper extends NeptuneStatementTestHelperBase {

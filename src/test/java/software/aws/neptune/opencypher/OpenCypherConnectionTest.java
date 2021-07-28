@@ -21,11 +21,11 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import software.aws.jdbc.Driver;
-import software.aws.jdbc.helpers.HelperFunctions;
-import software.aws.jdbc.utilities.AuthScheme;
-import software.aws.jdbc.utilities.ConnectionProperties;
-import software.aws.jdbc.utilities.SqlError;
+import software.aws.neptune.jdbc.Driver;
+import software.aws.neptune.jdbc.helpers.HelperFunctions;
+import software.aws.neptune.jdbc.utilities.AuthScheme;
+import software.aws.neptune.jdbc.utilities.ConnectionProperties;
+import software.aws.neptune.jdbc.utilities.SqlError;
 import software.aws.neptune.opencypher.mock.MockOpenCypherDatabase;
 import software.aws.neptune.opencypher.mock.MockOpenCypherNodes;
 import software.aws.neptune.opencypher.resultset.OpenCypherResultSet;
@@ -97,7 +97,7 @@ public class OpenCypherConnectionTest {
     void testOpenCypherConnectionPrepareStatementType() {
         final AtomicReference<PreparedStatement> statement = new AtomicReference<>();
         Assertions.assertDoesNotThrow(() -> statement.set(connection.prepareStatement(QUERY)));
-        Assertions.assertTrue(statement.get() instanceof software.aws.jdbc.PreparedStatement);
+        Assertions.assertTrue(statement.get() instanceof software.aws.neptune.jdbc.PreparedStatement);
 
         final AtomicReference<ResultSet> openCypherResultSet = new AtomicReference<>();
         Assertions.assertDoesNotThrow(() -> openCypherResultSet.set(statement.get().executeQuery()));
@@ -108,7 +108,7 @@ public class OpenCypherConnectionTest {
     void testOpenCypherConnectionStatementType() {
         final AtomicReference<Statement> statement = new AtomicReference<>();
         Assertions.assertDoesNotThrow(() -> statement.set(connection.createStatement()));
-        Assertions.assertTrue(statement.get() instanceof software.aws.jdbc.Statement);
+        Assertions.assertTrue(statement.get() instanceof software.aws.neptune.jdbc.Statement);
 
         final AtomicReference<ResultSet> openCypherResultSet = new AtomicReference<>();
         Assertions.assertDoesNotThrow(() -> openCypherResultSet.set(statement.get().executeQuery(QUERY)));

@@ -19,10 +19,10 @@ package software.aws.neptune.sparql;
 import lombok.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import software.aws.jdbc.DataSource;
-import software.aws.jdbc.utilities.AuthScheme;
-import software.aws.jdbc.utilities.SqlError;
 import software.aws.neptune.NeptuneDriver;
+import software.aws.neptune.jdbc.DataSource;
+import software.aws.neptune.jdbc.utilities.AuthScheme;
+import software.aws.neptune.jdbc.utilities.SqlError;
 import javax.sql.PooledConnection;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -169,6 +169,7 @@ public class SparqlDataSource extends DataSource
     public int getPort() {
         return connectionProperties.getPort();
     }
+
     /**
      * Sets the port.
      *
@@ -187,12 +188,12 @@ public class SparqlDataSource extends DataSource
     public String getDataset() {
         return connectionProperties.getDataset();
     }
+
     /**
      * Sets the dataset.
      *
      * @param dataset The dataset.
      * @throws SQLException if value is invalid.
-     *
      */
     public void setDataset(final String dataset) throws SQLException {
         connectionProperties.setDataset(dataset);

@@ -21,9 +21,9 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import software.aws.jdbc.utilities.SqlError;
-import software.aws.jdbc.utilities.SqlState;
 import software.aws.neptune.common.ResultSetInfoWithoutRows;
+import software.aws.neptune.jdbc.utilities.SqlError;
+import software.aws.neptune.jdbc.utilities.SqlState;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -81,6 +81,5 @@ public class SparqlAskResultSet extends SparqlResultSet {
         private final Boolean row;
         private final List<String> column = ImmutableList
                 .of(ASK_COLUMN_NAME);
-        ;
     }
 }

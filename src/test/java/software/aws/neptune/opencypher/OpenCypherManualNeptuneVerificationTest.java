@@ -20,7 +20,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
-import software.aws.jdbc.utilities.AuthScheme;
+import software.aws.neptune.jdbc.utilities.AuthScheme;
 import software.aws.neptune.opencypher.utilities.OpenCypherGetColumnUtilities;
 import java.sql.SQLException;
 import java.util.Properties;

@@ -19,9 +19,9 @@ package software.aws.neptune.opencypher;
 import com.google.common.collect.ImmutableList;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import software.aws.jdbc.utilities.AuthScheme;
-import software.aws.jdbc.utilities.ConnectionProperties;
 import software.aws.neptune.ConnectionPropertiesTestBase;
+import software.aws.neptune.jdbc.utilities.AuthScheme;
+import software.aws.neptune.jdbc.utilities.ConnectionProperties;
 import java.sql.SQLException;
 import java.util.Properties;
 

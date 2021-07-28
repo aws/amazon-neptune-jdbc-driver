@@ -16,7 +16,7 @@
 
 package software.aws.neptune.opencypher;
 
-import software.aws.jdbc.PooledConnection;
+import software.aws.neptune.jdbc.PooledConnection;
 import java.sql.SQLException;
 
 /**

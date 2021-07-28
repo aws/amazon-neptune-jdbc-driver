@@ -16,7 +16,7 @@
 
 package software.aws.neptune.common.gremlindatamodel.resultset;
 
-import software.aws.jdbc.ResultSet;
+import software.aws.neptune.jdbc.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
 

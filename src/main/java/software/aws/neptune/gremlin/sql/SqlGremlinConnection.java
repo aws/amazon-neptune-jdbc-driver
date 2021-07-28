@@ -17,10 +17,10 @@
 package software.aws.neptune.gremlin.sql;
 
 import lombok.NonNull;
-import software.aws.jdbc.utilities.ConnectionProperties;
-import software.aws.jdbc.utilities.QueryExecutor;
 import software.aws.neptune.NeptuneDatabaseMetadata;
 import software.aws.neptune.gremlin.GremlinConnection;
+import software.aws.neptune.jdbc.utilities.ConnectionProperties;
+import software.aws.neptune.jdbc.utilities.QueryExecutor;
 import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
 

@@ -16,7 +16,7 @@
 
 package software.aws.neptune.gremlin;
 
-import software.aws.jdbc.utilities.JdbcType;
+import software.aws.neptune.jdbc.utilities.JdbcType;
 import java.sql.Time;
 import java.sql.Timestamp;
 import java.util.HashMap;
