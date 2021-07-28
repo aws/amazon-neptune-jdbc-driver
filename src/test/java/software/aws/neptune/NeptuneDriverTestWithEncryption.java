@@ -33,8 +33,9 @@ public class NeptuneDriverTestWithEncryption extends NeptuneDriverTestBase {
      * with encryption enabled.
      */
     @BeforeAll
-    public static void initializeDatabase() {
+    public static void initializeDatabase() throws InterruptedException {
         initializeDatabase(WITH_ENCRYPTION);
+        Thread.sleep(3000);
     }
 
     /**

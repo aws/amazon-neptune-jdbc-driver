@@ -29,7 +29,7 @@ import java.sql.SQLException;
 
 public class SparqlDataSourceTest {
     private static final String HOSTNAME = "http://localhost";
-    private static final String VALID_ENDPOINT = String.format("sparql://%s:%d", HOSTNAME, SparqlMockServer.port());
+    private static final String VALID_ENDPOINT = String.format("%s:%d/mock/query", HOSTNAME, SparqlMockServer.port());
     private SparqlDataSource dataSource;
 
     /**
@@ -55,7 +55,10 @@ public class SparqlDataSourceTest {
 
     @Test
     void testGetConnectionSuccess() throws SQLException {
-        dataSource.setEndpoint(VALID_ENDPOINT);
+        dataSource.setEndpoint(HOSTNAME);
+        dataSource.setPort(SparqlMockServer.port());
+        dataSource.setDataset(SparqlMockServer.datasetPath());
+        dataSource.setQueryEndpoint("query");
         Assertions.assertTrue(dataSource.getConnection() instanceof SparqlConnection);
         Assertions.assertTrue(dataSource.getPooledConnection() instanceof SparqlPooledConnection);
     }

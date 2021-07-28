@@ -38,9 +38,10 @@ class OpenCypherDataSourceTest {
      * Function to get a random available port and initialize database before testing.
      */
     @BeforeAll
-    public static void initializeDatabase() {
+    public static void initializeDatabase() throws InterruptedException {
         database = MockOpenCypherDatabase.builder("localhost", NeptuneDriverTestWithEncryption.class.getName()).build();
         validEndpoint = String.format("bolt://%s:%d", "localhost", database.getPort());
+        Thread.sleep(3000);
     }
 
     /**
