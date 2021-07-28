@@ -1,5 +1,7 @@
 (function dsbuilder(attr){
-    var urlBuilder = "jdbc:neptune:opencypher://bolt://" + attr["server"] + ":" + attr["port"];
+    logging.log("entering urlBuilder");
+
+    var urlBuilder = "jdbc:neptune:sqlgremlin://" + attr["server"] + ";port=" + attr["port"];
 
     var additionalOptions = attr[connectionHelper.attributeVendor1];
     if (additionalOptions) {

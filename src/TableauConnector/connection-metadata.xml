@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<connection-metadata>
+  <database enabled='false' label="Database" />
+  <schema enabled='false' label="gremlin" />
+  <table enabled='true' label="Table" />
+</connection-metadata>

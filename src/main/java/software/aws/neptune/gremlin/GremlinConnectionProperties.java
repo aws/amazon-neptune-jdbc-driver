@@ -1072,10 +1072,10 @@ public class GremlinConnectionProperties extends ConnectionProperties {
         if (getAuthScheme() != null && getAuthScheme().equals(AuthScheme.IAMSigV4)) {
             final String region = System.getenv().get("SERVICE_REGION");
             if (region == null) {
-                // Log error here. If we throw here BI tools will assume we don't support the connection string.
-                // We need to throw later so a proper exception can be displayed.
-                LOGGER.error(
-                        "A Region must be provided to use IAMSigV4 Authentication. Set the SERVICE_REGION environment variable to the appropriate region, such as 'us-east-1'.");
+                throw new SQLException(
+                        "Error: SERVICE_REGION environment variable must be set to use IAM authentication. " +
+                                "Note, it must be accessible from BI tools if using a BI tool. " +
+                                "Example SERVICE_REGION=us-east-1.");
             }
 
             if (!getEnableSsl()) {

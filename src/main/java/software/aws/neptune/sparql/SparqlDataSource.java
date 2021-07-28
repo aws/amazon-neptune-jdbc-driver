@@ -16,6 +16,7 @@
 
 package software.aws.neptune.sparql;
 
+import lombok.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import software.aws.jdbc.DataSource;
@@ -119,6 +120,82 @@ public class SparqlDataSource extends DataSource
      */
     public void setEndpoint(final String endpoint) throws SQLException {
         connectionProperties.setEndpoint(endpoint);
+    }
+
+    /**
+     * Gets the RDF connection destination.
+     *
+     * @return The RDF connection destination.
+     */
+
+    public String getDestination() {
+        return connectionProperties.getDestination();
+    }
+
+    /**
+     * Sets the RDF connection destination.
+     *
+     * @param destination The RDF connection destination.
+     * @throws SQLException if value is invalid.
+     */
+    public void setDestination(@NonNull final String destination) throws SQLException {
+        connectionProperties.setDestination(destination);
+    }
+
+    /**
+     * Gets the query endpoint.
+     *
+     * @return The query endpoint for sparql query.
+     */
+    public String getQueryEndpoint() {
+        return connectionProperties.getQueryEndpoint();
+    }
+
+    /**
+     * Sets the query endpoint.
+     *
+     * @param queryEndpoint The query endpoint.
+     * @throws SQLException if value is invalid.
+     */
+    public void setQueryEndpoint(@NonNull final String queryEndpoint) throws SQLException {
+        connectionProperties.setQueryEndpoint(queryEndpoint);
+    }
+
+    /**
+     * Gets the port.
+     *
+     * @return The port.
+     */
+    public int getPort() {
+        return connectionProperties.getPort();
+    }
+    /**
+     * Sets the port.
+     *
+     * @param port The port.
+     * @throws SQLException if value is invalid.
+     */
+    public void setPort(final int port) throws SQLException {
+        connectionProperties.setPort(port);
+    }
+
+    /**
+     * Gets the dataset.
+     *
+     * @return The dataset.
+     */
+    public String getDataset() {
+        return connectionProperties.getDataset();
+    }
+    /**
+     * Sets the dataset.
+     *
+     * @param dataset The dataset.
+     * @throws SQLException if value is invalid.
+     *
+     */
+    public void setDataset(final String dataset) throws SQLException {
+        connectionProperties.setDataset(dataset);
     }
 
     /**

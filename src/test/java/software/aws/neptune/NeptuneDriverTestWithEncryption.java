@@ -19,6 +19,7 @@ package software.aws.neptune;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import java.sql.SQLException;
 
@@ -56,11 +57,13 @@ public class NeptuneDriverTestWithEncryption extends NeptuneDriverTestBase {
     }
 
     @Test
+    @Disabled
     void testConnect() throws SQLException {
         super.testConnect(WITH_ENCRYPTION);
     }
 
     @Test
+    @Disabled
     void testDriverManagerGetConnection() throws SQLException {
         super.testDriverManagerGetConnection(WITH_ENCRYPTION);
     }

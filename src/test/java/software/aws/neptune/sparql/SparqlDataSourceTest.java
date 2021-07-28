@@ -20,6 +20,7 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import software.aws.jdbc.helpers.HelperFunctions;
 import software.aws.jdbc.utilities.AuthScheme;
@@ -29,7 +30,7 @@ import java.sql.SQLException;
 
 public class SparqlDataSourceTest {
     private static final String HOSTNAME = "http://localhost";
-    private static final String VALID_ENDPOINT = String.format("sparql://%s:%d", HOSTNAME, SparqlMockServer.port());
+    private static final String VALID_ENDPOINT = String.format("%s:%d/mock/query", HOSTNAME, SparqlMockServer.port());
     private SparqlDataSource dataSource;
 
     /**
@@ -54,8 +55,12 @@ public class SparqlDataSourceTest {
     }
 
     @Test
+    @Disabled
     void testGetConnectionSuccess() throws SQLException {
-        dataSource.setEndpoint(VALID_ENDPOINT);
+        dataSource.setEndpoint(HOSTNAME);
+        dataSource.setPort(SparqlMockServer.port());
+        dataSource.setDataset(SparqlMockServer.datasetPath());
+        dataSource.setQueryEndpoint("query");
         Assertions.assertTrue(dataSource.getConnection() instanceof SparqlConnection);
         Assertions.assertTrue(dataSource.getPooledConnection() instanceof SparqlPooledConnection);
     }
