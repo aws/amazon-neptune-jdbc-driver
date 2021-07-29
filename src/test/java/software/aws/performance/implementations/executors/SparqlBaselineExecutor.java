@@ -14,20 +14,29 @@
  *
  */
 
-package software.aws.performance.config;
+package software.aws.performance.implementations.executors;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
+import software.aws.performance.PerformanceTestExecutor;
 
-public class ConcurrencyTestInfo {
-    @JsonProperty("parallel_connections")
-    private int parallelConnections;
-    public int getParallelConnections() {
-        return  parallelConnections;
+// TODO: Fill this class in.
+public class SparqlBaselineExecutor extends PerformanceTestExecutor {
+    @Override
+    protected Object execute(final String query) {
+        return null;
     }
 
-    @JsonProperty("query_1")
-    private String query1;
-    public String getQuery1() {
-        return  query1;
+    @Override
+    protected int retrieve(final Object retrieveObject) {
+        return 0;
+    }
+
+    @Override
+    protected int retrieveString(final Object retrieveObject) {
+        return 0;
+    }
+
+    @Override
+    protected int retrieveInteger(final Object retrieveObject) {
+        return 0;
     }
 }

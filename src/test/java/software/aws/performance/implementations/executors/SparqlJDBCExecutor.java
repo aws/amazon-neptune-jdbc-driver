@@ -14,14 +14,14 @@
  *
  */
 
-package software.aws.performance.config;
+package software.aws.performance.implementations.executors;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
+import java.sql.Statement;
 
-public class LatencyTestInfo {
-    @JsonProperty("query_1")
-    private String query1;
-    public String getQuery1() {
-        return  query1;
+// TODO: Fill this class in.
+public class SparqlJDBCExecutor extends JDBCExecutor {
+    @Override
+    Statement getNewStatement() {
+        return null;
     }
 }
