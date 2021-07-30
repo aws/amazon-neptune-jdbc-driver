@@ -28,6 +28,8 @@ If you wish to contribute, you will need to build the driver. The requirements t
 
 ## Testing
 
+[![codecov](https://codecov.io/gh/Bit-Quill/neptunejdbc/branch/develop/graph/badge.svg?token=E54Y02A3HE)](https://codecov.io/gh/Bit-Quill/neptunejdbc)
+
 The project is setup to do continuous unit testing whenever pull requests are generated, merged, or code is checked in. Integration tests can also be executed when major changes are made, but this will require coordination with a properly integrated server.
 
 ## Security issue notifications
