@@ -14,14 +14,14 @@
  *
  */
 
-package software.aws.performance.config;
+package software.aws.performance.implementations;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
+import software.aws.neptune.jdbc.utilities.AuthScheme;
 
-public class LoadTestInfo {
-    @JsonProperty("query_1")
-    private String query1;
-    public String getQuery1() {
-        return  query1;
-    }
+public class PerformanceTestConstants {
+    public static final String ENDPOINT = "no-auth-oc-enabled.cluster-cdubgfjknn5r.us-east-1.neptune.amazonaws.com";
+    public static final String REGION = "us-east-1";
+    public static final AuthScheme AUTH_SCHEME = AuthScheme.None;
+    public static final int PORT = 8182;
+    public static final int LIMIT_COUNT = 1000;
 }

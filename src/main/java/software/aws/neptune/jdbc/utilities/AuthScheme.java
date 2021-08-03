@@ -24,7 +24,6 @@ import lombok.NonNull;
  */
 public enum AuthScheme {
     IAMSigV4("IAMSigV4"),
-    IAMRoles("IAMRole"),
     None("None");
 
     private final String stringValue;

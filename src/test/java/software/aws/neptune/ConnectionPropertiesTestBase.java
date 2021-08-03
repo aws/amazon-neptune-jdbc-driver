@@ -42,7 +42,7 @@ public abstract class ConnectionPropertiesTestBase {
         final List<String> emptyAuthSchemes = ImmutableList.of(
                 "", " ");
         final List<String> validAuthSchemes = ImmutableList.of(
-                "NONE", "none", "IAMSigV4", "iamSIGV4", "IAMRole", "IaMRoLe");
+                "NONE", "none", "IAMSigV4", "iamSIGV4");
         final List<String> invalidAuthSchemes = ImmutableList.of(
                 "-1;", "100;", "46hj7;", "foo;");
 
