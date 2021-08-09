@@ -1,6 +1,6 @@
 # Amazon Neptune JDBC Driver
 
-This driver provides read-only JDBC connectivity for the Amazon Neptune service using OpenCypher queries, but does not block write queries. If write queries.
+This driver provides read-only JDBC connectivity for the Amazon Neptune service using OpenCypher queries, but does not block write queries.
 
 ## Using the Driver
 

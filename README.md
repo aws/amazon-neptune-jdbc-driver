@@ -14,13 +14,23 @@ This driver is compatible with JDBC 4.2 and requires a minimum of Java 8.
 
 To use the JDBC driver, please see the [usage instructions](./USAGE.md).
 
+For more specific samples, see the following:
+
+[SQL-Gremlin](samples/SQLGREMLIN.md)
+
+[Gremlin](samples/GREMLIN.md)
+
+[openCypher](samples/OPENCYPHER.md)
+
+[SPARQL](samples/SPARQL.md)
+
 ## Troubleshooting
 
 To troubleshoot or debug issues with the JDBC driver, please see the [troubleshooting instructions](./TROUBLESHOOTING.md).
 
 ## Contributing
 
-Because the JDBC driver is available as open source, contribution from the community is encouraged. If you are interested in improving performance, adding new features, or fixing bugs, please see our [contributing guidlines](./CONTRIBUTING.md).
+Because the JDBC driver is available as open source, contribution from the community is encouraged. If you are interested in improving performance, adding new features, or fixing bugs, please see our [contributing guidelines](./CONTRIBUTING.md).
 
 ## Building from source
 
