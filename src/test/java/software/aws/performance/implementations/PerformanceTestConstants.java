@@ -21,6 +21,8 @@ import software.aws.neptune.jdbc.utilities.AuthScheme;
 public class PerformanceTestConstants {
     public static final String ENDPOINT = "no-auth-oc-enabled.cluster-cdubgfjknn5r.us-east-1.neptune.amazonaws.com";
     public static final String REGION = "us-east-1";
+    public static final String SPARQL_ENDPOINT = "https://no-auth-oc-enabled.cluster-cdubgfjknn5r.us-east-1.neptune.amazonaws.com";
+    public static final String SPARQL_QUERY = "sparql";
     public static final AuthScheme AUTH_SCHEME = AuthScheme.None;
     public static final int PORT = 8182;
     public static final int LIMIT_COUNT = 1000;

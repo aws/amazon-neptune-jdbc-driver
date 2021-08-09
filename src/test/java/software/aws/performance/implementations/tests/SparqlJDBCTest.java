@@ -22,6 +22,8 @@ import software.aws.performance.DataTypePerformance;
 import software.aws.performance.PerformanceTestExecutor;
 import software.aws.performance.implementations.executors.SparqlJDBCExecutor;
 
+import static software.aws.performance.implementations.PerformanceTestConstants.LIMIT_COUNT;
+
 @Disabled
 public class SparqlJDBCTest extends DataTypePerformance {
 
@@ -34,12 +36,12 @@ public class SparqlJDBCTest extends DataTypePerformance {
     @Override
     // Get all airport data
     protected String getAllDataQuery() {
-        return null;
+        return "SELECT ?s ?p ?o {?s ?p ?o}";
     }
 
     @Override
     protected String getNumberOfResultsQuery() {
-        return null;
+        return String.format("%s LIMIT %d", getAllDataQuery(), LIMIT_COUNT);
     }
 
     @Override
@@ -47,7 +49,7 @@ public class SparqlJDBCTest extends DataTypePerformance {
     protected String getTransformNumberOfIntegersQuery() {
         return "PREFIX prop:  <http://kelvinlawrence.net/air-routes/datatypeProperty/> " +
                 "PREFIX class: <http://kelvinlawrence.net/air-routes/class/> " +
-                "SELECT ?s ?o " +
+                "SELECT ?o " +
                 "WHERE { " +
                 "     ?s a class:Airport . " +
                 "     ?s prop:elev ?o " +
@@ -63,7 +65,7 @@ public class SparqlJDBCTest extends DataTypePerformance {
                 "WHERE { " +
                 "    ?s a class:Airport . " +
                 "    ?s prop:code ?o " +
-                "}; ";
+                "} ";
     }
 
     @Override
