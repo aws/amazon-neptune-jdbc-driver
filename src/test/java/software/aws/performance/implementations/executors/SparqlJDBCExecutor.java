@@ -16,12 +16,34 @@
 
 package software.aws.performance.implementations.executors;
 
+import lombok.SneakyThrows;
+import software.aws.neptune.jdbc.utilities.ConnectionProperties;
+import software.aws.neptune.sparql.SparqlConnection;
+import software.aws.neptune.sparql.SparqlConnectionProperties;
+import software.aws.performance.implementations.PerformanceTestConstants;
 import java.sql.Statement;
+import java.util.Properties;
 
-// TODO: Fill this class in.
 public class SparqlJDBCExecutor extends JDBCExecutor {
+    private final java.sql.Connection connection;
+
+    /**
+     * Constructor for SparqlJDBCExecutor.
+     */
+    @SneakyThrows
+    public SparqlJDBCExecutor() {
+        final Properties properties = new Properties();
+        properties.put(ConnectionProperties.AUTH_SCHEME_KEY, PerformanceTestConstants.AUTH_SCHEME);
+        properties.put(SparqlConnectionProperties.ENDPOINT_KEY, PerformanceTestConstants.SPARQL_ENDPOINT);
+        properties.put(SparqlConnectionProperties.PORT_KEY, PerformanceTestConstants.PORT);
+        properties.put(SparqlConnectionProperties.QUERY_ENDPOINT_KEY, PerformanceTestConstants.SPARQL_QUERY);
+        System.out.println(properties);
+        connection = new SparqlConnection(new SparqlConnectionProperties(properties));
+    }
+
     @Override
+    @SneakyThrows
     Statement getNewStatement() {
-        return null;
+        return connection.createStatement();
     }
 }
