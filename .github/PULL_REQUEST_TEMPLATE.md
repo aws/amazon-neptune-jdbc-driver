@@ -13,6 +13,6 @@
 ### Additional Reviewers
 @birschick-bq
 @lyndonb-bq
-@xiaxcy
+@xiazcy
 @simonz-bq
 @csolonynka
