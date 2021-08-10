@@ -22,7 +22,10 @@ import software.aws.performance.DataTypePerformance;
 import software.aws.performance.PerformanceTestExecutor;
 import software.aws.performance.implementations.executors.SparqlJDBCExecutor;
 
-import static software.aws.performance.implementations.PerformanceTestConstants.LIMIT_COUNT;
+import static software.aws.performance.implementations.PerformanceTestConstants.SPARQL_ALL_DATA_LIMIT_QUERY;
+import static software.aws.performance.implementations.PerformanceTestConstants.SPARQL_ALL_DATA_QUERY;
+import static software.aws.performance.implementations.PerformanceTestConstants.SPARQL_NUMBER_QUERY;
+import static software.aws.performance.implementations.PerformanceTestConstants.SPARQL_STRING_QUERY;
 
 @Disabled
 public class SparqlJDBCTest extends DataTypePerformance {
@@ -36,36 +39,24 @@ public class SparqlJDBCTest extends DataTypePerformance {
     @Override
     // Get all airport data
     protected String getAllDataQuery() {
-        return "SELECT ?s ?p ?o {?s ?p ?o}";
+        return SPARQL_ALL_DATA_QUERY;
     }
 
     @Override
     protected String getNumberOfResultsQuery() {
-        return String.format("%s LIMIT %d", getAllDataQuery(), LIMIT_COUNT);
+        return SPARQL_ALL_DATA_LIMIT_QUERY;
     }
 
     @Override
     // Need to grab specific properties of certain nodes.
     protected String getTransformNumberOfIntegersQuery() {
-        return "PREFIX prop:  <http://kelvinlawrence.net/air-routes/datatypeProperty/> " +
-                "PREFIX class: <http://kelvinlawrence.net/air-routes/class/> " +
-                "SELECT ?o " +
-                "WHERE { " +
-                "     ?s a class:Airport . " +
-                "     ?s prop:elev ?o " +
-                "} ";
+        return SPARQL_NUMBER_QUERY;
     }
 
     @Override
     // Need to grab specific properties of certain nodes.
     protected String getTransformNumberOfStringsQuery() {
-        return "PREFIX prop:  <http://kelvinlawrence.net/air-routes/datatypeProperty/> " +
-                "PREFIX class: <http://kelvinlawrence.net/air-routes/class/> " +
-                "SELECT ?s ?o " +
-                "WHERE { " +
-                "    ?s a class:Airport . " +
-                "    ?s prop:code ?o " +
-                "} ";
+        return SPARQL_STRING_QUERY;
     }
 
     @Override

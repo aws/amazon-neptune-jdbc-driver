@@ -22,7 +22,10 @@ import software.aws.performance.DataTypePerformance;
 import software.aws.performance.PerformanceTestExecutor;
 import software.aws.performance.implementations.executors.OpenCypherJDBCExecutor;
 
-import static software.aws.performance.implementations.PerformanceTestConstants.LIMIT_COUNT;
+import static software.aws.performance.implementations.PerformanceTestConstants.OPENCYPHER_ALL_DATA_LIMIT_QUERY;
+import static software.aws.performance.implementations.PerformanceTestConstants.OPENCYPHER_ALL_DATA_QUERY;
+import static software.aws.performance.implementations.PerformanceTestConstants.OPENCYPHER_NUMBER_QUERY;
+import static software.aws.performance.implementations.PerformanceTestConstants.OPENCYPHER_STRING_QUERY;
 
 @Disabled
 public class OpenCypherJDBCTest extends DataTypePerformance {
@@ -35,24 +38,24 @@ public class OpenCypherJDBCTest extends DataTypePerformance {
 
     @Override
     protected String getAllDataQuery() {
-        return "MATCH (n:airport) RETURN n";
+        return OPENCYPHER_ALL_DATA_QUERY;
     }
 
     @Override
     protected String getNumberOfResultsQuery() {
-        return String.format("%s LIMIT %d", getAllDataQuery(), LIMIT_COUNT);
+        return OPENCYPHER_ALL_DATA_LIMIT_QUERY;
     }
 
     @Override
     // Need to grab specific properties of certain nodes.
     protected String getTransformNumberOfIntegersQuery() {
-        return "MATCH (a:airport) RETURN a.elev as Elevation";
+        return OPENCYPHER_NUMBER_QUERY;
     }
 
     @Override
     // Need to grab specific properties of certain nodes.
     protected String getTransformNumberOfStringsQuery() {
-        return "MATCH (a:airport) RETURN a.code as Code";
+        return OPENCYPHER_STRING_QUERY;
     }
 
     @Override
