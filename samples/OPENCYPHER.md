@@ -1,12 +1,12 @@
-# Using SQL-Gremlin with Amazon Neptune JDBC Driver
+# Using openCypher with Amazon Neptune JDBC Driver
 
-This driver supports using SQL, which it will translate into Gremlin for executing statements against Neptune.
+This driver supports using openCypher for executing statements against Neptune.
 
 ### Creating a connection
 
 The example connection string used in the code snippets below follow the rules specified in [the usage document](../USAGE.md). See that document for a more in-depth explanation of how to properly configure yours.
 
-**Note: SQL-Gremlin configures the port as a property and not as a part of the connection string. If a port is not specified it defaults to 8182.**
+**Note: For openCypher, the port must be specified as a part of the connection string and `useEncryption` must be set to `true` (defaults to true). The host must also be prefixed with `//bolt:` to specify usage of the Bolt connector.**
 
 #### No authentication using string only
 
@@ -14,7 +14,7 @@ The example connection string used in the code snippets below follow the rules s
 import java.sql.*;
 
 class Example {
-    static final String CONNECTION_STRING = "jdbc:neptune:sqlgremlin://example.neptune.amazonaws.com;port=8182;authScheme=None;useEncryption=false;";
+    static final String CONNECTION_STRING = "jdbc:neptune:opencypher://bolt://example.neptune.amazonaws.com:8182;authScheme=None;useEncryption=true;";
     
     public static void main(String[] args) throws SQLException {
         Connection connection = DriverManager.getConnection(CONNECTION_STRING);
@@ -34,13 +34,12 @@ import java.sql.*;
 import java.util.Properties;
 
 class Example {
-    static final String CONNECTION_STRING = "jdbc:neptune:sqlgremlin://example.neptune.amazonaws.com";
+    static final String CONNECTION_STRING = "jdbc:neptune:opencypher://bolt://example.neptune.amazonaws.com:8182";
     
     public static void main(String[] args) throws SQLException {
         Properties properties = new Properties();
-        properties.put("port", 8182);
         properties.put("authScheme", "None");
-        properties.put("useEncryption", false);
+        properties.put("useEncryption", true);
         
         Connection connection = DriverManager.getConnection(CONNECTION_STRING, properties);
         connection.close();
@@ -56,7 +55,7 @@ IAM is the standard way to access Neptune under an authorized account. Note that
 import java.sql.*;
 
 class Example {
-    static final String CONNECTION_STRING = "jdbc:neptune:sqlgremlin://example.neptune.amazonaws.com;port=8182;authScheme=IAMSigV4;enableSsl=true;";
+    static final String CONNECTION_STRING = "jdbc:neptune:opencypher://bolt://example.neptune.amazonaws.com:8182;authScheme=IAMSigV4;enableSsl=true;";
     
     public static void main(String[] args) throws SQLException {
         Connection connection = DriverManager.getConnection(CONNECTION_STRING);
@@ -72,11 +71,10 @@ import java.sql.*;
 import java.util.Properties;
 
 class Example {
-    static final String CONNECTION_STRING = "jdbc:neptune:sqlgremlin://example.neptune.amazonaws.com";
+    static final String CONNECTION_STRING = "jdbc:neptune:opencypher://bolt://example.neptune.amazonaws.com:8182";
     
     public static void main(String[] args) throws SQLException {
         Properties properties = new Properties();
-        properties.put("port", 8182);
         properties.put("authScheme", "AWS_SIGv4");
         properties.put("useEncryption", true);
         
@@ -94,7 +92,7 @@ class Example {
 import java.sql.*;
 
 class Example {
-    static final String CONNECTION_STRING = "jdbc:neptune:sqlgremlin://example.neptune.amazonaws.com;port=8182;authScheme=None;useEncryption=false;";
+    static final String CONNECTION_STRING = "jdbc:neptune:opencypher://bolt://example.neptune.amazonaws.com:8182;authScheme=None;useEncryption=true;";
     
     public static void main(String[] args) throws SQLException {
         // Create a connection
@@ -120,10 +118,10 @@ class Example {
 import java.sql.*;
 
 class Example {
-    static final String CONNECTION_STRING = "jdbc:neptune:sqlgremlin://example.neptune.amazonaws.com;port=8182;authScheme=None;useEncryption=false;";
+    static final String CONNECTION_STRING = "jdbc:neptune:opencypher://bolt://example.neptune.amazonaws.com:8182;authScheme=None;useEncryption=true;";
     
     public static void main(String[] args) throws SQLException {
-        String query = "SELECT * FROM country";
+        String query = "MATCH (c:country) RETURN c.desc";
         try (
             // Create a connection
             Connection connection = DriverManager.getConnection(CONNECTION_STRING);
@@ -133,8 +131,8 @@ class Example {
             ResultSet results = statement.executeQuery(query)
         ) {
             while (results.next()) {
-                // Get the country name (DESC) from the results and print them
-                String countryName = results.getString("DESC");
+                // Get the queried country name from the results and print them
+                String countryName = results.getString(1);
                 System.out.println(countryName);
             }
         }
