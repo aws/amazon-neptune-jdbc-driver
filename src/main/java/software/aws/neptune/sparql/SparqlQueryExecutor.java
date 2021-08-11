@@ -79,7 +79,13 @@ public class SparqlQueryExecutor extends QueryExecutor {
         this.sparqlConnectionProperties = sparqlConnectionProperties;
     }
 
-    private static RDFConnectionRemoteBuilder createRDFBuilder(final SparqlConnectionProperties properties)
+    /***
+     * Creates a Jena RDF remote connection builder from Sparql connection properties
+     * @param properties Sparql connection properties
+     * @return a Jena RDF remote connection builder
+     * @throws SQLException if remote connection builder fails, or it was cancelled.
+     */
+    public static RDFConnectionRemoteBuilder createRDFBuilder(final SparqlConnectionProperties properties)
             throws SQLException {
         final RDFConnectionRemoteBuilder builder = RDFConnectionRemote.create();
 

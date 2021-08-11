@@ -22,7 +22,10 @@ import software.aws.performance.DataTypePerformance;
 import software.aws.performance.PerformanceTestExecutor;
 import software.aws.performance.implementations.executors.GremlinJDBCExecutor;
 
-import static software.aws.performance.implementations.PerformanceTestConstants.LIMIT_COUNT;
+import static software.aws.performance.implementations.PerformanceTestConstants.GREMLIN_ALL_DATA_LIMIT_QUERY;
+import static software.aws.performance.implementations.PerformanceTestConstants.GREMLIN_ALL_DATA_QUERY;
+import static software.aws.performance.implementations.PerformanceTestConstants.GREMLIN_NUMBER_QUERY;
+import static software.aws.performance.implementations.PerformanceTestConstants.GREMLIN_STRING_QUERY;
 
 @Disabled
 public class GremlinJDBCTest extends DataTypePerformance {
@@ -35,24 +38,24 @@ public class GremlinJDBCTest extends DataTypePerformance {
 
     @Override
     protected String getAllDataQuery() {
-        return "g.V().valueMap().with(WithOptions.tokens)";
+        return GREMLIN_ALL_DATA_QUERY;
     }
 
     @Override
     protected String getNumberOfResultsQuery() {
-        return String.format("%s.limit(%d)", getAllDataQuery(), LIMIT_COUNT);
+        return GREMLIN_ALL_DATA_LIMIT_QUERY;
     }
 
     @Override
     // Need to grab specific properties of certain nodes.
     protected String getTransformNumberOfIntegersQuery() {
-        return "g.V().hasLabel('airport').project('Elevation').by(values('elev'))";
+        return GREMLIN_NUMBER_QUERY;
     }
 
     @Override
     // Need to grab specific properties of certain nodes.
     protected String getTransformNumberOfStringsQuery() {
-        return "g.V().hasLabel('airport').project('Elevation').by(values('code'))";
+        return GREMLIN_STRING_QUERY;
     }
 
     @Override
