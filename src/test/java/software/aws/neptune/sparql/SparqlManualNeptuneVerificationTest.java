@@ -77,7 +77,6 @@ public class SparqlManualNeptuneVerificationTest {
     @Test
     @Disabled
     void testBasicIamAuth() throws Exception {
-        System.out.println(CONNECTION_STRING);
         final Connection connection = DriverManager.getConnection(CONNECTION_STRING);
         Assertions.assertTrue(connection.isValid(1));
     }

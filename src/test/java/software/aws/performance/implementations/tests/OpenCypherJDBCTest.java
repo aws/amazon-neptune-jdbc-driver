@@ -27,7 +27,7 @@ import static software.aws.performance.implementations.PerformanceTestConstants.
 import static software.aws.performance.implementations.PerformanceTestConstants.OPENCYPHER_NUMBER_QUERY;
 import static software.aws.performance.implementations.PerformanceTestConstants.OPENCYPHER_STRING_QUERY;
 
-@Disabled
+//@Disabled
 public class OpenCypherJDBCTest extends DataTypePerformance {
 
     @Override

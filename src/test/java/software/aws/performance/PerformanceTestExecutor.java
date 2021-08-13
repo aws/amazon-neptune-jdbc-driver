@@ -17,6 +17,7 @@
 package software.aws.performance;
 
 import lombok.SneakyThrows;
+import org.apache.jena.base.Sys;
 import java.io.IOException;
 import java.util.AbstractMap;
 
@@ -42,14 +43,16 @@ public abstract class PerformanceTestExecutor {
      */
     @SneakyThrows
     public void runTest(final String testName, final String query, final int runs, final RetrieveType retrieveType) {
-
+        long executeTime;
+        long retrievalTime;
         final Metric retrievalMetric = new Metric();
         final Metric executionMetric = new Metric();
         for (int i = 0; i < runs; i++) {
             final long startExecuteTime = System.nanoTime();
             final Object data = execute(query);
             final long startRetrievalTime = System.nanoTime();
-            executionMetric.trackExecutionTime(System.nanoTime() - startExecuteTime);
+            executeTime = System.nanoTime() - startExecuteTime;
+            executionMetric.trackExecutionTime(executeTime);
             final int rowCount;
             switch (retrieveType) {
                 case STRING:
@@ -60,14 +63,18 @@ public abstract class PerformanceTestExecutor {
                     break;
                 case OBJECT:
                     rowCount = retrieve(data);
+//                    System.out.println(rowCount);
                     break;
                 default:
                     throw new Exception(String.format("Unknown retrieval type: %s", retrieveType.name()));
             }
-            retrievalMetric.trackExecutionTime(System.nanoTime() - startRetrievalTime);
+            retrievalTime = System.nanoTime() - startRetrievalTime;
+            retrievalMetric.trackExecutionTime(retrievalTime);
             if (i == 0) {
                 retrievalMetric.setNumberOfRows(rowCount);
             }
+//            System.out.println("Execution time: " + executeTime);
+//            System.out.println("Retrieval time: " + retrievalTime);
         }
         handleMetrics(testName, new AbstractMap.SimpleEntry<>(retrievalMetric, executionMetric));
 

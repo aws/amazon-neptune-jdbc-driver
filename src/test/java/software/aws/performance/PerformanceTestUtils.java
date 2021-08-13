@@ -71,9 +71,14 @@ class PerformanceTestUtils {
      */
     private static void appendToCSVFile(final Metric executionMetric, final Metric retrievalMetric,
                                         final String testName) {
+        final List<Double> normalizedExecutionTimes = PerformanceTestUtils
+                .normalizeTimes(executionMetric);
+        final Map<Integer, Double> executionPercentiles = Quantiles.percentiles().indexes(50, 90, 95, 99)
+                .compute(normalizedExecutionTimes);
+
         final List<Double> normalizedRetrievalTimes = PerformanceTestUtils
                 .normalizeTimes(retrievalMetric);
-        final Map<Integer, Double> percentiles = Quantiles.percentiles().indexes(90, 95, 99)
+        final Map<Integer, Double> retrievalPercentiles = Quantiles.percentiles().indexes(50, 90, 95, 99)
                 .compute(normalizedRetrievalTimes);
 
         try (final Writer csv = new OutputStreamWriter(new FileOutputStream(getCsvFile(testName), true),
@@ -87,15 +92,20 @@ class PerformanceTestUtils {
                     .valueOf(PerformanceTestUtils.toMillis(executionMetric.getMaxExecutionTime())));
             dataJoiner.add(String
                     .valueOf(PerformanceTestUtils.toMillis(executionMetric.calculateAverageExecutionTime())));
+            dataJoiner.add(String.valueOf(executionPercentiles.get(50)));
+            dataJoiner.add(String.valueOf(executionPercentiles.get(90)));
+            dataJoiner.add(String.valueOf(executionPercentiles.get(95)));
+            dataJoiner.add(String.valueOf(executionPercentiles.get(99)));
             dataJoiner.add(String
                     .valueOf(PerformanceTestUtils.toMillis(retrievalMetric.getMinExecutionTime())));
             dataJoiner.add(String
                     .valueOf(PerformanceTestUtils.toMillis(retrievalMetric.getMaxExecutionTime())));
             dataJoiner.add(String
                     .valueOf(PerformanceTestUtils.toMillis(retrievalMetric.calculateAverageExecutionTime())));
-            dataJoiner.add(String.valueOf(percentiles.get(90)));
-            dataJoiner.add(String.valueOf(percentiles.get(95)));
-            dataJoiner.add(String.valueOf(percentiles.get(99)));
+            dataJoiner.add(String.valueOf(retrievalPercentiles.get(50)));
+            dataJoiner.add(String.valueOf(retrievalPercentiles.get(90)));
+            dataJoiner.add(String.valueOf(retrievalPercentiles.get(95)));
+            dataJoiner.add(String.valueOf(retrievalPercentiles.get(99)));
 
             csv.append(dataJoiner.toString());
             csv.append("\n");
@@ -116,12 +126,17 @@ class PerformanceTestUtils {
             joiner.add("Min Execution Time");
             joiner.add("Max Execution Time");
             joiner.add("Average Execution Time");
+            joiner.add("Median Execution Time(P50)");
+            joiner.add("Execution Time P90");
+            joiner.add("Execution Time P95");
+            joiner.add("Execution Time P99");
             joiner.add("Min Retrieval Time");
             joiner.add("Max Retrieval Time");
             joiner.add("Average Retrieval Time");
-            joiner.add("P90");
-            joiner.add("P95");
-            joiner.add("P99");
+            joiner.add("Median Retrieval Time(P50)");
+            joiner.add("Retrieval Time P90");
+            joiner.add("Retrieval Time P95");
+            joiner.add("Retrieval Time P99");
             csv
                     .append(joiner.toString())
                     .append("\n");
