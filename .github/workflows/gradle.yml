@@ -15,15 +15,11 @@ name: Amazon Neptune JDBC Driver
 
 on:
   # Trigger the workflow on push or pull request,
-  # but only for the master branch
+  # but only for the master and develop branch
   push:
-    branches:
-      - master
-      - develop
+    branches: [ master, develop ]
   pull_request:
-    branches:
-      - master
-      - develop
+    branches: [ master, develop ]
 
 jobs:
   build:
