@@ -15,7 +15,15 @@ To setup a connection, the driver requires a JDBC connection URL. The connection
 
 * connectionType
 
-  The only supported option is `opencypher` in this release.
+  We support five different connection types:
+
+  * [SQL-Gremlin](samples/SQLGREMLIN.md)
+
+  * [Gremlin](samples/GREMLIN.md)
+
+  * [openCypher](samples/OPENCYPHER.md)
+
+  * [SPARQL](samples/SPARQL.md)
 
 * host
 
@@ -91,6 +99,25 @@ void example() {
 ## Download and Installation
 
 TODO: Once this is deployed we can put instructions here.
+
+## BI Tool Setup
+
+### Tableau Desktop
+
+#### Adding the Amazon Neptune JDBC Driver
+
+1. Download the Neptune JDBC driver JAR file and copy it to one of these
+   directories according to your operating system:
+
+  - **_Windows_**: `C:\Program Files\Tableau\Drivers`
+  - **_Mac_**: `~/Library/Tableau/Drivers`
+
+1. Download the Neptune Tableau connector (a TACO file) and copy it to your `My Tableau Repository/Connectors`
+   directory.
+  - **_Windows_**: `C:\Users\[user]\Documents\My Tableau Repository\Connectors`
+  - **_Mac_**: `/Users/[user]/Documents/My Tableau Repository/Connectors`
+
+   For more information, consult the [Tableau documentation](https://tableau.github.io/connector-plugin-sdk/docs/run-taco).
 
 ## Copyright
 
