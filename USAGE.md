@@ -15,7 +15,7 @@ To setup a connection, the driver requires a JDBC connection URL. The connection
 
 * connectionType
 
-  We support five different connection types:
+  We support four different connection types:
 
   * [SQL-Gremlin](samples/SQLGREMLIN.md)
 
