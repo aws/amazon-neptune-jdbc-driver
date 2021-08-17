@@ -42,7 +42,6 @@ public abstract class PerformanceTestExecutor {
      */
     @SneakyThrows
     public void runTest(final String testName, final String query, final int runs, final RetrieveType retrieveType) {
-
         final Metric retrievalMetric = new Metric();
         final Metric executionMetric = new Metric();
         for (int i = 0; i < runs; i++) {
@@ -70,7 +69,6 @@ public abstract class PerformanceTestExecutor {
             }
         }
         handleMetrics(testName, new AbstractMap.SimpleEntry<>(retrievalMetric, executionMetric));
-
     }
 
     /**

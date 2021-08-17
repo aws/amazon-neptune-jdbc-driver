@@ -89,6 +89,9 @@ public class Metric {
      */
     double calculateAverageExecutionTime() {
         final List<Double> normalizedExecutionTimes = new ArrayList<>(executionTimes);
+        // Remove two extremes from each end
+        normalizedExecutionTimes.remove(this.getMaxExecutionTime());
+        normalizedExecutionTimes.remove(this.getMinExecutionTime());
         normalizedExecutionTimes.remove(this.getMaxExecutionTime());
         normalizedExecutionTimes.remove(this.getMinExecutionTime());
         return normalizedExecutionTimes

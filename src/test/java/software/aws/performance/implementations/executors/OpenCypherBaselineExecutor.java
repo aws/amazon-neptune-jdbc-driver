@@ -23,8 +23,8 @@ import org.neo4j.driver.Config;
 import org.neo4j.driver.Driver;
 import org.neo4j.driver.GraphDatabase;
 import org.neo4j.driver.Record;
-import org.neo4j.driver.Result;
 import org.neo4j.driver.Session;
+import org.neo4j.driver.Value;
 import software.aws.neptune.jdbc.utilities.AuthScheme;
 import software.aws.neptune.opencypher.OpenCypherConnectionProperties;
 import software.aws.neptune.opencypher.OpenCypherIAMRequestGenerator;
@@ -76,25 +76,24 @@ public class OpenCypherBaselineExecutor extends PerformanceTestExecutor {
 
     @Override
     protected Object execute(final String query) {
-        return session.run(query);
+        return session.run(query).list();
     }
 
     @Override
     @SneakyThrows
     protected int retrieve(final Object retrieveObject) {
-        if (!(retrieveObject instanceof Result)) {
+        if (!(retrieveObject instanceof List)) {
             throw new Exception("Error: expected a Result for data retrieval.");
         }
 
         int rowCount = 0;
-        final Result result = (Result) retrieveObject;
-        final List<Record> resultList = result.list();
-        final List<String> columns = result.keys();
-        for (final Record r : resultList) {
-            rowCount++;
-            for (final String column : columns) {
-                r.get(column);
+        final List<Record> recordList = (List<Record>) retrieveObject;
+        for (final Record r : recordList) {
+            final List<Value> values = r.values();
+            for (int i = 0; i < values.size(); i++) {
+                values.get(i);
             }
+            rowCount++;
         }
         return rowCount;
     }
@@ -102,19 +101,18 @@ public class OpenCypherBaselineExecutor extends PerformanceTestExecutor {
     @Override
     @SneakyThrows
     protected int retrieveString(final Object retrieveObject) {
-        if (!(retrieveObject instanceof Result)) {
+        if (!(retrieveObject instanceof List)) {
             throw new Exception("Error: expected a Result for data retrieval.");
         }
 
         int rowCount = 0;
-        final Result result = (Result) retrieveObject;
-        final List<Record> resultList = result.list();
-        final List<String> columns = result.keys();
-        for (final Record r : resultList) {
-            rowCount++;
-            for (final String column : columns) {
-                r.get(column).asString();
+        final List<Record> recordList = (List<Record>) retrieveObject;
+        for (final Record r : recordList) {
+            final List<Value> values = r.values();
+            for (int i = 0; i < values.size(); i++) {
+                r.get(i).asString();
             }
+            rowCount++;
         }
         return rowCount;
     }
@@ -122,19 +120,18 @@ public class OpenCypherBaselineExecutor extends PerformanceTestExecutor {
     @Override
     @SneakyThrows
     protected int retrieveInteger(final Object retrieveObject) {
-        if (!(retrieveObject instanceof Result)) {
+        if (!(retrieveObject instanceof List)) {
             throw new Exception("Error: expected a Result for data retrieval.");
         }
 
         int rowCount = 0;
-        final Result result = (Result) retrieveObject;
-        final List<Record> resultList = result.list();
-        final List<String> columns = result.keys();
-        for (final Record r : resultList) {
-            rowCount++;
-            for (final String column : columns) {
-                r.get(column).asInt();
+        final List<Record> recordList = (List<Record>) retrieveObject;
+        for (final Record r : recordList) {
+            final List<Value> values = r.values();
+            for (int i = 0; i < values.size(); i++) {
+                r.get(i).asInt();
             }
+            rowCount++;
         }
         return rowCount;
     }
