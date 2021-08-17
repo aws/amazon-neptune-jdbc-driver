@@ -23,7 +23,7 @@ import java.sql.SQLException;
  * Benchmark the driver's performance retrieving different amounts of data and data types.
  */
 public abstract class DataTypePerformance {
-    private static final int RUN_COUNT = 12;
+    private static final int RUN_COUNT = 14;
 
     protected abstract PerformanceTestExecutor getPerformanceTestExecutor();
 

@@ -27,7 +27,7 @@ import static software.aws.performance.implementations.PerformanceTestConstants.
 import static software.aws.performance.implementations.PerformanceTestConstants.GREMLIN_NUMBER_QUERY;
 import static software.aws.performance.implementations.PerformanceTestConstants.GREMLIN_STRING_QUERY;
 
-//@Disabled
+@Disabled
 public class GremlinJDBCTest extends DataTypePerformance {
 
     @Override

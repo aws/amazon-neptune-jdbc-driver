@@ -155,6 +155,8 @@ class PerformanceTestUtils {
         final List<Double> normalizedRunningTimes = new ArrayList<>(metric.getExecutionTimes());
         normalizedRunningTimes.remove(metric.getMaxExecutionTime());
         normalizedRunningTimes.remove(metric.getMinExecutionTime());
+        normalizedRunningTimes.remove(metric.getMaxExecutionTime());
+        normalizedRunningTimes.remove(metric.getMinExecutionTime());
         return normalizedRunningTimes.parallelStream().map(d -> d / 1000000).collect(Collectors.toList());
     }
 

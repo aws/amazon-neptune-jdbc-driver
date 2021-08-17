@@ -26,7 +26,7 @@ import static software.aws.performance.implementations.PerformanceTestConstants.
 import static software.aws.performance.implementations.PerformanceTestConstants.SPARQL_NUMBER_QUERY;
 import static software.aws.performance.implementations.PerformanceTestConstants.SPARQL_STRING_QUERY;
 
-//@Disabled
+@Disabled
 public class SparqlBaselineTest extends DataTypePerformance {
     @Override
     protected PerformanceTestExecutor getPerformanceTestExecutor() {
