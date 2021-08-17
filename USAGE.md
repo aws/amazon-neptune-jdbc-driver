@@ -15,7 +15,15 @@ To setup a connection, the driver requires a JDBC connection URL. The connection
 
 * connectionType
 
-  The only supported option is `opencypher` in this release.
+  We support four different connection types:
+
+  * [SQL-Gremlin](samples/SQLGREMLIN.md)
+
+  * [Gremlin](samples/GREMLIN.md)
+
+  * [openCypher](samples/OPENCYPHER.md)
+
+  * [SPARQL](samples/SPARQL.md)
 
 * host
 
