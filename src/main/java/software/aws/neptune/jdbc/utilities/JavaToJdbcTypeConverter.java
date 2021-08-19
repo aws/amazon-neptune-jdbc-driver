@@ -34,7 +34,6 @@ import java.time.ZonedDateTime;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 public class JavaToJdbcTypeConverter {
@@ -189,27 +188,14 @@ public class JavaToJdbcTypeConverter {
      * @return String value.
      * @throws SQLException if conversion cannot be performed.
      */
-    public static String toString(final Object input) throws SQLException {
+    public static String toString(final Object input) {
         if (input == null) {
             return null;
         }
         if (input instanceof String) {
             return (String) input;
-        } else if (input instanceof Boolean ||
-                input instanceof Number ||
-                input instanceof List ||
-                input instanceof Map ||
-                input instanceof java.sql.Date ||
-                input instanceof java.sql.Time ||
-                input instanceof java.sql.Timestamp ||
-                input instanceof LocalDate ||
-                input instanceof LocalTime ||
-                input instanceof LocalDateTime ||
-                input instanceof OffsetTime ||
-                input instanceof ZonedDateTime) {
-            return input.toString();
         }
-        throw createConversionException(input.getClass(), String.class);
+        return input.toString();
     }
 
     /**
