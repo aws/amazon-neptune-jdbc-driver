@@ -35,7 +35,7 @@ public class SparqlConnectionProperties extends ConnectionProperties {
     // e.g. enter "https://your-neptune-endpoint"
     public static final String ENDPOINT_KEY = "endpointURL";
     public static final String PORT_KEY = "port";
-    // Dataset path with is optional depending on server (e.g. Neptune vs Fuseki)
+    // Dataset path which is optional depending on server (e.g. Neptune vs Fuseki)
     public static final String DATASET_KEY = "dataset";
     public static final String DESTINATION_KEY = "destination";
     // The query endpoints for sparql database

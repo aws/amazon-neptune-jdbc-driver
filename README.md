@@ -1,6 +1,6 @@
 # JDBC Driver for Amazon Neptune
 
-This driver provides JDBC connectivity for the Amazon Neptune service using OpenCypher queries.
+This driver provides JDBC connectivity for the Amazon Neptune service using openCypher, Gremlin, SQL-Gremlin, and SPARQL queries.
 
 ## Connection Requirements
 
@@ -12,9 +12,40 @@ This driver is compatible with JDBC 4.2 and requires a minimum of Java 8.
 
 ## Using the Driver
 
-To use the JDBC driver, please see the [usage instructions](./USAGE.md).
+The driver comes packed in a single jar file. To use the driver, place the jar file in the classpath of the application which is going to use it. Alternatively, if using the driver with a Maven/Gradle application, the jar can be used to install the driver via their respective commands.
 
-For more specific samples, see the following:
+#### Connection URL and Settings
+
+To setup a connection, the driver requires a JDBC connection URL. The connection URL is generally of the form:
+
+```
+jdbc:neptune:[connectionType]://[host];[propertyKey1=value1];[propertyKey2=value2]..;[propertyKeyN=valueN]
+```
+
+Specific requirements for the string can be found below in the specific query language documentation.
+
+#### Connecting using the DriverManager Interface
+
+If the jar is in the application's classpath, no other configuration is required. The driver can be connected to using the JDBC DriverManager by connecting using an Amazon Neptune connection string.
+
+Below is an example where Neptune is accessible through the endpoint neptune-example.com on port 8182.
+
+```
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.Statement;
+
+void example() {
+    String url = "jdbc:neptune:opencypher://bolt://neptune-example:8182";
+
+    Connection connection = DriverManager.getConnection(url);
+    Statement statement = connection.createStatement();
+    
+    connection.close();
+}
+```
+
+Refer to the connection string options in the specific query language documentation below for more information about configuring the connection.
 
 [SQL-Gremlin](samples/SQLGREMLIN.md)
 
@@ -23,6 +54,8 @@ For more specific samples, see the following:
 [openCypher](samples/OPENCYPHER.md)
 
 [SPARQL](samples/SPARQL.md)
+
+For more example applications, see the [sample applications](./src/test/java/sample/applications).
 
 ## BI Tool Setup
 
@@ -107,4 +140,4 @@ See the [LICENSE](./LICENSE) file for our project's licensing. We will ask you t
 
 ## Copyright
 
-Copyright 2020 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.

@@ -4,9 +4,31 @@ This driver supports using SPARQL for executing statements against Neptune.
 
 ### Creating a connection
 
-The example connection string used in the code snippets below follow the rules specified in [the usage document](../USAGE.md). See that document for a more in-depth explanation of how to properly configure yours.
+The connection string for SPARQL connections follows the following form:
 
-**Note: SPARQL configures the port as a property and not as a part of the connection string. If a port is not specified it defaults to 8182. There must also be a specification for the `queryEndpoint` property to be `sparql` and the connection string for SPARQL also must include a `https://` prefix as shown below.**
+`jdbc:neptune:sparql://https://[host];[port=portValue];[;propertyKey1=value1];[propertyKey2=value2]..;[propertyKeyN=valueN]`
+
+**Note: SPARQL configures the port as a propertyKey and not as a part of the connection string. If a port is not specified it defaults to 8182. There must also be a specification for the `queryEndpoint` property to be `sparql` and the connection string for SPARQL also must include a `https://` prefix as shown below.**
+
+The following properties are available for SPARQL:
+
+| Property Key            | Description                                                  | Accepted Value(s)                                            | Default value                                                |
+| ----------------------- | ------------------------------------------------------------ | ------------------------------------------------------------ | ------------------------------------------------------------ |
+| logLevel                | Log level for application.                                   | In order of least logging to most logging: `OFF`, `FATAL`, `ERROR`, `WARN`, `INFO`, `DEBUG`, `TRACE`, `ALL`. | `INFO`                                                       |
+| authScheme              | Authentication mechanism to use.                             | `NONE` (no auth), `IAMSigV4` (IAM / SIGV4 logging).          | If `IAMSigV4` is selected, the user must have AWS SIGV4 credentials properly set up in their environment, including a region. See [environment setup for IAM authentication on Neptune](https://docs.aws.amazon.com/neptune/latest/userguide/iam-auth-connecting-gremlin-java.html) for more information. |
+| connectionTimeout       | Amount of time to wait for initial connection in _milliseconds_. | Integer values.                                              | `5000`                                                       |
+| connectionRetryCount    | Number of times to retry if establishing initial connection fails. | Integer values.                                              | `3`                                                          |
+| port                    | The port used for connection.                                | Integer values.                                              | `8182`                                                       |
+| queryEndpoint           | The query endpoint to hit.                                   | Currently only `sparql`.                                     | `""`                                                         |
+| region                  | The AWS endpoint region to connect to.                       | Valid AWS regions such as, but not limited to, `us-east-1`, `us-west-1`. | Default value is whatever is configured in the user's AWS SIG4 credentials. |
+| dataset                 | The name of the dataset when connecting to a FusekiServer (not applicable to Neptune servers). | String values.                                               | `""`                                                         |
+| acceptHeaderQuery       | The HTTP `Accept:` header used to when making a SPARQL Protocol query if no query type specific setting available. | String values.                                               | `"application/rdf+xml, application/n-triples, text/turtle, text/plain, application/n-quads, text/x-nquads, text/turtle, application/trig, text/n3, application/ld+json, application/trix, application/x-binary-rdf, application/sparql-results+json, application/sparql-results+xml;q=0.9, text/tab-separated-values;q=0.7, text/csv;q=0.5, application/json;q=0.2, application/xml;q=0.2, /*;q=0.1"` |
+| acceptHeaderAskQuery    | The HTTP `Accept:` header used to when making a SPARQL Protocol ASK query. | String values.                                               | None                                                         |
+| acceptHeaderSelectQuery | The HTTP `Accept:` header used to when making a SPARQL Protocol SELECT query. | String values.                                               | None                                                         |
+| parseCheckSparql        | The flag for whether to check SPARQL queries and SPARQL updates provided as a string. | Boolean values.                                              | None                                                         |
+| acceptHeaderDataset     | The HTTP `Accept:` header used to fetch RDF datasets using HTTP GET operations. | String values.                                               | None                                                         |
+| httpClient              | The `HttpClient` for the connection to be built.             | `httpClient` values.                                         | None                                                         |
+| httpContext             | The `HttpContext` for the connection to tbe built            | `httpContext` values.                                        | None                                                         |
 
 #### No authentication using string only
 
@@ -14,7 +36,7 @@ The example connection string used in the code snippets below follow the rules s
 import java.sql.*;
 
 class Example {
-    static final String CONNECTION_STRING = "jdbc:neptune:sparql://https://example.neptune.amazonaws.com;port=8182;queryEndpoint=sparql;authScheme=None;useEncryption=false;";
+    static final String CONNECTION_STRING = "jdbc:neptune:sparql://https://example.neptune.amazonaws.com;port=8182;queryEndpoint=sparql;authScheme=None";
     
     public static void main(String[] args) throws SQLException {
         Connection connection = DriverManager.getConnection(CONNECTION_STRING);
@@ -41,7 +63,6 @@ class Example {
         properties.put("port", 8182);
         properties.put("queryEndpoint", "sparql");
         properties.put("authScheme", "None");
-        properties.put("useEncryption", false);
         
         Connection connection = DriverManager.getConnection(CONNECTION_STRING, properties);
         connection.close();
@@ -51,13 +72,13 @@ class Example {
 
 #### IAM authentication
 
-IAM is the standard way to access Neptune under an authorized account. Note that SSL is required for IAM authentication.
+IAM is the standard way to access Neptune under an authorized account.
 
 ```java
 import java.sql.*;
 
 class Example {
-    static final String CONNECTION_STRING = "jdbc:neptune:sparql://https://example.neptune.amazonaws.com;port=8182;queryEndpoint=sparql;authScheme=IAMSigV4;enableSsl=true;";
+    static final String CONNECTION_STRING = "jdbc:neptune:sparql://https://example.neptune.amazonaws.com;port=8182;queryEndpoint=sparql;authScheme=IAMSigV4";
     
     public static void main(String[] args) throws SQLException {
         Connection connection = DriverManager.getConnection(CONNECTION_STRING);
@@ -79,8 +100,7 @@ class Example {
         Properties properties = new Properties();
         properties.put("port", 8182);
         properties.put("queryEndpoint", "sparql");
-        properties.put("authScheme", "AWS_SIGv4");
-        properties.put("useEncryption", true);
+        properties.put("authScheme", "IAMSigV4");
         
         Connection connection = DriverManager.getConnection(CONNECTION_STRING, properties);
         connection.close();
@@ -100,7 +120,7 @@ MetaData is not currently supported for SPARQL.
 import java.sql.*;
 
 class Example {
-    static final String CONNECTION_STRING = "jdbc:neptune:sparql://https://example.neptune.amazonaws.com;port=8182;queryEndpoint=sparql;authScheme=None;useEncryption=false;";
+    static final String CONNECTION_STRING = "jdbc:neptune:sparql://https://example.neptune.amazonaws.com;port=8182;queryEndpoint=sparql;authScheme=None";
     
     public static void main(String[] args) throws SQLException {
         // Prefix for data found at https://github.com/aws/graph-notebook

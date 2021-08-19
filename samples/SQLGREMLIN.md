@@ -4,9 +4,24 @@ This driver supports using SQL, which it will translate into Gremlin for executi
 
 ### Creating a connection
 
-The example connection string used in the code snippets below follow the rules specified in [the usage document](../USAGE.md). See that document for a more in-depth explanation of how to properly configure yours.
+The connection string for SQL-Gremlin connections follows the following form:
+
+`jdbc:neptune:sqlgremlin://[host];[port=portValue];[propertyKey1=value1];[propertyKey2=value2]..;[propertyKeyN=valueN]`
 
 **Note: SQL-Gremlin configures the port as a property and not as a part of the connection string. If a port is not specified it defaults to 8182.**
+
+The following properties are available for SQL-Gremlin:
+
+| Property Key         | Description                                                  | Accepted Value(s)                                            | Default value                                                |
+| -------------------- | ------------------------------------------------------------ | ------------------------------------------------------------ | ------------------------------------------------------------ |
+| logLevel             | Log level for application.                                   | In order of least logging to most logging: `OFF`, `FATAL`, `ERROR`, `WARN`, `INFO`, `DEBUG`, `TRACE`, `ALL`. | `INFO`                                                       |
+| authScheme           | Authentication mechanism to use.                             | `NONE` (no auth), `IAMSigV4` (IAM / SIGV4 logging).          | If `IAMSigV4` is selected, the user must have AWS SIGV4 credentials properly set up in their environment, including a region. See [environment setup for IAM authentication on Neptune](https://docs.aws.amazon.com/neptune/latest/userguide/iam-auth-connecting-gremlin-java.html) for more information. |
+| connectionTimeout    | Amount of time to wait for initial connection in _milliseconds_. | Integer values.                                              | `5000`                                                       |
+| connectionRetryCount | Number of times to retry if establishing initial connection fails. | Integer values.                                              | `3`                                                          |
+
+The above properties are configurations that are shared across all query languages in the driver. For all the Gremlin-specific properties take a look at their [documentation.](https://tinkerpop.apache.org/javadocs/current/full/org/apache/tinkerpop/gremlin/driver/Cluster.Builder.html)
+
+Each Builder method listed in the documentation is accepted as a property. For example, "**[port](https://tinkerpop.apache.org/javadocs/current/full/org/apache/tinkerpop/gremlin/driver/Cluster.Builder.html#port-int-)**(int port)" means that as a part of the connection string it may be configured as a property or added as a Key-Value Pair in Properties with int values. See below for examples.
 
 #### No authentication using string only
 
@@ -14,7 +29,7 @@ The example connection string used in the code snippets below follow the rules s
 import java.sql.*;
 
 class Example {
-    static final String CONNECTION_STRING = "jdbc:neptune:sqlgremlin://example.neptune.amazonaws.com;port=8182;authScheme=None;useEncryption=false;";
+    static final String CONNECTION_STRING = "jdbc:neptune:sqlgremlin://example.neptune.amazonaws.com;port=8182;authScheme=None";
     
     public static void main(String[] args) throws SQLException {
         Connection connection = DriverManager.getConnection(CONNECTION_STRING);
@@ -40,7 +55,6 @@ class Example {
         Properties properties = new Properties();
         properties.put("port", 8182);
         properties.put("authScheme", "None");
-        properties.put("useEncryption", false);
         
         Connection connection = DriverManager.getConnection(CONNECTION_STRING, properties);
         connection.close();
@@ -77,7 +91,7 @@ class Example {
     public static void main(String[] args) throws SQLException {
         Properties properties = new Properties();
         properties.put("port", 8182);
-        properties.put("authScheme", "AWS_SIGv4");
+        properties.put("authScheme", "IAMSigV4");
         properties.put("useEncryption", true);
         
         Connection connection = DriverManager.getConnection(CONNECTION_STRING, properties);
@@ -94,7 +108,7 @@ class Example {
 import java.sql.*;
 
 class Example {
-    static final String CONNECTION_STRING = "jdbc:neptune:sqlgremlin://example.neptune.amazonaws.com;port=8182;authScheme=None;useEncryption=false;";
+    static final String CONNECTION_STRING = "jdbc:neptune:sqlgremlin://example.neptune.amazonaws.com;port=8182;authScheme=None";
     
     public static void main(String[] args) throws SQLException {
         // Create a connection
@@ -120,7 +134,7 @@ class Example {
 import java.sql.*;
 
 class Example {
-    static final String CONNECTION_STRING = "jdbc:neptune:sqlgremlin://example.neptune.amazonaws.com;port=8182;authScheme=None;useEncryption=false;";
+    static final String CONNECTION_STRING = "jdbc:neptune:sqlgremlin://example.neptune.amazonaws.com;port=8182;authScheme=None";
     
     public static void main(String[] args) throws SQLException {
         String query = "SELECT * FROM country";
