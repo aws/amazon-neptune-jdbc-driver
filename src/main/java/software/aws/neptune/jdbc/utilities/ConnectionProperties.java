@@ -21,6 +21,7 @@ import lombok.NonNull;
 import org.apache.log4j.Level;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import software.aws.neptune.jdbc.Connection;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -190,6 +191,12 @@ public abstract class ConnectionProperties extends Properties {
     }
 
     /**
+     * Function get encryption status of child.
+     * @return True if encrpytion is enabled, false otherwise.
+     */
+    protected abstract boolean isEncryptionEnabled();
+
+    /**
      * Gets the application name.
      *
      * @return The application name.
@@ -224,6 +231,13 @@ public abstract class ConnectionProperties extends Properties {
      * @throws SQLException if value is invalid.
      */
     public void setAuthScheme(@NonNull final AuthScheme authScheme) throws SQLException {
+        if (authScheme.equals(AuthScheme.IAMSigV4) && !isEncryptionEnabled()) {
+            throw SqlError.createSQLClientInfoException(
+                    LOGGER,
+                    Connection.getFailures("authScheme", "IAMSigV4"),
+                    SqlError.INVALID_CONNECTION_PROPERTY, "authScheme",
+                    "'IAMSigV4' when encryption is not enabled.");
+        }
         put(AUTH_SCHEME_KEY, authScheme);
     }
 

@@ -28,6 +28,7 @@ import software.aws.neptune.ConnectionPropertiesTestBase;
 import software.aws.neptune.jdbc.helpers.HelperFunctions;
 import software.aws.neptune.jdbc.utilities.AuthScheme;
 import software.aws.neptune.jdbc.utilities.ConnectionProperties;
+import java.sql.SQLClientInfoException;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Properties;
@@ -493,5 +494,31 @@ class GremlinConnectionPropertiesTest extends ConnectionPropertiesTestBase {
                 () -> connectionProperties.setLoadBalancingStrategy(strategy)
         );
         Assertions.assertEquals(strategy, connectionProperties.getLoadBalancingStrategy());
+    }
+
+    @Test
+    void testDisableEncryptionWithIAMSigV4() throws SQLException {
+        final Properties properties = new Properties();
+        properties.put("authScheme", "IAMSigV4");
+        properties.put("enableSsl", true);
+        connectionProperties = new GremlinConnectionProperties(properties);
+        Assertions.assertTrue(connectionProperties.getEnableSsl());
+        Assertions.assertEquals(connectionProperties.getAuthScheme(), AuthScheme.IAMSigV4);
+        Assertions.assertThrows(SQLClientInfoException.class, () -> connectionProperties.setEnableSsl(false));
+        Assertions.assertDoesNotThrow(() -> connectionProperties.setAuthScheme(AuthScheme.None));
+        Assertions.assertDoesNotThrow(() -> connectionProperties.setEnableSsl(false));
+    }
+
+    @Test
+    void testEnableIAMSigV4WithoutEncrpytion() throws SQLException {
+        final Properties properties = new Properties();
+        properties.put("authScheme", "None");
+        properties.put("enableSsl", false);
+        connectionProperties = new GremlinConnectionProperties(properties);
+        Assertions.assertFalse(connectionProperties.getEnableSsl());
+        Assertions.assertEquals(connectionProperties.getAuthScheme(), AuthScheme.None);
+        Assertions.assertThrows(SQLClientInfoException.class, () -> connectionProperties.setAuthScheme(AuthScheme.IAMSigV4));
+        Assertions.assertDoesNotThrow(() -> connectionProperties.setEnableSsl(true));
+        Assertions.assertDoesNotThrow(() -> connectionProperties.setAuthScheme(AuthScheme.IAMSigV4));
     }
 }

@@ -22,6 +22,7 @@ import org.junit.jupiter.api.Test;
 import software.aws.neptune.ConnectionPropertiesTestBase;
 import software.aws.neptune.jdbc.utilities.AuthScheme;
 import software.aws.neptune.jdbc.utilities.ConnectionProperties;
+import java.sql.SQLClientInfoException;
 import java.sql.SQLException;
 import java.util.Properties;
 
@@ -196,5 +197,32 @@ class OpenCypherConnectionPropertiesTest extends ConnectionPropertiesTestBase {
             connectionProperties.setUseEncryption(boolValue);
             Assertions.assertEquals(boolValue, connectionProperties.getUseEncryption());
         }
+    }
+
+    @Test
+    void testDisableEncryptionWithIAMSigV4() throws SQLException {
+        final Properties properties = new Properties();
+        properties.put("authScheme", "IAMSigV4");
+        properties.put("useEncryption", true);
+        connectionProperties = new OpenCypherConnectionProperties(properties);
+        Assertions.assertTrue(connectionProperties.getUseEncryption());
+        Assertions.assertEquals(connectionProperties.getAuthScheme(), AuthScheme.IAMSigV4);
+        Assertions.assertThrows(SQLClientInfoException.class, () -> connectionProperties.setUseEncryption(false));
+        Assertions.assertDoesNotThrow(() -> connectionProperties.setAuthScheme(AuthScheme.None));
+        Assertions.assertDoesNotThrow(() -> connectionProperties.setUseEncryption(false));
+    }
+
+    @Test
+    void testEnableIAMSigV4WithoutEncrpytion() throws SQLException {
+        final Properties properties = new Properties();
+        properties.put("authScheme", "None");
+        properties.put("useEncryption", false);
+        connectionProperties = new OpenCypherConnectionProperties(properties);
+        Assertions.assertFalse(connectionProperties.getUseEncryption());
+        Assertions.assertEquals(connectionProperties.getAuthScheme(), AuthScheme.None);
+        Assertions.assertThrows(SQLClientInfoException.class,
+                () -> connectionProperties.setAuthScheme(AuthScheme.IAMSigV4));
+        Assertions.assertDoesNotThrow(() -> connectionProperties.setUseEncryption(true));
+        Assertions.assertDoesNotThrow(() -> connectionProperties.setAuthScheme(AuthScheme.IAMSigV4));
     }
 }

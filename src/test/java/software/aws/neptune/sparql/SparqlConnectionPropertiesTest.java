@@ -363,4 +363,29 @@ public class SparqlConnectionPropertiesTest {
         properties.putAll(connectionProperties);
         assertDoesNotThrowOnNewConnectionProperties(properties);
     }
+
+    @Test
+    void testChangeAuthSchemeToNone() throws SQLException {
+        // Use encryption is always set because Neptune only supports encrypted connections on SPARQL.
+        final Properties properties = new Properties();
+        properties.put("authScheme", "IAMSigV4");
+        properties.put("endpointURL", "mock");
+        properties.put("port", "1234");
+        connectionProperties = new SparqlConnectionProperties(properties);
+        Assertions.assertEquals(connectionProperties.getAuthScheme(), AuthScheme.IAMSigV4);
+        Assertions.assertDoesNotThrow(() -> connectionProperties.setAuthScheme(AuthScheme.None));
+        Assertions.assertEquals(connectionProperties.getAuthScheme(), AuthScheme.None);
+    }
+
+    @Test
+    void testChangeAuthSchemeToIAMSigV4() throws SQLException {
+        final Properties properties = new Properties();
+        properties.put("authScheme", "None");
+        properties.put("endpointURL", "mock");
+        properties.put("port", "1234");
+        connectionProperties = new SparqlConnectionProperties(properties);
+        Assertions.assertEquals(connectionProperties.getAuthScheme(), AuthScheme.None);
+        Assertions.assertDoesNotThrow(() -> connectionProperties.setAuthScheme(AuthScheme.IAMSigV4));
+        Assertions.assertEquals(connectionProperties.getAuthScheme(), AuthScheme.IAMSigV4);
+    }
 }

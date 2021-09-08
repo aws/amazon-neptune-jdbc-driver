@@ -133,6 +133,11 @@ public class SparqlConnectionProperties extends ConnectionProperties {
         return AuthScheme.fromString(value);
     }
 
+    protected boolean isEncryptionEnabled() {
+        // Neptune only supports https when using SPARQL.
+        return true;
+    }
+
     /**
      * Gets the connection endpoint.
      *
@@ -421,8 +426,7 @@ public class SparqlConnectionProperties extends ConnectionProperties {
         }
 
         if ("".equals(getEndpoint()) || getPort() < 0) {
-            throw missingConnectionPropertyError("The ENDPOINT_KEY and PORT_KEY fields must be" +
-                    " provided");
+            throw missingConnectionPropertyError(String.format("The '%s' and '%s' fields must be provided", ENDPOINT_KEY, PORT_KEY));
         }
 
         String destination = String.format("%s:%d", getEndpoint(), getPort());
