@@ -384,7 +384,7 @@ public class GremlinConnectionProperties extends ConnectionProperties {
                     LOGGER,
                     Connection.getFailures("useEncrpytion", "true"),
                     SqlError.INVALID_CONNECTION_PROPERTY, "useEncrpytion",
-                    "'true' when authScheme is set to 'IAMSigV4'");
+                    "'false' when authScheme is set to 'IAMSigV4'");
         }
         put(ENABLE_SSL_KEY, enableSsl);
     }
