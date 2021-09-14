@@ -249,6 +249,7 @@ dependencies {
     compile group: 'com.amazonaws', name: 'amazon-neptune-sparql-java-sigv4', version: amazonSigv4SignerVersion
     compile group: 'com.amazonaws', name: 'amazon-neptune-sigv4-signer', version: amazonSigv4SignerVersion
     compile group: 'com.amazonaws', name: 'amazon-neptune-gremlin-java-sigv4', version: amazonSigv4SignerVersion
+    compile group: 'com.jcraft', name: 'jsch', version: '0.1.55'
     testImplementation group: 'com.massisframework', name: 'j-text-utils', version: '0.3.4'
 
     // Might need tinkerpop, also shade exclude for testing???

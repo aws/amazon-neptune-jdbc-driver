@@ -24,6 +24,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import software.aws.neptune.jdbc.utilities.AuthScheme;
 import software.aws.neptune.jdbc.utilities.ConnectionProperties;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
@@ -133,6 +135,21 @@ public class SparqlConnectionProperties extends ConnectionProperties {
         return AuthScheme.fromString(value);
     }
 
+    @Override
+    public String getHostname() throws SQLException {
+        try {
+            return (new URI(getEndpoint())).getHost();
+        } catch (final URISyntaxException e) {
+            throw new SQLException(e);
+        }
+
+    }
+
+    @Override
+    public void sshTunnelOverride(final String host, final int port) throws SQLException {
+        setPort(port);
+    }
+
     /**
      * Gets the connection endpoint.
      *
@@ -158,6 +175,7 @@ public class SparqlConnectionProperties extends ConnectionProperties {
      *
      * @return The port.
      */
+    @Override
     public int getPort() {
         return (int) get(PORT_KEY);
     }

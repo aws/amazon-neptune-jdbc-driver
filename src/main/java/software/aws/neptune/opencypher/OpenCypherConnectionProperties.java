@@ -21,6 +21,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import software.aws.neptune.jdbc.utilities.AuthScheme;
 import software.aws.neptune.jdbc.utilities.ConnectionProperties;
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.net.URLStreamHandlerFactory;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
@@ -70,6 +75,14 @@ public class OpenCypherConnectionProperties extends ConnectionProperties {
         super(new Properties(), DEFAULT_PROPERTIES_MAP, PROPERTY_CONVERTER_MAP);
     }
 
+    private URI getUri() throws SQLException {
+        try {
+            return new URI(getEndpoint());
+        } catch (final URISyntaxException e) {
+            throw new SQLException(e);
+        }
+    }
+
     /**
      * OpenCypherConnectionProperties constructor.
      *
@@ -79,7 +92,8 @@ public class OpenCypherConnectionProperties extends ConnectionProperties {
         super(properties, DEFAULT_PROPERTIES_MAP, PROPERTY_CONVERTER_MAP);
     }
 
-    protected static AuthScheme toAuthScheme(@NonNull final String key, @NonNull final String value) throws SQLException {
+    protected static AuthScheme toAuthScheme(@NonNull final String key, @NonNull final String value)
+            throws SQLException {
         if (isWhitespace(value)) {
             return DEFAULT_AUTH_SCHEME;
         }
@@ -87,6 +101,21 @@ public class OpenCypherConnectionProperties extends ConnectionProperties {
             throw invalidConnectionPropertyError(key, value);
         }
         return AuthScheme.fromString(value);
+    }
+
+    @Override
+    public String getHostname() throws SQLException {
+        return getUri().getHost();
+    }
+
+    @Override
+    public int getPort() throws SQLException {
+        return getUri().getPort();
+    }
+
+    @Override
+    public void sshTunnelOverride(final String host, final int port) throws SQLException {
+        setEndpoint(String.format("%s://%s:%d", getUri().getScheme(), host, port));
     }
 
     /**
@@ -105,6 +134,7 @@ public class OpenCypherConnectionProperties extends ConnectionProperties {
      * @throws SQLException if value is invalid.
      */
     public void setEndpoint(@NonNull final String endpoint) throws SQLException {
+        System.out.println("Endpoint: " + endpoint);
         setProperty(ENDPOINT_KEY,
                 (String) PROPERTY_CONVERTER_MAP.get(ENDPOINT_KEY).convert(ENDPOINT_KEY, endpoint));
     }

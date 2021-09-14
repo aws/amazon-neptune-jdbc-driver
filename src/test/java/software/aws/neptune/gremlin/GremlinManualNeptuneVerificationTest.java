@@ -28,9 +28,13 @@ import java.util.Properties;
 import static software.aws.neptune.gremlin.GremlinConnectionProperties.CONTACT_POINT_KEY;
 import static software.aws.neptune.gremlin.GremlinConnectionProperties.ENABLE_SSL_KEY;
 import static software.aws.neptune.gremlin.GremlinConnectionProperties.PORT_KEY;
+import static software.aws.neptune.jdbc.utilities.ConnectionProperties.SSH_HOSTNAME;
+import static software.aws.neptune.jdbc.utilities.ConnectionProperties.SSH_PRIVATE_KEY_FILE;
+import static software.aws.neptune.jdbc.utilities.ConnectionProperties.SSH_STRICT_HOST_KEY_CHECKING;
+import static software.aws.neptune.jdbc.utilities.ConnectionProperties.SSH_USER;
 
 public class GremlinManualNeptuneVerificationTest {
-    private static final String ENDPOINT = "iam-auth-test-lyndon.cluster-cdubgfjknn5r.us-east-1.neptune.amazonaws.com";
+    private static final String ENDPOINT = "database-1.cluster-cdffsmv2nzf7.us-east-2.neptune.amazonaws.com";
     private static final String SAMPLE_QUERY = "g.V().count()";
     private static final int PORT = 8182;
     private static final String CREATE_NODES;
@@ -50,12 +54,16 @@ public class GremlinManualNeptuneVerificationTest {
         properties.put(CONTACT_POINT_KEY, ENDPOINT);
         properties.put(PORT_KEY, PORT);
         properties.put(ENABLE_SSL_KEY, true);
+        properties.put(SSH_USER, "ec2-user");
+        properties.put(SSH_HOSTNAME, "52.14.185.245");
+        properties.put(SSH_PRIVATE_KEY_FILE, "~/Downloads/EC2/neptune-test.pem");
+        properties.put(SSH_STRICT_HOST_KEY_CHECKING, "false");
         connection = new GremlinConnection(new GremlinConnectionProperties(properties));
         databaseMetaData = connection.getMetaData();
-        connection.createStatement().executeQuery(CREATE_NODES);
+        // connection.createStatement().executeQuery(CREATE_NODES);
     }
 
-    @Disabled
+    // @Disabled
     @Test
     void testGetColumns() throws SQLException {
         final java.sql.ResultSet resultSet = databaseMetaData.getColumns(null, null, null, null);
