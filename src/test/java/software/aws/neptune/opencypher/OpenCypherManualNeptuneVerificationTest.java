@@ -31,6 +31,7 @@ import static software.aws.neptune.jdbc.utilities.ConnectionProperties.SSH_PRIVA
 import static software.aws.neptune.jdbc.utilities.ConnectionProperties.SSH_STRICT_HOST_KEY_CHECKING;
 import static software.aws.neptune.jdbc.utilities.ConnectionProperties.SSH_USER;
 
+@Disabled
 public class OpenCypherManualNeptuneVerificationTest {
 
     private static final String HOSTNAME = "database-1.cluster-cdffsmv2nzf7.us-east-2.neptune.amazonaws.com";

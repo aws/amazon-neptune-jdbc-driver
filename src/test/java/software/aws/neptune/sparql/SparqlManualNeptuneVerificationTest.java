@@ -47,6 +47,7 @@ import static software.aws.neptune.jdbc.utilities.ConnectionProperties.SSH_PRIVA
 import static software.aws.neptune.jdbc.utilities.ConnectionProperties.SSH_STRICT_HOST_KEY_CHECKING;
 import static software.aws.neptune.jdbc.utilities.ConnectionProperties.SSH_USER;
 
+@Disabled
 public class SparqlManualNeptuneVerificationTest {
 
     private static final String NEPTUNE_HOSTNAME =
