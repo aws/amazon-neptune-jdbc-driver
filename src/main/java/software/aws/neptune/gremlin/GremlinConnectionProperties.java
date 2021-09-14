@@ -161,8 +161,7 @@ public class GremlinConnectionProperties extends ConnectionProperties {
     }
 
     @Override
-    public void sshTunnelOverride(final String host, final int port) throws SQLException {
-        setContactPoint(host);
+    public void sshTunnelOverride(final int port) throws SQLException {
         setPort(port);
     }
 

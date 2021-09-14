@@ -138,12 +138,7 @@ public class OpenCypherQueryExecutor extends QueryExecutor {
         if (useEncryption) {
             LOGGER.info("Creating driver with encryption.");
             configBuilder.withEncryption();
-            if (openCypherConnectionProperties.getEndpoint().contains("//localhost:")) {
-                // SSL certificate verification will fail if we don't disable it here because the hosts lookup is not used.
-                configBuilder.withTrustStrategy(Config.TrustStrategy.trustAllCertificates().withoutHostnameVerification());
-            } else {
-                configBuilder.withTrustStrategy(Config.TrustStrategy.trustAllCertificates());
-            }
+            configBuilder.withTrustStrategy(Config.TrustStrategy.trustAllCertificates());
         } else {
             LOGGER.info("Creating driver without encryption.");
             configBuilder.withoutEncryption();
@@ -194,7 +189,7 @@ public class OpenCypherQueryExecutor extends QueryExecutor {
         if (!MetadataCache.isMetadataCached()) {
             MetadataCache.updateCache(openCypherConnectionProperties.getEndpoint(), null,
                     (openCypherConnectionProperties.getAuthScheme() == AuthScheme.IAMSigV4),
-                    MetadataCache.PathType.Bolt, null);
+                    MetadataCache.PathType.Bolt, null, openCypherConnectionProperties.getPort());
         }
 
         final List<GraphSchema> graphSchemaList =
@@ -251,7 +246,7 @@ public class OpenCypherQueryExecutor extends QueryExecutor {
         if (!MetadataCache.isMetadataCached()) {
             MetadataCache.updateCache(openCypherConnectionProperties.getEndpoint(), null,
                     (openCypherConnectionProperties.getAuthScheme() == AuthScheme.IAMSigV4),
-                    MetadataCache.PathType.Bolt, null);
+                    MetadataCache.PathType.Bolt, null, openCypherConnectionProperties.getPort());
         }
 
         final List<GraphSchema> graphSchemaList =

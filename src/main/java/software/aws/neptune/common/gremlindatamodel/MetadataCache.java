@@ -55,13 +55,14 @@ public class MetadataCache {
                                    final String nodes,
                                    final boolean useIAM,
                                    final PathType pathType,
-                                   final GremlinConnectionProperties gremlinConnectionProperties) throws SQLException {
+                                   final GremlinConnectionProperties gremlinConnectionProperties,
+                                   final int port) throws SQLException {
         synchronized (LOCK) {
             try {
                 nodeSchemaList = new ArrayList<>();
                 edgeSchemaList = new ArrayList<>();
                 SchemaHelperGremlinDataModel
-                        .getGraphSchema(endpoint, nodes, useIAM, pathType, nodeSchemaList, edgeSchemaList);
+                        .getGraphSchema(endpoint, nodes, useIAM, pathType, nodeSchemaList, edgeSchemaList, port);
                 if (gremlinConnectionProperties != null) {
                     schemaConfig = SchemaHelperGremlinDataModel.getSchemaConfig(gremlinConnectionProperties);
                     for (final TableRelationship tableRelationship : schemaConfig.getRelationships()) {

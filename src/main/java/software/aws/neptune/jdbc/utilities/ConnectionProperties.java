@@ -239,13 +239,12 @@ public abstract class ConnectionProperties extends Properties {
     public abstract int getPort() throws SQLException;
 
     /**
-     * Function to override the current endpoint with the ssh tunnel parameters.
+     * Function to override the current port with the ssh tunnel port.
      *
-     * @param host Host to override with.
      * @param port Port to override with.
      * @throws SQLException If the override fails.
      */
-    public abstract void sshTunnelOverride(String host, int port) throws SQLException;
+    public abstract void sshTunnelOverride(int port) throws SQLException;
 
     /**
      * Gets the application name.

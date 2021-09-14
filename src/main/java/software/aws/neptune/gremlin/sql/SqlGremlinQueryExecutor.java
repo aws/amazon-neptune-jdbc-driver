@@ -100,7 +100,7 @@ public class SqlGremlinQueryExecutor extends GremlinQueryExecutor {
         if (!MetadataCache.isMetadataCached()) {
             MetadataCache.updateCache(gremlinConnectionProperties.getContactPoint(), null,
                     (gremlinConnectionProperties.getAuthScheme() == AuthScheme.IAMSigV4),
-                    MetadataCache.PathType.Gremlin, gremlinConnectionProperties);
+                    MetadataCache.PathType.Gremlin, gremlinConnectionProperties, gremlinConnectionProperties.getPort());
         }
         if (sqlToGremlin == null) {
             sqlToGremlin = new SqlToGremlin(MetadataCache.getSchemaConfig(),
@@ -127,7 +127,7 @@ public class SqlGremlinQueryExecutor extends GremlinQueryExecutor {
             }
             MetadataCache.updateCache(gremlinConnectionProperties.getContactPoint(), null,
                     (gremlinConnectionProperties.getAuthScheme() == AuthScheme.IAMSigV4),
-                    MetadataCache.PathType.Gremlin, gremlinConnectionProperties);
+                    MetadataCache.PathType.Gremlin, gremlinConnectionProperties, gremlinConnectionProperties.getPort());
         }
 
         final List<GraphSchema> graphSchemaList =
@@ -156,7 +156,7 @@ public class SqlGremlinQueryExecutor extends GremlinQueryExecutor {
             }
             MetadataCache.updateCache(gremlinConnectionProperties.getContactPoint(), null,
                     (gremlinConnectionProperties.getAuthScheme() == AuthScheme.IAMSigV4),
-                    MetadataCache.PathType.Gremlin, gremlinConnectionProperties);
+                    MetadataCache.PathType.Gremlin, gremlinConnectionProperties, gremlinConnectionProperties.getPort());
         }
 
         final List<GraphSchema> graphSchemaList =

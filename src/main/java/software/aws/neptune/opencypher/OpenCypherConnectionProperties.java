@@ -21,11 +21,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import software.aws.neptune.jdbc.utilities.AuthScheme;
 import software.aws.neptune.jdbc.utilities.ConnectionProperties;
-import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.URL;
-import java.net.URLStreamHandlerFactory;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
@@ -75,14 +72,6 @@ public class OpenCypherConnectionProperties extends ConnectionProperties {
         super(new Properties(), DEFAULT_PROPERTIES_MAP, PROPERTY_CONVERTER_MAP);
     }
 
-    private URI getUri() throws SQLException {
-        try {
-            return new URI(getEndpoint());
-        } catch (final URISyntaxException e) {
-            throw new SQLException(e);
-        }
-    }
-
     /**
      * OpenCypherConnectionProperties constructor.
      *
@@ -103,6 +92,14 @@ public class OpenCypherConnectionProperties extends ConnectionProperties {
         return AuthScheme.fromString(value);
     }
 
+    private URI getUri() throws SQLException {
+        try {
+            return new URI(getEndpoint());
+        } catch (final URISyntaxException e) {
+            throw new SQLException(e);
+        }
+    }
+
     @Override
     public String getHostname() throws SQLException {
         return getUri().getHost();
@@ -114,8 +111,8 @@ public class OpenCypherConnectionProperties extends ConnectionProperties {
     }
 
     @Override
-    public void sshTunnelOverride(final String host, final int port) throws SQLException {
-        setEndpoint(String.format("%s://%s:%d", getUri().getScheme(), host, port));
+    public void sshTunnelOverride(final int port) throws SQLException {
+        setEndpoint(String.format("%s://%s:%d", getUri().getScheme(), getHostname(), port));
     }
 
     /**

@@ -60,7 +60,7 @@ public abstract class Connection implements java.sql.Connection {
                 Driver.APPLICATION_NAME);
         sshTunnel = new SshTunnel(connectionProperties);
         if (sshTunnel.sshTunnelValid()) {
-            connectionProperties.sshTunnelOverride(sshTunnel.getTunnelHost(), sshTunnel.getTunnelPort());
+            connectionProperties.sshTunnelOverride(sshTunnel.getTunnelPort());
         }
     }
 

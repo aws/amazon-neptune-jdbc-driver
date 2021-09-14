@@ -146,7 +146,7 @@ public class SparqlConnectionProperties extends ConnectionProperties {
     }
 
     @Override
-    public void sshTunnelOverride(final String host, final int port) throws SQLException {
+    public void sshTunnelOverride(final int port) throws SQLException {
         setPort(port);
     }
 

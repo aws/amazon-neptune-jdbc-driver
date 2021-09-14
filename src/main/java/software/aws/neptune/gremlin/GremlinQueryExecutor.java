@@ -312,7 +312,7 @@ public class GremlinQueryExecutor extends QueryExecutor {
             }
             MetadataCache.updateCache(gremlinConnectionProperties.getContactPoint(), null,
                     (gremlinConnectionProperties.getAuthScheme() == AuthScheme.IAMSigV4),
-                    MetadataCache.PathType.Gremlin, null);
+                    MetadataCache.PathType.Gremlin, null, gremlinConnectionProperties.getPort());
         }
 
         final List<GraphSchema> graphSchemaList =
@@ -377,7 +377,7 @@ public class GremlinQueryExecutor extends QueryExecutor {
             }
             MetadataCache.updateCache(gremlinConnectionProperties.getContactPoint(), null,
                     (gremlinConnectionProperties.getAuthScheme() == AuthScheme.IAMSigV4),
-                    MetadataCache.PathType.Gremlin, null);
+                    MetadataCache.PathType.Gremlin, null, gremlinConnectionProperties.getPort());
         }
 
         final List<GraphSchema> graphSchemaList =
