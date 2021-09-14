@@ -16,8 +16,9 @@
 
 package software.aws.neptune.opencypher;
 
+import org.junit.Assert;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import software.aws.neptune.jdbc.utilities.AuthScheme;
@@ -25,11 +26,18 @@ import software.aws.neptune.opencypher.utilities.OpenCypherGetColumnUtilities;
 import java.sql.SQLException;
 import java.util.Properties;
 
+import static software.aws.neptune.jdbc.utilities.ConnectionProperties.SSH_HOSTNAME;
+import static software.aws.neptune.jdbc.utilities.ConnectionProperties.SSH_PRIVATE_KEY_FILE;
+import static software.aws.neptune.jdbc.utilities.ConnectionProperties.SSH_STRICT_HOST_KEY_CHECKING;
+import static software.aws.neptune.jdbc.utilities.ConnectionProperties.SSH_USER;
+
 public class OpenCypherManualNeptuneVerificationTest {
 
-    private static final String HOSTNAME = "test-jdbc-3.cluster-cdubgfjknn5r.us-east-1.neptune.amazonaws.com";
+    private static final String HOSTNAME = "database-1.cluster-cdffsmv2nzf7.us-east-2.neptune.amazonaws.com";
     private static final Properties PROPERTIES = new Properties();
     private static final String CREATE_NODES;
+    private static java.sql.Connection connection;
+    private static java.sql.DatabaseMetaData databaseMetaData;
 
     static {
         CREATE_NODES = String.format("CREATE (:%s %s)", "Person:Developer", "{hello:'world'}") +
@@ -43,32 +51,25 @@ public class OpenCypherManualNeptuneVerificationTest {
                 " CREATE (:Foo {foo:'foo'})-[:Rel {rel:'rel'}]->(:Bar {bar:'bar'})";
     }
 
-    private java.sql.DatabaseMetaData databaseMetaData;
-
-    @BeforeEach
-    void initialize() throws SQLException {
+    @BeforeAll
+    static void initialize() throws SQLException {
         final String endpoint = String.format("bolt://%s:%d", HOSTNAME, 8182);
-        /*final Config config = Config.builder()
-                .withConnectionTimeout(3, TimeUnit.SECONDS)
-                .withMaxConnectionPoolSize(1000)
-                .withEncryption()
-                .withTrustStrategy(Config.TrustStrategy.trustAllCertificates())
-                .build();
-
-        final Driver driver = GraphDatabase.driver(endpoint, null, config);
-        driver.verifyConnectivity();*/
+        PROPERTIES.put(SSH_USER, "ec2-user");
+        PROPERTIES.put(SSH_HOSTNAME, "52.14.185.245");
+        PROPERTIES.put(SSH_PRIVATE_KEY_FILE, "~/Downloads/EC2/neptune-test.pem");
+        PROPERTIES.put(SSH_STRICT_HOST_KEY_CHECKING, "false");
         PROPERTIES.put(OpenCypherConnectionProperties.AUTH_SCHEME_KEY, AuthScheme.None); // reverse default to None
         PROPERTIES.putIfAbsent(OpenCypherConnectionProperties.ENDPOINT_KEY, endpoint);
-        System.out.println("Endpoint " + endpoint);
-        final java.sql.Connection connection = new OpenCypherConnection(new OpenCypherConnectionProperties(PROPERTIES));
+        connection = new OpenCypherConnection(new OpenCypherConnectionProperties(PROPERTIES));
         final java.sql.Statement statement = connection.createStatement();
-        // statement.execute(CREATE_NODES);
+        statement.execute(CREATE_NODES);
         databaseMetaData = connection.getMetaData();
     }
 
     @Disabled
     @Test
     void testGetColumns() throws SQLException {
+        Assert.assertTrue(connection.isValid(1));
         final java.sql.ResultSet resultSet = databaseMetaData.getColumns(null, null, null, null);
         Assertions.assertTrue(resultSet.next());
         do {
@@ -97,5 +98,11 @@ public class OpenCypherManualNeptuneVerificationTest {
     void testGetColumnsHumanDeveloper() throws SQLException {
         final java.sql.ResultSet resultSet = databaseMetaData.getColumns(null, null, "Human:Developer", null);
         Assertions.assertFalse(resultSet.next());
+    }
+
+    @Disabled
+    @Test
+    void testIsValid() throws SQLException {
+        Assertions.assertTrue(connection.isValid(1));
     }
 }
