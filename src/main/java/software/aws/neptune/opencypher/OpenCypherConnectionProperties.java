@@ -19,8 +19,11 @@ package software.aws.neptune.opencypher;
 import lombok.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import software.aws.neptune.jdbc.Connection;
 import software.aws.neptune.jdbc.utilities.AuthScheme;
 import software.aws.neptune.jdbc.utilities.ConnectionProperties;
+import software.aws.neptune.jdbc.utilities.SqlError;
+import java.sql.SQLClientInfoException;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
@@ -79,7 +82,12 @@ public class OpenCypherConnectionProperties extends ConnectionProperties {
         super(properties, DEFAULT_PROPERTIES_MAP, PROPERTY_CONVERTER_MAP);
     }
 
-    protected static AuthScheme toAuthScheme(@NonNull final String key, @NonNull final String value) throws SQLException {
+    protected boolean isEncryptionEnabled() {
+        return getUseEncryption();
+    }
+
+    protected static AuthScheme toAuthScheme(@NonNull final String key, @NonNull final String value)
+            throws SQLException {
         if (isWhitespace(value)) {
             return DEFAULT_AUTH_SCHEME;
         }
@@ -171,7 +179,14 @@ public class OpenCypherConnectionProperties extends ConnectionProperties {
      *
      * @param useEncryption The use encryption.
      */
-    public void setUseEncryption(final boolean useEncryption) {
+    public void setUseEncryption(final boolean useEncryption) throws SQLClientInfoException {
+        if (!useEncryption && getAuthScheme().equals(AuthScheme.IAMSigV4)) {
+            throw SqlError.createSQLClientInfoException(
+                    LOGGER,
+                    Connection.getFailures("useEncrpytion", "true"),
+                    SqlError.INVALID_CONNECTION_PROPERTY, "useEncrpytion",
+                    "'false' when authScheme is set to 'IAMSigV4'");
+        }
         put(USE_ENCRYPTION_KEY, useEncryption);
     }
 
