@@ -4,7 +4,7 @@ This driver provides JDBC connectivity for the Amazon Neptune service using open
 
 ## Connection Requirements
 
-To connect to Amazon Neptune using the JDBC driver, the Neptune instance must be available through an SSH tunnel, load balancer, or the JDBC driver must be deployed in an EC2 instance. 
+To connect to Amazon Neptune using the JDBC driver, the Neptune instance must be available through an SSH tunnel, load balancer, or the JDBC driver must be deployed in an EC2 instance. The SSH tunnel can be setup internally in the driver or externally.
 
 ## Specifications
 
@@ -90,11 +90,17 @@ With Tableau now open, select More on under to a server on the left side. If the
 
 Select **SQL via Gremlin by Amazon Neptune**, you will see the following window:
 
-[<img src="samples/images/tableauSQLgremlin.png" width="500"/>](samples/images/tableauSQLgremlin.png)
+[<img src="samples/images/tableauSQLgremlin-main.png" width="500"/>](samples/images/tableauSQLgremlin-main.png)
 
 You should not need to edit the port or add any additional connection options. Simply enter the Neptune Endpoint in a similar fashion to the above example, and select your IAM/SSL configuration. Note: you must enable SSL to use IAM.
 
 When you select Sign In, it may take >30 seconds to connect if you have a large graph as it is collecting vertex/edge tables, join vertices on edges, and perform visualizations.
+
+If you would like an SSH tunnel setup within the driver between the Neptune service and an EC2 instance, an internal SSH tunnel can be configured by the driver by filling in the advanced options tab.
+
+[<img src="samples/images/tableauSQLgremlin-advanced.png" width="500"/>](samples/images/tableauSQLgremlin-advanced.png)
+
+Minimally, an SSH user, SSH host name (or ip address), private key file must be provided. A passphrase for the private key file and hosts file may also be provided. Strict host checking can be disabled if required, however this is less secure.
 
 ### Tableau Troubleshooting
 

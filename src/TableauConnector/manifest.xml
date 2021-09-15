@@ -10,6 +10,7 @@
         <vendor name="Amazon Neptune"/>
         <driver name="SQL via Gremlin Connector"/>
         <customizations>
+            <customization name="CAP_SUPPORTS_INITIAL_SQL" value="no" />
             <customization name='CAP_CREATE_TEMP_TABLES' value='no'/>
             <customization name='CAP_SUPPRESS_DISCOVERY_QUERIES' value='yes' />
             <customization name='CAP_SUPPRESS_DISPLAY_LIMITATIONS' value='yes'/>
