@@ -239,11 +239,11 @@ public abstract class Connection implements java.sql.Connection {
 
     @Override
     public void close() {
-        if (sshTunnel.sshTunnelValid()) {
-            sshTunnel.disconnect();
-        }
-
         if (!isClosed.getAndSet(true)) {
+            if (sshTunnel.sshTunnelValid()) {
+                sshTunnel.disconnect();
+            }
+
             doClose();
         }
     }

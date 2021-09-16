@@ -131,7 +131,6 @@ public class OpenCypherConnectionProperties extends ConnectionProperties {
      * @throws SQLException if value is invalid.
      */
     public void setEndpoint(@NonNull final String endpoint) throws SQLException {
-        System.out.println("Endpoint: " + endpoint);
         setProperty(ENDPOINT_KEY,
                 (String) PROPERTY_CONVERTER_MAP.get(ENDPOINT_KEY).convert(ENDPOINT_KEY, endpoint));
     }

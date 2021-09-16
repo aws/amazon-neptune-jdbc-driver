@@ -42,6 +42,7 @@ public class SshTunnel {
     private static final int DEFAULT_PORT = 22;
     private static final String LOCALHOST = "localhost";
     private static final int PORT = 8182;
+    private static final int CONNECTION_TIMEOUT_MILLISECONDS = 3000;
     private Integer localPort = null;
     private Session session = null;
 
@@ -63,7 +64,7 @@ public class SshTunnel {
             session = jSch.getSession(connectionProperties.getSshUser(), getHostName(connectionProperties),
                     getPort(connectionProperties));
             setHostKeyType(jSch, session, connectionProperties);
-            session.connect(3000);
+            session.connect(CONNECTION_TIMEOUT_MILLISECONDS);
 
             // Need to force lport because there is port range locks on the Neptune export utility.
             localPort = session.setPortForwardingL(LOCALHOST, PORT, connectionProperties.getHostname(),
