@@ -45,7 +45,7 @@ public class ConnectionTest {
     private static final String TEST_PROP_KEY_UNSUPPORTED = "unsupported";
     private static final String TEST_PROP_VAL_UNSUPPORTED = "unsupported";
     private static final String TEST_PROP_KEY = ConnectionProperties.LOG_LEVEL_KEY;
-    private static final Level TEST_PROP_VAL = Level.INFO;
+    private static final Level TEST_PROP_VAL = Level.OFF;
     private static final Properties TEST_PROP = new Properties();
     private static final Properties TEST_PROP_INITIAL = new Properties();
     private static final Properties TEST_PROP_MODIFIED = new Properties();
