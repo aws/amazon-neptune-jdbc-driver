@@ -189,7 +189,7 @@ public class OpenCypherQueryExecutor extends QueryExecutor {
         if (!MetadataCache.isMetadataCached()) {
             MetadataCache.updateCache(openCypherConnectionProperties.getEndpoint(), null,
                     (openCypherConnectionProperties.getAuthScheme() == AuthScheme.IAMSigV4),
-                    MetadataCache.PathType.Bolt, null);
+                    MetadataCache.PathType.Bolt, null, openCypherConnectionProperties.getPort());
         }
 
         final List<GraphSchema> graphSchemaList =
@@ -246,7 +246,7 @@ public class OpenCypherQueryExecutor extends QueryExecutor {
         if (!MetadataCache.isMetadataCached()) {
             MetadataCache.updateCache(openCypherConnectionProperties.getEndpoint(), null,
                     (openCypherConnectionProperties.getAuthScheme() == AuthScheme.IAMSigV4),
-                    MetadataCache.PathType.Bolt, null);
+                    MetadataCache.PathType.Bolt, null, openCypherConnectionProperties.getPort());
         }
 
         final List<GraphSchema> graphSchemaList =

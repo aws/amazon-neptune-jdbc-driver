@@ -157,6 +157,16 @@ public class GremlinConnectionProperties extends ConnectionProperties {
         super(new Properties(), DEFAULT_PROPERTIES_MAP, PROPERTY_CONVERTER_MAP);
     }
 
+    @Override
+    public String getHostname() {
+        return getContactPoint();
+    }
+
+    @Override
+    public void sshTunnelOverride(final int port) throws SQLException {
+        setPort(port);
+    }
+
     /**
      * GremlinConnectionProperties constructor.
      *
@@ -226,6 +236,7 @@ public class GremlinConnectionProperties extends ConnectionProperties {
      *
      * @return The port.
      */
+    @Override
     public int getPort() {
         return (int) get(PORT_KEY);
     }

@@ -23,6 +23,8 @@ import software.aws.neptune.jdbc.Connection;
 import software.aws.neptune.jdbc.utilities.AuthScheme;
 import software.aws.neptune.jdbc.utilities.ConnectionProperties;
 import software.aws.neptune.jdbc.utilities.SqlError;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.sql.SQLClientInfoException;
 import java.sql.SQLException;
 import java.util.HashMap;
@@ -82,10 +84,6 @@ public class OpenCypherConnectionProperties extends ConnectionProperties {
         super(properties, DEFAULT_PROPERTIES_MAP, PROPERTY_CONVERTER_MAP);
     }
 
-    protected boolean isEncryptionEnabled() {
-        return getUseEncryption();
-    }
-
     protected static AuthScheme toAuthScheme(@NonNull final String key, @NonNull final String value)
             throws SQLException {
         if (isWhitespace(value)) {
@@ -95,6 +93,33 @@ public class OpenCypherConnectionProperties extends ConnectionProperties {
             throw invalidConnectionPropertyError(key, value);
         }
         return AuthScheme.fromString(value);
+    }
+
+    protected boolean isEncryptionEnabled() {
+        return getUseEncryption();
+    }
+
+    private URI getUri() throws SQLException {
+        try {
+            return new URI(getEndpoint());
+        } catch (final URISyntaxException e) {
+            throw new SQLException(e);
+        }
+    }
+
+    @Override
+    public String getHostname() throws SQLException {
+        return getUri().getHost();
+    }
+
+    @Override
+    public int getPort() throws SQLException {
+        return getUri().getPort();
+    }
+
+    @Override
+    public void sshTunnelOverride(final int port) throws SQLException {
+        setEndpoint(String.format("%s://%s:%d", getUri().getScheme(), getHostname(), port));
     }
 
     /**

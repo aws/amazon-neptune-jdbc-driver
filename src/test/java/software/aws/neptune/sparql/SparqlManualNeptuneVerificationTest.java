@@ -34,55 +34,64 @@ import org.apache.jena.rdfconnection.RDFConnection;
 import org.apache.jena.rdfconnection.RDFConnectionRemote;
 import org.apache.jena.rdfconnection.RDFConnectionRemoteBuilder;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import software.aws.neptune.jdbc.utilities.AuthScheme;
 import software.aws.neptune.jdbc.utilities.ConnectionProperties;
-import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.Properties;
 
+import static software.aws.neptune.jdbc.utilities.ConnectionProperties.SSH_HOSTNAME;
+import static software.aws.neptune.jdbc.utilities.ConnectionProperties.SSH_PRIVATE_KEY_FILE;
+import static software.aws.neptune.jdbc.utilities.ConnectionProperties.SSH_STRICT_HOST_KEY_CHECKING;
+import static software.aws.neptune.jdbc.utilities.ConnectionProperties.SSH_USER;
+
+@Disabled
 public class SparqlManualNeptuneVerificationTest {
 
     private static final String NEPTUNE_HOSTNAME =
-            "https://iam-auth-test-lyndon.cluster-cdubgfjknn5r.us-east-1.neptune.amazonaws.com";
+            "https://database-1.cluster-cdffsmv2nzf7.us-east-2.neptune.amazonaws.com";
     private static final int NEPTUNE_DEFAULT_PORT = 8182;
-    private static final String AUTH = "IamSigV4";
+    private static final String AUTH = "None";
     private static final String NEPTUNE_QUERY_ENDPOINT = "sparql";
     private static final String NEPTUNE_DESTINATION_STRING =
             String.format("%s:%d", NEPTUNE_HOSTNAME, NEPTUNE_DEFAULT_PORT);
-    private static final String CONNECTION_STRING = String.format("jdbc:neptune:sparql://%s;queryEndpoint=%s;authScheme=%s;",NEPTUNE_HOSTNAME, NEPTUNE_QUERY_ENDPOINT, AUTH);
+    private static final String CONNECTION_STRING =
+            String.format("jdbc:neptune:sparql://%s;queryEndpoint=%s;authScheme=%s;", NEPTUNE_HOSTNAME,
+                    NEPTUNE_QUERY_ENDPOINT, AUTH);
     private static java.sql.Statement statement;
-    private java.sql.Connection authConnection;
-    private java.sql.DatabaseMetaData databaseMetaData;
+    private static java.sql.Connection authConnection;
+    private static java.sql.DatabaseMetaData databaseMetaData;
 
     private static Properties authProperties() {
         final Properties properties = new Properties();
-        properties.put(ConnectionProperties.AUTH_SCHEME_KEY, AuthScheme.IAMSigV4);
+        properties.put(ConnectionProperties.AUTH_SCHEME_KEY, AuthScheme.None);
         properties.put(SparqlConnectionProperties.ENDPOINT_KEY, NEPTUNE_HOSTNAME);
         properties.put(SparqlConnectionProperties.PORT_KEY, NEPTUNE_DEFAULT_PORT);
         properties.put(SparqlConnectionProperties.QUERY_ENDPOINT_KEY, NEPTUNE_QUERY_ENDPOINT);
+        properties.put(SSH_USER, "ec2-user");
+        properties.put(SSH_HOSTNAME, "52.14.185.245");
+        properties.put(SSH_PRIVATE_KEY_FILE, "~/Downloads/EC2/neptune-test.pem");
+        properties.put(SSH_STRICT_HOST_KEY_CHECKING, "false");
         return properties;
     }
 
-    @BeforeEach
-    void initialize() throws SQLException {
+    @BeforeAll
+    static void initialize() throws SQLException {
         authConnection = new SparqlConnection(new SparqlConnectionProperties(authProperties()));
         statement = authConnection.createStatement();
         databaseMetaData = authConnection.getMetaData();
     }
 
-    @Test
     @Disabled
+    @Test
     void testBasicIamAuth() throws Exception {
-        final Connection connection = DriverManager.getConnection(CONNECTION_STRING);
-        Assertions.assertTrue(connection.isValid(1));
+        Assertions.assertTrue(authConnection.isValid(1));
     }
 
-    @Test
     @Disabled
+    @Test
     void testSigV4Auth() throws SQLException {
         Assertions.assertTrue(authConnection.isValid(1));
         final String query = "SELECT ?s ?p ?o WHERE {?s ?p ?o}";
@@ -138,5 +147,4 @@ public class SparqlManualNeptuneVerificationTest {
             conn.queryResultSet(query, ResultSetFormatter::out);
         }
     }
-
 }

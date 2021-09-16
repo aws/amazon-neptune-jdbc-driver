@@ -65,14 +65,14 @@ public class SchemaHelperGremlinDataModel {
      */
     public static void getGraphSchema(final String endpoint, final String nodes, final boolean useIAM,
                                       final MetadataCache.PathType pathType, final List<GraphSchema> nodeSchemaList,
-                                      final List<GraphSchema> edgeSchemaList)
+                                      final List<GraphSchema> edgeSchemaList, final int port)
             throws SQLException, IOException {
         // Create unique directory if doesn't exist
         // If does exist, delete current contents
         final String directory = createUniqueDirectoryForThread();
 
         // Run process
-        final List<String> outputFiles = runGremlinSchemaGrabber(endpoint, nodes, directory, useIAM, pathType);
+        final List<String> outputFiles = runGremlinSchemaGrabber(endpoint, nodes, directory, useIAM, pathType, port);
 
         // Validate to see if files are json
         for (final String file : outputFiles) {
@@ -124,7 +124,8 @@ public class SchemaHelperGremlinDataModel {
     @VisibleForTesting
     private static List<String> runGremlinSchemaGrabber(final String endpoint, final String nodes,
                                                         final String outputPath, final boolean useIAM,
-                                                        final MetadataCache.PathType pathType)
+                                                        final MetadataCache.PathType pathType,
+                                                        final int port)
             throws SQLException {
         final String adjustedEndpoint;
         if (pathType == MetadataCache.PathType.Bolt) {
@@ -147,6 +148,8 @@ public class SchemaHelperGremlinDataModel {
         arguments.add(adjustedEndpoint);
         arguments.add("-d");
         arguments.add(outputPath);
+        arguments.add("-p");
+        arguments.add(String.format("%d", port));
 
         // This gremlin utility requires that the SERVICE_REGION is set no matter what usage of IAM is being used.
         if (useIAM) {

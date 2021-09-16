@@ -24,6 +24,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import software.aws.neptune.jdbc.utilities.AuthScheme;
 import software.aws.neptune.jdbc.utilities.ConnectionProperties;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
@@ -133,9 +135,24 @@ public class SparqlConnectionProperties extends ConnectionProperties {
         return AuthScheme.fromString(value);
     }
 
+    @Override
+    public String getHostname() throws SQLException {
+        try {
+            return (new URI(getEndpoint())).getHost();
+        } catch (final URISyntaxException e) {
+            throw new SQLException(e);
+        }
+
+    }
+
     protected boolean isEncryptionEnabled() {
         // Neptune only supports https when using SPARQL.
         return true;
+    }
+
+    @Override
+    public void sshTunnelOverride(final int port) throws SQLException {
+        setPort(port);
     }
 
     /**
@@ -163,6 +180,7 @@ public class SparqlConnectionProperties extends ConnectionProperties {
      *
      * @return The port.
      */
+    @Override
     public int getPort() {
         return (int) get(PORT_KEY);
     }
@@ -256,8 +274,9 @@ public class SparqlConnectionProperties extends ConnectionProperties {
      */
     public void setAcceptHeaderAskQuery(@NonNull final String acceptHeaderAskQuery) throws SQLException {
         setProperty(ACCEPT_HEADER_ASK_QUERY_KEY,
-                (String) PROPERTY_CONVERTER_MAP.get(ACCEPT_HEADER_ASK_QUERY_KEY).convert(ACCEPT_HEADER_ASK_QUERY_KEY,
-                        acceptHeaderAskQuery));
+                (String) PROPERTY_CONVERTER_MAP.get(ACCEPT_HEADER_ASK_QUERY_KEY)
+                        .convert(ACCEPT_HEADER_ASK_QUERY_KEY,
+                                acceptHeaderAskQuery));
     }
 
     /**
@@ -426,7 +445,8 @@ public class SparqlConnectionProperties extends ConnectionProperties {
         }
 
         if ("".equals(getEndpoint()) || getPort() < 0) {
-            throw missingConnectionPropertyError(String.format("The '%s' and '%s' fields must be provided", ENDPOINT_KEY, PORT_KEY));
+            throw missingConnectionPropertyError(
+                    String.format("The '%s' and '%s' fields must be provided", ENDPOINT_KEY, PORT_KEY));
         }
 
         String destination = String.format("%s:%d", getEndpoint(), getPort());

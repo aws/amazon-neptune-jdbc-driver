@@ -17,7 +17,7 @@
 package software.aws.neptune.gremlin;
 
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import software.aws.neptune.jdbc.utilities.AuthScheme;
@@ -25,34 +25,43 @@ import software.aws.neptune.jdbc.utilities.ConnectionProperties;
 import software.aws.neptune.opencypher.utilities.OpenCypherGetColumnUtilities;
 import java.sql.SQLException;
 import java.util.Properties;
+
 import static software.aws.neptune.gremlin.GremlinConnectionProperties.CONTACT_POINT_KEY;
 import static software.aws.neptune.gremlin.GremlinConnectionProperties.ENABLE_SSL_KEY;
 import static software.aws.neptune.gremlin.GremlinConnectionProperties.PORT_KEY;
+import static software.aws.neptune.jdbc.utilities.ConnectionProperties.SSH_HOSTNAME;
+import static software.aws.neptune.jdbc.utilities.ConnectionProperties.SSH_PRIVATE_KEY_FILE;
+import static software.aws.neptune.jdbc.utilities.ConnectionProperties.SSH_STRICT_HOST_KEY_CHECKING;
+import static software.aws.neptune.jdbc.utilities.ConnectionProperties.SSH_USER;
 
+@Disabled
 public class GremlinManualNeptuneVerificationTest {
-    private static final String ENDPOINT = "iam-auth-test-lyndon.cluster-cdubgfjknn5r.us-east-1.neptune.amazonaws.com";
+    private static final String ENDPOINT = "database-1.cluster-cdffsmv2nzf7.us-east-2.neptune.amazonaws.com";
     private static final String SAMPLE_QUERY = "g.V().count()";
     private static final int PORT = 8182;
     private static final String CREATE_NODES;
+    private static java.sql.Connection connection;
+    private static java.sql.DatabaseMetaData databaseMetaData;
 
     static {
         CREATE_NODES =
                 "g.addV('book').property('name', 'The French Chef Cookbook').property('year' , 1968).property('ISBN', '0-394-40135-2')";
     }
 
-    private java.sql.Connection connection;
-    private java.sql.DatabaseMetaData databaseMetaData;
-
-    @BeforeEach
-    void initialize() throws SQLException {
+    @BeforeAll
+    static void initialize() throws SQLException {
         final Properties properties = new Properties();
         properties.put(ConnectionProperties.AUTH_SCHEME_KEY, AuthScheme.IAMSigV4); // set default to IAMSigV4
         properties.put(CONTACT_POINT_KEY, ENDPOINT);
         properties.put(PORT_KEY, PORT);
         properties.put(ENABLE_SSL_KEY, true);
+        properties.put(SSH_USER, "ec2-user");
+        properties.put(SSH_HOSTNAME, "52.14.185.245");
+        properties.put(SSH_PRIVATE_KEY_FILE, "~/Downloads/EC2/neptune-test.pem");
+        properties.put(SSH_STRICT_HOST_KEY_CHECKING, "false");
         connection = new GremlinConnection(new GremlinConnectionProperties(properties));
         databaseMetaData = connection.getMetaData();
-        connection.createStatement().executeQuery(CREATE_NODES);
+        // connection.createStatement().executeQuery(CREATE_NODES);
     }
 
     @Disabled

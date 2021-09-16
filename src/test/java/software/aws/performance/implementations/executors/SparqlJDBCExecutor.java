@@ -37,7 +37,6 @@ public class SparqlJDBCExecutor extends JDBCExecutor {
         properties.put(SparqlConnectionProperties.ENDPOINT_KEY, PerformanceTestConstants.SPARQL_ENDPOINT);
         properties.put(SparqlConnectionProperties.PORT_KEY, PerformanceTestConstants.PORT);
         properties.put(SparqlConnectionProperties.QUERY_ENDPOINT_KEY, PerformanceTestConstants.SPARQL_QUERY);
-        System.out.println(properties);
         connection = new SparqlConnection(new SparqlConnectionProperties(properties));
     }
 

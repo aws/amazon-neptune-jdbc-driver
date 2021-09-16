@@ -11,4 +11,3 @@
     logging.log("urlBuilder=" + urlBuilder);
     return [urlBuilder];
 })
-

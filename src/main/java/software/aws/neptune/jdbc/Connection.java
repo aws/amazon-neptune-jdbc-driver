@@ -25,6 +25,7 @@ import software.aws.neptune.jdbc.utilities.ConnectionProperties;
 import software.aws.neptune.jdbc.utilities.QueryExecutor;
 import software.aws.neptune.jdbc.utilities.SqlError;
 import software.aws.neptune.jdbc.utilities.SqlState;
+import software.aws.neptune.jdbc.utilities.SshTunnel;
 import java.sql.Array;
 import java.sql.ClientInfoStatus;
 import java.sql.ResultSet;
@@ -50,12 +51,17 @@ public abstract class Connection implements java.sql.Connection {
     private final ConnectionProperties connectionProperties;
     private Map<String, Class<?>> typeMap = new HashMap<>();
     private SQLWarning warnings = null;
+    private final SshTunnel sshTunnel;
 
     protected Connection(@NonNull final ConnectionProperties connectionProperties) throws SQLException {
         this.connectionProperties = connectionProperties;
         this.connectionProperties.putIfAbsent(
                 ConnectionProperties.APPLICATION_NAME_KEY,
                 Driver.APPLICATION_NAME);
+        sshTunnel = new SshTunnel(connectionProperties);
+        if (sshTunnel.sshTunnelValid()) {
+            connectionProperties.sshTunnelOverride(sshTunnel.getTunnelPort());
+        }
     }
 
     /**
@@ -239,6 +245,10 @@ public abstract class Connection implements java.sql.Connection {
     @Override
     public void close() {
         if (!isClosed.getAndSet(true)) {
+            if (sshTunnel.sshTunnelValid()) {
+                sshTunnel.disconnect();
+            }
+
             doClose();
         }
     }
@@ -290,7 +300,6 @@ public abstract class Connection implements java.sql.Connection {
         // a parameter which is not supported.
         throw SqlError.createSQLFeatureNotSupportedException(LOGGER);
     }
-
 
     // Add default of no schema and no catalog support.
     @Override
