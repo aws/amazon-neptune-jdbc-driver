@@ -25,6 +25,7 @@ import software.aws.neptune.jdbc.utilities.SqlError;
 import javax.sql.PooledConnection;
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.SQLClientInfoException;
 import java.sql.SQLException;
 
 /**
@@ -233,7 +234,7 @@ public class OpenCypherDataSource extends DataSource
      *
      * @param useEncryption The use encryption.
      */
-    public void setUseEncryption(final boolean useEncryption) {
+    public void setUseEncryption(final boolean useEncryption) throws SQLClientInfoException {
         connectionProperties.setUseEncryption(useEncryption);
     }
 }

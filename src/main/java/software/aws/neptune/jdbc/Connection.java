@@ -82,14 +82,20 @@ public abstract class Connection implements java.sql.Connection {
         return this.connectionProperties;
     }
 
-    private Map<String, ClientInfoStatus> getFailures(@NonNull final String name, final String value) {
+    /**
+     * Function to get failures as a Map.
+     * @param name Name of property which failed.
+     * @param value Value of property which failed.
+     * @return Map of failures.
+     */
+    public static Map<String, ClientInfoStatus> getFailures(@NonNull final String name, final String value) {
         final Properties newProperties = new Properties();
         newProperties.setProperty(name, value);
 
         return getFailures(newProperties);
     }
 
-    private Map<String, ClientInfoStatus> getFailures(final Properties properties) {
+    private static Map<String, ClientInfoStatus> getFailures(final Properties properties) {
         final Map<String, ClientInfoStatus> clientInfoStatusMap = new HashMap<>();
         if (properties != null) {
             for (final String name : properties.stringPropertyNames()) {
@@ -140,7 +146,6 @@ public abstract class Connection implements java.sql.Connection {
 
     @Override
     public void setClientInfo(@NonNull final String name, final String value) throws SQLClientInfoException {
-        // TODO: Remove this and go through them.
         if (isClosed.get()) {
             throw SqlError.createSQLClientInfoException(
                     LOGGER,

@@ -24,10 +24,12 @@ import org.apache.tinkerpop.gremlin.driver.MessageSerializer;
 import org.apache.tinkerpop.gremlin.driver.ser.Serializers;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import software.aws.neptune.jdbc.Connection;
 import software.aws.neptune.jdbc.utilities.AuthScheme;
 import software.aws.neptune.jdbc.utilities.ConnectionProperties;
 import software.aws.neptune.jdbc.utilities.SqlError;
 import software.aws.neptune.jdbc.utilities.SqlState;
+import java.sql.SQLClientInfoException;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.List;
@@ -172,6 +174,11 @@ public class GremlinConnectionProperties extends ConnectionProperties {
      */
     public GremlinConnectionProperties(final Properties properties) throws SQLException {
         super(properties, DEFAULT_PROPERTIES_MAP, PROPERTY_CONVERTER_MAP);
+    }
+
+    protected boolean isEncryptionEnabled() {
+        // Neptune only supports https when using SPARQL.
+        return getEnableSsl();
     }
 
     /**
@@ -382,7 +389,14 @@ public class GremlinConnectionProperties extends ConnectionProperties {
      *
      * @param enableSsl The enable ssl flag.
      */
-    public void setEnableSsl(final boolean enableSsl) {
+    public void setEnableSsl(final boolean enableSsl) throws SQLClientInfoException {
+        if (!enableSsl && getAuthScheme().equals(AuthScheme.IAMSigV4)) {
+            throw SqlError.createSQLClientInfoException(
+                    LOGGER,
+                    Connection.getFailures("useEncrpytion", "true"),
+                    SqlError.INVALID_CONNECTION_PROPERTY, "useEncrpytion",
+                    "'false' when authScheme is set to 'IAMSigV4'");
+        }
         put(ENABLE_SSL_KEY, enableSsl);
     }
 
