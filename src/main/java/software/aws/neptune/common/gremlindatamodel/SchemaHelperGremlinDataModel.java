@@ -28,10 +28,10 @@ import org.apache.tinkerpop.gremlin.driver.Result;
 import org.apache.tinkerpop.gremlin.driver.ResultSet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.twilmes.sql.gremlin.schema.SchemaConfig;
-import org.twilmes.sql.gremlin.schema.TableColumn;
-import org.twilmes.sql.gremlin.schema.TableConfig;
-import org.twilmes.sql.gremlin.schema.TableRelationship;
+import org.twilmes.sql.gremlin.adapter.converter.schema.SchemaConfig;
+import org.twilmes.sql.gremlin.adapter.converter.schema.TableColumn;
+import org.twilmes.sql.gremlin.adapter.converter.schema.TableConfig;
+import org.twilmes.sql.gremlin.adapter.converter.schema.TableRelationship;
 import software.aws.neptune.gremlin.GremlinConnectionProperties;
 import software.aws.neptune.gremlin.GremlinQueryExecutor;
 import software.aws.neptune.jdbc.utilities.SqlError;
@@ -297,7 +297,6 @@ public class SchemaHelperGremlinDataModel {
         return tableConfigList;
     }
 
-    // TODO: This code needs to be cleaned up
     static List<TableRelationship> getTableRelationships(final List<GraphSchema> edgeSchema,
                                                          final GremlinConnectionProperties gremlinConnectionProperties)
             throws SQLException {

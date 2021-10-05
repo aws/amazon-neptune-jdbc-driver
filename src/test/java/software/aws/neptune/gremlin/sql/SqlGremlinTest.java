@@ -43,11 +43,14 @@ import static org.apache.tinkerpop.gremlin.process.traversal.AnonymousTraversalS
 import static software.aws.neptune.gremlin.GremlinConnectionProperties.CONTACT_POINT_KEY;
 import static software.aws.neptune.gremlin.GremlinConnectionProperties.ENABLE_SSL_KEY;
 import static software.aws.neptune.gremlin.GremlinConnectionProperties.PORT_KEY;
+import static software.aws.neptune.jdbc.utilities.ConnectionProperties.SSH_HOSTNAME;
+import static software.aws.neptune.jdbc.utilities.ConnectionProperties.SSH_PRIVATE_KEY_FILE;
+import static software.aws.neptune.jdbc.utilities.ConnectionProperties.SSH_STRICT_HOST_KEY_CHECKING;
+import static software.aws.neptune.jdbc.utilities.ConnectionProperties.SSH_USER;
 
 // Temporary test file to do ad hoc testing.
 public class SqlGremlinTest {
-
-    private static final String ENDPOINT = "iam-auth-test-lyndon.cluster-cdubgfjknn5r.us-east-1.neptune.amazonaws.com";
+    private static final String ENDPOINT = "database-1.cluster-cdffsmv2nzf7.us-east-2.neptune.amazonaws.com";
     private static final int PORT = 8182;
 
     GraphTraversalSource getGraphTraversalSource() {
@@ -111,6 +114,72 @@ public class SqlGremlinTest {
     }
 
     @Test
+    void testSql() throws SQLException {
+        final Properties properties = new Properties();
+        properties.put(ConnectionProperties.AUTH_SCHEME_KEY, AuthScheme.IAMSigV4); // set default to IAMSigV4
+        properties.put(CONTACT_POINT_KEY, ENDPOINT);
+        properties.put(PORT_KEY, PORT);
+        properties.put(ENABLE_SSL_KEY, true);
+        properties.put(SSH_USER, "ec2-user");
+        properties.put(SSH_HOSTNAME, "52.14.185.245");
+        properties.put(SSH_PRIVATE_KEY_FILE, "~/Downloads/EC2/neptune-test.pem");
+        properties.put(SSH_STRICT_HOST_KEY_CHECKING, "false");
+        //
+        // g.V().hasLabel("airport")
+        //      .project("airport")
+        //          .by(__.values("lat"))
+        //          .by(
+        //              __.project("avg","lat")
+        //                  .by(__.inject().choose(__.has("lat"),__.values("lat"),__.constant("")))
+        //                  .by(__.inject().choose(__.has("lat"),__.values("lat"),__.constant(""))))
+        final List<String> queries = ImmutableList.of(
+                        "SELECT " +
+                        " AVG(`airport`.`lat`) AS `avg`," +
+                        " `airport`.`lat` AS `lat`" +
+                        " FROM `gremlin`.`airport` `airport`" +
+                        " GROUP BY `airport`.`lat`",
+                /*"SELECT " +
+                        "     `airport`.`CONTAINS_ID` AS `CONTAINS_ID`, " +
+                        "     `airport`.`ROUTE_ID` AS `ROUTE_ID`, " +
+                        "     `airport`.`city` AS `city`,\n" +
+                        "     `airport`.`code` AS `code`,\n" +
+                        "     `airport`.`country` AS `country`,\n" +
+                        "     `airport`.`desc` AS `desc`,\n" +
+                        "     `airport`.`elev` AS `elev`,\n" +
+                        "     `airport`.`icao` AS `icao`,\n" +
+                        "     `airport`.`lat` AS `lat`,\n" +
+                        "     `airport`.`lon` AS `lon`,\n" +
+                        "     `airport`.`longest` AS `longest`,\n" +
+                        "     `airport`.`region` AS `region`,\n" +
+                        "     `airport`.`runways` AS `runways`,\n" +
+                        "     `airport`.`type` AS `type`\n" +
+                        "   FROM `gremlin`.`airport` `airport`\n" +
+                        "   LIMIT 100",*/
+
+                "SELECT " +
+                        "                     `airport1`.`ROUTE_ID` as `arid1`, " +
+                        "                     `airport`.`ROUTE_ID` as `arid0`, " +
+                        "                     `airport1`.`city` AS `city__airport__`, " +
+                        "                     `airport`.`city` AS `city`, " +
+                        "                     AVG(`airport`.`lat`) AS `avg`" +
+                        "                           FROM `gremlin`.`airport` `airport` " +
+                        "                               INNER JOIN `gremlin`.`airport` `airport1` " +
+                        "                                   ON (`airport`.`ROUTE_ID` = `airport1`.`ROUTE_ID`) " +
+                        "                                       GROUP BY `airport`.`lat`, `airport1`.`city`, `airport`.`city`," +
+                        "                                                 `airport1`.`ROUTE_ID`, `airport`.`ROUTE_ID`" +
+                        "   LIMIT 100",
+
+                // "SELECT ROUTE_ID, ROUTE_ID as rid, COUNT(ROUTE_ID) AS cnt, AVG(ROUTE_ID) AS a, SUM(SQRT(ROUTE_ID)) AS s FROM airport " +
+                //         "GROUP BY ROUTE_ID",
+
+                "SELECT ROUTE_ID as r FROM airport as a LIMIT 100");
+        final java.sql.Connection connection = new SqlGremlinConnection(new GremlinConnectionProperties(properties));
+        for (final String query : queries) {
+            runQueryPrintResults(query, connection.createStatement());
+        }
+    }
+
+    @Test
     @Disabled
     void testSqlConnectionExecution() throws SQLException {
         final Properties properties = new Properties();
@@ -168,8 +237,10 @@ public class SqlGremlinTest {
         System.out.println("Executing query: " + query);
         final java.sql.ResultSet resultSet = statement.executeQuery(query);
         final int columnCount = resultSet.getMetaData().getColumnCount();
+        System.out.println("Columns count: " + columnCount);
         final List<String> columns = new ArrayList<>();
         for (int i = 1; i <= columnCount; i++) {
+            System.out.println("Column: " + columns);
             columns.add(resultSet.getMetaData().getColumnName(i));
         }
 
@@ -181,6 +252,7 @@ public class SqlGremlinTest {
             }
             rows.add(row);
         }
+        System.out.println("Row count: " + rows.size());
 
         final Object[][] rowObjects = new Object[rows.size()][];
         final String[] colString = new String[columns.size()];
