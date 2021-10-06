@@ -23,7 +23,6 @@ import com.github.javafaker.Faker;
 import com.github.javafaker.Name;
 import com.google.common.collect.ImmutableList;
 import dnl.utils.text.table.TextTable;
-import javafx.util.Pair;
 import org.apache.tinkerpop.gremlin.driver.Client;
 import org.apache.tinkerpop.gremlin.driver.Cluster;
 import org.apache.tinkerpop.gremlin.driver.SigV4WebSocketChannelizer;
