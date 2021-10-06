@@ -162,13 +162,7 @@ public class SqlGremlinTest {
                         "                                       GROUP BY `airport`.`lat`, `airport1`.`city`, `airport`.`city`," +
                         "                                                 `airport1`.`ROUTE_ID`, `airport`.`ROUTE_ID`" +
                         "   LIMIT 100",
-                "SELECT \"route\".\"dist\" AS \"dist\" FROM \"gremlin\".\"route\" \"route\" LIMIT 10000"
-
-                // "SELECT ROUTE_ID, ROUTE_ID as rid, COUNT(ROUTE_ID) AS cnt, AVG(ROUTE_ID) AS a, SUM(SQRT(ROUTE_ID)) AS s FROM airport " +
-                //         "GROUP BY ROUTE_ID",
-
-                //"SELECT ROUTE_ID as r FROM airport as a LIMIT 100");
-        );
+                "SELECT \"route\".\"dist\" AS \"dist\" FROM \"gremlin\".\"route\" \"route\" LIMIT 10000");
         final java.sql.Connection connection = new SqlGremlinConnection(new GremlinConnectionProperties(properties));
         for (final String query : queries) {
             runQueryPrintResults(query, connection.createStatement());

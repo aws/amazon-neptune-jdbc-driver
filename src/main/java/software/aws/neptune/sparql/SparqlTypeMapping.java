@@ -130,7 +130,7 @@ public class SparqlTypeMapping {
      */
     public static JdbcType getJDBCType(final Object sparqlClass) {
         try {
-            return SPARQL_LITERAL_TO_JDBC_TYPE_MAP.getOrDefault((XSDDatatype) sparqlClass, JdbcType.VARCHAR);
+            return SPARQL_LITERAL_TO_JDBC_TYPE_MAP.getOrDefault(sparqlClass, JdbcType.VARCHAR);
         } catch (final ClassCastException e) {
             LOGGER.warn("Value is not of typed literal XSDDatatype, returning as VARCHAR type");
             return JdbcType.VARCHAR;
@@ -145,7 +145,7 @@ public class SparqlTypeMapping {
      */
     public static Class<?> getJavaType(final Object sparqlClass) {
         try {
-            return SPARQL_LITERAL_TO_JAVA_TYPE_MAP.getOrDefault((XSDDatatype) sparqlClass, String.class);
+            return SPARQL_LITERAL_TO_JAVA_TYPE_MAP.getOrDefault(sparqlClass, String.class);
         } catch (final ClassCastException e) {
             LOGGER.warn("Value is not of typed literal XSDDatatype, returning as String type");
             return String.class;
