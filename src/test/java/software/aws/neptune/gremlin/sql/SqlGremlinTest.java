@@ -67,35 +67,6 @@ public class SqlGremlinTest {
     }
 
     @Test
-    void testAggregateFunctions() throws SQLException {
-        final Properties sqlGremlinProperties = new Properties();
-        sqlGremlinProperties.put(ConnectionProperties.AUTH_SCHEME_KEY, AuthScheme.IAMSigV4); // set default to IAMSigV4
-        sqlGremlinProperties.put(CONTACT_POINT_KEY, ENDPOINT);
-        sqlGremlinProperties.put(PORT_KEY, PORT);
-        sqlGremlinProperties.put(ENABLE_SSL_KEY, true);
-        sqlGremlinProperties.put(SSH_USER, "ec2-user");
-        sqlGremlinProperties.put(SSH_HOSTNAME, "52.14.185.245");
-        sqlGremlinProperties.put(SSH_PRIVATE_KEY_FILE, "~/Downloads/EC2/neptune-test.pem");
-        sqlGremlinProperties.put(SSH_STRICT_HOST_KEY_CHECKING, "false");
-
-        final Properties gremlinProperties = new Properties();
-        gremlinProperties.put(ConnectionProperties.AUTH_SCHEME_KEY, AuthScheme.IAMSigV4); // set default to IAMSigV4
-        gremlinProperties.put(CONTACT_POINT_KEY, ENDPOINT);
-        gremlinProperties.put(PORT_KEY, PORT);
-        final List<Pair<String, String>> queries = ImmutableList.of(
-                new Pair<>("SELECT AVG(`airport`.`lat`) AS `avg` FROM `gremlin`.`airport` `airport` GROUP BY `airport`.`lat`",
-                        "g.V().hasLabel('airport').values('lat').mean()"),
-                new Pair<>("SELECT SUM(`airport`.`lat`) AS `avg` FROM `gremlin`.`airport` `airport` GROUP BY `airport`.`lat`",
-                        "g.V().hasLabel('airport').values('lat').sum()"));
-        final java.sql.Connection sqlGremlinConnection = new SqlGremlinConnection(new GremlinConnectionProperties(sqlGremlinProperties));
-        final java.sql.Connection gremlinConnection = new GremlinConnection(new GremlinConnectionProperties(gremlinProperties));
-        for (final Pair<String, String> queriez : queries) {
-            runQueriesCompareResults(queriez.getKey(), queriez.getValue(), sqlGremlinConnection.createStatement(),
-                    gremlinConnection.createStatement());
-        }
-    }
-
-    @Test
     @Disabled
     void load() throws SQLException {
         final Properties properties = new Properties();
@@ -259,13 +230,6 @@ public class SqlGremlinTest {
                 statement);
     }
 
-    void runQueriesCompareResults(final String sqlQuery, final String gremlinQuery,
-                                  final java.sql.Statement sqlGremlinStatement, final java.sql.Statement gremlinStatement) throws SQLException {
-        final java.sql.ResultSet sqlGremlinResultSet = sqlGremlinStatement.executeQuery(sqlQuery);
-        final java.sql.ResultSet gremlinResultSet = gremlinStatement.executeQuery(gremlinQuery);
-        // TODO: ADD RESULTS
-    }
-
     void runQueryPrintResults(final String query, final java.sql.Statement statement) throws SQLException {
         System.out.println("Executing query: " + query);
         final java.sql.ResultSet resultSet = statement.executeQuery(query);
@@ -274,7 +238,6 @@ public class SqlGremlinTest {
         for (int i = 1; i <= columnCount; i++) {
             columns.add(resultSet.getMetaData().getColumnName(i));
         }
-        System.out.println("Columns: " + columns);
 
         final List<List<Object>> rows = new ArrayList<>();
         while (resultSet.next()) {
@@ -284,7 +247,6 @@ public class SqlGremlinTest {
             }
             rows.add(row);
         }
-        System.out.println("Row count: " + rows.size());
 
         final Object[][] rowObjects = new Object[rows.size()][];
         final String[] colString = new String[columns.size()];
