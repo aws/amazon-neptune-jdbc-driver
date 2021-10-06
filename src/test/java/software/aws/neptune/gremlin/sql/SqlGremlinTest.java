@@ -23,6 +23,7 @@ import com.github.javafaker.Faker;
 import com.github.javafaker.Name;
 import com.google.common.collect.ImmutableList;
 import dnl.utils.text.table.TextTable;
+import javafx.util.Pair;
 import org.apache.tinkerpop.gremlin.driver.Client;
 import org.apache.tinkerpop.gremlin.driver.Cluster;
 import org.apache.tinkerpop.gremlin.driver.SigV4WebSocketChannelizer;
@@ -63,6 +64,35 @@ public class SqlGremlinTest {
         final Cluster cluster = builder.create();
         final Client client = cluster.connect().init();
         return traversal().withRemote(DriverRemoteConnection.using(client));
+    }
+
+    @Test
+    void testAggregateFunctions() throws SQLException {
+        final Properties sqlGremlinProperties = new Properties();
+        sqlGremlinProperties.put(ConnectionProperties.AUTH_SCHEME_KEY, AuthScheme.IAMSigV4); // set default to IAMSigV4
+        sqlGremlinProperties.put(CONTACT_POINT_KEY, ENDPOINT);
+        sqlGremlinProperties.put(PORT_KEY, PORT);
+        sqlGremlinProperties.put(ENABLE_SSL_KEY, true);
+        sqlGremlinProperties.put(SSH_USER, "ec2-user");
+        sqlGremlinProperties.put(SSH_HOSTNAME, "52.14.185.245");
+        sqlGremlinProperties.put(SSH_PRIVATE_KEY_FILE, "~/Downloads/EC2/neptune-test.pem");
+        sqlGremlinProperties.put(SSH_STRICT_HOST_KEY_CHECKING, "false");
+
+        final Properties gremlinProperties = new Properties();
+        gremlinProperties.put(ConnectionProperties.AUTH_SCHEME_KEY, AuthScheme.IAMSigV4); // set default to IAMSigV4
+        gremlinProperties.put(CONTACT_POINT_KEY, ENDPOINT);
+        gremlinProperties.put(PORT_KEY, PORT);
+        final List<Pair<String, String>> queries = ImmutableList.of(
+                new Pair<>("SELECT AVG(`airport`.`lat`) AS `avg` FROM `gremlin`.`airport` `airport` GROUP BY `airport`.`lat`",
+                        "g.V().hasLabel('airport').values('lat').mean()"),
+                new Pair<>("SELECT SUM(`airport`.`lat`) AS `avg` FROM `gremlin`.`airport` `airport` GROUP BY `airport`.`lat`",
+                        "g.V().hasLabel('airport').values('lat').sum()"));
+        final java.sql.Connection sqlGremlinConnection = new SqlGremlinConnection(new GremlinConnectionProperties(sqlGremlinProperties));
+        final java.sql.Connection gremlinConnection = new GremlinConnection(new GremlinConnectionProperties(gremlinProperties));
+        for (final Pair<String, String> queriez : queries) {
+            runQueriesCompareResults(queriez.getKey(), queriez.getValue(), sqlGremlinConnection.createStatement(),
+                    gremlinConnection.createStatement());
+        }
     }
 
     @Test
@@ -124,23 +154,12 @@ public class SqlGremlinTest {
         properties.put(SSH_HOSTNAME, "52.14.185.245");
         properties.put(SSH_PRIVATE_KEY_FILE, "~/Downloads/EC2/neptune-test.pem");
         properties.put(SSH_STRICT_HOST_KEY_CHECKING, "false");
-        //
-        // g.V().hasLabel("airport")
-        //      .project("airport")
-        //          .by(__.values("lat"))
-        //          .by(
-        //              __.project("avg","lat")
-        //                  .by(__.inject().choose(__.has("lat"),__.values("lat"),__.constant("")))
-        //                  .by(__.inject().choose(__.has("lat"),__.values("lat"),__.constant(""))))
+
+
         final List<String> queries = ImmutableList.of(
-                        "SELECT " +
-                        " AVG(`airport`.`lat`) AS `avg`," +
-                        " `airport`.`lat` AS `lat`" +
-                        " FROM `gremlin`.`airport` `airport`" +
-                        " GROUP BY `airport`.`lat`",
-                /*"SELECT " +
-                        "     `airport`.`CONTAINS_ID` AS `CONTAINS_ID`, " +
-                        "     `airport`.`ROUTE_ID` AS `ROUTE_ID`, " +
+                "SELECT \n" +
+                        "     `airport`.`CONTAINS_ID` AS `CONTAINS_ID`, \n" +
+                        "     `airport`.`ROUTE_ID` AS `ROUTE_ID`, \n" +
                         "     `airport`.`city` AS `city`,\n" +
                         "     `airport`.`code` AS `code`,\n" +
                         "     `airport`.`country` AS `country`,\n" +
@@ -154,7 +173,12 @@ public class SqlGremlinTest {
                         "     `airport`.`runways` AS `runways`,\n" +
                         "     `airport`.`type` AS `type`\n" +
                         "   FROM `gremlin`.`airport` `airport`\n" +
-                        "   LIMIT 100",*/
+                        "   LIMIT 100",
+                "SELECT " +
+                        " AVG(`airport`.`lat`) AS `avg`," +
+                        " `airport`.`lat` AS `lat`" +
+                        " FROM `gremlin`.`airport` `airport`" +
+                        " GROUP BY `airport`.`lat`",
 
                 "SELECT " +
                         "                     `airport1`.`ROUTE_ID` as `arid1`, " +
@@ -168,11 +192,13 @@ public class SqlGremlinTest {
                         "                                       GROUP BY `airport`.`lat`, `airport1`.`city`, `airport`.`city`," +
                         "                                                 `airport1`.`ROUTE_ID`, `airport`.`ROUTE_ID`" +
                         "   LIMIT 100",
+                "SELECT \"route\".\"dist\" AS \"dist\" FROM \"gremlin\".\"route\" \"route\" LIMIT 10000"
 
                 // "SELECT ROUTE_ID, ROUTE_ID as rid, COUNT(ROUTE_ID) AS cnt, AVG(ROUTE_ID) AS a, SUM(SQRT(ROUTE_ID)) AS s FROM airport " +
                 //         "GROUP BY ROUTE_ID",
 
-                "SELECT ROUTE_ID as r FROM airport as a LIMIT 100");
+                //"SELECT ROUTE_ID as r FROM airport as a LIMIT 100");
+        );
         final java.sql.Connection connection = new SqlGremlinConnection(new GremlinConnectionProperties(properties));
         for (final String query : queries) {
             runQueryPrintResults(query, connection.createStatement());
@@ -233,16 +259,22 @@ public class SqlGremlinTest {
                 statement);
     }
 
+    void runQueriesCompareResults(final String sqlQuery, final String gremlinQuery,
+                                  final java.sql.Statement sqlGremlinStatement, final java.sql.Statement gremlinStatement) throws SQLException {
+        final java.sql.ResultSet sqlGremlinResultSet = sqlGremlinStatement.executeQuery(sqlQuery);
+        final java.sql.ResultSet gremlinResultSet = gremlinStatement.executeQuery(gremlinQuery);
+        // TODO: ADD RESULTS
+    }
+
     void runQueryPrintResults(final String query, final java.sql.Statement statement) throws SQLException {
         System.out.println("Executing query: " + query);
         final java.sql.ResultSet resultSet = statement.executeQuery(query);
         final int columnCount = resultSet.getMetaData().getColumnCount();
-        System.out.println("Columns count: " + columnCount);
         final List<String> columns = new ArrayList<>();
         for (int i = 1; i <= columnCount; i++) {
-            System.out.println("Column: " + columns);
             columns.add(resultSet.getMetaData().getColumnName(i));
         }
+        System.out.println("Columns: " + columns);
 
         final List<List<Object>> rows = new ArrayList<>();
         while (resultSet.next()) {
