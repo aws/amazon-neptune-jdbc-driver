@@ -114,6 +114,7 @@ public class SqlGremlinTest {
     }
 
     @Test
+    @Disabled
     void testSql() throws SQLException {
         final Properties properties = new Properties();
         properties.put(ConnectionProperties.AUTH_SCHEME_KEY, AuthScheme.IAMSigV4); // set default to IAMSigV4
