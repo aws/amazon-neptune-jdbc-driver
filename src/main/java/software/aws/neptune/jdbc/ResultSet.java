@@ -71,11 +71,11 @@ public abstract class ResultSet implements java.sql.ResultSet {
     protected int getDriverFetchSize() throws SQLException {
         LOGGER.warn("Feature is not supported");
         return 0;
-    };
+    }
 
     protected void setDriverFetchSize(final int rows) {
         LOGGER.warn("Feature is not supported");
-    };
+    }
 
     protected abstract Object getConvertedValue(int columnIndex) throws SQLException;
 

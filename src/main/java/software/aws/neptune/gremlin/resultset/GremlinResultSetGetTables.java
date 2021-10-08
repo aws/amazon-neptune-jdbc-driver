@@ -65,7 +65,7 @@ public class GremlinResultSetGetTables extends ResultSetGetTables implements jav
     protected ResultSetMetaData getResultMetadata() {
         final List<String> orderedColumns = getColumns();
         final List<Class<?>> rowTypes = new ArrayList<>();
-        for (String orderedColumn : orderedColumns) {
+        for (final String orderedColumn : orderedColumns) {
             rowTypes.add(COLUMN_TYPE_MAP.get(orderedColumn));
         }
         return new GremlinResultSetMetadata(orderedColumns, rowTypes);

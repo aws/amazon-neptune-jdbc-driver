@@ -21,8 +21,8 @@ import org.apache.tinkerpop.gremlin.driver.remote.DriverRemoteConnection;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.twilmes.sql.gremlin.SqlToGremlin;
-import org.twilmes.sql.gremlin.processor.executors.SqlGremlinQueryResult;
+import org.twilmes.sql.gremlin.adapter.converter.SqlConverter;
+import org.twilmes.sql.gremlin.adapter.results.SqlGremlinQueryResult;
 import software.aws.neptune.common.gremlindatamodel.GraphSchema;
 import software.aws.neptune.common.gremlindatamodel.MetadataCache;
 import software.aws.neptune.gremlin.GremlinConnectionProperties;
@@ -46,7 +46,7 @@ import static org.apache.tinkerpop.gremlin.process.traversal.AnonymousTraversalS
 public class SqlGremlinQueryExecutor extends GremlinQueryExecutor {
     private static final Logger LOGGER = LoggerFactory.getLogger(SqlGremlinQueryExecutor.class);
     private static final Object TRAVERSAL_LOCK = new Object();
-    private static SqlToGremlin sqlToGremlin = null;
+    private static SqlConverter gremlinSqlConverter = null;
     private static GraphTraversalSource graphTraversalSource = null;
     private final GremlinConnectionProperties gremlinConnectionProperties;
 
@@ -95,18 +95,18 @@ public class SqlGremlinQueryExecutor extends GremlinQueryExecutor {
 
     }
 
-    private static SqlToGremlin getSqlToGremlin(final GremlinConnectionProperties gremlinConnectionProperties)
+    private static SqlConverter getGremlinSqlConverter(final GremlinConnectionProperties gremlinConnectionProperties)
             throws SQLException {
         if (!MetadataCache.isMetadataCached()) {
             MetadataCache.updateCache(gremlinConnectionProperties.getContactPoint(), null,
                     (gremlinConnectionProperties.getAuthScheme() == AuthScheme.IAMSigV4),
                     MetadataCache.PathType.Gremlin, gremlinConnectionProperties, gremlinConnectionProperties.getPort());
         }
-        if (sqlToGremlin == null) {
-            sqlToGremlin = new SqlToGremlin(MetadataCache.getSchemaConfig(),
+        if (gremlinSqlConverter == null) {
+            gremlinSqlConverter = new SqlConverter(MetadataCache.getSchemaConfig(),
                     getGraphTraversalSource(gremlinConnectionProperties));
         }
-        return sqlToGremlin;
+        return gremlinSqlConverter;
     }
 
     /**
@@ -194,7 +194,7 @@ public class SqlGremlinQueryExecutor extends GremlinQueryExecutor {
     protected <T> T runQuery(final String query) {
         // TODO: AN-618 Fix this backtick conversion.
         final String backtickQuery = query.replaceAll("\"", "`");
-        return (T) getSqlToGremlin(gremlinConnectionProperties).execute(backtickQuery);
+        return (T) getGremlinSqlConverter(gremlinConnectionProperties).executeQuery(backtickQuery);
     }
 
     // TODO AN-540: Look into query cancellation.

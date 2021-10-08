@@ -77,13 +77,13 @@ public class SparqlMockServer {
     // Note: it is important to cleanly close a PoolingHttpClient across server restarts
     // otherwise the pooled connections remain for the old server.
 
-    private static ServerScope serverScope = ServerScope.CLASS;
-    private static int currentPort = WebLib.choosePort();
+    private static final ServerScope SERVER_SCOPE = ServerScope.CLASS;
+    private static final int CHOOSE_PORT = WebLib.choosePort();
     // Whether to use a transaction on the dataset or to use SPARQL Update.
     private static DatasetGraph dsgTesting;
-    private static boolean clearDSGDirectly = true;
+    private static final boolean CLEAR_DSG_DIRECTLY = true;
     // reference count of start/stop server
-    private static AtomicInteger countServer = new AtomicInteger();
+    private static final AtomicInteger COUNT_SERVER = new AtomicInteger();
     private static FusekiServer server = null;
 
     // Abstraction that runs a SPARQL server for tests.
@@ -94,7 +94,7 @@ public class SparqlMockServer {
      * @return the currently used port.
      */
     public static int port() {
-        return currentPort;
+        return CHOOSE_PORT;
     }
 
     /**
@@ -155,7 +155,7 @@ public class SparqlMockServer {
      * Setup for the tests by allocating a Fuseki instance to work with
      */
     public static void ctlBeforeTestSuite() {
-        if (serverScope == SUITE) {
+        if (SERVER_SCOPE == SUITE) {
             setPoolingHttpClient();
             allocServer();
         }
@@ -165,7 +165,7 @@ public class SparqlMockServer {
      * Setup for the tests by allocating a Fuseki instance to work with
      */
     public static void ctlAfterTestSuite() {
-        if (serverScope == SUITE) {
+        if (SERVER_SCOPE == SUITE) {
             freeServer();
             resetDefaultHttpClient();
         }
@@ -175,7 +175,7 @@ public class SparqlMockServer {
      * Setup for the tests by allocating a Fuseki instance to work with
      */
     public static void ctlBeforeClass() {
-        if (serverScope == CLASS) {
+        if (SERVER_SCOPE == CLASS) {
             setPoolingHttpClient();
             allocServer();
         }
@@ -185,7 +185,7 @@ public class SparqlMockServer {
      * Clean up after tests by de-allocating the Fuseki instance
      */
     public static void ctlAfterClass() {
-        if (serverScope == CLASS) {
+        if (SERVER_SCOPE == CLASS) {
             freeServer();
             resetDefaultHttpClient();
         }
@@ -195,7 +195,7 @@ public class SparqlMockServer {
      * Placeholder.
      */
     public static void ctlBeforeTest() {
-        if (serverScope == TEST) {
+        if (SERVER_SCOPE == TEST) {
             setPoolingHttpClient();
             allocServer();
         }
@@ -205,7 +205,7 @@ public class SparqlMockServer {
      * Clean up after each test by resetting the Fuseki dataset
      */
     public static void ctlAfterTest() {
-        if (serverScope == TEST) {
+        if (SERVER_SCOPE == TEST) {
             freeServer();
             resetDefaultHttpClient();
         } else {
@@ -256,14 +256,14 @@ public class SparqlMockServer {
 
     /*package*/
     static void allocServer() {
-        if (countServer.getAndIncrement() == 0) {
+        if (COUNT_SERVER.getAndIncrement() == 0) {
             setupServer(true);
         }
     }
 
     /*package*/
     static void freeServer() {
-        if (countServer.decrementAndGet() == 0) {
+        if (COUNT_SERVER.decrementAndGet() == 0) {
             teardownServer();
         }
     }
@@ -289,17 +289,17 @@ public class SparqlMockServer {
 
     /*package*/
     static void resetServer() {
-        if (countServer.get() == 0) {
+        if (COUNT_SERVER.get() == 0) {
             throw new RuntimeException("No server started!");
         }
-        if (clearDSGDirectly) {
+        if (CLEAR_DSG_DIRECTLY) {
             Txn.executeWrite(dsgTesting, () -> dsgTesting.clear());
         } else {
             final Update clearRequest = new UpdateDrop(Target.ALL);
             final UpdateProcessor proc = UpdateExecutionFactory.createRemote(clearRequest, serviceUpdate());
             try {
                 proc.execute();
-            } catch (Throwable e) {
+            } catch (final Throwable e) {
                 e.printStackTrace();
                 throw e;
             }

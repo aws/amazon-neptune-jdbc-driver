@@ -18,7 +18,7 @@ package software.aws.neptune.gremlin.sql;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.twilmes.sql.gremlin.processor.executors.SqlGremlinQueryResult;
+import org.twilmes.sql.gremlin.adapter.results.SqlGremlinQueryResult;
 import software.aws.neptune.gremlin.GremlinTypeMapping;
 import software.aws.neptune.gremlin.resultset.GremlinResultSet;
 import software.aws.neptune.gremlin.resultset.GremlinResultSetMetadata;
