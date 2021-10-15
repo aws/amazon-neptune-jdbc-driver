@@ -197,8 +197,6 @@ license {
 repositories {
     mavenCentral()
     flatDir {
-        dir 'amazon-neptune-tools/neptune-export/target'
-        dir 'amazon-neptune-tools/neptune-gremlin-client/gremlin-client/target'
         dir 'sql-gremlin/target'
     }
 }
@@ -227,90 +225,44 @@ subprojects {
 }
 
 dependencies {
-    // Local neptune-export library
-    // TODO: switch this to a shaded jar and remove the dependencies.
-    implementation('com.amazonaws:neptune-export:1.0-SNAPSHOT')
-    implementation(':neptune-export:1.0-SNAPSHOT')
-    implementation('com.amazonaws:gremlin-client:1.0-SNAPSHOT')
-    implementation(':gremlin-client:1.0-SNAPSHOT')
+    // Local sql-gremlin build.
     implementation('org.twilmes:sql-gremlin')
     implementation(':sql-gremlin')
 
-    // neptune-export dependencies
-    compile group: 'com.github.rvesse', name: 'airline', version: '2.8.0'
-    compile group: 'org.apache.tinkerpop', name: 'gremlin-driver', version: gremlinVersion
-    compile group: 'org.eclipse.rdf4j', name: 'rdf4j-repository-sparql', version: rdf4jVersion
-    compile group: 'org.eclipse.rdf4j', name: 'rdf4j-rio-turtle', version: rdf4jVersion
-    compile group: 'org.eclipse.rdf4j', name: 'rdf4j-rio-nquads', version: rdf4jVersion
-    compile group: 'com.amazonaws', name: 'aws-java-sdk-kinesis', version: awsSdkVersion
-    compile group: 'com.amazonaws', name: 'aws-java-sdk-neptune', version: awsSdkVersion
-    compile group: 'com.amazonaws', name: 'aws-java-sdk-s3', version: awsSdkVersion
-    compile group: 'com.amazonaws', name: 'aws-java-sdk-core', version: awsSdkVersion
-    compile group: 'com.amazonaws', name: 'amazon-neptune-sparql-java-sigv4', version: amazonSigv4SignerVersion
-    compile group: 'com.amazonaws', name: 'amazon-neptune-sigv4-signer', version: amazonSigv4SignerVersion
-    compile group: 'com.amazonaws', name: 'amazon-neptune-gremlin-java-sigv4', version: amazonSigv4SignerVersion
-    compile group: 'com.jcraft', name: 'jsch', version: '0.1.55'
-    testImplementation group: 'com.massisframework', name: 'j-text-utils', version: '0.3.4'
-
-    // Might need tinkerpop, also shade exclude for testing???
-    // compile group: 'org.apache.tinkerpop', name: 'gremlin-groovy', version: gremlinVersion
-    // implementation group: 'org.fusesource.jansi', name: 'jansi', version: '2.0.0'
-
-    compile group: 'io.netty', name: 'netty-all', version: nettyVersion
-    compile group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.10.5'
-    compile group: 'com.github.rvesse', name: 'airline', version: '2.8.0'
-    compile group: 'com.amazonaws', name: 'aws-lambda-java-core', version: '1.2.1'
-    compile group: 'org.apache.commons', name: 'commons-csv', version: '1.6'
-    compile group: 'org.codehaus.plexus', name: 'plexus-utils', version: '3.2.0'
-    compile group: 'com.fasterxml.jackson.dataformat', name: 'jackson-dataformat-cbor', version: '2.10.5'
-
-    // Creating IAM SigV4 Requests
-    compile group: 'com.amazonaws', name: 'amazon-neptune-gremlin-java-sigv4', version: '1.0'
-
-    // Logging
+    // Dependencies
+    implementation group: 'org.apache.tinkerpop', name: 'gremlin-driver', version: gremlinVersion
+    implementation group: 'com.amazonaws', name: 'amazon-neptune-sparql-java-sigv4', version: amazonSigv4SignerVersion
+    implementation group: 'com.amazonaws', name: 'amazon-neptune-gremlin-java-sigv4', version: '1.0'
+    implementation group: 'com.jcraft', name: 'jsch', version: '0.1.55'
+    implementation group: 'io.netty', name: 'netty-all', version: nettyVersion
+    implementation group: 'org.neo4j.driver', name: 'neo4j-java-driver', version: neo4jDriverVersion
+    implementation group: 'org.apache.jena', name: 'jena-arq', version: '3.17.0'
     implementation group: 'org.slf4j', name: 'slf4j-log4j12', version: slf4jVersion
-
-    // Utilities
-    compile group: 'com.google.code.gson', name: 'gson', version: '2.7'
+    implementation group: 'com.google.code.gson', name: 'gson', version: '2.7'
     implementation group: 'com.google.guava', name: 'guava', version: '29.0-jre'
+    implementation group: 'com.puppycrawl.tools', name: 'checkstyle', version: puppyCrawlVersion
+    implementation group: 'com.google.code.findbugs', name: 'annotations', version: findBugsVersion
     compileOnly group: 'org.projectlombok', name: 'lombok', version: lombokVersion
     annotationProcessor group: 'org.projectlombok', name: 'lombok', version: lombokVersion
-
-    // Code analysis
-    implementation group: 'com.puppycrawl.tools', name: 'checkstyle', version: puppyCrawlVersion
-    compile group: 'com.google.code.findbugs', name: 'annotations', version: findBugsVersion
-    testImplementation group: 'com.puppycrawl.tools', name: 'checkstyle', version: puppyCrawlVersion
-    testImplementation 'org.codehaus.janino:janino:3.1.0'
-    testCompile group: 'com.google.code.findbugs', name: 'annotations', version: findBugsVersion
 
     // Testing
     testImplementation  group: 'junit', name: 'junit', version: '4.12'
     testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-api', version: jupiterVersion
     testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-engine', version: jupiterVersion
     testImplementation group: 'org.mockito', name: 'mockito-core', version: '2.1.0'
+    testImplementation group: 'com.massisframework', name: 'j-text-utils', version: '0.3.4'
+    testImplementation group: 'org.neo4j.test', name: 'neo4j-harness', version: neo4jDBVersion
+    testImplementation group: 'org.neo4j', name: 'neo4j-common', version: neo4jDBVersion, classifier: "tests"
+    testImplementation group: 'org.neo4j.community', name: 'it-test-support', version: neo4jDBVersion
+    testImplementation group: 'org.neo4j', name: 'neo4j-kernel', version: neo4jDBVersion, classifier: "tests"
+    testImplementation group: 'org.neo4j', name: 'neo4j-io', version: neo4jDBVersion, classifier: "tests"
+    testImplementation group: 'com.puppycrawl.tools', name: 'checkstyle', version: puppyCrawlVersion
+    testImplementation 'org.codehaus.janino:janino:3.1.0'
+    testImplementation group: 'com.google.code.findbugs', name: 'annotations', version: findBugsVersion
+    testImplementation group: 'com.github.javafaker', name: 'javafaker', version: '1.0.2'
+    testImplementation group: 'org.apache.jena', name: 'jena-fuseki-main', version: '3.17.0'
     testCompileOnly group: 'org.projectlombok', name: 'lombok', version: lombokVersion
     testAnnotationProcessor group: 'org.projectlombok', name: 'lombok', version: lombokVersion
-
-    // OpenCypher related
-    implementation group: 'org.neo4j.driver', name: 'neo4j-java-driver', version: neo4jDriverVersion
-    testCompile group: 'org.neo4j.test', name: 'neo4j-harness', version: neo4jDBVersion
-    testCompile group: 'org.neo4j', name: 'neo4j-common', version: neo4jDBVersion, classifier: "tests"
-    testCompile group: 'org.neo4j.community', name: 'it-test-support', version: neo4jDBVersion
-    testCompile group: 'org.neo4j', name: 'neo4j-kernel', version: neo4jDBVersion, classifier: "tests"
-    testCompile group: 'org.neo4j', name: 'neo4j-io', version: neo4jDBVersion, classifier: "tests"
-
-    // Yaml file parsing
-    implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.12.0'
-    implementation group: 'com.fasterxml.jackson.dataformat', name: 'jackson-dataformat-yaml', version: '2.12.0'
-
-    // https://mvnrepository.com/artifact/org.apache.jena/jena-arq
-    implementation group: 'org.apache.jena', name: 'jena-arq', version: '3.17.0'
-
-    // https://mvnrepository.com/artifact/org.apache.jena/jena-fuseki-main
-    testImplementation group: 'org.apache.jena', name: 'jena-fuseki-main', version: '3.17.0'
-
-
-    testCompile 'com.github.javafaker:javafaker:0.12'
 }
 
 shadowJar {

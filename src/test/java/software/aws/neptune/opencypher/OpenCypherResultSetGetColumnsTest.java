@@ -20,15 +20,10 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
-import software.aws.neptune.common.ResultSetInfoWithoutRows;
 import software.aws.neptune.common.gremlindatamodel.resultset.ResultSetGetTables;
 import software.aws.neptune.jdbc.utilities.AuthScheme;
-import software.aws.neptune.opencypher.resultset.OpenCypherResultSetGetColumns;
-import software.aws.neptune.opencypher.utilities.OpenCypherGetColumnUtilities;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
@@ -75,24 +70,6 @@ public class OpenCypherResultSetGetColumnsTest {
                 String.format("bolt://%s:%d", "localhost", 123));
         final java.sql.Connection connection = new OpenCypherConnection(new OpenCypherConnectionProperties(PROPERTIES));
         statement = connection.createStatement();
-    }
-
-    @Test
-    void generateOpenCypherResultSetGetColumnsManuallyTest() throws Exception {
-        final ResultSet resultSet =
-                new OpenCypherResultSetGetColumns(statement, OpenCypherGetColumnUtilities.NODE_COLUMN_INFOS,
-                        new ResultSetInfoWithoutRows(OpenCypherGetColumnUtilities.NODE_COLUMN_INFOS.size(),
-                                OpenCypherResultSetGetColumns.getColumns()));
-        final ResultSetMetaData resultSetMetaData = resultSet.getMetaData();
-        verifyResultSetMetadata(resultSetMetaData);
-        verifyResultSet(resultSet);
-    }
-
-    void verifyResultSetMetadata(final ResultSetMetaData metadata) throws SQLException {
-        Assertions.assertEquals(OpenCypherGetColumnUtilities.COLUMN_NAMES.size(), metadata.getColumnCount());
-        for (int i = 1; i <= OpenCypherGetColumnUtilities.COLUMN_NAMES.size(); i++) {
-            Assertions.assertEquals(OpenCypherGetColumnUtilities.COLUMN_NAMES.get(i - 1), metadata.getColumnName(i));
-        }
     }
 
     void verifyResultSet(final ResultSet resultSet) throws SQLException {

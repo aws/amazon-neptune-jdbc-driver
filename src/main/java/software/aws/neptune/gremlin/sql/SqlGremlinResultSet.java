@@ -79,13 +79,17 @@ public class SqlGremlinResultSet extends ResultSet implements java.sql.ResultSet
     }
 
     @Override
-    public boolean next() {
+    public boolean next() throws SQLException {
         final Object res;
         try {
             res = sqlQueryResult.getResult();
         } catch (final SQLException e) {
-            LOGGER.trace("No more results.");
-            return false;
+            if (e.getMessage().equals(SqlGremlinQueryResult.EMPTY_MESSAGE)) {
+                LOGGER.trace(SqlGremlinQueryResult.EMPTY_MESSAGE);
+                return false;
+            } else {
+                throw e;
+            }
         }
         this.row = (List<Object>) res;
         return true;

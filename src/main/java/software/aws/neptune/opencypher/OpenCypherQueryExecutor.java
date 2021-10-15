@@ -26,7 +26,7 @@ import org.neo4j.driver.Result;
 import org.neo4j.driver.Session;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import software.aws.neptune.common.gremlindatamodel.GraphSchema;
+import org.twilmes.sql.gremlin.adapter.converter.schema.calcite.GremlinSchema;
 import software.aws.neptune.common.gremlindatamodel.MetadataCache;
 import software.aws.neptune.jdbc.utilities.AuthScheme;
 import software.aws.neptune.jdbc.utilities.QueryExecutor;
@@ -186,15 +186,8 @@ public class OpenCypherQueryExecutor extends QueryExecutor {
     @Override
     public java.sql.ResultSet executeGetTables(final java.sql.Statement statement, final String tableName)
             throws SQLException {
-        if (!MetadataCache.isMetadataCached()) {
-            MetadataCache.updateCache(openCypherConnectionProperties.getEndpoint(), null,
-                    (openCypherConnectionProperties.getAuthScheme() == AuthScheme.IAMSigV4),
-                    MetadataCache.PathType.Bolt, null, openCypherConnectionProperties.getPort());
-        }
-
-        final List<GraphSchema> graphSchemaList =
-                MetadataCache.getFilteredCacheNodeColumnInfos(tableName);
-        return new OpenCypherResultSetGetTables(statement, graphSchemaList,
+        MetadataCache.updateCacheIfNotUpdated(openCypherConnectionProperties);
+        return new OpenCypherResultSetGetTables(statement, MetadataCache.getFilteredCacheNodeColumnInfos(tableName),
                 MetadataCache.getFilteredResultSetInfoWithoutRowsForTables(tableName));
     }
 
@@ -243,15 +236,8 @@ public class OpenCypherQueryExecutor extends QueryExecutor {
     @Override
     public java.sql.ResultSet executeGetColumns(final java.sql.Statement statement, final String nodes)
             throws SQLException {
-        if (!MetadataCache.isMetadataCached()) {
-            MetadataCache.updateCache(openCypherConnectionProperties.getEndpoint(), null,
-                    (openCypherConnectionProperties.getAuthScheme() == AuthScheme.IAMSigV4),
-                    MetadataCache.PathType.Bolt, null, openCypherConnectionProperties.getPort());
-        }
-
-        final List<GraphSchema> graphSchemaList =
-                MetadataCache.getFilteredCacheNodeColumnInfos(nodes);
-        return new OpenCypherResultSetGetColumns(statement, graphSchemaList,
+        MetadataCache.updateCacheIfNotUpdated(openCypherConnectionProperties);
+        return new OpenCypherResultSetGetColumns(statement, MetadataCache.getFilteredCacheNodeColumnInfos(nodes),
                 MetadataCache.getFilteredResultSetInfoWithoutRowsForColumns(nodes));
     }
 

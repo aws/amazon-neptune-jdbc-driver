@@ -67,7 +67,7 @@ public class SshTunnel {
             session.connect(CONNECTION_TIMEOUT_MILLISECONDS);
 
             // Need to force lport because there is port range locks on the Neptune export utility.
-            localPort = session.setPortForwardingL(LOCALHOST, PORT, connectionProperties.getHostname(),
+            localPort = session.setPortForwardingL(LOCALHOST, 0, connectionProperties.getHostname(),
                     connectionProperties.getPort());
         } catch (final Exception e) {
             localPort = null;

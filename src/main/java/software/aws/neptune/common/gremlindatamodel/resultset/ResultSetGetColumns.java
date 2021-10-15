@@ -18,8 +18,10 @@ package software.aws.neptune.common.gremlindatamodel.resultset;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.twilmes.sql.gremlin.adapter.converter.schema.calcite.GremlinSchema;
+import org.twilmes.sql.gremlin.adapter.converter.schema.gremlin.GremlinProperty;
+import org.twilmes.sql.gremlin.adapter.converter.schema.gremlin.GremlinTableBase;
 import software.aws.neptune.common.ResultSetInfoWithoutRows;
-import software.aws.neptune.common.gremlindatamodel.GraphSchema;
 import software.aws.neptune.jdbc.ResultSet;
 import software.aws.neptune.jdbc.utilities.JavaToJdbcTypeConverter;
 import software.aws.neptune.jdbc.utilities.JdbcType;
@@ -143,24 +145,24 @@ public abstract class ResultSetGetColumns extends ResultSet
      * ResultSetGetColumns constructor, initializes super class.
      *
      * @param statement                Statement Object.
-     * @param graphSchemas             List of GraphSchema Objects.
+     * @param gremlinSchema            GremlinSchema Object.
      * @param resultSetInfoWithoutRows ResultSetInfoWithoutRows Object.
      */
-    public ResultSetGetColumns(final Statement statement, final List<GraphSchema> graphSchemas,
+    public ResultSetGetColumns(final Statement statement, final GremlinSchema gremlinSchema,
                                final ResultSetInfoWithoutRows resultSetInfoWithoutRows)
             throws SQLException {
         super(statement, resultSetInfoWithoutRows.getColumns(), resultSetInfoWithoutRows.getRowCount());
-        for (final GraphSchema graphSchema : graphSchemas) {
+        for (final GremlinTableBase gremlinTableBase : gremlinSchema.getAllTables()) {
             int i = 1;
-            for (final Map<String, Object> property : graphSchema.getProperties()) {
+            for (final Map.Entry<String, GremlinProperty> property : gremlinTableBase.getColumns().entrySet()) {
                 // Add defaults.
                 final Map<String, Object> map = new HashMap<>(CONVERSION_MAP);
 
                 // Set table name.
-                map.put("TABLE_NAME", ResultSetGetTables.nodeListToString(graphSchema.getLabels()));
+                map.put("TABLE_NAME", gremlinTableBase.getLabel());
 
                 // Get column type.
-                final String dataType = property.get("dataType").toString();
+                final String dataType = property.getValue().getType();
                 map.put("TYPE_NAME", dataType);
                 final Class<?> javaClass =
                         GREMLIN_STRING_TYPE_TO_JAVA_TYPE_CONVERTER_MAP.getOrDefault(dataType, String.class);
@@ -169,16 +171,9 @@ public abstract class ResultSetGetColumns extends ResultSet
                         .getOrDefault(javaClass, JdbcType.VARCHAR.getJdbcCode());
                 map.put("DATA_TYPE", jdbcType);
 
-                map.put("COLUMN_NAME", property.getOrDefault("property", "unknown"));
-                final Object nullable = property.getOrDefault("isNullable", null);
-                if (!(nullable instanceof Boolean)) {
-                    map.put("NULLABLE", DatabaseMetaData.columnNullableUnknown);
-                    map.put("IS_NULLABLE", "");
-                } else {
-                    map.put("NULLABLE",
-                            (Boolean) nullable ? DatabaseMetaData.columnNullable : DatabaseMetaData.columnNoNulls);
-                    map.put("IS_NULLABLE", (Boolean) nullable ? "YES" : "NO");
-                }
+                map.put("COLUMN_NAME", property.getKey());
+                map.put("NULLABLE", DatabaseMetaData.columnNullable);
+                map.put("IS_NULLABLE", "YES");
 
                 // TODO: These need to be verified for Tableau.
                 map.put("DECIMAL_DIGITS", null);

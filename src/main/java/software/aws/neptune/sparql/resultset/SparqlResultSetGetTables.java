@@ -16,8 +16,8 @@
 
 package software.aws.neptune.sparql.resultset;
 
+import org.twilmes.sql.gremlin.adapter.converter.schema.calcite.GremlinSchema;
 import software.aws.neptune.common.ResultSetInfoWithoutRows;
-import software.aws.neptune.common.gremlindatamodel.GraphSchema;
 import software.aws.neptune.common.gremlindatamodel.resultset.ResultSetGetTables;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
@@ -48,13 +48,13 @@ public class SparqlResultSetGetTables extends ResultSetGetTables implements java
      * ResultSetGetTables constructor, initializes super class.
      *
      * @param statement                Statement Object.
-     * @param graphSchemas             List of NodeColumnInfo Objects.
+     * @param gremlinSchema            GremlinSchema Object.
      * @param resultSetInfoWithoutRows ResultSetInfoWithoutRows Object.
      */
     public SparqlResultSetGetTables(final Statement statement,
-                                    final List<GraphSchema> graphSchemas,
+                                    final GremlinSchema gremlinSchema,
                                     final ResultSetInfoWithoutRows resultSetInfoWithoutRows) {
-        super(statement, graphSchemas, resultSetInfoWithoutRows);
+        super(statement, gremlinSchema, resultSetInfoWithoutRows);
     }
 
     @Override

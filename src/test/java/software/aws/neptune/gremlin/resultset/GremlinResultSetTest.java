@@ -16,19 +16,25 @@
 
 package software.aws.neptune.gremlin.resultset;
 
+import org.apache.tinkerpop.gremlin.driver.Client;
+import org.apache.tinkerpop.gremlin.driver.Cluster;
+import org.apache.tinkerpop.gremlin.driver.remote.DriverRemoteConnection;
+import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversal;
+import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import software.aws.neptune.gremlin.GremlinConnection;
 import software.aws.neptune.gremlin.GremlinConnectionProperties;
+import software.aws.neptune.gremlin.GremlinQueryExecutor;
 import software.aws.neptune.gremlin.mock.MockGremlinDatabase;
-
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 
+import static org.apache.tinkerpop.gremlin.process.traversal.AnonymousTraversalSource.traversal;
 import static software.aws.neptune.gremlin.GremlinHelper.createVertex;
 import static software.aws.neptune.gremlin.GremlinHelper.dropVertex;
 import static software.aws.neptune.gremlin.GremlinHelper.getProperties;
@@ -39,8 +45,11 @@ class GremlinResultSetTest {
     private static final int PORT = 8181; // Mock server uses 8181.
     private static final String VERTEX = "planet";
 
-    @SuppressWarnings({ "unchecked", "rawtypes" })
+    @SuppressWarnings({"unchecked", "rawtypes"})
     private static final Map<String, Object> VERTEX_PROPERTIES_MAP = new HashMap();
+    private static java.sql.Connection connection;
+    private static java.sql.ResultSet resultSet;
+
     static {
         VERTEX_PROPERTIES_MAP.put("name", "Earth");
         VERTEX_PROPERTIES_MAP.put("continents", 7);
@@ -50,9 +59,6 @@ class GremlinResultSetTest {
         VERTEX_PROPERTIES_MAP.put("density", 5.514F);
         VERTEX_PROPERTIES_MAP.put("supportsLife", true);
     }
-
-    private static java.sql.Connection connection;
-    private static java.sql.ResultSet resultSet;
 
     @BeforeAll
     static void beforeAll() throws SQLException, IOException, InterruptedException {
@@ -72,15 +78,23 @@ class GremlinResultSetTest {
     }
 
     @Test
-    void testNullType() throws SQLException {
-        // TODO: AN-534
+    void testGremlinTraversal() throws SQLException {
+        final GremlinConnectionProperties gremlinConnectionProperties = new GremlinConnectionProperties(getProperties(HOSTNAME, PORT));
+        final Cluster cluster = GremlinQueryExecutor.createClusterBuilder(gremlinConnectionProperties).create();
+        final Client client = cluster.connect();
+        client.init();
+        final GraphTraversalSource g = traversal().withRemote(DriverRemoteConnection.using(client));
+        final GraphTraversal<?, ?> graphTraversal = g.V().hasLabel("foo");
+        boolean hasNext = graphTraversal.hasNext();
+        final Object name = graphTraversal.values("name");
+        hasNext = graphTraversal.hasNext();
     }
 
     @Test
     void testBooleanType() throws SQLException {
         final int col = resultSet.findColumn("supportsLife");
         Assertions.assertTrue(resultSet.getBoolean(col));
-        Assertions.assertEquals(((Boolean)true).toString(), resultSet.getString(col));
+        Assertions.assertEquals(((Boolean) true).toString(), resultSet.getString(col));
         Assertions.assertThrows(SQLException.class, () -> resultSet.getByte(col));
         Assertions.assertThrows(SQLException.class, () -> resultSet.getShort(col));
         Assertions.assertThrows(SQLException.class, () -> resultSet.getInt(col));
@@ -92,67 +106,67 @@ class GremlinResultSetTest {
     @Test
     void testShortType() throws SQLException {
         final int col = resultSet.findColumn("continents");
-        final int expected = (int)VERTEX_PROPERTIES_MAP.get("continents");
+        final int expected = (int) VERTEX_PROPERTIES_MAP.get("continents");
         Assertions.assertEquals(expected, 7);
-        Assertions.assertEquals((byte)expected, resultSet.getByte(col));
-        Assertions.assertEquals((short)expected, resultSet.getShort(col));
+        Assertions.assertEquals((byte) expected, resultSet.getByte(col));
+        Assertions.assertEquals((short) expected, resultSet.getShort(col));
         Assertions.assertEquals(expected, resultSet.getInt(col));
         Assertions.assertEquals(expected, resultSet.getLong(col));
         Assertions.assertEquals(expected, resultSet.getDouble(col));
         Assertions.assertEquals(expected, resultSet.getFloat(col));
-        Assertions.assertEquals(((Integer)expected).toString(), resultSet.getString(col));
+        Assertions.assertEquals(((Integer) expected).toString(), resultSet.getString(col));
         Assertions.assertTrue(resultSet.getBoolean(col));
     }
 
     @Test
     void testIntegerType() throws SQLException {
         final int col = resultSet.findColumn("diameter");
-        final int expected = (int)VERTEX_PROPERTIES_MAP.get("diameter");
+        final int expected = (int) VERTEX_PROPERTIES_MAP.get("diameter");
         Assertions.assertEquals(expected, 12742);
         Assertions.assertEquals(expected, resultSet.getInt(col));
         Assertions.assertEquals(expected, resultSet.getLong(col));
         Assertions.assertEquals(expected, resultSet.getDouble(col));
         Assertions.assertEquals(expected, resultSet.getFloat(col));
-        Assertions.assertEquals(((Integer)expected).toString(), resultSet.getString(col));
+        Assertions.assertEquals(((Integer) expected).toString(), resultSet.getString(col));
         Assertions.assertTrue(resultSet.getBoolean(col));
     }
 
     @Test
     void testLongType() throws SQLException {
         final int col = resultSet.findColumn("age");
-        final long expected = (long)VERTEX_PROPERTIES_MAP.get("age");
+        final long expected = (long) VERTEX_PROPERTIES_MAP.get("age");
         Assertions.assertEquals(expected, 4500000000L);
         Assertions.assertEquals(expected, resultSet.getLong(col));
         Assertions.assertEquals(expected, resultSet.getDouble(col));
         Assertions.assertEquals(expected, resultSet.getFloat(col));
-        Assertions.assertEquals(((Long)expected).toString(), resultSet.getString(col));
+        Assertions.assertEquals(((Long) expected).toString(), resultSet.getString(col));
         Assertions.assertTrue(resultSet.getBoolean(col));
     }
 
     @Test
     void testDoubleType() throws SQLException {
         final int col = resultSet.findColumn("tilt");
-        final double expected = (double)VERTEX_PROPERTIES_MAP.get("tilt");
+        final double expected = (double) VERTEX_PROPERTIES_MAP.get("tilt");
         Assertions.assertEquals(expected, 23.4392811);
         Assertions.assertEquals(expected, resultSet.getDouble(col));
-        Assertions.assertEquals((float)expected, resultSet.getFloat(col));
-        Assertions.assertEquals(((Double)expected).toString(), resultSet.getString(col));
+        Assertions.assertEquals((float) expected, resultSet.getFloat(col));
+        Assertions.assertEquals(((Double) expected).toString(), resultSet.getString(col));
     }
 
     @Test
     void testFloatingPointType() throws SQLException {
         final int col = resultSet.findColumn("density");
-        final float expected = (float)VERTEX_PROPERTIES_MAP.get("density");
+        final float expected = (float) VERTEX_PROPERTIES_MAP.get("density");
         Assertions.assertEquals(expected, 5.514F);
         Assertions.assertEquals(expected, resultSet.getDouble(col), 0.3);
         Assertions.assertEquals(expected, resultSet.getFloat(col));
-        Assertions.assertEquals(((Float)expected).toString(), resultSet.getString(col));
+        Assertions.assertEquals(((Float) expected).toString(), resultSet.getString(col));
     }
 
     @Test
     void testStringType() throws SQLException {
         final int col = resultSet.findColumn("name");
-        final String expected = (String)VERTEX_PROPERTIES_MAP.get("name");
+        final String expected = (String) VERTEX_PROPERTIES_MAP.get("name");
         Assertions.assertEquals(expected, "Earth");
         Assertions.assertEquals(expected, resultSet.getString(col));
         Assertions.assertThrows(SQLException.class, () -> resultSet.getBoolean(col));

@@ -16,8 +16,8 @@
 
 package software.aws.neptune.gremlin.resultset;
 
+import org.twilmes.sql.gremlin.adapter.converter.schema.calcite.GremlinSchema;
 import software.aws.neptune.common.ResultSetInfoWithoutRows;
-import software.aws.neptune.common.gremlindatamodel.GraphSchema;
 import software.aws.neptune.common.gremlindatamodel.resultset.ResultSetGetColumns;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
@@ -64,14 +64,14 @@ public class GremlinResultSetGetColumns extends ResultSetGetColumns implements j
      * OpenCypherResultSetGetColumns constructor, initializes super class.
      *
      * @param statement                Statement Object.
-     * @param graphSchemas             List of GraphSchema Objects.
+     * @param gremlinSchema            GremlinSchema Object.
      * @param resultSetInfoWithoutRows ResultSetInfoWithoutRows Object.
      */
     public GremlinResultSetGetColumns(final Statement statement,
-                                      final List<GraphSchema> graphSchemas,
+                                      final GremlinSchema gremlinSchema,
                                       final ResultSetInfoWithoutRows resultSetInfoWithoutRows)
             throws SQLException {
-        super(statement, graphSchemas, resultSetInfoWithoutRows);
+        super(statement, gremlinSchema, resultSetInfoWithoutRows);
     }
 
     @Override

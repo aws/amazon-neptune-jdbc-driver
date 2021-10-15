@@ -20,6 +20,9 @@ import lombok.SneakyThrows;
 import org.apache.tinkerpop.gremlin.driver.Client;
 import org.apache.tinkerpop.gremlin.driver.Cluster;
 import org.apache.tinkerpop.gremlin.driver.Result;
+import org.apache.tinkerpop.gremlin.driver.remote.DriverRemoteConnection;
+import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversal;
+import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource;
 import software.aws.neptune.gremlin.GremlinConnectionProperties;
 import software.aws.neptune.gremlin.GremlinQueryExecutor;
 import software.aws.performance.PerformanceTestExecutor;
@@ -30,6 +33,7 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
+import static org.apache.tinkerpop.gremlin.process.traversal.AnonymousTraversalSource.traversal;
 import static software.aws.neptune.gremlin.GremlinConnectionProperties.CONTACT_POINT_KEY;
 import static software.aws.neptune.gremlin.GremlinConnectionProperties.PORT_KEY;
 import static software.aws.neptune.jdbc.utilities.ConnectionProperties.AUTH_SCHEME_KEY;
@@ -50,6 +54,7 @@ public class GremlinBaselineExecutor extends PerformanceTestExecutor {
         final Cluster cluster = GremlinQueryExecutor.createClusterBuilder(gremlinConnectionProperties).create();
         client = cluster.connect();
         client.init();
+        GraphTraversalSource graphTraversalSource = traversal().withRemote(DriverRemoteConnection.using(client));
     }
 
 

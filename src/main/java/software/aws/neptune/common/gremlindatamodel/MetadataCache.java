@@ -19,69 +19,76 @@ package software.aws.neptune.common.gremlindatamodel;
 import lombok.Getter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.twilmes.sql.gremlin.adapter.converter.schema.SchemaConfig;
-import org.twilmes.sql.gremlin.adapter.converter.schema.TableRelationship;
+import org.twilmes.sql.gremlin.adapter.converter.schema.calcite.GremlinSchema;
+import org.twilmes.sql.gremlin.adapter.converter.schema.gremlin.GremlinEdgeTable;
+import org.twilmes.sql.gremlin.adapter.converter.schema.gremlin.GremlinVertexTable;
 import software.aws.neptune.common.ResultSetInfoWithoutRows;
 import software.aws.neptune.common.gremlindatamodel.resultset.ResultSetGetColumns;
 import software.aws.neptune.common.gremlindatamodel.resultset.ResultSetGetTables;
 import software.aws.neptune.gremlin.GremlinConnectionProperties;
-import java.io.IOException;
+import software.aws.neptune.jdbc.utilities.AuthScheme;
+import software.aws.neptune.opencypher.OpenCypherConnectionProperties;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class MetadataCache {
     private static final Logger LOGGER = LoggerFactory.getLogger(MetadataCache.class);
     private static final Object LOCK = new Object();
     @Getter
-    private static List<GraphSchema> nodeSchemaList = null;
-    @Getter
-    private static List<GraphSchema> edgeSchemaList = null;
-    @Getter
-    private static SchemaConfig schemaConfig = null;
+    private static GremlinSchema gremlinSchema = null;
 
     /**
      * Function to update the cache of the metadata.
      *
-     * @param endpoint                    Endpoint of target database.
-     * @param nodes                       Node list to use if any.
-     * @param useIAM                      Flag to use IAM or not.
-     * @param pathType                    Path type.
-     * @param gremlinConnectionProperties GremlinConnectionProperties to use. Only use for sql-gremlin.
+     * @param endpoint Endpoint of target database.
+     * @param port     Port of target database.
+     * @param useIam   Flag to use IAM or not.
+     * @param useSsl   Flag to use SSL.
+     * @param pathType Path type.
      * @throws SQLException Thrown if error occurs during update.
      */
-    public static void updateCache(final String endpoint,
-                                   final String nodes,
-                                   final boolean useIAM,
-                                   final PathType pathType,
-                                   final GremlinConnectionProperties gremlinConnectionProperties,
-                                   final int port) throws SQLException {
+    public static void updateCache(final String endpoint, final int port, final boolean useIam, final boolean useSsl,
+                                   final PathType pathType, final SchemaHelperGremlinDataModel.ScanType scanType)
+            throws SQLException {
         synchronized (LOCK) {
-            try {
-                nodeSchemaList = new ArrayList<>();
-                edgeSchemaList = new ArrayList<>();
-                SchemaHelperGremlinDataModel
-                        .getGraphSchema(endpoint, nodes, useIAM, pathType, nodeSchemaList, edgeSchemaList, port);
-                if (gremlinConnectionProperties != null) {
-                    schemaConfig = SchemaHelperGremlinDataModel.getSchemaConfig(gremlinConnectionProperties);
-                    for (final TableRelationship tableRelationship : schemaConfig.getRelationships()) {
-                        for (final GraphSchema graphSchema : nodeSchemaList) {
-                            for (final String label : graphSchema.getLabels()) {
-                                if (label.toLowerCase().equals(tableRelationship.getOutTable().toLowerCase())
-                                        || label.toLowerCase().equals(tableRelationship.getInTable().toLowerCase())) {
-                                    graphSchema.addForeignKey(tableRelationship.getEdgeLabel());
-                                }
-                            }
-                        }
-                    }
-                }
-            } catch (final IOException e) {
-                nodeSchemaList = null;
-                edgeSchemaList = null;
-                schemaConfig = null;
-                throw new SQLException(e.getMessage());
+            if (gremlinSchema == null) {
+                gremlinSchema =
+                        SchemaHelperGremlinDataModel.getGraphSchema(endpoint, port, useIam, useSsl, pathType, scanType);
             }
+        }
+    }
+
+    /**
+     * Function to update the cache of the metadata.
+     *
+     * @param gremlinConnectionProperties GremlinConnectionProperties to use.
+     * @throws SQLException Thrown if error occurs during update.
+     */
+    public static void updateCacheIfNotUpdated(final GremlinConnectionProperties gremlinConnectionProperties)
+            throws SQLException {
+        if (!isMetadataCached()) {
+            updateCache(gremlinConnectionProperties.getContactPoint(), gremlinConnectionProperties.getPort(),
+                    (gremlinConnectionProperties.getAuthScheme() == AuthScheme.IAMSigV4),
+                    gremlinConnectionProperties.getEnableSsl(),
+                    MetadataCache.PathType.Gremlin, gremlinConnectionProperties.getScanType());
+        }
+    }
+
+    /**
+     * Function to update the cache of the metadata.
+     *
+     * @param openCypherConnectionProperties OpenCypherConnectionProperties to use.
+     * @throws SQLException Thrown if error occurs during update.
+     */
+    public static void updateCacheIfNotUpdated(final OpenCypherConnectionProperties openCypherConnectionProperties)
+            throws SQLException {
+        if (!isMetadataCached()) {
+            updateCache(openCypherConnectionProperties.getEndpoint(), openCypherConnectionProperties.getPort(),
+                    (openCypherConnectionProperties.getAuthScheme() == AuthScheme.IAMSigV4),
+                    openCypherConnectionProperties.getUseEncryption(),
+                    PathType.Bolt, openCypherConnectionProperties.getScanType());
         }
     }
 
@@ -92,7 +99,7 @@ public class MetadataCache {
      */
     public static boolean isMetadataCached() {
         synchronized (LOCK) {
-            return ((nodeSchemaList != null) && (edgeSchemaList != null));
+            return (gremlinSchema != null);
         }
     }
 
@@ -102,31 +109,24 @@ public class MetadataCache {
      * @param nodeFilter Filter to apply.
      * @return Filtered NodeColumnInfo List.
      */
-    public static List<GraphSchema> getFilteredCacheNodeColumnInfos(
-            final String nodeFilter) {
+    public static GremlinSchema getFilteredCacheNodeColumnInfos(final String nodeFilter) throws SQLException {
         synchronized (LOCK) {
-            final List<GraphSchema> graphSchemas = new ArrayList<>();
-            for (final GraphSchema graphSchema : nodeSchemaList) {
-                if (nodeFilter != null && !"%".equals(nodeFilter)) {
-                    if (Arrays.stream(nodeFilter.split(":"))
-                            .allMatch(node -> graphSchema.getLabels().contains(node))) {
-                        graphSchemas.add(graphSchema);
-                    }
-                } else {
-                    graphSchemas.add(graphSchema);
-                }
+            if (gremlinSchema == null) {
+                throw new SQLException("Error, cache must be updated before filtered cache can be retrieved.");
+            } else if (nodeFilter == null || "%".equals(nodeFilter)) {
+                return gremlinSchema;
             }
-            for (final GraphSchema graphSchema : edgeSchemaList) {
-                if (nodeFilter != null && !"%".equals(nodeFilter)) {
-                    if (Arrays.stream(nodeFilter.split(":"))
-                            .allMatch(node -> graphSchema.getLabels().contains(node))) {
-                        graphSchemas.add(graphSchema);
-                    }
-                } else {
-                    graphSchemas.add(graphSchema);
-                }
-            }
-            return graphSchemas;
+            LOGGER.info("Getting vertices.");
+            final List<GremlinVertexTable> vertices = gremlinSchema.getVertices();
+            LOGGER.info("Getting edges.");
+            final List<GremlinEdgeTable> edges = gremlinSchema.getEdges();
+            final List<GremlinVertexTable> filteredGremlinVertexTables = vertices.stream().filter(
+                    table -> Arrays.stream(nodeFilter.split(":")).allMatch(f -> table.getLabel().contains(f)))
+                    .collect(Collectors.toList());
+            final List<GremlinEdgeTable> filteredGremlinEdgeTables = edges.stream().filter(
+                    table -> Arrays.stream(nodeFilter.split(":")).allMatch(f -> table.getLabel().contains(f)))
+                    .collect(Collectors.toList());
+            return new GremlinSchema(filteredGremlinVertexTables, filteredGremlinEdgeTables);
         }
     }
 
@@ -137,10 +137,9 @@ public class MetadataCache {
      * @return Filtered ResultSetInfoWithoutRows Object.
      */
     public static ResultSetInfoWithoutRows getFilteredResultSetInfoWithoutRowsForColumns(
-            final String nodeFilter) {
-        return new ResultSetInfoWithoutRows(
-                getFilteredCacheNodeColumnInfos(nodeFilter).stream().mapToInt(node -> node.getProperties().size())
-                        .sum(), ResultSetGetColumns.getColumns());
+            final String nodeFilter) throws SQLException {
+        return new ResultSetInfoWithoutRows(getFilteredCacheNodeColumnInfos(nodeFilter).getAllTables().stream()
+                .mapToInt(table -> table.getColumns().size()).sum(), ResultSetGetColumns.getColumns());
     }
 
     /**
@@ -150,9 +149,9 @@ public class MetadataCache {
      * @return Filtered ResultSetInfoWithoutRows Object.
      */
     public static ResultSetInfoWithoutRows getFilteredResultSetInfoWithoutRowsForTables(
-            final String nodeFilter) {
+            final String nodeFilter) throws SQLException {
         return new ResultSetInfoWithoutRows(
-                getFilteredCacheNodeColumnInfos(nodeFilter).size(), ResultSetGetTables.getColumns());
+                getFilteredCacheNodeColumnInfos(nodeFilter).getAllTables().size(), ResultSetGetTables.getColumns());
     }
 
     public enum PathType {
