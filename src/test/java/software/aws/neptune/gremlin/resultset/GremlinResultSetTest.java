@@ -16,25 +16,18 @@
 
 package software.aws.neptune.gremlin.resultset;
 
-import org.apache.tinkerpop.gremlin.driver.Client;
-import org.apache.tinkerpop.gremlin.driver.Cluster;
-import org.apache.tinkerpop.gremlin.driver.remote.DriverRemoteConnection;
-import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversal;
-import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import software.aws.neptune.gremlin.GremlinConnection;
 import software.aws.neptune.gremlin.GremlinConnectionProperties;
-import software.aws.neptune.gremlin.GremlinQueryExecutor;
 import software.aws.neptune.gremlin.mock.MockGremlinDatabase;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.apache.tinkerpop.gremlin.process.traversal.AnonymousTraversalSource.traversal;
 import static software.aws.neptune.gremlin.GremlinHelper.createVertex;
 import static software.aws.neptune.gremlin.GremlinHelper.dropVertex;
 import static software.aws.neptune.gremlin.GremlinHelper.getProperties;
