@@ -78,19 +78,6 @@ class GremlinResultSetTest {
     }
 
     @Test
-    void testGremlinTraversal() throws SQLException {
-        final GremlinConnectionProperties gremlinConnectionProperties = new GremlinConnectionProperties(getProperties(HOSTNAME, PORT));
-        final Cluster cluster = GremlinQueryExecutor.createClusterBuilder(gremlinConnectionProperties).create();
-        final Client client = cluster.connect();
-        client.init();
-        final GraphTraversalSource g = traversal().withRemote(DriverRemoteConnection.using(client));
-        final GraphTraversal<?, ?> graphTraversal = g.V().hasLabel("foo");
-        boolean hasNext = graphTraversal.hasNext();
-        final Object name = graphTraversal.values("name");
-        hasNext = graphTraversal.hasNext();
-    }
-
-    @Test
     void testBooleanType() throws SQLException {
         final int col = resultSet.findColumn("supportsLife");
         Assertions.assertTrue(resultSet.getBoolean(col));
