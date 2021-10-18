@@ -45,9 +45,7 @@ class Example {
 
 #### No authentication using Properties
 
-Instead of having properties set in the connection string, you can also set Properties in order to get a connection. 
-
-[The usage document](../USAGE.md) has a list of settings that can be set in the properties.
+Instead of having properties set in the connection string, you can also set Properties in order to get a connection.
 
 ```java
 import java.sql.*;

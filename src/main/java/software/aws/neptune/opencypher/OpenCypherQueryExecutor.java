@@ -26,7 +26,6 @@ import org.neo4j.driver.Result;
 import org.neo4j.driver.Session;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.twilmes.sql.gremlin.adapter.converter.schema.calcite.GremlinSchema;
 import software.aws.neptune.common.gremlindatamodel.MetadataCache;
 import software.aws.neptune.jdbc.utilities.AuthScheme;
 import software.aws.neptune.jdbc.utilities.QueryExecutor;

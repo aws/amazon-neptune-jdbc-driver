@@ -162,7 +162,7 @@ public class SqlGremlinTest {
     }
 
     @Test
-        // @Disabled
+    @Disabled
     void testSql() throws SQLException {
         final Properties properties = new Properties();
         properties.put(ConnectionProperties.AUTH_SCHEME_KEY, AuthScheme.IAMSigV4); // set default to IAMSigV4
@@ -224,8 +224,8 @@ public class SqlGremlinTest {
                         "AVG(`airport`.`lat`) AS `lat_avg`, " +
                         "MIN(`airport`.`lat`) AS `lat_min`, " +
                         "MAX(`airport`.`lat`) AS `lat_max` " +
-                        " FROM `airport` GROUP BY `airport`.`country`, `airport`.`region`"
-                /*"SELECT " +
+                        " FROM `airport` GROUP BY `airport`.`country`, `airport`.`region`",
+                "SELECT " +
                         "                     `airport1`.`ROUTE_OUT_ID` as `arid1`, " +
                         "                     `airport`.`ROUTE_IN_ID` as `arid0`, " +
                         "                     `airport1`.`city` AS `city__airport__`, " +
@@ -237,7 +237,7 @@ public class SqlGremlinTest {
                         "                                       GROUP BY `airport`.`lat`, `airport1`.`city`, `airport`.`city`," +
                         "                                                 `airport1`.`ROUTE_OUT_ID`, `airport`.`ROUTE_IN_ID`" +
                         "               ORDER BY `arid1`, `arid0`, `city__airport__`, `city`" +
-                        "   LIMIT 100"*/
+                        "   LIMIT 100"
         );
 
         // Issue is in ROUTE / ROUTE_OUT_ID
@@ -248,7 +248,7 @@ public class SqlGremlinTest {
     }
 
     @Test
-        // @Disabled
+    @Disabled
     void testHaving() throws SQLException {
         final Properties properties = new Properties();
         properties.put(ConnectionProperties.AUTH_SCHEME_KEY, AuthScheme.IAMSigV4); // set default to IAMSigV4
@@ -272,9 +272,85 @@ public class SqlGremlinTest {
                         "MIN(`airport`.`lat`) AS `lat_min`, " +
                         "MAX(`airport`.`lat`) AS `lat_max` " +
                         " FROM `airport` GROUP BY `airport`.`country`, `airport`.`region` ORDER BY SUM(`airport`.`elev`)",*/
-                "SELECT `airport`.`country` AS `COUNT` FROM `gremlin`.`airport` `airport` " +
-                        "GROUP BY `airport`.`country`" +
-                        " HAVING COUNT(`airport`.`city`) > 8 AND SUM(`airport`.`lat`) < 1000 LIMIT 2"
+                "SELECT `airport`.`country` FROM `airport` GROUP BY `airport`.`country` " +
+                        " HAVING (COUNT(1) > 0) LIMIT 10",
+                "SELECT `airport`.`country`, `airport`.`region`, " +
+                        " SUM(`airport`.`elev`) AS `elev_sum`, " +
+                        "AVG(`airport`.`elev`) AS `elev_avg`, " +
+                        "MIN(`airport`.`elev`) AS `elev_min`, " +
+                        "MAX(`airport`.`elev`) AS `elev_max`," +
+                        " SUM(`airport`.`lat`) AS `lat_sum`, " +
+                        "AVG(`airport`.`lat`) AS `lat_avg`, " +
+                        "MIN(`airport`.`lat`) AS `lat_min`, " +
+                        "MAX(`airport`.`lat`) AS `lat_max` " +
+                        " FROM `airport` GROUP BY `airport`.`country`, `airport`.`region`, `airport`.`elev`, `airport`.`lat`" +
+                        " HAVING (COUNT(1) > 0) LIMIT 10",
+                "SELECT `airport`.`country`, `airport`.`region`, " +
+                        " SUM(`airport`.`elev`) AS `elev_sum`, " +
+                        "AVG(`airport`.`elev`) AS `elev_avg`, " +
+                        "MIN(`airport`.`elev`) AS `elev_min`, " +
+                        "MAX(`airport`.`elev`) AS `elev_max`," +
+                        " SUM(`airport`.`lat`) AS `lat_sum`, " +
+                        "AVG(`airport`.`lat`) AS `lat_avg`, " +
+                        "MIN(`airport`.`lat`) AS `lat_min`, " +
+                        "MAX(`airport`.`lat`) AS `lat_max` " +
+                        " FROM `airport` GROUP BY `airport`.`country`, `airport`.`region`, `airport`.`elev`, `airport`.`lat`" +
+                        " HAVING `airport`.`lat` >= 8 LIMIT 10",
+                "SELECT `airport`.`country`, `airport`.`region`, " +
+                        " SUM(`airport`.`elev`) AS `elev_sum`, " +
+                        "AVG(`airport`.`elev`) AS `elev_avg`, " +
+                        "MIN(`airport`.`elev`) AS `elev_min`, " +
+                        "MAX(`airport`.`elev`) AS `elev_max`," +
+                        " SUM(`airport`.`lat`) AS `lat_sum`, " +
+                        "AVG(`airport`.`lat`) AS `lat_avg`, " +
+                        "MIN(`airport`.`lat`) AS `lat_min`, " +
+                        "MAX(`airport`.`lat`) AS `lat_max` " +
+                        " FROM `airport` GROUP BY `airport`.`country`, `airport`.`region`, `airport`.`elev`, `airport`.`lat`" +
+                        " HAVING `airport`.`lat` <= 8 LIMIT 10",
+                "SELECT `airport`.`lat`, `airport`.`lon`, " +
+                        " SUM(`airport`.`elev`) AS `elev_sum`, " +
+                        "AVG(`airport`.`elev`) AS `elev_avg`, " +
+                        "MIN(`airport`.`elev`) AS `elev_min`, " +
+                        "MAX(`airport`.`elev`) AS `elev_max`," +
+                        " SUM(`airport`.`lat`) AS `lat_sum`, " +
+                        "AVG(`airport`.`lat`) AS `lat_avg`, " +
+                        "MIN(`airport`.`lat`) AS `lat_min`, " +
+                        "MAX(`airport`.`lat`) AS `lat_max` " +
+                        " FROM `airport` GROUP BY `airport`.`country`, `airport`.`region`, `airport`.`elev`, `airport`.`lat`, `airport`.`lon`" +
+                        " HAVING COUNT(`airport`.`city`) > 8 LIMIT 10",
+                "SELECT `airport`.`lat`, `airport`.`lon`, " +
+                        " SUM(`airport`.`elev`) AS `elev_sum`, " +
+                        "AVG(`airport`.`elev`) AS `elev_avg`, " +
+                        "MIN(`airport`.`elev`) AS `elev_min`, " +
+                        "MAX(`airport`.`elev`) AS `elev_max`," +
+                        " SUM(`airport`.`lat`) AS `lat_sum`, " +
+                        "AVG(`airport`.`lat`) AS `lat_avg`, " +
+                        "MIN(`airport`.`lat`) AS `lat_min`, " +
+                        "MAX(`airport`.`lat`) AS `lat_max` " +
+                        " FROM `airport` GROUP BY `airport`.`lat`, `airport`.`lon`, `airport`.`country`, `airport`.`region`" +
+                        " HAVING `airport`.`lat` > `airport`.`lon` LIMIT 10",
+                "SELECT `airport`.`lat`, `airport`.`lon`, " +
+                        " SUM(`airport`.`elev`) AS `elev_sum`, " +
+                        "AVG(`airport`.`elev`) AS `elev_avg`, " +
+                        "MIN(`airport`.`elev`) AS `elev_min`, " +
+                        "MAX(`airport`.`elev`) AS `elev_max`," +
+                        " SUM(`airport`.`lat`) AS `lat_sum`, " +
+                        "AVG(`airport`.`lat`) AS `lat_avg`, " +
+                        "MIN(`airport`.`lat`) AS `lat_min`, " +
+                        "MAX(`airport`.`lat`) AS `lat_max` " +
+                        " FROM `airport` GROUP BY `airport`.`country`, `airport`.`region`, `airport`.`elev`, `airport`.`lat`, `airport`.`lon`" +
+                        " HAVING `airport`.`lat` > 8 LIMIT 10",
+                "SELECT `airport`.`country`, `airport`.`region`, " +
+                        " SUM(`airport`.`elev`) AS `elev_sum`, " +
+                        "AVG(`airport`.`elev`) AS `elev_avg`, " +
+                        "MIN(`airport`.`elev`) AS `elev_min`, " +
+                        "MAX(`airport`.`elev`) AS `elev_max`," +
+                        " SUM(`airport`.`lat`) AS `lat_sum`, " +
+                        "AVG(`airport`.`lat`) AS `lat_avg`, " +
+                        "MIN(`airport`.`lat`) AS `lat_min`, " +
+                        "MAX(`airport`.`lat`) AS `lat_max` " +
+                        " FROM `airport` GROUP BY `airport`.`country`, `airport`.`region`, `airport`.`elev`, `airport`.`lat`" +
+                        " HAVING `airport`.`lat` > 8 LIMIT 10"
         );
 
         // Issue is in ROUTE / ROUTE_OUT_ID
@@ -285,7 +361,7 @@ public class SqlGremlinTest {
     }
 
     @Test
-        // @Disabled
+    @Disabled
     void testAggregateFunctions() throws SQLException {
         final Properties properties = new Properties();
         properties.put(ConnectionProperties.AUTH_SCHEME_KEY, AuthScheme.IAMSigV4); // set default to IAMSigV4
@@ -353,7 +429,8 @@ public class SqlGremlinTest {
         final GremlinConnectionProperties sqlGremlinConnectionProperties = new GremlinConnectionProperties(properties);
         final java.sql.Connection sqlGremlinConnection = new SqlGremlinConnection(sqlGremlinConnectionProperties);
 
-        final GremlinConnectionProperties gremlinConnectionProperties = new GremlinConnectionProperties(gremlinProperties);
+        final GremlinConnectionProperties gremlinConnectionProperties =
+                new GremlinConnectionProperties(gremlinProperties);
         gremlinConnectionProperties.sshTunnelOverride(sqlGremlinConnectionProperties.getPort());
         final java.sql.Connection gremlinConnection = new GremlinConnection(gremlinConnectionProperties);
 
@@ -371,21 +448,23 @@ public class SqlGremlinTest {
     }
 
 
-    private String generateAggregateGremlinQueriesWithGroup(final String operator, final String table, final String column, final String groupColumn) {
+    private String generateAggregateGremlinQueriesWithGroup(final String operator, final String table,
+                                                            final String column, final String groupColumn) {
         // Returns a simple Gremlin query in the form:
         return String.format(
                 "g.V().hasLabel('%s')." +
                         "group()." +
-                            "by(union(values('%s')).fold()).unfold()." +
+                        "by(union(values('%s')).fold()).unfold()." +
                         "select(values)." +
                         "order()." +
-                            "by(unfold().values())." +
+                        "by(unfold().values())." +
                         "project('%s_%s')." +
-                            "by(unfold().values('%s').%s())",
+                        "by(unfold().values('%s').%s())",
                 table, groupColumn, column, operator.toLowerCase(), column, operator.toLowerCase());
     }
 
-    private String generateAggregateSQLQueriesWithGroup(final String operator, final String table, final String column, final String groupColumn) {
+    private String generateAggregateSQLQueriesWithGroup(final String operator, final String table, final String column,
+                                                        final String groupColumn) {
         // Returns a simple SQL query in the form:
         // "SELECT OPERATOR(`table`.`column`) AS `OPERATOR` FROM `gremlin`.`table` `table` GROUP BY `table`.`column`"
         return String.format("SELECT `%s`.`%s` %s(`%s`.`%s`) AS `%s` FROM `gremlin`.`%s` `%s` GROUP BY `%s`.`%s`",
@@ -395,13 +474,15 @@ public class SqlGremlinTest {
 
     private String generateAggregateGremlinQueries(final String operator, final String table, final String column) {
         // Returns a simple Gremlin query in the form:
-        return String.format("g.V().hasLabel('%s').group().by(union(values('%s')).fold()).unfold().select(values).order().by(unfold().values())" +
-                        ".fold().project('%s_%s').by(unfold().unfold().values('%s').%s())",
-                table, column, column, operator.toLowerCase(), column, operator.toLowerCase());
+        return String
+                .format("g.V().hasLabel('%s').group().by(union(values('%s')).fold()).unfold().select(values).order().by(unfold().values())" +
+                                ".fold().project('%s_%s').by(unfold().unfold().values('%s').%s())",
+                        table, column, column, operator.toLowerCase(), column, operator.toLowerCase());
     }
 
     void runQueriesCompareResults(final String sqlQuery, final String gremlinQuery,
-                                  final java.sql.Statement sqlGremlinStatement, final java.sql.Statement gremlinStatement) throws SQLException {
+                                  final java.sql.Statement sqlGremlinStatement,
+                                  final java.sql.Statement gremlinStatement) throws SQLException {
         System.out.println("SQL: " + sqlQuery);
         System.out.println("Gremlin: " + gremlinQuery);
         final java.sql.ResultSet sqlGremlinResultSet = sqlGremlinStatement.executeQuery(sqlQuery);
@@ -473,19 +554,6 @@ public class SqlGremlinTest {
                 statement);
     }
 
-    /*
-    [
-        {
-            'key': 'value',
-            'key': 'value'
-        },
-        {
-            'key': 'value',
-            'key': 'value'
-        },
-    ]
-     */
-
     void runQueryPrintResults(final String query, final java.sql.Statement statement) throws SQLException {
         System.out.println("Executing query: " + query);
         final java.sql.ResultSet resultSet = statement.executeQuery(query);
@@ -518,6 +586,7 @@ public class SqlGremlinTest {
     }
 
     @Test
+    @Disabled
     void getGremlinSchema() throws SQLException, ExecutionException, InterruptedException {
         final Properties properties = new Properties();
         properties.put(ConnectionProperties.AUTH_SCHEME_KEY, AuthScheme.IAMSigV4); // set default to IAMSigV4
@@ -538,12 +607,15 @@ public class SqlGremlinTest {
         final ExecutorService executor = Executors.newFixedThreadPool(96,
                 new ThreadFactoryBuilder().setNameFormat("RxSessionRunner-%d").setDaemon(true).build());
 
-        final Future<List<GremlinVertexTable>> gremlinVertexTablesFuture = executor.submit(new RunGremlinQueryVertices(client, executor, TraversalStrategy.First));
-        final Future<List<GremlinEdgeTable>> gremlinEdgeTablesFuture = executor.submit(new RunGremlinQueryEdges(client, executor, TraversalStrategy.First));
+        final Future<List<GremlinVertexTable>> gremlinVertexTablesFuture =
+                executor.submit(new RunGremlinQueryVertices(client, executor, TraversalStrategy.First));
+        final Future<List<GremlinEdgeTable>> gremlinEdgeTablesFuture =
+                executor.submit(new RunGremlinQueryEdges(client, executor, TraversalStrategy.First));
         final List<GremlinVertexTable> vertices = gremlinVertexTablesFuture.get();
         final List<GremlinEdgeTable> edges = gremlinEdgeTablesFuture.get();
         final GremlinSchema gremlinSchema = new GremlinSchema(vertices, edges);
-        final SqlConverter sqlConverter = new SqlConverter(gremlinSchema, traversal().withRemote(DriverRemoteConnection.using(client)));
+        final SqlConverter sqlConverter =
+                new SqlConverter(gremlinSchema, traversal().withRemote(DriverRemoteConnection.using(client)));
         SqlGremlinQueryResult result = sqlConverter.executeQuery("SELECT airport.city AS c FROM airport");
         System.out.println("Columns: " + result.getColumns());
         result = sqlConverter.executeQuery("SELECT city AS c FROM airport");
@@ -560,9 +632,9 @@ public class SqlGremlinTest {
 
     @AllArgsConstructor
     class RunGremlinQueryVertices implements Callable<List<GremlinVertexTable>> {
-        Client client;
-        ExecutorService service;
-        TraversalStrategy traversalStrategy;
+        private final Client client;
+        private final ExecutorService service;
+        private final TraversalStrategy traversalStrategy;
 
         @Override
         public List<GremlinVertexTable> call() throws Exception {
@@ -589,9 +661,9 @@ public class SqlGremlinTest {
 
     @AllArgsConstructor
     class RunGremlinQueryVertexEdges implements Callable<List<String>> {
-        Client client;
-        String label;
-        String direction;
+        private final Client client;
+        private final String label;
+        private final String direction;
 
         @Override
         public List<String> call() throws Exception {
@@ -608,9 +680,9 @@ public class SqlGremlinTest {
 
     @AllArgsConstructor
     class RunGremlinQueryEdges implements Callable<List<GremlinEdgeTable>> {
-        Client client;
-        ExecutorService service;
-        TraversalStrategy traversalStrategy;
+        private final Client client;
+        private final ExecutorService service;
+        private final TraversalStrategy traversalStrategy;
 
         @Override
         public List<GremlinEdgeTable> call() throws Exception {
@@ -626,7 +698,8 @@ public class SqlGremlinTest {
 
             final List<GremlinEdgeTable> gremlinEdgeTables = new ArrayList<>();
             for (int i = 0; i < labels.size(); i++) {
-                gremlinEdgeTables.add(new GremlinEdgeTable(labels.get(i), futureTableColumns.get(i).get(), inOutLabels.get(i).get()));
+                gremlinEdgeTables.add(new GremlinEdgeTable(labels.get(i), futureTableColumns.get(i).get(),
+                        inOutLabels.get(i).get()));
             }
             return gremlinEdgeTables;
         }
@@ -634,19 +707,21 @@ public class SqlGremlinTest {
 
     @AllArgsConstructor
     class RunGremlinQueryPropertyType implements Callable<String> {
-        boolean isVertex;
-        String label;
-        String property;
-        Client client;
-        TraversalStrategy strategy;
+        private final boolean isVertex;
+        private final String label;
+        private final String property;
+        private final Client client;
+        private final TraversalStrategy strategy;
 
         @Override
         public String call() {
             final String query;
             if (strategy.equals(TraversalStrategy.First)) {
-                query = String.format("g.%s().hasLabel('%s').values('%s').next(1)", isVertex ? "V" : "E", label, property);
+                query = String.format("g.%s().hasLabel('%s').values('%s').next(1)", isVertex ? "V" : "E", label,
+                        property);
             } else {
-                query = String.format("g.%s().hasLabel('%s').values('%s').toSet()", isVertex ? "V" : "E", label, property);
+                query = String.format("g.%s().hasLabel('%s').values('%s').toSet()", isVertex ? "V" : "E", label,
+                        property);
             }
             System.out.printf("Start %s%n", query);
 
@@ -660,15 +735,16 @@ public class SqlGremlinTest {
 
     @AllArgsConstructor
     class RunGremlinQueryPropertiesList implements Callable<List<GremlinProperty>> {
-        boolean isVertex;
-        String label;
-        Client client;
-        TraversalStrategy traversalStrategy;
-        ExecutorService service;
+        private final boolean isVertex;
+        private final String label;
+        private final Client client;
+        private final TraversalStrategy traversalStrategy;
+        private final ExecutorService service;
 
         @Override
         public List<GremlinProperty> call() throws ExecutionException, InterruptedException {
-            final String query = String.format("g.%s().hasLabel('%s').properties().key().dedup()", isVertex ? "V" : "E", label);
+            final String query =
+                    String.format("g.%s().hasLabel('%s').properties().key().dedup()", isVertex ? "V" : "E", label);
             System.out.printf("Start %s%n", query);
             final ResultSet resultSet = client.submit(query);
             final Iterator<Result> iterator = resultSet.stream().iterator();
@@ -676,7 +752,8 @@ public class SqlGremlinTest {
             final List<Future<String>> propertyTypes = new ArrayList<>();
             while (iterator.hasNext()) {
                 final String property = iterator.next().getString();
-                propertyTypes.add(service.submit(new RunGremlinQueryPropertyType(isVertex, label, property, client, traversalStrategy)));
+                propertyTypes.add(service
+                        .submit(new RunGremlinQueryPropertyType(isVertex, label, property, client, traversalStrategy)));
                 properties.add(property);
             }
 
@@ -692,8 +769,8 @@ public class SqlGremlinTest {
 
     @AllArgsConstructor
     class RunGremlinQueryLabels implements Callable<List<String>> {
-        boolean isVertex;
-        Client client;
+        private final boolean isVertex;
+        private final Client client;
 
         @Override
         public List<String> call() throws Exception {
@@ -710,13 +787,14 @@ public class SqlGremlinTest {
 
     @AllArgsConstructor
     class RunGremlinQueryInOutV implements Callable<List<Pair<String, String>>> {
-        Client client;
-        String label;
+        private final Client client;
+        private final String label;
 
         @Override
         public List<Pair<String, String>> call() throws Exception {
             // Get labels.
-            final String query = String.format("g.E().hasLabel('%s').project('in','out').by(inV().label()).by(outV().label()).dedup()", label);
+            final String query = String.format(
+                    "g.E().hasLabel('%s').project('in','out').by(inV().label()).by(outV().label()).dedup()", label);
             System.out.printf("Start %s%n", query);
             final List<Pair<String, String>> labels = new ArrayList<>();
             final ResultSet resultSet = client.submit(query);
@@ -731,8 +809,8 @@ public class SqlGremlinTest {
 
     @AllArgsConstructor
     class RunGremlinQueryOutV implements Callable<List<String>> {
-        Client client;
-        String label;
+        private final Client client;
+        private final String label;
 
         @Override
         public List<String> call() throws Exception {

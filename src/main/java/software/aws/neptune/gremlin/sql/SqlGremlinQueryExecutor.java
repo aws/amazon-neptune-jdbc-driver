@@ -35,7 +35,6 @@ import java.lang.reflect.Constructor;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.List;
 
 import static org.apache.tinkerpop.gremlin.process.traversal.AnonymousTraversalSource.traversal;
 
@@ -121,7 +120,7 @@ public class SqlGremlinQueryExecutor extends GremlinQueryExecutor {
             }
         }
         MetadataCache.updateCacheIfNotUpdated(gremlinConnectionProperties);
-        return new GremlinResultSetGetColumns(statement,  MetadataCache.getFilteredCacheNodeColumnInfos(nodes),
+        return new GremlinResultSetGetColumns(statement, MetadataCache.getFilteredCacheNodeColumnInfos(nodes),
                 MetadataCache.getFilteredResultSetInfoWithoutRowsForColumns(nodes));
     }
 

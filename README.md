@@ -14,6 +14,14 @@ This driver is compatible with JDBC 4.2 and requires a minimum of Java 8.
 
 The driver comes packed in a single jar file. To use the driver, place the jar file in the classpath of the application which is going to use it. Alternatively, if using the driver with a Maven/Gradle application, the jar can be used to install the driver via their respective commands.
 
+### SSH Tunneling
+
+Connecting to Neptune requires an SSH tunnel which can be done internally in the driver, or manually using an ssh command.
+
+To add to hosts, add the cluster name to your host file (`/etc/hosts` on Mac or `C:\Windows\System32\drivers\etc\hosts` on Windows).
+Add the following line to the list of hosts lookup:
+`127.0.0.1        <endpoint>`
+
 #### Connection URL and Settings
 
 To setup a connection, the driver requires a JDBC connection URL. The connection URL is generally of the form:

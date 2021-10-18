@@ -17,9 +17,9 @@
 package software.aws.neptune.common.gremlindatamodel;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
-import org.apache.calcite.util.Pair;
 import lombok.AllArgsConstructor;
 import lombok.NonNull;
+import org.apache.calcite.util.Pair;
 import org.apache.tinkerpop.gremlin.driver.Client;
 import org.apache.tinkerpop.gremlin.driver.Cluster;
 import org.apache.tinkerpop.gremlin.driver.Result;
@@ -55,7 +55,8 @@ public class SchemaHelperGremlinDataModel {
     private static final String PROPERTIES_VALUE_QUERY = "g.%s().hasLabel('%s').values('%s').%s";
     private static final String PROPERTY_KEY_QUERY = "g.%s().hasLabel('%s').properties().key().dedup()";
     private static final String LABELS_QUERY = "g.%s().label().dedup()";
-    private static final String IN_OUT_VERTEX_QUERY = "g.E().hasLabel('%s').project('in','out').by(inV().label()).by(outV().label()).dedup()";
+    private static final String IN_OUT_VERTEX_QUERY =
+            "g.E().hasLabel('%s').project('in','out').by(inV().label()).by(outV().label()).dedup()";
 
     static {
         TYPE_MAP.put(String.class, "String");
@@ -69,11 +70,13 @@ public class SchemaHelperGremlinDataModel {
         TYPE_MAP.put(Date.class, "Date");
     }
 
-    private static String getAdjustedEndpoint(final String endpoint, final MetadataCache.PathType pathType) throws SQLException {
+    private static String getAdjustedEndpoint(final String endpoint, final MetadataCache.PathType pathType)
+            throws SQLException {
         if (pathType == MetadataCache.PathType.Bolt) {
             final String[] endpointSplit = endpoint.split(":");
             if ((endpointSplit.length != 3) || (!endpointSplit[1].startsWith("//"))) {
-                throw SqlError.createSQLException(LOGGER, SqlState.CONNECTION_FAILURE, SqlError.INVALID_ENDPOINT, endpoint);
+                throw SqlError
+                        .createSQLException(LOGGER, SqlState.CONNECTION_FAILURE, SqlError.INVALID_ENDPOINT, endpoint);
             }
             return endpointSplit[1].substring(2);
         } else {
@@ -81,8 +84,21 @@ public class SchemaHelperGremlinDataModel {
         }
     }
 
-    public static GremlinSchema getGraphSchema(final String endpoint, final int port, final boolean useIAM, final boolean useSsl,
-                                               final MetadataCache.PathType pathType, ScanType scanType)
+    /**
+     * Function to get the schema of the graph.
+     *
+     * @param endpoint Endpoint of database.
+     * @param port     Port of database.
+     * @param useIAM   Boolean for whether or not to use IAM.
+     * @param useSsl   Boolean for whether or not to use SSL.
+     * @param pathType Type of path.
+     * @param scanType Scan type.
+     * @return Graph Schema.
+     * @throws SQLException If graph schema cannot be obtained.
+     */
+    public static GremlinSchema getGraphSchema(final String endpoint, final int port, final boolean useIAM,
+                                               final boolean useSsl,
+                                               final MetadataCache.PathType pathType, final ScanType scanType)
             throws SQLException {
         final String adjustedEndpoint = getAdjustedEndpoint(endpoint, pathType);
         // This gremlin utility requires that the SERVICE_REGION is set no matter what usage of IAM is being used.
@@ -116,9 +132,12 @@ public class SchemaHelperGremlinDataModel {
         final ExecutorService executor = Executors.newFixedThreadPool(96,
                 new ThreadFactoryBuilder().setNameFormat("RxSessionRunner-%d").setDaemon(true).build());
         try {
-            final Future<List<GremlinVertexTable>> gremlinVertexTablesFuture = executor.submit(new RunGremlinQueryVertices(client, executor, scanType));
-            final Future<List<GremlinEdgeTable>> gremlinEdgeTablesFuture = executor.submit(new RunGremlinQueryEdges(client, executor, scanType));
-            final GremlinSchema gremlinSchema = new GremlinSchema(gremlinVertexTablesFuture.get(), gremlinEdgeTablesFuture.get());
+            final Future<List<GremlinVertexTable>> gremlinVertexTablesFuture =
+                    executor.submit(new RunGremlinQueryVertices(client, executor, scanType));
+            final Future<List<GremlinEdgeTable>> gremlinEdgeTablesFuture =
+                    executor.submit(new RunGremlinQueryEdges(client, executor, scanType));
+            final GremlinSchema gremlinSchema =
+                    new GremlinSchema(gremlinVertexTablesFuture.get(), gremlinEdgeTablesFuture.get());
             executor.shutdown();
             return gremlinSchema;
         } catch (final ExecutionException | InterruptedException e) {
@@ -220,7 +239,8 @@ public class SchemaHelperGremlinDataModel {
 
             final List<GremlinEdgeTable> gremlinEdgeTables = new ArrayList<>();
             for (int i = 0; i < labels.size(); i++) {
-                gremlinEdgeTables.add(new GremlinEdgeTable(labels.get(i), futureTableColumns.get(i).get(), inOutLabels.get(i).get()));
+                gremlinEdgeTables.add(new GremlinEdgeTable(labels.get(i), futureTableColumns.get(i).get(),
+                        inOutLabels.get(i).get()));
             }
             return gremlinEdgeTables;
         }
@@ -283,7 +303,8 @@ public class SchemaHelperGremlinDataModel {
             final List<Future<String>> propertyTypes = new ArrayList<>();
             while (iterator.hasNext()) {
                 final String property = iterator.next().getString();
-                propertyTypes.add(service.submit(new RunGremlinQueryPropertyType(isVertex, label, property, client, scanType)));
+                propertyTypes.add(service
+                        .submit(new RunGremlinQueryPropertyType(isVertex, label, property, client, scanType)));
                 properties.add(property);
             }
 

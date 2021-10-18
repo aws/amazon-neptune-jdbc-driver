@@ -946,11 +946,11 @@ public abstract class DatabaseMetaData implements java.sql.DatabaseMetaData {
         }
         try {
             LOGGER.info("Getting database columns.");
-            ResultSet resultSet = connection.getQueryExecutor()
+            final ResultSet resultSet = connection.getQueryExecutor()
                     .executeGetColumns(getConnection().createStatement(), tableNamePattern);
             LOGGER.info("Database columns retrieved.");
             return resultSet;
-        } catch (Exception e) {
+        } catch (final Exception e) {
             final StringWriter sw = new StringWriter();
             final PrintWriter pw = new PrintWriter(sw);
             e.printStackTrace(pw);
