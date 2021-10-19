@@ -2,18 +2,18 @@
 
 This driver supports using SQL, which it will translate into Gremlin for executing statements against Neptune.
 
-### Creating a connection
+## SQL Support
 
 SQL SELECT and INNER JOIN commands are supports, additionally, the following SQL functions are also supported:
 
-## General Operators and Functions
+### General Operators and Functions
 
 - LIMIT
 - ORDER BY
 - GROUP BY
 - HAVING
 
-## Aggregate Operators and Functions
+### Aggregate Operators and Functions
 
 - MAX
 - MIN
