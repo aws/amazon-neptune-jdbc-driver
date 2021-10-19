@@ -4,6 +4,26 @@ This driver supports using SQL, which it will translate into Gremlin for executi
 
 ### Creating a connection
 
+SQL SELECT and INNER JOIN commands are supports, additionally, the following SQL functions are also supported:
+
+## General Operators and Functions
+
+- LIMIT
+- ORDER BY
+- GROUP BY
+- HAVING
+
+## Aggregate Operators and Functions
+
+- MAX
+- MIN
+- COUNT
+- DISTINCT
+- SUM
+- AVG
+
+### Creating a connection
+
 The connection string for SQL-Gremlin connections follows the following form:
 
 `jdbc:neptune:sqlgremlin://[host];[port=portValue];[propertyKey1=value1];[propertyKey2=value2]..;[propertyKeyN=valueN]`
