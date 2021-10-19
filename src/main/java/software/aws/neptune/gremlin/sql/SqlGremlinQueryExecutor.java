@@ -23,7 +23,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.twilmes.sql.gremlin.adapter.converter.SqlConverter;
 import org.twilmes.sql.gremlin.adapter.results.SqlGremlinQueryResult;
-import software.aws.neptune.common.gremlindatamodel.GraphSchema;
 import software.aws.neptune.common.gremlindatamodel.MetadataCache;
 import software.aws.neptune.gremlin.GremlinConnectionProperties;
 import software.aws.neptune.gremlin.GremlinQueryExecutor;
@@ -36,7 +35,6 @@ import java.lang.reflect.Constructor;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.List;
 
 import static org.apache.tinkerpop.gremlin.process.traversal.AnonymousTraversalSource.traversal;
 
@@ -97,13 +95,9 @@ public class SqlGremlinQueryExecutor extends GremlinQueryExecutor {
 
     private static SqlConverter getGremlinSqlConverter(final GremlinConnectionProperties gremlinConnectionProperties)
             throws SQLException {
-        if (!MetadataCache.isMetadataCached()) {
-            MetadataCache.updateCache(gremlinConnectionProperties.getContactPoint(), null,
-                    (gremlinConnectionProperties.getAuthScheme() == AuthScheme.IAMSigV4),
-                    MetadataCache.PathType.Gremlin, gremlinConnectionProperties, gremlinConnectionProperties.getPort());
-        }
+        MetadataCache.updateCacheIfNotUpdated(gremlinConnectionProperties);
         if (gremlinSqlConverter == null) {
-            gremlinSqlConverter = new SqlConverter(MetadataCache.getSchemaConfig(),
+            gremlinSqlConverter = new SqlConverter(MetadataCache.getGremlinSchema(),
                     getGraphTraversalSource(gremlinConnectionProperties));
         }
         return gremlinSqlConverter;
@@ -121,18 +115,12 @@ public class SqlGremlinQueryExecutor extends GremlinQueryExecutor {
             throws SQLException {
         LOGGER.info("Running executeGetColumns.");
         if (!MetadataCache.isMetadataCached()) {
-            // TODO AN-576: Temp isValid check. Find a better solution inside the export tool to check if connection is valid.
             if (!statement.getConnection().isValid(3000)) {
                 throw new SQLException("Failed to execute getTables, could not connect to database.");
             }
-            MetadataCache.updateCache(gremlinConnectionProperties.getContactPoint(), null,
-                    (gremlinConnectionProperties.getAuthScheme() == AuthScheme.IAMSigV4),
-                    MetadataCache.PathType.Gremlin, gremlinConnectionProperties, gremlinConnectionProperties.getPort());
         }
-
-        final List<GraphSchema> graphSchemaList =
-                MetadataCache.getFilteredCacheNodeColumnInfos(nodes);
-        return new GremlinResultSetGetColumns(statement, graphSchemaList,
+        MetadataCache.updateCacheIfNotUpdated(gremlinConnectionProperties);
+        return new GremlinResultSetGetColumns(statement, MetadataCache.getFilteredCacheNodeColumnInfos(nodes),
                 MetadataCache.getFilteredResultSetInfoWithoutRowsForColumns(nodes));
     }
 
@@ -148,20 +136,13 @@ public class SqlGremlinQueryExecutor extends GremlinQueryExecutor {
     public java.sql.ResultSet executeGetTables(final java.sql.Statement statement, final String tableName)
             throws SQLException {
         LOGGER.info("Running executeGetTables.");
-        // TODO: Update this caching mechanism, should try to make this automatic or something.
         if (!MetadataCache.isMetadataCached()) {
-            // TODO AN-576: Temp isValid check. Find a better solution inside the export tool to check if connection is valid.
             if (!statement.getConnection().isValid(3000)) {
                 throw new SQLException("Failed to execute getTables, could not connect to database.");
             }
-            MetadataCache.updateCache(gremlinConnectionProperties.getContactPoint(), null,
-                    (gremlinConnectionProperties.getAuthScheme() == AuthScheme.IAMSigV4),
-                    MetadataCache.PathType.Gremlin, gremlinConnectionProperties, gremlinConnectionProperties.getPort());
         }
-
-        final List<GraphSchema> graphSchemaList =
-                MetadataCache.getFilteredCacheNodeColumnInfos(tableName);
-        return new GremlinResultSetGetTables(statement, graphSchemaList,
+        MetadataCache.updateCacheIfNotUpdated(gremlinConnectionProperties);
+        return new GremlinResultSetGetTables(statement, MetadataCache.getFilteredCacheNodeColumnInfos(tableName),
                 MetadataCache.getFilteredResultSetInfoWithoutRowsForTables(tableName));
     }
 

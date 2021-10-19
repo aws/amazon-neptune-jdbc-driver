@@ -157,16 +157,6 @@ public class GremlinConnectionProperties extends ConnectionProperties {
         super(new Properties(), DEFAULT_PROPERTIES_MAP, PROPERTY_CONVERTER_MAP);
     }
 
-    @Override
-    public String getHostname() {
-        return getContactPoint();
-    }
-
-    @Override
-    public void sshTunnelOverride(final int port) throws SQLException {
-        setPort(port);
-    }
-
     /**
      * GremlinConnectionProperties constructor.
      *
@@ -174,11 +164,6 @@ public class GremlinConnectionProperties extends ConnectionProperties {
      */
     public GremlinConnectionProperties(final Properties properties) throws SQLException {
         super(properties, DEFAULT_PROPERTIES_MAP, PROPERTY_CONVERTER_MAP);
-    }
-
-    protected boolean isEncryptionEnabled() {
-        // Neptune only supports https when using SPARQL.
-        return getEnableSsl();
     }
 
     /**
@@ -189,6 +174,21 @@ public class GremlinConnectionProperties extends ConnectionProperties {
     private static int getNumberOfProcessors() {
         // get the runtime object associated with the current Java application
         return Runtime.getRuntime().availableProcessors();
+    }
+
+    @Override
+    public String getHostname() {
+        return getContactPoint();
+    }
+
+    @Override
+    public void sshTunnelOverride(final int port) throws SQLException {
+        setPort(port);
+    }
+
+    protected boolean isEncryptionEnabled() {
+        // Neptune only supports https when using SPARQL.
+        return getEnableSsl();
     }
 
     /**

@@ -19,8 +19,9 @@ package software.aws.neptune.common.gremlindatamodel.resultset;
 import com.google.common.collect.ImmutableList;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.twilmes.sql.gremlin.adapter.converter.schema.calcite.GremlinSchema;
+import org.twilmes.sql.gremlin.adapter.converter.schema.gremlin.GremlinTableBase;
 import software.aws.neptune.common.ResultSetInfoWithoutRows;
-import software.aws.neptune.common.gremlindatamodel.GraphSchema;
 import software.aws.neptune.jdbc.utilities.SqlError;
 import software.aws.neptune.jdbc.utilities.SqlState;
 import java.sql.SQLException;
@@ -72,17 +73,17 @@ public abstract class ResultSetGetTables extends GenericResultSet implements jav
      * ResultSetGetTables constructor, initializes super class.
      *
      * @param statement                Statement Object.
-     * @param graphSchemas             List of GraphSchema Objects.
+     * @param gremlinSchema            GremlinSchema Object.
      * @param resultSetInfoWithoutRows ResultSetInfoWithoutRows Object.
      */
     public ResultSetGetTables(final Statement statement,
-                              final List<GraphSchema> graphSchemas,
+                              final GremlinSchema gremlinSchema,
                               final ResultSetInfoWithoutRows resultSetInfoWithoutRows) {
         super(statement, resultSetInfoWithoutRows.getColumns(), resultSetInfoWithoutRows.getRowCount());
-        for (final GraphSchema graphSchema : graphSchemas) {
+        for (final GremlinTableBase gremlinTableBase : gremlinSchema.getAllTables()) {
             // Add defaults, table name, and push into List.
             final Map<String, Object> map = new HashMap<>(MAPPED_KEYS);
-            map.put(TABLE_NAME, nodeListToString(graphSchema.getLabels()));
+            map.put(TABLE_NAME, gremlinTableBase.getLabel());
             rows.add(map);
         }
     }

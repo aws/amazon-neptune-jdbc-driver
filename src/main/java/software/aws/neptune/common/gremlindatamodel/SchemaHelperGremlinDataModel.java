@@ -16,141 +16,91 @@
 
 package software.aws.neptune.common.gremlindatamodel;
 
-import com.amazonaws.services.neptune.NeptuneExportCli;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.annotations.VisibleForTesting;
-import com.google.common.collect.ImmutableSet;
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import lombok.AllArgsConstructor;
-import lombok.Getter;
+import lombok.NonNull;
+import org.apache.calcite.util.Pair;
 import org.apache.tinkerpop.gremlin.driver.Client;
 import org.apache.tinkerpop.gremlin.driver.Cluster;
 import org.apache.tinkerpop.gremlin.driver.Result;
 import org.apache.tinkerpop.gremlin.driver.ResultSet;
+import org.apache.tinkerpop.gremlin.driver.SigV4WebSocketChannelizer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.twilmes.sql.gremlin.adapter.converter.schema.SchemaConfig;
-import org.twilmes.sql.gremlin.adapter.converter.schema.TableColumn;
-import org.twilmes.sql.gremlin.adapter.converter.schema.TableConfig;
-import org.twilmes.sql.gremlin.adapter.converter.schema.TableRelationship;
-import software.aws.neptune.gremlin.GremlinConnectionProperties;
-import software.aws.neptune.gremlin.GremlinQueryExecutor;
+import org.twilmes.sql.gremlin.adapter.converter.schema.calcite.GremlinSchema;
+import org.twilmes.sql.gremlin.adapter.converter.schema.gremlin.GremlinEdgeTable;
+import org.twilmes.sql.gremlin.adapter.converter.schema.gremlin.GremlinProperty;
+import org.twilmes.sql.gremlin.adapter.converter.schema.gremlin.GremlinVertexTable;
 import software.aws.neptune.jdbc.utilities.SqlError;
 import software.aws.neptune.jdbc.utilities.SqlState;
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Comparator;
+import java.util.Date;
 import java.util.HashMap;
-import java.util.LinkedList;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
-import java.util.stream.Collectors;
+import java.util.Set;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 public class SchemaHelperGremlinDataModel {
     private static final Logger LOGGER = LoggerFactory.getLogger(SchemaHelperGremlinDataModel.class);
+    private static final Map<Class<?>, String> TYPE_MAP = new HashMap<>();
+    private static final String VERTEX_EDGES_LABEL_QUERY = "g.V().hasLabel('%s').%sE().label().dedup()";
+    private static final String PROPERTIES_VALUE_QUERY = "g.%s().hasLabel('%s').values('%s').%s";
+    private static final String PROPERTY_KEY_QUERY = "g.%s().hasLabel('%s').properties().key().dedup()";
+    private static final String LABELS_QUERY = "g.%s().label().dedup()";
+    private static final String IN_OUT_VERTEX_QUERY =
+            "g.E().hasLabel('%s').project('in','out').by(inV().label()).by(outV().label()).dedup()";
 
-    /**
-     * Function to get graph schema and return list of NodeColumnInfo describing it.
-     *
-     * @param endpoint       Endpoint to connect to.
-     * @param nodes          Nodes to use if only single table is targeted.
-     * @param nodeSchemaList List of GraphSchema for nodes.
-     * @param edgeSchemaList List of GraphSchema for edges.
-     * @throws SQLException Thrown if an error is encountered.
-     */
-    public static void getGraphSchema(final String endpoint, final String nodes, final boolean useIAM,
-                                      final MetadataCache.PathType pathType, final List<GraphSchema> nodeSchemaList,
-                                      final List<GraphSchema> edgeSchemaList, final int port)
-            throws SQLException, IOException {
-        // Create unique directory if doesn't exist
-        // If does exist, delete current contents
-        final String directory = createUniqueDirectoryForThread();
-
-        // Run process
-        final List<String> outputFiles = runGremlinSchemaGrabber(endpoint, nodes, directory, useIAM, pathType, port);
-
-        // Validate to see if files are json
-        for (final String file : outputFiles) {
-            parseFile(file, nodeSchemaList, edgeSchemaList);
-        }
-
-        // Clean up
-        try {
-            deleteDirectoryIfExists(Paths.get(directory));
-        } catch (final IOException ignored) {
-        }
+    static {
+        TYPE_MAP.put(String.class, "String");
+        TYPE_MAP.put(Boolean.class, "Boolean");
+        TYPE_MAP.put(Byte.class, "Byte");
+        TYPE_MAP.put(Short.class, "Short");
+        TYPE_MAP.put(Integer.class, "Integer");
+        TYPE_MAP.put(Long.class, "Long");
+        TYPE_MAP.put(Float.class, "Float");
+        TYPE_MAP.put(Double.class, "Double");
+        TYPE_MAP.put(Date.class, "Date");
     }
 
-    @VisibleForTesting
-    static String createUniqueDirectoryForThread() throws SQLException, IOException {
-        // Thread id is unique, so use it to create output directory.
-        // Before output directory is created, check if it exists and delete contents if it does.
-        final Path path = Files.createTempDirectory(String.format("%d", Thread.currentThread().getId()));
-        LOGGER.info(String.format("Creating directory '%s'", path.toString()));
-        final File outputDirectory = new File(path.toAbsolutePath().toString());
-        if (!outputDirectory.exists()) {
-            if (!outputDirectory.mkdirs()) {
-                throw SqlError.createSQLException(
-                        LOGGER,
-                        SqlState.CONNECTION_FAILURE,
-                        SqlError.FAILED_TO_CREATE_DIRECTORY);
-            }
-        }
-        return path.toString();
-    }
-
-    @VisibleForTesting
-    static void deleteDirectoryIfExists(final Path root) throws IOException {
-        if (!root.toFile().exists()) {
-            return;
-        }
-        Files.walk(root)
-                .sorted(Comparator.reverseOrder())
-                .map(Path::toFile)
-                .forEach(File::delete);
-    }
-
-    @VisibleForTesting
-    static List<String> getOutputFiles(final String root) throws IOException {
-        return Files.walk(Paths.get(root)).filter(Files::isRegularFile).map(Path::toString)
-                .collect(Collectors.toList());
-    }
-
-    @VisibleForTesting
-    private static List<String> runGremlinSchemaGrabber(final String endpoint, final String nodes,
-                                                        final String outputPath, final boolean useIAM,
-                                                        final MetadataCache.PathType pathType,
-                                                        final int port)
+    private static String getAdjustedEndpoint(final String endpoint, final MetadataCache.PathType pathType)
             throws SQLException {
-        final String adjustedEndpoint;
         if (pathType == MetadataCache.PathType.Bolt) {
             final String[] endpointSplit = endpoint.split(":");
             if ((endpointSplit.length != 3) || (!endpointSplit[1].startsWith("//"))) {
-                throw SqlError.createSQLException(
-                        LOGGER,
-                        SqlState.CONNECTION_FAILURE,
-                        SqlError.INVALID_ENDPOINT, endpoint);
+                throw SqlError
+                        .createSQLException(LOGGER, SqlState.CONNECTION_FAILURE, SqlError.INVALID_ENDPOINT, endpoint);
             }
-            adjustedEndpoint = endpointSplit[1].substring(2);
+            return endpointSplit[1].substring(2);
         } else {
-            adjustedEndpoint = endpoint;
+            return endpoint;
         }
+    }
 
-        // Setup arguments
-        final List<String> arguments = new LinkedList<>();
-        arguments.add("create-pg-config");
-        arguments.add("-e");
-        arguments.add(adjustedEndpoint);
-        arguments.add("-d");
-        arguments.add(outputPath);
-        arguments.add("-p");
-        arguments.add(String.format("%d", port));
-
+    /**
+     * Function to get the schema of the graph.
+     *
+     * @param endpoint Endpoint of database.
+     * @param port     Port of database.
+     * @param useIAM   Boolean for whether or not to use IAM.
+     * @param useSsl   Boolean for whether or not to use SSL.
+     * @param pathType Type of path.
+     * @param scanType Scan type.
+     * @return Graph Schema.
+     * @throws SQLException If graph schema cannot be obtained.
+     */
+    public static GremlinSchema getGraphSchema(final String endpoint, final int port, final boolean useIAM,
+                                               final boolean useSsl,
+                                               final MetadataCache.PathType pathType, final ScanType scanType)
+            throws SQLException {
+        final String adjustedEndpoint = getAdjustedEndpoint(endpoint, pathType);
         // This gremlin utility requires that the SERVICE_REGION is set no matter what usage of IAM is being used.
         if (useIAM) {
             if (!System.getenv().containsKey("SERVICE_REGION")) {
@@ -159,244 +109,249 @@ public class SchemaHelperGremlinDataModel {
                         SqlState.OPERATION_CANCELED,
                         SqlError.MISSING_SERVICE_REGION);
             }
-            arguments.add("--use-iam-auth");
         }
+        final Client client = getClient(adjustedEndpoint, port, useIAM, useSsl);
+        return getSchema(client, scanType);
+    }
 
-        if (nodes != null && !nodes.isEmpty()) {
-            final String[] nodeSplit = nodes.split(":");
-            for (final String node : nodeSplit) {
-                arguments.add("-nl");
-                arguments.add(node);
-            }
+    private static Client getClient(final String endpoint, final int port, final boolean useIam, final boolean useSsl) {
+        final Cluster.Builder builder = Cluster.build();
+        builder.addContactPoint(endpoint);
+        builder.port(port);
+        builder.enableSsl(useSsl);
+        if (useIam) {
+            builder.channelizer(SigV4WebSocketChannelizer.class);
         }
+        final Cluster cluster = builder.create();
+        final Client client = cluster.connect();
+        client.init();
+        return client;
+    }
 
+    private static GremlinSchema getSchema(final Client client, final ScanType scanType) throws SQLException {
+        final ExecutorService executor = Executors.newFixedThreadPool(96,
+                new ThreadFactoryBuilder().setNameFormat("RxSessionRunner-%d").setDaemon(true).build());
         try {
-            NeptuneExportCli.main(arguments.toArray(new String[0]));
-            return getOutputFiles(outputPath);
-        } catch (final Exception e) {
-            throw SqlError.createSQLException(
-                    LOGGER,
-                    SqlState.CONNECTION_FAILURE,
-                    SqlError.FAILED_TO_RUN_SCHEMA_EXPORT, e);
+            final Future<List<GremlinVertexTable>> gremlinVertexTablesFuture =
+                    executor.submit(new RunGremlinQueryVertices(client, executor, scanType));
+            final Future<List<GremlinEdgeTable>> gremlinEdgeTablesFuture =
+                    executor.submit(new RunGremlinQueryEdges(client, executor, scanType));
+            final GremlinSchema gremlinSchema =
+                    new GremlinSchema(gremlinVertexTablesFuture.get(), gremlinEdgeTablesFuture.get());
+            executor.shutdown();
+            return gremlinSchema;
+        } catch (final ExecutionException | InterruptedException e) {
+            e.printStackTrace();
+            executor.shutdown();
+            throw new SQLException("Error occurred during schema collection. '" + e.getMessage() + "'.");
         }
     }
 
-    @VisibleForTesting
-    static void parseFile(final String filePath,
-                          final List<GraphSchema> nodeSchemaList,
-                          final List<GraphSchema> edgeSchemaList) {
-        LOGGER.info(String.format("Parsing file '%s'", filePath));
-        try {
-            final String jsonString = new String(Files.readAllBytes(Paths.get(filePath).toAbsolutePath()));
-            if (jsonString.isEmpty()) {
-                throw new Exception(String.format("Schema file '%s' is empty.", filePath));
-            }
-            final ObjectMapper mapper = new ObjectMapper();
-            final Map<String, List<Map<String, Object>>> nodesAndEdges = mapper.readValue(jsonString, HashMap.class);
-            if (!nodesAndEdges.containsKey("nodes")) {
-                throw new Exception("Schema file does not contain the 'node' key.");
-            }
-
-            // Get node labels and properties.
-            parseGraphSchema("nodes", nodesAndEdges, nodeSchemaList);
-
-            if (!nodesAndEdges.containsKey("edges")) {
-                LOGGER.warn("Schema file does not contain the 'edge' key. Graph has no edges.");
-            } else {
-                parseGraphSchema("edges", nodesAndEdges, edgeSchemaList);
-            }
-        } catch (final Exception e) {
-            LOGGER.error(e.getMessage());
+    private static String getType(final Set<Object> data) {
+        final Set<String> types = new HashSet<>();
+        for (final Object d : data) {
+            types.add(TYPE_MAP.getOrDefault(d.getClass(), "String"));
         }
+        if (types.size() == 1) {
+            return types.iterator().next();
+        }
+        return "String";
     }
 
-    private static void parseGraphSchema(final String key, final Map<String, List<Map<String, Object>>> nodesAndEdges,
-                                         final List<GraphSchema> graphSchemaList)
-            throws Exception {
-        for (final Map<String, Object> node : nodesAndEdges.get(key)) {
-            if (!node.keySet().equals(ImmutableSet.of("label", "properties"))) {
-                throw new Exception(
-                        String.format("Schema under '%s' key does not contain 'label' and/or 'properties' keys", key));
-            }
-            final List<String> labels = new ArrayList<>();
-            try {
-                labels.addAll(getValueCheckType(node, "label", ArrayList.class));
-            } catch (final Exception ignored) {
-                labels.add(getValueCheckType(node, "label", String.class));
-            }
-            final List<Map<String, Object>> properties =
-                    getValueCheckType(node, "properties", ArrayList.class);
-            for (final Map<String, Object> property : properties) {
-                if (!property.keySet()
-                        .equals(ImmutableSet.of("property", "dataType", "isMultiValue", "isNullable"))) {
-                    throw new Exception(
-                            "Properties does not contain 'property', 'dataType', 'isMultiValue', and/or 'isNullable' keys");
+    public enum ScanType {
+        First("First"),
+        All("All");
+
+        private final String stringValue;
+
+        ScanType(@NonNull final String stringValue) {
+            this.stringValue = stringValue;
+        }
+
+        /**
+         * Converts case-insensitive string to enum value.
+         *
+         * @param in The case-insensitive string to be converted to enum.
+         * @return The enum value if string is recognized as a valid value, otherwise null.
+         */
+        public static ScanType fromString(@NonNull final String in) {
+            for (final ScanType scheme : ScanType.values()) {
+                if (scheme.stringValue.equalsIgnoreCase(in)) {
+                    return scheme;
                 }
             }
-            graphSchemaList.add(new GraphSchema(labels, properties));
+            return null;
         }
-    }
 
-    /**
-     * Function to get value from map and check the type before returning it.
-     *
-     * @param map           Map to get result from.
-     * @param key           Key that Object exists in map under.
-     * @param expectedClass Expected type of Object from map.
-     * @param <T>           Template type to cast Object to.
-     * @return Object casted for specific type.
-     * @throws Exception Throws an exception if the type does not match.
-     */
-    @SuppressWarnings("unchecked")
-    private static <T> T getValueCheckType(final Map map, final String key, final Class<?> expectedClass)
-            throws Exception {
-        final Object obj = map.get(key);
-        if (!(obj.getClass().equals(expectedClass))) {
-            throw new Exception(String.format("Expected %s key to have a value of type '%s'. "
-                            + "Instead it contained a value of type '%s'.",
-                    key, expectedClass.toString(), obj.getClass().toString()));
-        }
-        return (T) obj;
-    }
-
-    /**
-     * Function to get SchemaConfig with given connection properties.
-     *
-     * @param gremlinConnectionProperties Connection properties.
-     * @return SchemaConfig Object.
-     * @throws SQLException if getting the config fails.
-     */
-    public static SchemaConfig getSchemaConfig(final GremlinConnectionProperties gremlinConnectionProperties)
-            throws SQLException {
-        final SchemaConfig schemaConfig = new SchemaConfig();
-        schemaConfig.setTables(getTableConfigs(MetadataCache.getNodeSchemaList()));
-        schemaConfig.setRelationships(
-                getTableRelationships(MetadataCache.getEdgeSchemaList(), gremlinConnectionProperties));
-        return schemaConfig;
-    }
-
-    static List<TableConfig> getTableConfigs(final List<GraphSchema> nodeSchema) {
-        // Get Node table information.
-        final List<TableConfig> tableConfigList = new ArrayList<>();
-        for (final GraphSchema graphSchema : nodeSchema) {
-            final TableConfig tableConfig = new TableConfig();
-            final List<TableColumn> tableColumns = new ArrayList<>();
-            for (final Map<String, Object> properties : graphSchema.getProperties()) {
-                final TableColumn tableColumn = new TableColumn();
-                tableColumn.setType(properties.get("dataType").toString().toLowerCase());
-                tableColumn.setName((String) properties.get("property"));
-                tableColumn.setPropertyName(null);
-                tableColumns.add(tableColumn);
-            }
-
-            // might be the issue
-            tableConfig.setName(String.join(":", graphSchema.getLabels()));
-            tableConfig.setColumns(tableColumns);
-            tableConfigList.add(tableConfig);
-        }
-        return tableConfigList;
-    }
-
-    static List<TableRelationship> getTableRelationships(final List<GraphSchema> edgeSchema,
-                                                         final GremlinConnectionProperties gremlinConnectionProperties)
-            throws SQLException {
-        final List<TableRelationship> tableRelationshipList = new ArrayList<>();
-        for (final GraphSchema graphSchema : edgeSchema) {
-            final InOutQueries inOutQueries = getInVertex(graphSchema.getLabels());
-            final InOutLabels inOutLabels = runInOutQueries(gremlinConnectionProperties, inOutQueries);
-
-            final TableRelationship tableRelationship = new TableRelationship();
-
-            // Handle columns
-            final List<TableColumn> tableColumns = new ArrayList<>();
-            for (final Map<String, Object> properties : graphSchema.getProperties()) {
-                final TableColumn tableColumn = new TableColumn();
-                tableColumn.setType(properties.get("dataType").toString().toLowerCase());
-                tableColumn.setName((String) properties.get("property"));
-                tableColumn.setPropertyName(null);
-                tableColumns.add(tableColumn);
-            }
-            tableRelationship.setColumns(tableColumns);
-
-            // TODO: Investigate how to support this / how this is returned.
-            // It is currently unclear if a given edge will return multiple labels if
-            //  a) it is connected to vertexes that have different single labels
-            //  b) it is connected to a vertex that has multiple labels
-            //  c) both of the above
-            // Need to figure this out and also do some handling around this. Perhaps we can leverage the vertex schema
-            // that the neptune export tool gives us. For now hardcode and assume/handle the simplest case of a single
-            // vertex.
-            if (inOutLabels.getIn().size() > 1) {
-                LOGGER.warn("Multiple in vertex labels not currently supported here, only first is used.");
-            }
-            if (inOutLabels.getOut().size() > 1) {
-                LOGGER.warn("Multiple out vertex labels not currently supported here, only first is used.");
-            }
-            // TODO: Revisit this null value later.
-            // If FkTable is null, it defaults to OutTable.
-            tableRelationship.setFkTable(null);
-            tableRelationship.setInTable(inOutLabels.getIn().get(0));
-            tableRelationship.setOutTable(inOutLabels.getOut().get(0));
-            tableRelationship.setEdgeLabel(String.join(":", graphSchema.getLabels()));
-            tableRelationshipList.add(tableRelationship);
-        }
-        return tableRelationshipList;
-    }
-
-    static InOutQueries getInVertex(final List<String> labels) {
-        // Combine labels into list of comma delimited labels.
-        // ["foo", "bar", "baz"] -> "'foo', 'bar', 'baz'"
-        // ["foo"] -> "'foo'"
-        final String relationshipLabel = labels.stream().collect(Collectors.joining("','", "'", "'"));
-        return new InOutQueries(getVertexLabelQuery("in", relationshipLabel),
-                getVertexLabelQuery("out", relationshipLabel));
-    }
-
-    static String getVertexLabelQuery(final String direction, final String relationshipLabel) {
-        // g.V().in(<labels with comma delimits and single quotes>).label().dedup()
-        return String.format("g.V().%s(%s).label().dedup()", direction, relationshipLabel);
-    }
-
-    static InOutLabels runInOutQueries(final GremlinConnectionProperties gremlinConnectionProperties,
-                                       final InOutQueries inOutQueries)
-            throws SQLException {
-        try {
-            final Cluster cluster = GremlinQueryExecutor.createClusterBuilder(gremlinConnectionProperties).create();
-            final Client client = cluster.connect().init();
-
-            // Run queries async so they run in parallel.
-            final CompletableFuture<ResultSet> inResult = client.submitAsync(inOutQueries.getIn());
-            final CompletableFuture<ResultSet> outResult =
-                    client.submitAsync(inOutQueries.getOut());
-
-            // Block on in result and transform it to a List of Strings.
-            final List<String> inLabels = inResult.get().stream().map(Result::getString).collect(Collectors.toList());
-
-            // Block on out result and transform it to a List of Strings.
-            final List<String> outLabels = outResult.get().stream().map(Result::getString).collect(Collectors.toList());
-            return new InOutLabels(inLabels, outLabels);
-        } catch (final Exception e) {
-            if (e instanceof SQLException) {
-                throw (SQLException) e;
-            }
-            throw SqlError.createSQLException(
-                    LOGGER,
-                    SqlState.DATA_EXCEPTION,
-                    SqlError.QUERY_FAILED, e);
+        @Override
+        public java.lang.String toString() {
+            return this.stringValue;
         }
     }
 
     @AllArgsConstructor
-    @Getter
-    private static class InOutQueries {
-        private final String in;
-        private final String out;
+    static
+    class RunGremlinQueryVertices implements Callable<List<GremlinVertexTable>> {
+        private final Client client;
+        private final ExecutorService service;
+        private final ScanType scanType;
+
+        @Override
+        public List<GremlinVertexTable> call() throws Exception {
+            final List<Future<List<GremlinProperty>>> gremlinProperties = new ArrayList<>();
+            final List<Future<List<String>>> gremlinVertexInEdgeLabels = new ArrayList<>();
+            final List<Future<List<String>>> gremlinVertexOutEdgeLabels = new ArrayList<>();
+            final List<String> labels = service.submit(new RunGremlinQueryLabels(true, client)).get();
+
+            for (final String label : labels) {
+                gremlinProperties.add(service.submit(
+                        new RunGremlinQueryPropertiesList(true, label, client, scanType, service)));
+                gremlinVertexInEdgeLabels.add(service.submit(new RunGremlinQueryVertexEdges(client, label, "in")));
+                gremlinVertexOutEdgeLabels.add(service.submit(new RunGremlinQueryVertexEdges(client, label, "out")));
+            }
+
+            final List<GremlinVertexTable> gremlinVertexTables = new ArrayList<>();
+            for (int i = 0; i < labels.size(); i++) {
+                gremlinVertexTables.add(new GremlinVertexTable(labels.get(i), gremlinProperties.get(i).get(),
+                        gremlinVertexInEdgeLabels.get(i).get(), gremlinVertexOutEdgeLabels.get(i).get()));
+            }
+            return gremlinVertexTables;
+        }
     }
 
     @AllArgsConstructor
-    @Getter
-    private static class InOutLabels {
-        private final List<String> in;
-        private final List<String> out;
+    static class RunGremlinQueryEdges implements Callable<List<GremlinEdgeTable>> {
+        private final Client client;
+        private final ExecutorService service;
+        private final ScanType scanType;
+
+        @Override
+        public List<GremlinEdgeTable> call() throws Exception {
+            final List<Future<List<GremlinProperty>>> futureTableColumns = new ArrayList<>();
+            final List<Future<List<Pair<String, String>>>> inOutLabels = new ArrayList<>();
+            final List<String> labels = service.submit(new RunGremlinQueryLabels(false, client)).get();
+
+            for (final String label : labels) {
+                futureTableColumns.add(service.submit(
+                        new RunGremlinQueryPropertiesList(false, label, client, scanType, service)));
+                inOutLabels.add(service.submit(new RunGremlinQueryInOutV(client, label)));
+            }
+
+            final List<GremlinEdgeTable> gremlinEdgeTables = new ArrayList<>();
+            for (int i = 0; i < labels.size(); i++) {
+                gremlinEdgeTables.add(new GremlinEdgeTable(labels.get(i), futureTableColumns.get(i).get(),
+                        inOutLabels.get(i).get()));
+            }
+            return gremlinEdgeTables;
+        }
+    }
+
+    @AllArgsConstructor
+    static class RunGremlinQueryVertexEdges implements Callable<List<String>> {
+        private final Client client;
+        private final String label;
+        private final String direction;
+
+        @Override
+        public List<String> call() throws Exception {
+            final String query = String.format(VERTEX_EDGES_LABEL_QUERY, label, direction);
+            LOGGER.debug(String.format("Start %s%n", query));
+            final ResultSet resultSet = client.submit(query);
+            final List<String> labels = new ArrayList<>();
+            resultSet.stream().iterator().forEachRemaining(it -> labels.add(it.getString()));
+            LOGGER.debug(String.format("End %s%n", query));
+            return labels;
+        }
+    }
+
+    @AllArgsConstructor
+    static class RunGremlinQueryPropertyType implements Callable<String> {
+        private final boolean isVertex;
+        private final String label;
+        private final String property;
+        private final Client client;
+        private final ScanType strategy;
+
+        @Override
+        public String call() {
+            final String query = String.format(PROPERTIES_VALUE_QUERY, isVertex ? "V" : "E", label, property,
+                    strategy.equals(ScanType.First) ? "next(1)" : "toSet()");
+            LOGGER.debug(String.format("Start %s%n", query));
+            final ResultSet resultSet = client.submit(query);
+            final Set<Object> data = new HashSet<>();
+            resultSet.stream().iterator().forEachRemaining(r -> data.add(r.getObject()));
+            LOGGER.debug(String.format("End %s%n", query));
+            return getType(data);
+        }
+    }
+
+    @AllArgsConstructor
+    static class RunGremlinQueryPropertiesList implements Callable<List<GremlinProperty>> {
+        private final boolean isVertex;
+        private final String label;
+        private final Client client;
+        private final ScanType scanType;
+        private final ExecutorService service;
+
+        @Override
+        public List<GremlinProperty> call() throws ExecutionException, InterruptedException {
+            final String query = String.format(PROPERTY_KEY_QUERY, isVertex ? "V" : "E", label);
+            LOGGER.debug(String.format("Start %s%n", query));
+            final ResultSet resultSet = client.submit(query);
+            final Iterator<Result> iterator = resultSet.stream().iterator();
+            final List<String> properties = new ArrayList<>();
+            final List<Future<String>> propertyTypes = new ArrayList<>();
+            while (iterator.hasNext()) {
+                final String property = iterator.next().getString();
+                propertyTypes.add(service
+                        .submit(new RunGremlinQueryPropertyType(isVertex, label, property, client, scanType)));
+                properties.add(property);
+            }
+
+            final List<GremlinProperty> columns = new ArrayList<>();
+            for (int i = 0; i < properties.size(); i++) {
+                columns.add(new GremlinProperty(properties.get(i), propertyTypes.get(i).get().toLowerCase()));
+            }
+
+            LOGGER.debug(String.format("End %s%n", query));
+            return columns;
+        }
+    }
+
+    @AllArgsConstructor
+    static class RunGremlinQueryLabels implements Callable<List<String>> {
+        private final boolean isVertex;
+        private final Client client;
+
+        @Override
+        public List<String> call() {
+            final String query = String.format(LABELS_QUERY, isVertex ? "V" : "E");
+            LOGGER.debug(String.format("Start %s%n", query));
+            final List<String> labels = new ArrayList<>();
+            final ResultSet resultSet = client.submit(query);
+            resultSet.stream().iterator().forEachRemaining(it -> labels.add(it.getString()));
+            LOGGER.debug(String.format("End %s%n", query));
+            return labels;
+        }
+    }
+
+    @AllArgsConstructor
+    static class RunGremlinQueryInOutV implements Callable<List<Pair<String, String>>> {
+        private final Client client;
+        private final String label;
+
+        @Override
+        public List<Pair<String, String>> call() {
+            final String query = String.format(IN_OUT_VERTEX_QUERY, label);
+            LOGGER.debug(String.format("Start %s%n", query));
+            final List<Pair<String, String>> labels = new ArrayList<>();
+            final ResultSet resultSet = client.submit(query);
+            resultSet.stream().iterator().forEachRemaining(map -> {
+                final Map<String, String> m = (Map<String, String>) map.getObject();
+                m.forEach((key, value) -> labels.add(new Pair<>(key, value)));
+            });
+            LOGGER.debug(String.format("End %s%n", query));
+            return labels;
+        }
     }
 }

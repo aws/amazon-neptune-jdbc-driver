@@ -20,6 +20,8 @@ import org.slf4j.LoggerFactory;
 import software.aws.neptune.common.EmptyResultSet;
 import software.aws.neptune.jdbc.utilities.CastHelper;
 import software.aws.neptune.jdbc.utilities.SqlError;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.sql.ResultSet;
 import java.sql.RowIdLifetime;
 import java.sql.SQLException;
@@ -942,7 +944,18 @@ public abstract class DatabaseMetaData implements java.sql.DatabaseMetaData {
         if (schemaPattern != null) {
             LOGGER.warn("SchemaPattern in getColumns is not supported, ignoring {}.", schemaPattern);
         }
-        LOGGER.info("Getting database columns.");
-        return connection.getQueryExecutor().executeGetColumns(getConnection().createStatement(), tableNamePattern);
+        try {
+            LOGGER.info("Getting database columns.");
+            final ResultSet resultSet = connection.getQueryExecutor()
+                    .executeGetColumns(getConnection().createStatement(), tableNamePattern);
+            LOGGER.info("Database columns retrieved.");
+            return resultSet;
+        } catch (final Exception e) {
+            final StringWriter sw = new StringWriter();
+            final PrintWriter pw = new PrintWriter(sw);
+            e.printStackTrace(pw);
+            LOGGER.error("Encountered exception", e);
+            throw new SQLException(e);
+        }
     }
 }

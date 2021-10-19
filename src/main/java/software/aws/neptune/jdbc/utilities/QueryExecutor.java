@@ -20,6 +20,8 @@ import lombok.Getter;
 import lombok.Setter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.lang.reflect.Constructor;
 import java.sql.SQLException;
 import java.util.Properties;
@@ -164,7 +166,7 @@ public abstract class QueryExecutor {
             }
             return (java.sql.ResultSet) constructor.newInstance(statement, intermediateResult);
         } catch (final SQLException e) {
-          throw e;
+            throw e;
         } catch (final Exception e) {
             synchronized (lock) {
                 if (queryState.equals(QueryState.CANCELLED)) {
@@ -175,14 +177,23 @@ public abstract class QueryExecutor {
                             SqlError.QUERY_CANCELED);
                 } else {
                     resetQueryState();
+                    final StringWriter sw = new StringWriter();
+                    final PrintWriter pw = new PrintWriter(sw);
+                    e.printStackTrace(pw);
                     throw SqlError.createSQLException(
                             LOGGER,
                             SqlState.OPERATION_CANCELED,
-                            SqlError.QUERY_FAILED, e);
+                            SqlError.QUERY_FAILED, e + "Stack Trace: " + sw.toString());
                 }
             }
         }
     }
+    //
+    //  project("country","region","elev","elev","elev","elev","lat","lat","lat","lat")
+    //      .choose(__.has("country"),__.values("country"),__.constant(""))
+    //      .choose(__.has("region"),__.values("region"),__.constant(""))
+    // Sub traversal:
+    //      unfold().choose(__.has("elev"),__.values("elev"),__.constant(""))
 
     private void resetQueryState() {
         queryState = QueryState.NOT_STARTED;
