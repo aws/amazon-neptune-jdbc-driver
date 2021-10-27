@@ -132,7 +132,12 @@ public class SqlGremlinResultSet extends ResultSet implements java.sql.ResultSet
     }
 
     protected Object getConvertedValue(final int columnIndex) throws SQLException {
-        final Object value = getValue(columnIndex);
+        Object value = getValue(columnIndex);
+        if (value instanceof java.util.Date) {
+            final java.util.Date utilDate = new java.util.Date();
+            value = new java.sql.Timestamp(utilDate.getTime());
+        }
+        LOGGER.info("Converted value {}.", value);
         return (value == null) || GremlinTypeMapping.checkContains(value.getClass())
                 ? value
                 : value.toString();

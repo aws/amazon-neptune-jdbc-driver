@@ -194,6 +194,8 @@ public class JavaToJdbcTypeConverter {
         }
         if (input instanceof String) {
             return (String) input;
+        } else if  (input instanceof Boolean) {
+            return ((Boolean) input) ? "1" : "0";
         }
         return input.toString();
     }

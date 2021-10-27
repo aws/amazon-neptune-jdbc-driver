@@ -6,7 +6,6 @@
     const SSH_PRIVATE_KEY_PASSPHRASE="sshPrivateKeyPassphrase"
     const SSH_STRICT_HOST_KEY_CHECKING="sshStrictHostKeyChecking"
     const SSH_KNOWN_HOSTS_FILE="sshKnownHostsFile"
-    const REFRESH_SCHEMA="refreshSchema"
     const AUTH_SCHEME_KEY = "authScheme";
     const USE_ENCRYPTION_KEY = "enableSsl";
 

@@ -37,6 +37,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 /**
  * Base ResultSet for getColumns.
@@ -131,6 +132,7 @@ public abstract class ResultSetGetColumns extends ResultSet
         GREMLIN_STRING_TYPE_TO_JAVA_TYPE_CONVERTER_MAP.put("Byte", Byte.class);
         GREMLIN_STRING_TYPE_TO_JAVA_TYPE_CONVERTER_MAP.put("Short", Short.class);
         GREMLIN_STRING_TYPE_TO_JAVA_TYPE_CONVERTER_MAP.put("Integer", Integer.class);
+        GREMLIN_STRING_TYPE_TO_JAVA_TYPE_CONVERTER_MAP.put("Boolean", Boolean.class);
         GREMLIN_STRING_TYPE_TO_JAVA_TYPE_CONVERTER_MAP.put("Long", Long.class);
         GREMLIN_STRING_TYPE_TO_JAVA_TYPE_CONVERTER_MAP.put("Float", Float.class);
         GREMLIN_STRING_TYPE_TO_JAVA_TYPE_CONVERTER_MAP.put("Double", Double.class);
@@ -164,8 +166,13 @@ public abstract class ResultSetGetColumns extends ResultSet
                 // Get column type.
                 final String dataType = property.getValue().getType();
                 map.put("TYPE_NAME", dataType);
-                final Class<?> javaClass =
-                        GREMLIN_STRING_TYPE_TO_JAVA_TYPE_CONVERTER_MAP.getOrDefault(dataType, String.class);
+                final Optional<? extends Class<?>> javaClassOptional =
+                        GREMLIN_STRING_TYPE_TO_JAVA_TYPE_CONVERTER_MAP.
+                                entrySet().stream().
+                                filter(d -> d.getKey().equalsIgnoreCase(dataType)).
+                                map(Map.Entry::getValue).
+                                findFirst();
+                final Class<?> javaClass = javaClassOptional.isPresent() ? javaClassOptional.get() : String.class;
                 map.put("CHAR_OCTET_LENGTH", (javaClass == String.class) ? Integer.MAX_VALUE : null);
                 final int jdbcType = JavaToJdbcTypeConverter.CLASS_TO_JDBC_ORDINAL
                         .getOrDefault(javaClass, JdbcType.VARCHAR.getJdbcCode());
