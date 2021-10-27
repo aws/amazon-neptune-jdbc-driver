@@ -85,7 +85,7 @@ public abstract class ResultSetGetColumns extends ResultSet
      */
     private static final Map<String, Object> CONVERSION_MAP = new HashMap<>();
     private static final List<String> ORDERED_COLUMNS = new ArrayList<>();
-    private static final Map<String, Class<?>> GREMLIN_STRING_TYPE_TO_JAVA_TYPE_CONVERTER_MAP = new HashMap<>();
+    public static final Map<String, Class<?>> GREMLIN_STRING_TYPE_TO_JAVA_TYPE_CONVERTER_MAP = new HashMap<>();
 
     static {
         CONVERSION_MAP.put("TABLE_CAT", "catalog");

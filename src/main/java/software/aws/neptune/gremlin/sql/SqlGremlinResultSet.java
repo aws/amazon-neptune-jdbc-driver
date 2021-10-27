@@ -19,6 +19,7 @@ package software.aws.neptune.gremlin.sql;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.twilmes.sql.gremlin.adapter.results.SqlGremlinQueryResult;
+import software.aws.neptune.common.gremlindatamodel.resultset.ResultSetGetColumns;
 import software.aws.neptune.gremlin.GremlinTypeMapping;
 import software.aws.neptune.gremlin.resultset.GremlinResultSet;
 import software.aws.neptune.gremlin.resultset.GremlinResultSetMetadata;
@@ -30,18 +31,12 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import static software.aws.neptune.gremlin.GremlinTypeMapping.GREMLIN_TO_JDBC_TYPE_MAP;
 
 public class SqlGremlinResultSet extends ResultSet implements java.sql.ResultSet {
     private static final Logger LOGGER = LoggerFactory.getLogger(GremlinResultSet.class);
-    private static final Map<String, Class<?>> SQL_GREMLIN_COLUMN_TYPE_TO_JAVA_TYPE = new HashMap<>();
-
-    static {
-        GREMLIN_TO_JDBC_TYPE_MAP.keySet().forEach(gremlinType -> {
-            SQL_GREMLIN_COLUMN_TYPE_TO_JAVA_TYPE.put(gremlinType.getName().toLowerCase(), gremlinType);
-        });
-    }
 
     private final List<String> columns;
     private final List<String> columnTypes;
@@ -61,6 +56,7 @@ public class SqlGremlinResultSet extends ResultSet implements java.sql.ResultSet
                                final SqlGremlinQueryResult queryResult) {
         // 1 for row count as placeholder.
         super(statement, queryResult.getColumns(), 1);
+
         this.columns = queryResult.getColumns();
         // Null until we get result by calling next.
         this.row = null;
@@ -69,7 +65,16 @@ public class SqlGremlinResultSet extends ResultSet implements java.sql.ResultSet
 
         final List<Class<?>> rowTypes = new ArrayList<>();
         for (final String columnType : columnTypes) {
-            rowTypes.add(SQL_GREMLIN_COLUMN_TYPE_TO_JAVA_TYPE.getOrDefault(columnType.toLowerCase(), String.class));
+            LOGGER.info("Column type: " + columnType);
+            LOGGER.info("Key set: " + ResultSetGetColumns.GREMLIN_STRING_TYPE_TO_JAVA_TYPE_CONVERTER_MAP.keySet());
+            final Optional<? extends Class<?>> javaClassOptional =
+                    ResultSetGetColumns.GREMLIN_STRING_TYPE_TO_JAVA_TYPE_CONVERTER_MAP.
+                            entrySet().stream().
+                            filter(d -> d.getKey().equalsIgnoreCase(columnType)).
+                            map(Map.Entry::getValue).
+                            findFirst();
+            LOGGER.info("Java type: " + (javaClassOptional.isPresent() ? javaClassOptional.get() : String.class));
+            rowTypes.add(javaClassOptional.isPresent() ? javaClassOptional.get() : String.class);
         }
         gremlinResultSetMetadata = new GremlinResultSetMetadata(columns, rowTypes);
     }
@@ -133,10 +138,6 @@ public class SqlGremlinResultSet extends ResultSet implements java.sql.ResultSet
 
     protected Object getConvertedValue(final int columnIndex) throws SQLException {
         Object value = getValue(columnIndex);
-        if (value instanceof java.util.Date) {
-            final java.util.Date utilDate = new java.util.Date();
-            value = new java.sql.Timestamp(utilDate.getTime());
-        }
         LOGGER.info("Converted value {}.", value);
         return (value == null) || GremlinTypeMapping.checkContains(value.getClass())
                 ? value
