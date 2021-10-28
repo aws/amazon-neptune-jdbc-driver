@@ -32,30 +32,16 @@ import org.apache.commons.beanutils.converters.SqlTimestampConverter;
 import org.apache.commons.beanutils.converters.StringConverter;
 import org.slf4j.LoggerFactory;
 import java.math.BigDecimal;
-import java.math.BigInteger;
 import java.sql.Date;
 import java.sql.SQLException;
 import java.sql.Time;
 import java.sql.Timestamp;
-import java.time.Instant;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.time.OffsetTime;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
-import java.util.Calendar;
-import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.Map;
 
 public class JavaToJdbcTypeConverter {
     public static final Map<Class<?>, Integer> CLASS_TO_JDBC_ORDINAL = new HashMap<>();
     private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(JavaToJdbcTypeConverter.class);
-    private static final Map<String, Boolean> BOOLEAN_STRINGS = ImmutableMap.of(
-            "1", true, "true", true,
-            "0", false, "false", false);
-    private static final Calendar DEFAULT_CALENDAR = new GregorianCalendar();
 
     private static final ImmutableMap<Class<?>, AbstractConverter> TYPE_CONVERTERS_MAP;
 
@@ -103,7 +89,6 @@ public class JavaToJdbcTypeConverter {
      * @param sourceType the source type to get the converter for.
      * @param targetType the target type used to log error in case of missing converter.
      * @return a {@link AbstractConverter} instance for the source type.
-     *
      * @throws SQLException if a converter cannot be found the source type.
      */
     public static AbstractConverter get(final Class<? extends Object> sourceType,
