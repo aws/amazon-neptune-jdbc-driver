@@ -1,3 +1,19 @@
+/*
+ * Copyright <2021> Amazon.com, Inc. or its affiliates. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License").
+ * You may not use this file except in compliance with the License.
+ * A copy of the License is located at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * or in the "license" file accompanying this file. This file is distributed
+ * on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
+ * express or implied. See the License for the specific language governing
+ * permissions and limitations under the License.
+ *
+ */
+
 package tdvt;
 
 import org.apache.commons.text.StringEscapeUtils;
@@ -25,9 +41,6 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.sql.SQLException;
-import java.time.LocalDateTime;
-import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.Properties;
 import java.util.concurrent.ExecutionException;
@@ -82,15 +95,9 @@ public class TDVTDataUpload {
 
     Object attemptDateConversion(final Object data) {
         try {
-            // return Date.parse(data.toString());
-            //final DateTimeFormatter formatter = DateTimeFormatter.ISO_DATE_TIME;
-            // final LocalDateTime localDateTime = LocalDateTime.parse(data.toString(), formatter);
-            //System.out.println("Formatted as date.");
-            Date date = DateTime.parse(data.toString()).toDate();
-            System.out.println("Input: " + data.toString() + " - Output: " + date.toString());
+            final Date date = DateTime.parse(data.toString()).toDate();
             return date;
         } catch (final Exception ignored) {
-            System.out.println("Failed to convert " + data.toString());
             return data;
         }
     }
@@ -187,6 +194,5 @@ public class TDVTDataUpload {
         Calcs,
         Staples
     }
-
-
 }
+
