@@ -17,6 +17,7 @@
 package software.aws.neptune.jdbc;
 
 import lombok.Getter;
+import org.apache.commons.beanutils.ConversionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import software.aws.neptune.jdbc.utilities.CastHelper;
@@ -263,100 +264,148 @@ public abstract class ResultSet implements java.sql.ResultSet {
         return columns.indexOf(columnLabel) + 1;
     }
 
+    /**
+     * Gets the value in the target type on the current row and given index.
+     *
+     * @param columnIndex the index of the cell value.
+     * @param targetType the intended target type.
+     * @param <T> the intended target type.
+     *
+     * @return a value that is possibly converted to the target type.
+     * @throws SQLException the result set is closed, the row is incorrect or the given
+     *      * column index is invalid.
+     */
+    private <T> T getValue(final int columnIndex, final Class<T> targetType) throws SQLException {
+        final Object o = getConvertedValue(columnIndex);
+        final boolean wasNull = (o == null);
+
+        // If value is null, just use the target type as the source type.
+        // This will ensure we get the default value.
+        final Class<?> sourceType = wasNull ? targetType : o.getClass();
+
+        try {
+            return JavaToJdbcTypeConverter.get(sourceType, targetType).convert(targetType, o);
+        } catch (ConversionException e) {
+            throw SqlError.createSQLException(LOGGER,
+                    SqlState.DATA_EXCEPTION,
+                    SqlError.UNSUPPORTED_CONVERSION,
+                    sourceType.getSimpleName(),
+                    targetType.getSimpleName());
+        }
+    }
+
     @Override
     public boolean getBoolean(final int columnIndex) throws SQLException {
         LOGGER.trace("Getting column {} as a Boolean.", columnIndex);
-        return JavaToJdbcTypeConverter.toBoolean(getConvertedValue(columnIndex));
+        return getValue(columnIndex, boolean.class);
     }
 
     @Override
     public byte getByte(final int columnIndex) throws SQLException {
         LOGGER.trace("Getting column {} as a Byte.", columnIndex);
-        return JavaToJdbcTypeConverter.toByte(getConvertedValue(columnIndex));
+        return getValue(columnIndex, byte.class);
     }
 
     @Override
     public short getShort(final int columnIndex) throws SQLException {
         LOGGER.trace("Getting column {} as a Short.", columnIndex);
-        return JavaToJdbcTypeConverter.toShort(getConvertedValue(columnIndex));
+        return getValue(columnIndex, short.class);
     }
 
     @Override
     public int getInt(final int columnIndex) throws SQLException {
         LOGGER.trace("Getting column {} as a Integer.", columnIndex);
-        return JavaToJdbcTypeConverter.toInteger(getConvertedValue(columnIndex));
+        return getValue(columnIndex, int.class);
     }
 
     @Override
     public long getLong(final int columnIndex) throws SQLException {
         LOGGER.trace("Getting column {} as a Long.", columnIndex);
-        return JavaToJdbcTypeConverter.toLong(getConvertedValue(columnIndex));
+        return getValue(columnIndex, long.class);
     }
 
     @Override
     public float getFloat(final int columnIndex) throws SQLException {
         LOGGER.trace("Getting column {} as a Float.", columnIndex);
-        return JavaToJdbcTypeConverter.toFloat(getConvertedValue(columnIndex));
+        return getValue(columnIndex, float.class);
     }
 
     @Override
     public double getDouble(final int columnIndex) throws SQLException {
         LOGGER.trace("Getting column {} as a Double.", columnIndex);
-        return JavaToJdbcTypeConverter.toDouble(getConvertedValue(columnIndex));
+        return getValue(columnIndex, double.class);
     }
 
     @Override
     public BigDecimal getBigDecimal(final int columnIndex) throws SQLException {
         LOGGER.trace("Getting column {} as a BigDecimal.", columnIndex);
-        return JavaToJdbcTypeConverter.toBigDecimal(getConvertedValue(columnIndex));
+        return getValue(columnIndex, BigDecimal.class);
     }
 
     @Override
     public String getString(final int columnIndex) throws SQLException {
         LOGGER.trace("Getting column {} as a String.", columnIndex);
-        return JavaToJdbcTypeConverter.toString(getConvertedValue(columnIndex));
+        return getValue(columnIndex, String.class);
     }
 
     @Override
     public byte[] getBytes(final int columnIndex) throws SQLException {
         LOGGER.trace("Getting column {} as a byte array.", columnIndex);
-        return JavaToJdbcTypeConverter.toByteArray(getConvertedValue(columnIndex));
+        return getValue(columnIndex, byte[].class);
     }
 
     @Override
     public Date getDate(final int columnIndex) throws SQLException {
         LOGGER.trace("Getting column {} as a Date.", columnIndex);
-        return JavaToJdbcTypeConverter.toDate(getConvertedValue(columnIndex));
+        return getValue(columnIndex, null);
     }
 
     @Override
     public Time getTime(final int columnIndex) throws SQLException {
         LOGGER.trace("Getting column {} as a Time.", columnIndex);
-        return JavaToJdbcTypeConverter.toTime(getConvertedValue(columnIndex));
+        return getValue(columnIndex, null);
     }
 
     @Override
     public Timestamp getTimestamp(final int columnIndex) throws SQLException {
         LOGGER.trace("Getting column {} as a Timestamp.", columnIndex);
-        return JavaToJdbcTypeConverter.toTimestamp(getConvertedValue(columnIndex));
-    }
-
-    @Override
-    public Timestamp getTimestamp(final int columnIndex, final Calendar cal) throws SQLException {
-        LOGGER.trace("Getting column {} as a Timestamp.", columnIndex);
-        return JavaToJdbcTypeConverter.toTimestamp(getConvertedValue(columnIndex), cal);
+        return getValue(columnIndex, null);
     }
 
     @Override
     public Date getDate(final int columnIndex, final Calendar cal) throws SQLException {
-        LOGGER.trace("Getting column {} as a Date with Calendar.", columnIndex);
-        return JavaToJdbcTypeConverter.toDate(getConvertedValue(columnIndex), cal);
+        final Date value = getValue(columnIndex, Date.class);
+        if (value == null) {
+            return null;
+        }
+        return getMaybeAdjustedTime(value, cal);
+    }
+
+    private Date getMaybeAdjustedTime(final Date utcTime, final Calendar cal) {
+        if (cal != null) {
+            long adjustedTime = utcTime.getTime();
+            adjustedTime -= cal.getTimeZone().getOffset(adjustedTime);
+            return new Date(adjustedTime);
+        }
+        return utcTime;
     }
 
     @Override
     public Time getTime(final int columnIndex, final Calendar cal) throws SQLException {
-        LOGGER.trace("Getting column {} as a Time with Calendar.", columnIndex);
-        return JavaToJdbcTypeConverter.toTime(getConvertedValue(columnIndex), cal);
+        final Date value = getDate(columnIndex, cal);
+        if (value == null) {
+            return null;
+        }
+        return new Time(value.getTime());
+    }
+
+    @Override
+    public Timestamp getTimestamp(final int columnIndex, final Calendar cal) throws SQLException {
+        final Date value = getDate(columnIndex, cal);
+        if (value == null) {
+            return null;
+        }
+        return new Timestamp(value.getTime());
     }
 
     @Override

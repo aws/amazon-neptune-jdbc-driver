@@ -17,6 +17,19 @@
 package software.aws.neptune.jdbc.utilities;
 
 import com.google.common.collect.ImmutableMap;
+import org.apache.commons.beanutils.converters.AbstractConverter;
+import org.apache.commons.beanutils.converters.ArrayConverter;
+import org.apache.commons.beanutils.converters.BigDecimalConverter;
+import org.apache.commons.beanutils.converters.BooleanConverter;
+import org.apache.commons.beanutils.converters.ByteConverter;
+import org.apache.commons.beanutils.converters.DateConverter;
+import org.apache.commons.beanutils.converters.DoubleConverter;
+import org.apache.commons.beanutils.converters.FloatConverter;
+import org.apache.commons.beanutils.converters.IntegerConverter;
+import org.apache.commons.beanutils.converters.LongConverter;
+import org.apache.commons.beanutils.converters.ShortConverter;
+import org.apache.commons.beanutils.converters.SqlTimestampConverter;
+import org.apache.commons.beanutils.converters.StringConverter;
 import org.slf4j.LoggerFactory;
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -45,6 +58,8 @@ public class JavaToJdbcTypeConverter {
             "0", false, "false", false);
     private static final Calendar DEFAULT_CALENDAR = new GregorianCalendar();
 
+    private static final ImmutableMap<Class<?>, AbstractConverter> TYPE_CONVERTERS_MAP;
+
     static {
         CLASS_CONVERTER_MAP.put(Boolean.class, JavaToJdbcTypeConverter::toBoolean);
         CLASS_CONVERTER_MAP.put(Byte.class, JavaToJdbcTypeConverter::toByte);
@@ -71,6 +86,52 @@ public class JavaToJdbcTypeConverter {
         CLASS_TO_JDBC_ORDINAL.put(Time.class, JdbcType.TIME.getJdbcCode());
         CLASS_TO_JDBC_ORDINAL.put(String.class, JdbcType.VARCHAR.getJdbcCode());
         CLASS_TO_JDBC_ORDINAL.put(java.math.BigDecimal.class, JdbcType.DECIMAL.getJdbcCode());
+
+        TYPE_CONVERTERS_MAP = ImmutableMap.<Class<?>, AbstractConverter>builder()
+                .put(BigDecimal.class, new BigDecimalConverter(0))
+                .put(Boolean.class, new BooleanConverter(false))
+                .put(boolean.class, new BooleanConverter(false))
+                .put(Byte.class, new ByteConverter(0))
+                .put(byte.class, new ByteConverter(0))
+                .put(Date.class, new DateConverter(null))
+                .put(java.util.Date.class, new DateConverter(null))
+                .put(Double.class, new DoubleConverter(0.0))
+                .put(double.class, new DoubleConverter(0.0))
+                .put(Float.class, new FloatConverter(0.0))
+                .put(float.class, new FloatConverter(0.0))
+                .put(Integer.class, new IntegerConverter(0))
+                .put(int.class, new IntegerConverter(0))
+                .put(Long.class, new LongConverter(0))
+                .put(long.class, new LongConverter(0))
+                .put(Short.class, new ShortConverter(0))
+                .put(short.class, new ShortConverter(0))
+                .put(String.class, new StringConverter())
+                .put(Timestamp.class, new SqlTimestampConverter())
+                .put(Byte[].class, new ArrayConverter(Byte[].class, new ByteConverter()))
+                .put(byte[].class, new ArrayConverter(byte[].class, new ByteConverter()))
+                .build();
+    }
+
+    /**
+     * Gets the type converter for the given source type.
+     *
+     * @param sourceType the source type to get the converter for.
+     * @param targetType the target type used to log error in case of missing converter.
+     * @return a {@link AbstractConverter} instance for the source type.
+     *
+     * @throws SQLException if a converter cannot be found the source type.
+     */
+    public static AbstractConverter get(final Class<? extends Object> sourceType,
+                                        final Class<? extends Object> targetType) throws SQLException {
+        final AbstractConverter converter = TYPE_CONVERTERS_MAP.get(sourceType);
+        if (converter == null) {
+            throw SqlError.createSQLException(LOGGER,
+                    SqlState.DATA_EXCEPTION,
+                    SqlError.UNSUPPORTED_CONVERSION,
+                    sourceType.getSimpleName(),
+                    targetType.getSimpleName());
+        }
+        return converter;
     }
 
     /**
