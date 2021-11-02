@@ -71,11 +71,6 @@ class GremlinResultSetTest {
     }
 
     @Test
-    void testDataset() throws SQLException {
-
-    }
-
-    @Test
     void testBooleanType() throws SQLException {
         final int col = resultSet.findColumn("supportsLife");
         Assertions.assertTrue(resultSet.getBoolean(col));

@@ -137,23 +137,20 @@ public class SchemaHelperGremlinDataModel {
     private static GremlinSchema getSchema(final Client client, final ScanType scanType) throws SQLException {
         final ExecutorService executor = Executors.newFixedThreadPool(96,
                 new ThreadFactoryBuilder().setNameFormat("RxSessionRunner-%d").setDaemon(true).build());
-        for (int i = 0; i < 3; i++) {
-            try {
-                Thread.sleep(10000);
-                final Future<List<GremlinVertexTable>> gremlinVertexTablesFuture =
-                        executor.submit(new RunGremlinQueryVertices(client, executor, scanType));
-                final Future<List<GremlinEdgeTable>> gremlinEdgeTablesFuture =
-                        executor.submit(new RunGremlinQueryEdges(client, executor, scanType));
-                final GremlinSchema gremlinSchema =
-                        new GremlinSchema(gremlinVertexTablesFuture.get(), gremlinEdgeTablesFuture.get());
-                executor.shutdown();
-                return gremlinSchema;
-            } catch (final ExecutionException | InterruptedException e) {
-                e.printStackTrace();
-            }
+        try {
+            final Future<List<GremlinVertexTable>> gremlinVertexTablesFuture =
+                    executor.submit(new RunGremlinQueryVertices(client, executor, scanType));
+            final Future<List<GremlinEdgeTable>> gremlinEdgeTablesFuture =
+                    executor.submit(new RunGremlinQueryEdges(client, executor, scanType));
+            final GremlinSchema gremlinSchema =
+                    new GremlinSchema(gremlinVertexTablesFuture.get(), gremlinEdgeTablesFuture.get());
+            executor.shutdown();
+            return gremlinSchema;
+        } catch (final ExecutionException | InterruptedException e) {
+            e.printStackTrace();
+            executor.shutdown();
+            throw new SQLException("Error occurred during schema collection. '" + e.getMessage() + "'.");
         }
-        executor.shutdown();
-        throw new SQLException("Error occurred during schema collection.");
     }
 
     private static String getType(final Set<Object> data) {
