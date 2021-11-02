@@ -31,7 +31,7 @@ def csv_to_json(csvFilePath, jsonFilePath):
     with open(csvFilePath) as csvf, open(jsonFilePath, 'w') as jsonf:
             rowCount = 0
             csvReader = csv.DictReader(csvf)
-            for row in csvReader: 
+            for row in csvReader:
                 rowCount += 1
                 for key in row.keys():
                     column = row[key]

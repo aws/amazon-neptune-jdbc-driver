@@ -24,9 +24,7 @@ import org.junit.jupiter.api.Test;
 import software.aws.neptune.jdbc.utilities.AuthScheme;
 import software.aws.neptune.opencypher.mock.MockOpenCypherDatabase;
 import java.sql.SQLException;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.util.Properties;
 
 public class OpenCypherResultSetTest {
@@ -113,10 +111,10 @@ public class OpenCypherResultSetTest {
         Assertions.assertEquals((short) 1, resultSet.getShort(1));
         Assertions.assertEquals((byte) 1, resultSet.getByte(1));
         Assertions.assertEquals(((Integer) 1).toString(), resultSet.getString(1));
-        Assertions.assertTrue(resultSet.getBoolean(1));
-        Assertions.assertEquals(new java.sql.Date(1L), resultSet.getDate(1));
-        Assertions.assertEquals(new java.sql.Time(1L).toLocalTime(), resultSet.getTime(1).toLocalTime());
-        Assertions.assertEquals(new java.sql.Timestamp(1L), resultSet.getTimestamp(1));
+        Assertions.assertThrows(SQLException.class, () -> resultSet.getBoolean(1));
+        Assertions.assertThrows(SQLException.class, () -> resultSet.getDate(1));
+        Assertions.assertThrows(SQLException.class, () -> resultSet.getTime(1).toLocalTime());
+        Assertions.assertThrows(SQLException.class, () -> resultSet.getTimestamp(1));
     }
 
     @Test
@@ -124,14 +122,14 @@ public class OpenCypherResultSetTest {
         final java.sql.ResultSet resultSet = statement.executeQuery("RETURN 4147483647 as x");
         Assertions.assertTrue(resultSet.next());
         Assertions.assertEquals(4147483647L, resultSet.getLong(1));
-        Assertions.assertEquals((int) 4147483647L, resultSet.getInt(1));
-        Assertions.assertEquals((short) 4147483647L, resultSet.getShort(1));
-        Assertions.assertEquals((byte) 4147483647L, resultSet.getByte(1));
+        Assertions.assertEquals(0, resultSet.getInt(1));
+        Assertions.assertEquals(0, resultSet.getShort(1));
+        Assertions.assertEquals(0, resultSet.getByte(1));
         Assertions.assertEquals(((Long) 4147483647L).toString(), resultSet.getString(1));
-        Assertions.assertTrue(resultSet.getBoolean(1));
-        Assertions.assertEquals(new java.sql.Date(4147483647L), resultSet.getDate(1));
-        Assertions.assertEquals(new java.sql.Time(4147483647L).toLocalTime(), resultSet.getTime(1).toLocalTime());
-        Assertions.assertEquals(new java.sql.Timestamp(4147483647L), resultSet.getTimestamp(1));
+        Assertions.assertThrows(java.sql.SQLException.class, () -> resultSet.getBoolean(1));
+        Assertions.assertThrows(java.sql.SQLException.class, () -> resultSet.getDate(1));
+        Assertions.assertThrows(java.sql.SQLException.class, () -> resultSet.getTime(1).toLocalTime());
+        Assertions.assertThrows(java.sql.SQLException.class, () -> resultSet.getTimestamp(1));
     }
 
     @Test
@@ -174,10 +172,10 @@ public class OpenCypherResultSetTest {
         Assertions.assertTrue(resultSet.next());
         Assertions.assertEquals(resultSet.getString(1), "1.0");
         Assertions.assertEquals(resultSet.getString(1), ((Double) 1.0).toString());
-        Assertions.assertEquals(resultSet.getFloat(1), 1.0f);
-        Assertions.assertEquals(resultSet.getDouble(1), 1.0);
         Assertions.assertThrows(SQLException.class, () -> resultSet.getByte(1));
         Assertions.assertThrows(SQLException.class, () -> resultSet.getShort(1));
+        Assertions.assertThrows(SQLException.class, () -> resultSet.getFloat(1));
+        Assertions.assertThrows(SQLException.class, () -> resultSet.getDouble(1));
         Assertions.assertThrows(SQLException.class, () -> resultSet.getInt(1));
         Assertions.assertThrows(SQLException.class, () -> resultSet.getLong(1));
         Assertions.assertThrows(SQLException.class, () -> resultSet.getBoolean(1));
@@ -356,11 +354,10 @@ public class OpenCypherResultSetTest {
     void testDateType() throws SQLException {
         final java.sql.ResultSet resultSet = statement.executeQuery("RETURN date(\"1993-03-30\") AS n");
         Assertions.assertTrue(resultSet.next());
-        Assertions.assertEquals("1993-03-30", resultSet.getString(1));
         Assertions.assertEquals(java.sql.Date.valueOf("1993-03-30"), resultSet.getDate(1));
         Assertions.assertEquals(java.sql.Timestamp.valueOf(LocalDateTime.of(1993, 3, 30, 0, 0)),
                 resultSet.getTimestamp(1));
-        Assertions.assertThrows(SQLException.class, () -> resultSet.getTime(1));
+        Assertions.assertEquals(java.sql.Time.valueOf("00:00:00").toString(), resultSet.getTime(1).toString());
         Assertions.assertThrows(SQLException.class, () -> resultSet.getBoolean(1));
         Assertions.assertThrows(SQLException.class, () -> resultSet.getByte(1));
         Assertions.assertThrows(SQLException.class, () -> resultSet.getShort(1));
@@ -372,14 +369,13 @@ public class OpenCypherResultSetTest {
 
     @Test
     void testTimeType() throws SQLException {
-        final java.sql.ResultSet resultSet = statement.executeQuery("RETURN time(\"12:10:10.000000225+0100\") AS n");
+        final java.sql.ResultSet resultSet = statement.executeQuery("RETURN time(\"12:10:10\") AS n");
         Assertions.assertTrue(resultSet.next());
-        Assertions.assertEquals("12:10:10.000000225+01:00", resultSet.getString(1));
-        Assertions.assertEquals(java.sql.Timestamp.valueOf(
-                LocalTime.of(12, 10, 10, 225).atDate(LocalDate.ofEpochDay(0))),
-                resultSet.getTimestamp(1));
         Assertions.assertEquals(java.sql.Time.valueOf("12:10:10"), resultSet.getTime(1));
-        Assertions.assertThrows(SQLException.class, () -> resultSet.getDate(1));
+        Assertions.assertEquals(java.sql.Timestamp.valueOf(LocalDateTime.of(1970, 1, 1, 12, 10, 10)),
+                resultSet.getTimestamp(1));
+        Assertions.assertEquals(java.sql.Time.valueOf("12:10:10").toString() + "Z", resultSet.getString(1));
+        Assertions.assertEquals(java.sql.Date.valueOf("1970-01-01").toString(), resultSet.getDate(1).toString());
         Assertions.assertThrows(SQLException.class, () -> resultSet.getBoolean(1));
         Assertions.assertThrows(SQLException.class, () -> resultSet.getByte(1));
         Assertions.assertThrows(SQLException.class, () -> resultSet.getShort(1));
@@ -391,14 +387,13 @@ public class OpenCypherResultSetTest {
 
     @Test
     void testLocalTimeType() throws SQLException {
-        final java.sql.ResultSet resultSet = statement.executeQuery("RETURN localtime(\"12:10:10.000000225\") AS n");
+        final java.sql.ResultSet resultSet = statement.executeQuery("RETURN localtime(\"12:10:10\") AS n");
         Assertions.assertTrue(resultSet.next());
-        Assertions.assertEquals("12:10:10.000000225", resultSet.getString(1));
-        Assertions.assertEquals(java.sql.Timestamp.valueOf(
-                LocalTime.of(12, 10, 10, 225).atDate(LocalDate.ofEpochDay(0))),
-                resultSet.getTimestamp(1));
         Assertions.assertEquals(java.sql.Time.valueOf("12:10:10"), resultSet.getTime(1));
-        Assertions.assertThrows(SQLException.class, () -> resultSet.getDate(1));
+        Assertions.assertEquals(java.sql.Timestamp.valueOf(LocalDateTime.of(1970, 1, 1, 12, 10, 10)),
+                resultSet.getTimestamp(1));
+        Assertions.assertEquals(java.sql.Time.valueOf("12:10:10").toString(), resultSet.getString(1));
+        Assertions.assertEquals(java.sql.Date.valueOf("1970-01-01").toString(), resultSet.getDate(1).toString());
         Assertions.assertThrows(SQLException.class, () -> resultSet.getBoolean(1));
         Assertions.assertThrows(SQLException.class, () -> resultSet.getByte(1));
         Assertions.assertThrows(SQLException.class, () -> resultSet.getShort(1));
@@ -414,10 +409,10 @@ public class OpenCypherResultSetTest {
                 statement.executeQuery("RETURN datetime(\"1993-03-30T12:10:10.000000225+0100\") AS n");
         Assertions.assertTrue(resultSet.next());
         Assertions.assertEquals("1993-03-30T12:10:10.000000225+01:00", resultSet.getString(1));
-        Assertions.assertEquals(java.sql.Date.valueOf("1993-03-30"), resultSet.getDate(1));
-        Assertions.assertEquals(java.sql.Time.valueOf("12:10:10"), resultSet.getTime(1));
-        Assertions.assertEquals(java.sql.Timestamp.valueOf(LocalDateTime.of(1993, 3, 30, 12, 10, 10, 225)),
-                resultSet.getTimestamp(1));
+        Assertions.assertEquals(java.sql.Timestamp.valueOf(LocalDateTime.of(1993, 3, 30, 12, 10, 10, 225)).toString(),
+                resultSet.getTimestamp(1).toString());
+        Assertions.assertEquals(java.sql.Date.valueOf("1993-03-30").toString(), resultSet.getDate(1).toString());
+        Assertions.assertEquals(java.sql.Time.valueOf("12:10:10").toString(), resultSet.getTime(1).toString());
         Assertions.assertThrows(SQLException.class, () -> resultSet.getBoolean(1));
         Assertions.assertThrows(SQLException.class, () -> resultSet.getByte(1));
         Assertions.assertThrows(SQLException.class, () -> resultSet.getShort(1));
@@ -433,10 +428,10 @@ public class OpenCypherResultSetTest {
                 statement.executeQuery("RETURN localdatetime(\"1993-03-30T12:10:10.000000225\") AS n");
         Assertions.assertTrue(resultSet.next());
         Assertions.assertEquals("1993-03-30T12:10:10.000000225", resultSet.getString(1));
-        Assertions.assertEquals(java.sql.Date.valueOf("1993-03-30"), resultSet.getDate(1));
-        Assertions.assertEquals(java.sql.Time.valueOf("12:10:10"), resultSet.getTime(1));
-        Assertions.assertEquals(java.sql.Timestamp.valueOf(LocalDateTime.of(1993, 3, 30, 12, 10, 10, 225)),
-                resultSet.getTimestamp(1));
+        Assertions.assertEquals(java.sql.Date.valueOf("1993-03-30").toString(), resultSet.getDate(1).toString());
+        Assertions.assertEquals(java.sql.Time.valueOf("12:10:10").toString(), resultSet.getTime(1).toString());
+        Assertions.assertEquals(java.sql.Timestamp.valueOf(LocalDateTime.of(1993, 3, 30, 12, 10, 10, 225)).toString(),
+                resultSet.getTimestamp(1).toString());
         Assertions.assertThrows(SQLException.class, () -> resultSet.getBoolean(1));
         Assertions.assertThrows(SQLException.class, () -> resultSet.getByte(1));
         Assertions.assertThrows(SQLException.class, () -> resultSet.getShort(1));

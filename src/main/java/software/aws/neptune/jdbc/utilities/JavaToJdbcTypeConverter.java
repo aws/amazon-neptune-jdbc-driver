@@ -28,6 +28,8 @@ import org.apache.commons.beanutils.converters.FloatConverter;
 import org.apache.commons.beanutils.converters.IntegerConverter;
 import org.apache.commons.beanutils.converters.LongConverter;
 import org.apache.commons.beanutils.converters.ShortConverter;
+import org.apache.commons.beanutils.converters.SqlDateConverter;
+import org.apache.commons.beanutils.converters.SqlTimeConverter;
 import org.apache.commons.beanutils.converters.SqlTimestampConverter;
 import org.apache.commons.beanutils.converters.StringConverter;
 import org.slf4j.LoggerFactory;
@@ -64,8 +66,9 @@ public class JavaToJdbcTypeConverter {
                 .put(boolean.class, new BooleanConverter(false))
                 .put(Byte.class, new ByteConverter(0))
                 .put(byte.class, new ByteConverter(0))
-                .put(Date.class, new DateConverter(null))
-                .put(java.util.Date.class, new DateConverter(null))
+                .put(Date.class, new SqlDateConverter())
+                .put(java.util.Date.class, new DateConverter())
+                .put(Time.class, new SqlTimeConverter())
                 .put(Double.class, new DoubleConverter(0.0))
                 .put(double.class, new DoubleConverter(0.0))
                 .put(Float.class, new FloatConverter(0.0))

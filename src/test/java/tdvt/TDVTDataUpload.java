@@ -31,6 +31,7 @@ import org.json.simple.parser.JSONParser;
 import org.junit.Assert;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import software.aws.neptune.gremlin.GremlinConnectionProperties;
 import software.aws.neptune.gremlin.sql.SqlGremlinConnection;
@@ -54,6 +55,7 @@ import static software.aws.neptune.jdbc.utilities.ConnectionProperties.SSH_PRIVA
 import static software.aws.neptune.jdbc.utilities.ConnectionProperties.SSH_STRICT_HOST_KEY_CHECKING;
 import static software.aws.neptune.jdbc.utilities.ConnectionProperties.SSH_USER;
 
+@Disabled
 public class TDVTDataUpload {
     private static final String ENDPOINT = "database-1.cluster-cdffsmv2nzf7.us-east-2.neptune.amazonaws.com";
     private static final String SAMPLE_QUERY = "g.V().count()";
