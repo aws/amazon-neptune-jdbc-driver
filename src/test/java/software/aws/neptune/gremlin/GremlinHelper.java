@@ -80,10 +80,17 @@ public class GremlinHelper {
             if (entry.getValue() instanceof String) {
                 sb.append(q).append(entry.getValue()).append(q);
             } else {
-                sb.append(entry.getValue());
+                if (entry.getValue() instanceof Float) {
+                    sb.append(((Float)entry.getValue()).floatValue());
+                } else if (entry.getValue() instanceof Double) {
+                    sb.append(((Double)entry.getValue()).doubleValue());
+                } else {
+                    sb.append(entry.getValue());
+                }
             }
             sb.append(")");
         }
+        System.out.println("Query: " + sb.toString());
         return sb.toString();
     }
 

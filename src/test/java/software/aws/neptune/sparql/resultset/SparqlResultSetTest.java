@@ -113,8 +113,8 @@ public class SparqlResultSetTest {
             throws SQLException {
         final java.sql.ResultSet resultSet = statement.executeQuery(query);
         Assertions.assertTrue(resultSet.next());
-        Assertions.assertEquals((byte) expectedValue, resultSet.getByte(columnIdx));
-        Assertions.assertEquals((short) expectedValue, resultSet.getShort(columnIdx));
+        Assertions.assertEquals(getExpectedByteValue(expectedValue), resultSet.getByte(columnIdx));
+        Assertions.assertEquals(getExpectedShortValue(expectedValue), resultSet.getShort(columnIdx));
         Assertions.assertEquals(expectedValue, resultSet.getInt(columnIdx));
         Assertions.assertEquals(expectedValue, resultSet.getLong(columnIdx));
         Assertions.assertEquals(String.valueOf(expectedValue), resultSet.getString(columnIdx));
@@ -183,6 +183,18 @@ public class SparqlResultSetTest {
                 "John Smith", OBJECT_COLUMN_INDEX);
     }
 
+    private static byte getExpectedByteValue(final long value) {
+        return (value > Byte.MAX_VALUE) ? 0 : (byte) value;
+    }
+
+    private static short getExpectedShortValue(final long value) {
+        return (value > Short.MAX_VALUE) ? 0 : (short) value;
+    }
+
+    private static int getExpectedIntValue(final long value) {
+        return (value > Integer.MAX_VALUE) ? 0 : (int) value;
+    }
+
     @Test
     void testBooleanType() throws SQLException {
         final java.sql.ResultSet resultSet = statement.executeQuery(SparqlMockDataQuery.BOOL_QUERY);
@@ -207,7 +219,7 @@ public class SparqlResultSetTest {
     void testByteType() throws SQLException {
         final java.sql.ResultSet resultSet = statement.executeQuery(SparqlMockDataQuery.BYTE_QUERY);
         Assertions.assertTrue(resultSet.next());
-        Assertions.assertEquals((byte) EXPECTED_BYTE_VALUE, resultSet.getByte(SELECT_RESULT_INDEX));
+        Assertions.assertEquals(getExpectedByteValue(EXPECTED_BYTE_VALUE), resultSet.getByte(SELECT_RESULT_INDEX));
         Assertions.assertEquals((short) EXPECTED_BYTE_VALUE, resultSet.getShort(SELECT_RESULT_INDEX));
         Assertions.assertEquals(EXPECTED_BYTE_VALUE, resultSet.getInt(SELECT_RESULT_INDEX));
         Assertions.assertEquals(EXPECTED_BYTE_VALUE, resultSet.getLong(SELECT_RESULT_INDEX));
@@ -218,8 +230,8 @@ public class SparqlResultSetTest {
     void testConstructByteType() throws SQLException {
         final java.sql.ResultSet resultSet = statement.executeQuery(SparqlMockDataQuery.CONSTRUCT_BYTE_QUERY);
         Assertions.assertTrue(resultSet.next());
-        Assertions.assertEquals((byte) EXPECTED_BYTE_VALUE, resultSet.getByte(OBJECT_COLUMN_INDEX));
-        Assertions.assertEquals((short) EXPECTED_BYTE_VALUE, resultSet.getShort(OBJECT_COLUMN_INDEX));
+        Assertions.assertEquals(getExpectedByteValue(EXPECTED_BYTE_VALUE), resultSet.getByte(OBJECT_COLUMN_INDEX));
+        Assertions.assertEquals(getExpectedShortValue(EXPECTED_BYTE_VALUE), resultSet.getShort(OBJECT_COLUMN_INDEX));
         Assertions.assertEquals(EXPECTED_BYTE_VALUE, resultSet.getInt(OBJECT_COLUMN_INDEX));
         Assertions.assertEquals(EXPECTED_BYTE_VALUE, resultSet.getLong(OBJECT_COLUMN_INDEX));
         Assertions.assertEquals(String.valueOf(EXPECTED_BYTE_VALUE), resultSet.getString(OBJECT_COLUMN_INDEX));
@@ -229,7 +241,7 @@ public class SparqlResultSetTest {
     void testShortType() throws SQLException {
         final java.sql.ResultSet resultSet = statement.executeQuery(SparqlMockDataQuery.SHORT_QUERY);
         Assertions.assertTrue(resultSet.next());
-        Assertions.assertEquals((byte) EXPECTED_SHORT_VALUE, resultSet.getByte(SELECT_RESULT_INDEX));
+        Assertions.assertEquals(getExpectedByteValue(EXPECTED_SHORT_VALUE), resultSet.getByte(SELECT_RESULT_INDEX));
         Assertions.assertEquals((short) EXPECTED_SHORT_VALUE, resultSet.getShort(SELECT_RESULT_INDEX));
         Assertions.assertEquals(EXPECTED_SHORT_VALUE, resultSet.getInt(SELECT_RESULT_INDEX));
         Assertions.assertEquals(EXPECTED_SHORT_VALUE, resultSet.getLong(SELECT_RESULT_INDEX));
@@ -240,8 +252,8 @@ public class SparqlResultSetTest {
     void testConstructShortType() throws SQLException {
         final java.sql.ResultSet resultSet = statement.executeQuery(SparqlMockDataQuery.CONSTRUCT_SHORT_QUERY);
         Assertions.assertTrue(resultSet.next());
-        Assertions.assertEquals((byte) EXPECTED_SHORT_VALUE, resultSet.getByte(OBJECT_COLUMN_INDEX));
-        Assertions.assertEquals((short) EXPECTED_SHORT_VALUE, resultSet.getShort(OBJECT_COLUMN_INDEX));
+        Assertions.assertEquals(getExpectedByteValue(EXPECTED_SHORT_VALUE), resultSet.getByte(OBJECT_COLUMN_INDEX));
+        Assertions.assertEquals(getExpectedShortValue(EXPECTED_SHORT_VALUE), resultSet.getShort(OBJECT_COLUMN_INDEX));
         Assertions.assertEquals(EXPECTED_SHORT_VALUE, resultSet.getInt(OBJECT_COLUMN_INDEX));
         Assertions.assertEquals(EXPECTED_SHORT_VALUE, resultSet.getLong(OBJECT_COLUMN_INDEX));
         Assertions.assertEquals(String.valueOf(EXPECTED_SHORT_VALUE), resultSet.getString(OBJECT_COLUMN_INDEX));
@@ -257,29 +269,29 @@ public class SparqlResultSetTest {
     void testIntegerLargeType() throws SQLException {
         final java.sql.ResultSet resultSet = statement.executeQuery(SparqlMockDataQuery.INTEGER_LARGE_QUERY);
         Assertions.assertTrue(resultSet.next());
-        Assertions.assertEquals(EXPECTED_BIG_INTEGER_VALUE.byteValue(), resultSet.getByte(SELECT_RESULT_INDEX));
-        Assertions.assertEquals(EXPECTED_BIG_INTEGER_VALUE.shortValue(), resultSet.getShort(SELECT_RESULT_INDEX));
-        Assertions.assertEquals(EXPECTED_BIG_INTEGER_VALUE.intValue(), resultSet.getInt(SELECT_RESULT_INDEX));
-        Assertions.assertEquals(EXPECTED_BIG_INTEGER_VALUE.doubleValue(), resultSet.getDouble(SELECT_RESULT_INDEX));
-        Assertions.assertEquals(EXPECTED_BIG_INTEGER_VALUE.floatValue(), resultSet.getFloat(SELECT_RESULT_INDEX));
-        Assertions.assertEquals(EXPECTED_BIG_INTEGER_VALUE.longValue(), resultSet.getLong(SELECT_RESULT_INDEX));
         Assertions.assertEquals(EXPECTED_BIG_INTEGER_VALUE, resultSet.getObject(SELECT_RESULT_INDEX));
         Assertions.assertEquals(String.valueOf(EXPECTED_BIG_INTEGER_VALUE), resultSet.getString(SELECT_RESULT_INDEX));
         Assertions.assertThrows(SQLException.class, () -> resultSet.getBoolean(SELECT_RESULT_INDEX));
+        Assertions.assertThrows(SQLException.class, () -> resultSet.getByte(OBJECT_COLUMN_INDEX));
+        Assertions.assertThrows(SQLException.class, () -> resultSet.getShort(OBJECT_COLUMN_INDEX));
+        Assertions.assertThrows(SQLException.class, () -> resultSet.getInt(OBJECT_COLUMN_INDEX));
+        Assertions.assertThrows(SQLException.class, () -> resultSet.getDouble(OBJECT_COLUMN_INDEX));
+        Assertions.assertThrows(SQLException.class, () -> resultSet.getFloat(OBJECT_COLUMN_INDEX));
+        Assertions.assertThrows(SQLException.class, () -> resultSet.getLong(OBJECT_COLUMN_INDEX));
     }
 
     @Test
     void testConstructIntegerLargeType() throws SQLException {
         final java.sql.ResultSet resultSet = statement.executeQuery(SparqlMockDataQuery.CONSTRUCT_INTEGER_LARGE_QUERY);
         Assertions.assertTrue(resultSet.next());
-        Assertions.assertEquals(EXPECTED_BIG_INTEGER_VALUE.byteValue(), resultSet.getByte(OBJECT_COLUMN_INDEX));
-        Assertions.assertEquals(EXPECTED_BIG_INTEGER_VALUE.shortValue(), resultSet.getShort(OBJECT_COLUMN_INDEX));
-        Assertions.assertEquals(EXPECTED_BIG_INTEGER_VALUE.intValue(), resultSet.getInt(OBJECT_COLUMN_INDEX));
-        Assertions.assertEquals(EXPECTED_BIG_INTEGER_VALUE.doubleValue(), resultSet.getDouble(OBJECT_COLUMN_INDEX));
-        Assertions.assertEquals(EXPECTED_BIG_INTEGER_VALUE.floatValue(), resultSet.getFloat(OBJECT_COLUMN_INDEX));
-        Assertions.assertEquals(EXPECTED_BIG_INTEGER_VALUE.longValue(), resultSet.getLong(OBJECT_COLUMN_INDEX));
         Assertions.assertEquals(EXPECTED_BIG_INTEGER_VALUE, resultSet.getObject(OBJECT_COLUMN_INDEX));
         Assertions.assertEquals(String.valueOf(EXPECTED_BIG_INTEGER_VALUE), resultSet.getString(OBJECT_COLUMN_INDEX));
+        Assertions.assertThrows(SQLException.class, () -> resultSet.getByte(OBJECT_COLUMN_INDEX));
+        Assertions.assertThrows(SQLException.class, () -> resultSet.getShort(OBJECT_COLUMN_INDEX));
+        Assertions.assertThrows(SQLException.class, () -> resultSet.getInt(OBJECT_COLUMN_INDEX));
+        Assertions.assertThrows(SQLException.class, () -> resultSet.getDouble(OBJECT_COLUMN_INDEX));
+        Assertions.assertThrows(SQLException.class, () -> resultSet.getFloat(OBJECT_COLUMN_INDEX));
+        Assertions.assertThrows(SQLException.class, () -> resultSet.getLong(OBJECT_COLUMN_INDEX));
         Assertions.assertThrows(SQLException.class, () -> resultSet.getBoolean(OBJECT_COLUMN_INDEX));
     }
 
@@ -287,32 +299,28 @@ public class SparqlResultSetTest {
     void testLongType() throws SQLException {
         final java.sql.ResultSet resultSet = statement.executeQuery(SparqlMockDataQuery.LONG_QUERY);
         Assertions.assertTrue(resultSet.next());
-        Assertions.assertEquals(EXPECTED_LONG_VALUE.byteValue(), resultSet.getByte(SELECT_RESULT_INDEX));
-        Assertions.assertEquals(EXPECTED_LONG_VALUE.shortValue(), resultSet.getShort(SELECT_RESULT_INDEX));
-        Assertions.assertEquals(EXPECTED_LONG_VALUE.intValue(), resultSet.getInt(SELECT_RESULT_INDEX));
+        Assertions.assertEquals(getExpectedByteValue(EXPECTED_LONG_VALUE), resultSet.getByte(SELECT_RESULT_INDEX));
+        Assertions.assertEquals(getExpectedShortValue(EXPECTED_LONG_VALUE), resultSet.getShort(SELECT_RESULT_INDEX));
+        Assertions.assertEquals(getExpectedIntValue(EXPECTED_LONG_VALUE), resultSet.getInt(SELECT_RESULT_INDEX));
         Assertions.assertEquals(EXPECTED_LONG_VALUE, resultSet.getLong(SELECT_RESULT_INDEX));
         Assertions.assertEquals(String.valueOf(EXPECTED_LONG_VALUE), resultSet.getString(SELECT_RESULT_INDEX));
-        Assertions.assertEquals(new java.sql.Date(EXPECTED_LONG_VALUE), resultSet.getDate(SELECT_RESULT_INDEX));
-        Assertions.assertEquals(new java.sql.Time(EXPECTED_LONG_VALUE).toLocalTime(),
-                resultSet.getTime(SELECT_RESULT_INDEX).toLocalTime());
-        Assertions
-                .assertEquals(new java.sql.Timestamp(EXPECTED_LONG_VALUE), resultSet.getTimestamp(SELECT_RESULT_INDEX));
+        Assertions.assertThrows(SQLException.class, () -> resultSet.getDate(SELECT_RESULT_INDEX));
+        Assertions.assertThrows(SQLException.class, () -> resultSet.getTime(SELECT_RESULT_INDEX));
+        Assertions.assertThrows(SQLException.class, () -> resultSet.getTimestamp(SELECT_RESULT_INDEX));
     }
 
     @Test
     void testConstructLongType() throws SQLException {
         final java.sql.ResultSet resultSet = statement.executeQuery(SparqlMockDataQuery.CONSTRUCT_LONG_QUERY);
         Assertions.assertTrue(resultSet.next());
-        Assertions.assertEquals(EXPECTED_LONG_VALUE.byteValue(), resultSet.getByte(OBJECT_COLUMN_INDEX));
-        Assertions.assertEquals(EXPECTED_LONG_VALUE.shortValue(), resultSet.getShort(OBJECT_COLUMN_INDEX));
-        Assertions.assertEquals(EXPECTED_LONG_VALUE.intValue(), resultSet.getInt(OBJECT_COLUMN_INDEX));
+        Assertions.assertEquals(getExpectedByteValue(EXPECTED_LONG_VALUE), resultSet.getByte(OBJECT_COLUMN_INDEX));
+        Assertions.assertEquals(getExpectedShortValue(EXPECTED_LONG_VALUE), resultSet.getShort(OBJECT_COLUMN_INDEX));
+        Assertions.assertEquals(getExpectedIntValue(EXPECTED_LONG_VALUE), resultSet.getInt(OBJECT_COLUMN_INDEX));
         Assertions.assertEquals(EXPECTED_LONG_VALUE, resultSet.getLong(OBJECT_COLUMN_INDEX));
         Assertions.assertEquals(String.valueOf(EXPECTED_LONG_VALUE), resultSet.getString(OBJECT_COLUMN_INDEX));
-        Assertions.assertEquals(new java.sql.Date(EXPECTED_LONG_VALUE), resultSet.getDate(OBJECT_COLUMN_INDEX));
-        Assertions.assertEquals(new java.sql.Time(EXPECTED_LONG_VALUE).toLocalTime(),
-                resultSet.getTime(OBJECT_COLUMN_INDEX).toLocalTime());
-        Assertions
-                .assertEquals(new java.sql.Timestamp(EXPECTED_LONG_VALUE), resultSet.getTimestamp(OBJECT_COLUMN_INDEX));
+        Assertions.assertThrows(SQLException.class, () -> resultSet.getDate(OBJECT_COLUMN_INDEX));
+        Assertions.assertThrows(SQLException.class, () -> resultSet.getTime(OBJECT_COLUMN_INDEX).toLocalTime());
+        Assertions.assertThrows(SQLException.class, () -> resultSet.getTimestamp(OBJECT_COLUMN_INDEX));
     }
 
     @Test
@@ -328,9 +336,9 @@ public class SparqlResultSetTest {
         Assertions.assertTrue(resultSet.next());
         Assertions.assertEquals(EXPECTED_BIG_DECIMAL_VALUE, resultSet.getBigDecimal(SELECT_RESULT_INDEX));
         Assertions.assertEquals(String.valueOf(EXPECTED_BIG_DECIMAL_VALUE), resultSet.getString(SELECT_RESULT_INDEX));
-        Assertions.assertEquals(EXPECTED_BIG_DECIMAL_VALUE.byteValue(), resultSet.getByte(SELECT_RESULT_INDEX));
-        Assertions.assertEquals(EXPECTED_BIG_DECIMAL_VALUE.shortValue(), resultSet.getShort(SELECT_RESULT_INDEX));
-        Assertions.assertEquals(EXPECTED_BIG_DECIMAL_VALUE.intValue(), resultSet.getInt(SELECT_RESULT_INDEX));
+        Assertions.assertEquals(getExpectedByteValue(EXPECTED_BIG_DECIMAL_VALUE.longValue()), resultSet.getByte(SELECT_RESULT_INDEX));
+        Assertions.assertEquals(getExpectedShortValue(EXPECTED_BIG_DECIMAL_VALUE.shortValue()), resultSet.getShort(SELECT_RESULT_INDEX));
+        Assertions.assertEquals(getExpectedIntValue(EXPECTED_BIG_DECIMAL_VALUE.longValue()), resultSet.getInt(SELECT_RESULT_INDEX));
         Assertions.assertEquals(EXPECTED_BIG_DECIMAL_VALUE.floatValue(), resultSet.getFloat(SELECT_RESULT_INDEX));
         Assertions.assertEquals(EXPECTED_BIG_DECIMAL_VALUE.doubleValue(), resultSet.getDouble(SELECT_RESULT_INDEX));
         Assertions.assertEquals(EXPECTED_BIG_DECIMAL_VALUE.longValue(), resultSet.getLong(SELECT_RESULT_INDEX));
@@ -345,9 +353,9 @@ public class SparqlResultSetTest {
         Assertions.assertTrue(resultSet.next());
         Assertions.assertEquals(EXPECTED_BIG_DECIMAL_VALUE, resultSet.getBigDecimal(OBJECT_COLUMN_INDEX));
         Assertions.assertEquals(String.valueOf(EXPECTED_BIG_DECIMAL_VALUE), resultSet.getString(OBJECT_COLUMN_INDEX));
-        Assertions.assertEquals(EXPECTED_BIG_DECIMAL_VALUE.byteValue(), resultSet.getByte(OBJECT_COLUMN_INDEX));
-        Assertions.assertEquals(EXPECTED_BIG_DECIMAL_VALUE.shortValue(), resultSet.getShort(OBJECT_COLUMN_INDEX));
-        Assertions.assertEquals(EXPECTED_BIG_DECIMAL_VALUE.intValue(), resultSet.getInt(OBJECT_COLUMN_INDEX));
+        Assertions.assertEquals(getExpectedByteValue(EXPECTED_BIG_DECIMAL_VALUE.longValue()), resultSet.getByte(OBJECT_COLUMN_INDEX));
+        Assertions.assertEquals(getExpectedShortValue(EXPECTED_BIG_DECIMAL_VALUE.longValue()), resultSet.getShort(OBJECT_COLUMN_INDEX));
+        Assertions.assertEquals(getExpectedIntValue(EXPECTED_BIG_DECIMAL_VALUE.longValue()), resultSet.getInt(OBJECT_COLUMN_INDEX));
         Assertions.assertEquals(EXPECTED_BIG_DECIMAL_VALUE.floatValue(), resultSet.getFloat(OBJECT_COLUMN_INDEX));
         Assertions.assertEquals(EXPECTED_BIG_DECIMAL_VALUE.doubleValue(), resultSet.getDouble(OBJECT_COLUMN_INDEX));
         Assertions.assertEquals(EXPECTED_BIG_DECIMAL_VALUE.longValue(), resultSet.getLong(OBJECT_COLUMN_INDEX));
@@ -362,9 +370,9 @@ public class SparqlResultSetTest {
         Assertions.assertTrue(resultSet.next());
         Assertions.assertEquals(EXPECTED_DOUBLE_VALUE, resultSet.getFloat(SELECT_RESULT_INDEX));
         Assertions.assertEquals(EXPECTED_DOUBLE_VALUE, resultSet.getDouble(SELECT_RESULT_INDEX));
-        Assertions.assertEquals((byte) EXPECTED_DOUBLE_VALUE, resultSet.getByte(SELECT_RESULT_INDEX));
-        Assertions.assertEquals((short) EXPECTED_DOUBLE_VALUE, resultSet.getShort(SELECT_RESULT_INDEX));
-        Assertions.assertEquals((int) EXPECTED_DOUBLE_VALUE, resultSet.getInt(SELECT_RESULT_INDEX));
+        Assertions.assertEquals(getExpectedByteValue((long) EXPECTED_DOUBLE_VALUE), resultSet.getByte(SELECT_RESULT_INDEX));
+        Assertions.assertEquals(getExpectedShortValue((long) EXPECTED_DOUBLE_VALUE), resultSet.getShort(SELECT_RESULT_INDEX));
+        Assertions.assertEquals(getExpectedIntValue((long) EXPECTED_DOUBLE_VALUE), resultSet.getInt(SELECT_RESULT_INDEX));
         Assertions.assertEquals((long) EXPECTED_DOUBLE_VALUE, resultSet.getLong(SELECT_RESULT_INDEX));
         Assertions.assertEquals(String.valueOf(EXPECTED_DOUBLE_VALUE), resultSet.getString(SELECT_RESULT_INDEX));
         Assertions.assertThrows(SQLException.class, () -> resultSet.getBoolean(SELECT_RESULT_INDEX));
@@ -378,9 +386,9 @@ public class SparqlResultSetTest {
         Assertions.assertTrue(resultSet.next());
         Assertions.assertEquals(EXPECTED_DOUBLE_VALUE, resultSet.getFloat(OBJECT_COLUMN_INDEX));
         Assertions.assertEquals(EXPECTED_DOUBLE_VALUE, resultSet.getDouble(OBJECT_COLUMN_INDEX));
-        Assertions.assertEquals((byte) EXPECTED_DOUBLE_VALUE, resultSet.getByte(OBJECT_COLUMN_INDEX));
-        Assertions.assertEquals((short) EXPECTED_DOUBLE_VALUE, resultSet.getShort(OBJECT_COLUMN_INDEX));
-        Assertions.assertEquals((int) EXPECTED_DOUBLE_VALUE, resultSet.getInt(OBJECT_COLUMN_INDEX));
+        Assertions.assertEquals(getExpectedByteValue((long) EXPECTED_DOUBLE_VALUE), resultSet.getByte(OBJECT_COLUMN_INDEX));
+        Assertions.assertEquals(getExpectedShortValue((long) EXPECTED_DOUBLE_VALUE), resultSet.getShort(OBJECT_COLUMN_INDEX));
+        Assertions.assertEquals(getExpectedIntValue((long) EXPECTED_DOUBLE_VALUE), resultSet.getInt(OBJECT_COLUMN_INDEX));
         Assertions.assertEquals((long) EXPECTED_DOUBLE_VALUE, resultSet.getLong(OBJECT_COLUMN_INDEX));
         Assertions.assertEquals(String.valueOf(EXPECTED_DOUBLE_VALUE), resultSet.getString(OBJECT_COLUMN_INDEX));
         Assertions.assertThrows(SQLException.class, () -> resultSet.getBoolean(OBJECT_COLUMN_INDEX));
@@ -393,9 +401,9 @@ public class SparqlResultSetTest {
         Assertions.assertTrue(resultSet.next());
         Assertions.assertEquals(EXPECTED_FLOAT_VALUE, resultSet.getFloat(SELECT_RESULT_INDEX));
         Assertions.assertEquals(EXPECTED_FLOAT_VALUE, resultSet.getDouble(SELECT_RESULT_INDEX));
-        Assertions.assertEquals((byte) EXPECTED_FLOAT_VALUE, resultSet.getByte(SELECT_RESULT_INDEX));
-        Assertions.assertEquals((short) EXPECTED_FLOAT_VALUE, resultSet.getShort(SELECT_RESULT_INDEX));
-        Assertions.assertEquals((int) EXPECTED_FLOAT_VALUE, resultSet.getInt(SELECT_RESULT_INDEX));
+        Assertions.assertEquals(getExpectedByteValue((long) EXPECTED_FLOAT_VALUE), resultSet.getByte(SELECT_RESULT_INDEX));
+        Assertions.assertEquals(getExpectedShortValue((long) EXPECTED_FLOAT_VALUE), resultSet.getShort(SELECT_RESULT_INDEX));
+        Assertions.assertEquals(getExpectedIntValue((long) EXPECTED_FLOAT_VALUE), resultSet.getInt(SELECT_RESULT_INDEX));
         Assertions.assertEquals((long) EXPECTED_FLOAT_VALUE, resultSet.getLong(SELECT_RESULT_INDEX));
         Assertions.assertEquals(String.valueOf(EXPECTED_FLOAT_VALUE), resultSet.getString(SELECT_RESULT_INDEX));
         Assertions.assertThrows(SQLException.class, () -> resultSet.getBoolean(SELECT_RESULT_INDEX));
@@ -408,9 +416,9 @@ public class SparqlResultSetTest {
         Assertions.assertTrue(resultSet.next());
         Assertions.assertEquals(EXPECTED_FLOAT_VALUE, resultSet.getFloat(OBJECT_COLUMN_INDEX));
         Assertions.assertEquals(EXPECTED_FLOAT_VALUE, resultSet.getDouble(OBJECT_COLUMN_INDEX));
-        Assertions.assertEquals((byte) EXPECTED_FLOAT_VALUE, resultSet.getByte(OBJECT_COLUMN_INDEX));
-        Assertions.assertEquals((short) EXPECTED_FLOAT_VALUE, resultSet.getShort(OBJECT_COLUMN_INDEX));
-        Assertions.assertEquals((int) EXPECTED_FLOAT_VALUE, resultSet.getInt(OBJECT_COLUMN_INDEX));
+        Assertions.assertEquals(getExpectedByteValue((long) EXPECTED_FLOAT_VALUE), resultSet.getByte(OBJECT_COLUMN_INDEX));
+        Assertions.assertEquals(getExpectedShortValue((long) EXPECTED_FLOAT_VALUE), resultSet.getShort(OBJECT_COLUMN_INDEX));
+        Assertions.assertEquals(getExpectedIntValue((long) EXPECTED_FLOAT_VALUE), resultSet.getInt(OBJECT_COLUMN_INDEX));
         Assertions.assertEquals((long) EXPECTED_FLOAT_VALUE, resultSet.getLong(OBJECT_COLUMN_INDEX));
         Assertions.assertEquals(String.valueOf(EXPECTED_FLOAT_VALUE), resultSet.getString(OBJECT_COLUMN_INDEX));
         Assertions.assertThrows(SQLException.class, () -> resultSet.getBoolean(OBJECT_COLUMN_INDEX));
@@ -440,9 +448,9 @@ public class SparqlResultSetTest {
         final java.sql.ResultSet resultSet =
                 statement.executeQuery(SparqlMockDataQuery.UNSIGNED_LONG_SMALL_QUERY);
         Assertions.assertTrue(resultSet.next());
-        Assertions.assertEquals(EXPECTED_UNSIGNED_LONG_VALUE.byteValue(), resultSet.getByte(SELECT_RESULT_INDEX));
-        Assertions.assertEquals(EXPECTED_UNSIGNED_LONG_VALUE.shortValue(), resultSet.getShort(SELECT_RESULT_INDEX));
-        Assertions.assertEquals(EXPECTED_UNSIGNED_LONG_VALUE.intValue(), resultSet.getInt(SELECT_RESULT_INDEX));
+        Assertions.assertEquals(getExpectedByteValue(EXPECTED_UNSIGNED_LONG_VALUE), resultSet.getByte(SELECT_RESULT_INDEX));
+        Assertions.assertEquals(getExpectedShortValue(EXPECTED_UNSIGNED_LONG_VALUE), resultSet.getInt(SELECT_RESULT_INDEX));
+        Assertions.assertEquals(getExpectedIntValue(EXPECTED_UNSIGNED_LONG_VALUE), resultSet.getInt(SELECT_RESULT_INDEX));
         Assertions.assertEquals(EXPECTED_UNSIGNED_LONG_VALUE, resultSet.getLong(SELECT_RESULT_INDEX));
         Assertions.assertEquals(String.valueOf(EXPECTED_UNSIGNED_LONG_VALUE), resultSet.getString(SELECT_RESULT_INDEX));
     }
@@ -452,9 +460,9 @@ public class SparqlResultSetTest {
         final java.sql.ResultSet resultSet =
                 statement.executeQuery(SparqlMockDataQuery.CONSTRUCT_UNSIGNED_LONG_SMALL_QUERY);
         Assertions.assertTrue(resultSet.next());
-        Assertions.assertEquals(EXPECTED_UNSIGNED_LONG_VALUE.byteValue(), resultSet.getByte(OBJECT_COLUMN_INDEX));
-        Assertions.assertEquals(EXPECTED_UNSIGNED_LONG_VALUE.shortValue(), resultSet.getShort(OBJECT_COLUMN_INDEX));
-        Assertions.assertEquals(EXPECTED_UNSIGNED_LONG_VALUE.intValue(), resultSet.getInt(OBJECT_COLUMN_INDEX));
+        Assertions.assertEquals(getExpectedByteValue(EXPECTED_UNSIGNED_LONG_VALUE), resultSet.getByte(OBJECT_COLUMN_INDEX));
+        Assertions.assertEquals(getExpectedShortValue(EXPECTED_UNSIGNED_LONG_VALUE), resultSet.getInt(OBJECT_COLUMN_INDEX));
+        Assertions.assertEquals(getExpectedIntValue(EXPECTED_UNSIGNED_LONG_VALUE), resultSet.getInt(OBJECT_COLUMN_INDEX));
         Assertions.assertEquals(EXPECTED_UNSIGNED_LONG_VALUE, resultSet.getLong(OBJECT_COLUMN_INDEX));
         Assertions.assertEquals(String.valueOf(EXPECTED_UNSIGNED_LONG_VALUE), resultSet.getString(OBJECT_COLUMN_INDEX));
     }
@@ -464,14 +472,14 @@ public class SparqlResultSetTest {
         final java.sql.ResultSet resultSet =
                 statement.executeQuery(SparqlMockDataQuery.UNSIGNED_LONG_LARGE_QUERY);
         Assertions.assertTrue(resultSet.next());
-        Assertions.assertEquals(EXPECTED_BIG_INTEGER_VALUE.byteValue(), resultSet.getByte(SELECT_RESULT_INDEX));
-        Assertions.assertEquals(EXPECTED_BIG_INTEGER_VALUE.shortValue(), resultSet.getShort(SELECT_RESULT_INDEX));
-        Assertions.assertEquals(EXPECTED_BIG_INTEGER_VALUE.intValue(), resultSet.getInt(SELECT_RESULT_INDEX));
-        Assertions.assertEquals(EXPECTED_BIG_INTEGER_VALUE.doubleValue(), resultSet.getDouble(SELECT_RESULT_INDEX));
-        Assertions.assertEquals(EXPECTED_BIG_INTEGER_VALUE.floatValue(), resultSet.getFloat(SELECT_RESULT_INDEX));
-        Assertions.assertEquals(EXPECTED_BIG_INTEGER_VALUE.longValue(), resultSet.getLong(SELECT_RESULT_INDEX));
         Assertions.assertEquals(EXPECTED_BIG_INTEGER_VALUE, resultSet.getObject(SELECT_RESULT_INDEX));
         Assertions.assertEquals(String.valueOf(EXPECTED_BIG_INTEGER_VALUE), resultSet.getString(SELECT_RESULT_INDEX));
+        Assertions.assertThrows(SQLException.class, () -> resultSet.getByte(OBJECT_COLUMN_INDEX));
+        Assertions.assertThrows(SQLException.class, () -> resultSet.getBigDecimal(OBJECT_COLUMN_INDEX));
+        Assertions.assertThrows(SQLException.class, () -> resultSet.getInt(OBJECT_COLUMN_INDEX));
+        Assertions.assertThrows(SQLException.class, () -> resultSet.getShort(OBJECT_COLUMN_INDEX));
+        Assertions.assertThrows(SQLException.class, () -> resultSet.getLong(OBJECT_COLUMN_INDEX));
+        Assertions.assertThrows(SQLException.class, () -> resultSet.getFloat(OBJECT_COLUMN_INDEX));
         Assertions.assertThrows(SQLException.class, () -> resultSet.getBoolean(SELECT_RESULT_INDEX));
     }
 
@@ -480,15 +488,15 @@ public class SparqlResultSetTest {
         final java.sql.ResultSet resultSet =
                 statement.executeQuery(SparqlMockDataQuery.CONSTRUCT_UNSIGNED_LONG_LARGE_QUERY);
         Assertions.assertTrue(resultSet.next());
-        Assertions.assertEquals(EXPECTED_BIG_INTEGER_VALUE.byteValue(), resultSet.getByte(OBJECT_COLUMN_INDEX));
-        Assertions.assertEquals(EXPECTED_BIG_INTEGER_VALUE.shortValue(), resultSet.getShort(OBJECT_COLUMN_INDEX));
-        Assertions.assertEquals(EXPECTED_BIG_INTEGER_VALUE.intValue(), resultSet.getInt(OBJECT_COLUMN_INDEX));
-        Assertions.assertEquals(EXPECTED_BIG_INTEGER_VALUE.doubleValue(), resultSet.getDouble(OBJECT_COLUMN_INDEX));
-        Assertions.assertEquals(EXPECTED_BIG_INTEGER_VALUE.floatValue(), resultSet.getFloat(OBJECT_COLUMN_INDEX));
-        Assertions.assertEquals(EXPECTED_BIG_INTEGER_VALUE.longValue(), resultSet.getLong(OBJECT_COLUMN_INDEX));
         Assertions.assertEquals(EXPECTED_BIG_INTEGER_VALUE, resultSet.getObject(OBJECT_COLUMN_INDEX));
         Assertions.assertEquals(String.valueOf(EXPECTED_BIG_INTEGER_VALUE), resultSet.getString(OBJECT_COLUMN_INDEX));
         Assertions.assertThrows(SQLException.class, () -> resultSet.getBoolean(OBJECT_COLUMN_INDEX));
+        Assertions.assertThrows(SQLException.class, () -> resultSet.getByte(OBJECT_COLUMN_INDEX));
+        Assertions.assertThrows(SQLException.class, () -> resultSet.getShort(OBJECT_COLUMN_INDEX));
+        Assertions.assertThrows(SQLException.class, () -> resultSet.getInt(OBJECT_COLUMN_INDEX));
+        Assertions.assertThrows(SQLException.class, () -> resultSet.getDouble(OBJECT_COLUMN_INDEX));
+        Assertions.assertThrows(SQLException.class, () -> resultSet.getFloat(OBJECT_COLUMN_INDEX));
+        Assertions.assertThrows(SQLException.class, () -> resultSet.getLong(OBJECT_COLUMN_INDEX));
     }
 
     @Test
@@ -549,8 +557,10 @@ public class SparqlResultSetTest {
                 statement.executeQuery(SparqlMockDataQuery.DATE_TIME_QUERY);
         Assertions.assertTrue(resultSet.next());
         Assertions.assertEquals("2020-01-01 00:10:10.0", resultSet.getString(SELECT_RESULT_INDEX));
-        Assertions.assertEquals(java.sql.Time.valueOf("00:10:10"), resultSet.getTime(SELECT_RESULT_INDEX));
-        Assertions.assertEquals(java.sql.Date.valueOf("2020-01-01"), resultSet.getDate(SELECT_RESULT_INDEX));
+        Assertions.assertEquals(java.sql.Time.valueOf("00:10:10").toString(),
+                resultSet.getTime(SELECT_RESULT_INDEX).toString());
+        Assertions.assertEquals(java.sql.Date.valueOf("2020-01-01").toString(),
+                resultSet.getDate(SELECT_RESULT_INDEX).toString());
         Assertions.assertThrows(SQLException.class, () -> resultSet.getBoolean(SELECT_RESULT_INDEX));
         expectNumericTypesToThrow(resultSet, SELECT_RESULT_INDEX);
     }
@@ -561,8 +571,10 @@ public class SparqlResultSetTest {
                 statement.executeQuery(SparqlMockDataQuery.CONSTRUCT_DATE_TIME_QUERY);
         Assertions.assertTrue(resultSet.next());
         Assertions.assertEquals("2020-01-01 00:10:10.0", resultSet.getString(OBJECT_COLUMN_INDEX));
-        Assertions.assertEquals(java.sql.Time.valueOf("00:10:10"), resultSet.getTime(OBJECT_COLUMN_INDEX));
-        Assertions.assertEquals(java.sql.Date.valueOf("2020-01-01"), resultSet.getDate(OBJECT_COLUMN_INDEX));
+        Assertions.assertEquals(java.sql.Time.valueOf("00:10:10").toString(),
+                resultSet.getTime(OBJECT_COLUMN_INDEX).toString());
+        Assertions.assertEquals(java.sql.Date.valueOf("2020-01-01").toString(),
+                resultSet.getDate(OBJECT_COLUMN_INDEX).toString());
         Assertions.assertThrows(SQLException.class, () -> resultSet.getBoolean(OBJECT_COLUMN_INDEX));
         expectNumericTypesToThrow(resultSet, OBJECT_COLUMN_INDEX);
     }
@@ -573,8 +585,10 @@ public class SparqlResultSetTest {
                 statement.executeQuery(SparqlMockDataQuery.DATE_TIME_STAMP_QUERY);
         Assertions.assertTrue(resultSet.next());
         Assertions.assertEquals("2020-01-01T06:10:10Z[UTC]", resultSet.getString(SELECT_RESULT_INDEX));
-        Assertions.assertEquals(java.sql.Time.valueOf("06:10:10"), resultSet.getTime(SELECT_RESULT_INDEX));
-        Assertions.assertEquals(java.sql.Date.valueOf("2020-01-01"), resultSet.getDate(SELECT_RESULT_INDEX));
+        Assertions.assertEquals(java.sql.Time.valueOf("06:10:10").toString(),
+                resultSet.getTime(SELECT_RESULT_INDEX).toString());
+        Assertions.assertEquals(java.sql.Date.valueOf("2020-01-01").toString(),
+                resultSet.getDate(SELECT_RESULT_INDEX).toString());
         Assertions.assertThrows(SQLException.class, () -> resultSet.getBoolean(SELECT_RESULT_INDEX));
         expectNumericTypesToThrow(resultSet, SELECT_RESULT_INDEX);
     }
@@ -585,8 +599,10 @@ public class SparqlResultSetTest {
                 statement.executeQuery(SparqlMockDataQuery.CONSTRUCT_DATE_TIME_STAMP_QUERY);
         Assertions.assertTrue(resultSet.next());
         Assertions.assertEquals("2020-01-01T06:10:10Z[UTC]", resultSet.getString(OBJECT_COLUMN_INDEX));
-        Assertions.assertEquals(java.sql.Time.valueOf("06:10:10"), resultSet.getTime(OBJECT_COLUMN_INDEX));
-        Assertions.assertEquals(java.sql.Date.valueOf("2020-01-01"), resultSet.getDate(OBJECT_COLUMN_INDEX));
+        Assertions.assertEquals(java.sql.Time.valueOf("06:10:10").toString(),
+                resultSet.getTime(OBJECT_COLUMN_INDEX).toString());
+        Assertions.assertEquals(java.sql.Date.valueOf("2020-01-01").toString(),
+                resultSet.getDate(OBJECT_COLUMN_INDEX).toString());
         Assertions.assertThrows(SQLException.class, () -> resultSet.getBoolean(OBJECT_COLUMN_INDEX));
         expectNumericTypesToThrow(resultSet, OBJECT_COLUMN_INDEX);
     }
@@ -597,15 +613,12 @@ public class SparqlResultSetTest {
                 statement.executeQuery(SparqlMockDataQuery.G_YEAR_QUERY);
         Assertions.assertTrue(resultSet.next());
         Assertions.assertEquals(EXPECTED_YEAR_VALUE, resultSet.getString(SELECT_RESULT_INDEX));
-        Assertions.assertEquals((byte) Integer.parseInt(EXPECTED_YEAR_VALUE), resultSet.getByte(SELECT_RESULT_INDEX));
-        Assertions.assertEquals(new BigDecimal(EXPECTED_YEAR_VALUE), resultSet.getBigDecimal(SELECT_RESULT_INDEX));
-        Assertions.assertEquals(Integer.parseInt(EXPECTED_YEAR_VALUE), resultSet.getInt(SELECT_RESULT_INDEX));
-        Assertions.assertEquals(Short.parseShort(EXPECTED_YEAR_VALUE), resultSet.getShort(SELECT_RESULT_INDEX));
-        Assertions.assertEquals(Long.parseLong(EXPECTED_YEAR_VALUE), resultSet.getLong(SELECT_RESULT_INDEX));
-        Assertions.assertEquals(Double.parseDouble(EXPECTED_YEAR_VALUE), resultSet.getLong(SELECT_RESULT_INDEX));
-        Assertions.assertEquals(Float.parseFloat(EXPECTED_YEAR_VALUE), resultSet.getFloat(SELECT_RESULT_INDEX));
-        Assertions.assertThrows(SQLException.class, () -> resultSet.getTimestamp(SELECT_RESULT_INDEX));
-        Assertions.assertThrows(SQLException.class, () -> resultSet.getBoolean(SELECT_RESULT_INDEX));
+        Assertions.assertThrows(SQLException.class, () -> resultSet.getByte(OBJECT_COLUMN_INDEX));
+        Assertions.assertThrows(SQLException.class, () -> resultSet.getBigDecimal(OBJECT_COLUMN_INDEX));
+        Assertions.assertThrows(SQLException.class, () -> resultSet.getInt(OBJECT_COLUMN_INDEX));
+        Assertions.assertThrows(SQLException.class, () -> resultSet.getShort(OBJECT_COLUMN_INDEX));
+        Assertions.assertThrows(SQLException.class, () -> resultSet.getLong(OBJECT_COLUMN_INDEX));
+        Assertions.assertThrows(SQLException.class, () -> resultSet.getFloat(OBJECT_COLUMN_INDEX));
     }
 
     @Test
@@ -614,14 +627,13 @@ public class SparqlResultSetTest {
                 statement.executeQuery(SparqlMockDataQuery.CONSTRUCT_G_YEAR_QUERY);
         Assertions.assertTrue(resultSet.next());
         Assertions.assertEquals(EXPECTED_YEAR_VALUE, resultSet.getString(OBJECT_COLUMN_INDEX));
-        Assertions.assertEquals((byte) Integer.parseInt(EXPECTED_YEAR_VALUE), resultSet.getByte(OBJECT_COLUMN_INDEX));
-        Assertions.assertEquals(new BigDecimal(EXPECTED_YEAR_VALUE), resultSet.getBigDecimal(OBJECT_COLUMN_INDEX));
-        Assertions.assertEquals(Integer.parseInt(EXPECTED_YEAR_VALUE), resultSet.getInt(OBJECT_COLUMN_INDEX));
-        Assertions.assertEquals(Short.parseShort(EXPECTED_YEAR_VALUE), resultSet.getShort(OBJECT_COLUMN_INDEX));
-        Assertions.assertEquals(Long.parseLong(EXPECTED_YEAR_VALUE), resultSet.getLong(OBJECT_COLUMN_INDEX));
-        Assertions.assertEquals(Double.parseDouble(EXPECTED_YEAR_VALUE), resultSet.getLong(OBJECT_COLUMN_INDEX));
-        Assertions.assertEquals(Float.parseFloat(EXPECTED_YEAR_VALUE), resultSet.getFloat(OBJECT_COLUMN_INDEX));
-        Assertions.assertThrows(SQLException.class, () -> resultSet.getTimestamp(OBJECT_COLUMN_INDEX));
+        Assertions.assertThrows(SQLException.class, () -> resultSet.getByte(OBJECT_COLUMN_INDEX));
+        Assertions.assertThrows(SQLException.class, () -> resultSet.getShort(OBJECT_COLUMN_INDEX));
+        Assertions.assertThrows(SQLException.class, () -> resultSet.getInt(OBJECT_COLUMN_INDEX));
+        Assertions.assertThrows(SQLException.class, () -> resultSet.getLong(OBJECT_COLUMN_INDEX));
+        Assertions.assertThrows(SQLException.class, () -> resultSet.getBigDecimal(OBJECT_COLUMN_INDEX));
+        Assertions.assertThrows(SQLException.class, () -> resultSet.getFloat(OBJECT_COLUMN_INDEX));
+        Assertions.assertThrows(SQLException.class, () -> resultSet.getDouble(OBJECT_COLUMN_INDEX));
         Assertions.assertThrows(SQLException.class, () -> resultSet.getBoolean(OBJECT_COLUMN_INDEX));
     }
 

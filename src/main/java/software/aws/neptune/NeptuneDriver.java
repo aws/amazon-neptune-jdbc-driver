@@ -85,10 +85,16 @@ public class NeptuneDriver extends Driver implements java.sql.Driver {
             if (info != null) {
                 properties.putAll(info);
             }
+            final ConnectionProperties connectionProperties = connectionProperties(language, properties);
             connection = (java.sql.Connection) connectionMap.get(language)
                     .getConstructor(ConnectionProperties.class)
-                    .newInstance(connectionProperties(language, properties));
-            if (connection.isValid(2)) {
+                    .newInstance(connectionProperties);
+            int connectionTimeoutSeconds = connectionProperties.getConnectionTimeoutMillis() / 1000;
+            if (connectionTimeoutSeconds <= 0) {
+                connectionTimeoutSeconds = 1;
+            }
+
+            if (connection.isValid(connectionTimeoutSeconds)) {
                 return connection;
             }
         } catch (final Exception e) {

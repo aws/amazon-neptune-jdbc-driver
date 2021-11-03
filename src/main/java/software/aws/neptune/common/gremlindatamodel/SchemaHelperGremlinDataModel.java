@@ -50,6 +50,9 @@ import java.util.concurrent.Future;
 
 public class SchemaHelperGremlinDataModel {
     private static final Logger LOGGER = LoggerFactory.getLogger(SchemaHelperGremlinDataModel.class);
+    private static final int MIN_CONNECTION_POOL_SIZE = 32;
+    private static final int MAX_CONNECTION_POOL_SIZE = 96;
+    private static final int CONNECTION_TIMEOUT = 180 * 1000;
     private static final Map<Class<?>, String> TYPE_MAP = new HashMap<>();
     private static final String VERTEX_EDGES_LABEL_QUERY = "g.V().hasLabel('%s').%sE().label().dedup()";
     private static final String PROPERTIES_VALUE_QUERY = "g.%s().hasLabel('%s').values('%s').%s";
@@ -119,6 +122,9 @@ public class SchemaHelperGremlinDataModel {
         builder.addContactPoint(endpoint);
         builder.port(port);
         builder.enableSsl(useSsl);
+        builder.maxWaitForConnection(CONNECTION_TIMEOUT);
+        builder.maxConnectionPoolSize(MAX_CONNECTION_POOL_SIZE);
+        builder.minConnectionPoolSize(MIN_CONNECTION_POOL_SIZE);
         if (useIam) {
             builder.channelizer(SigV4WebSocketChannelizer.class);
         }
@@ -154,6 +160,22 @@ public class SchemaHelperGremlinDataModel {
         }
         if (types.size() == 1) {
             return types.iterator().next();
+        } else if (types.size() > 1) {
+            if (types.contains("String") || types.contains("Date")) {
+                return "String";
+            } else if (types.contains("Double")) {
+                return "Double";
+            } else if (types.contains("Float")) {
+                return "Float";
+            } else if (types.contains("Long")) {
+                return "Long";
+            } else if (types.contains("Integer")) {
+                return "Integer";
+            } else if (types.contains("Short")) {
+                return "Short";
+            } else if (types.contains("Byte")) {
+                return "Byte";
+            }
         }
         return "String";
     }

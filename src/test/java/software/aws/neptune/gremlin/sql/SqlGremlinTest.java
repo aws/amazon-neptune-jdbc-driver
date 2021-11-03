@@ -73,6 +73,7 @@ import static software.aws.neptune.jdbc.utilities.ConnectionProperties.SSH_STRIC
 import static software.aws.neptune.jdbc.utilities.ConnectionProperties.SSH_USER;
 
 // Temporary test file to do ad hoc testing.
+@Disabled
 public class SqlGremlinTest {
     private static final String ENDPOINT = "database-1.cluster-cdffsmv2nzf7.us-east-2.neptune.amazonaws.com";
     private static final int PORT = 8182;
@@ -162,7 +163,6 @@ public class SqlGremlinTest {
     }
 
     @Test
-    @Disabled
     void testSql() throws SQLException {
         final Properties properties = new Properties();
         properties.put(ConnectionProperties.AUTH_SCHEME_KEY, AuthScheme.IAMSigV4); // set default to IAMSigV4
@@ -176,6 +176,18 @@ public class SqlGremlinTest {
         properties.put(SCAN_TYPE_KEY, "first");
 
         final List<String> queries = ImmutableList.of(
+                "SELECT COUNT(\"Calcs\".\"bool0\") AS \"TEMP(Test)(1133866179)(0)\"\n" +
+                        "FROM \"gremlin\".\"Calcs\" \"Calcs\"\n" +
+                        "HAVING (COUNT(1) > 0)",
+                "SELECT COUNT(`Calcs`.`int0`) AS `TEMP(Test)(3910975586)(0)` " +
+                        "FROM `gremlin`.`Calcs` `Calcs` " +
+                        "HAVING (COUNT(1) > 0)",
+                "SELECT \"Staples\".\"Discount\" AS \"TEMP(Test)(1913174168)(0)\" " +
+                        "FROM \"gremlin\".\"Staples\" \"Staples\" " +
+                        "GROUP BY \"Staples\".\"Discount\"",
+                "SELECT `airport`.`country`, `airport`.`region` FROM `airport` ORDER BY `airport`.`country`, `airport`.`region` DESC LIMIT 10",
+                "SELECT `airport`.`country`, `airport`.`region` FROM `airport` ORDER BY `airport`.`country`, `airport`.`region` ASC LIMIT 10",
+                "SELECT \"Calcs\".\"Calcs_ID\" AS \"Calcs_ID\", \"Calcs\".\"bool0\" AS \"bool_\", \"Calcs\".\"bool1\" AS \"bool_1\", \"Calcs\".\"bool2\" AS \"bool_2\", \"Calcs\".\"bool3\" AS \"bool_3\", \"Calcs\".\"date0\" AS \"date_\", \"Calcs\".\"date1\" AS \"date_1\", \"Calcs\".\"date2\" AS \"date_2\", \"Calcs\".\"date3\" AS \"date_3\", \"Calcs\".\"datetime0\" AS \"datetime_\", \"Calcs\".\"datetime1\" AS \"datetime_1\", \"Calcs\".\"int0\" AS \"int_\", \"Calcs\".\"int1\" AS \"int_1\", \"Calcs\".\"int2\" AS \"int_2\", \"Calcs\".\"int3\" AS \"int_3\", \"Calcs\".\"key\" AS \"key\", \"Calcs\".\"num0\" AS \"num_\", \"Calcs\".\"num1\" AS \"num_1\", \"Calcs\".\"num2\" AS \"num_2\", \"Calcs\".\"num3\" AS \"num_3\", \"Calcs\".\"num4\" AS \"num_4\", \"Calcs\".\"str0\" AS \"str_\", \"Calcs\".\"str1\" AS \"str_1\", \"Calcs\".\"str2\" AS \"str_2\", \"Calcs\".\"str3\" AS \"str_3\", \"Calcs\".\"time0\" AS \"time_\", \"Calcs\".\"time1\" AS \"time_1\", \"Calcs\".\"zzz\" AS \"zzz\" FROM \"gremlin\".\"Calcs\" \"Calcs\" LIMIT 10000 ",
                 "SELECT \n" +
                         "     `airport`.`city` AS `city`,\n" +
                         "     `airport`.`city` AS `city`,\n" +
@@ -248,7 +260,6 @@ public class SqlGremlinTest {
     }
 
     @Test
-    @Disabled
     void testHaving() throws SQLException {
         final Properties properties = new Properties();
         properties.put(ConnectionProperties.AUTH_SCHEME_KEY, AuthScheme.IAMSigV4); // set default to IAMSigV4
@@ -361,7 +372,6 @@ public class SqlGremlinTest {
     }
 
     @Test
-    @Disabled
     void testAggregateFunctions() throws SQLException {
         final Properties properties = new Properties();
         properties.put(ConnectionProperties.AUTH_SCHEME_KEY, AuthScheme.IAMSigV4); // set default to IAMSigV4
@@ -501,13 +511,17 @@ public class SqlGremlinTest {
     }
 
     @Test
-    @Disabled
     void testSqlConnectionExecution() throws SQLException {
         final Properties properties = new Properties();
         properties.put(ConnectionProperties.AUTH_SCHEME_KEY, AuthScheme.IAMSigV4); // set default to IAMSigV4
         properties.put(CONTACT_POINT_KEY, ENDPOINT);
         properties.put(PORT_KEY, PORT);
         properties.put(ENABLE_SSL_KEY, true);
+        properties.put(SSH_USER, "ec2-user");
+        properties.put(SSH_HOSTNAME, "52.14.185.245");
+        properties.put(SSH_PRIVATE_KEY_FILE, "~/Downloads/EC2/neptune-test.pem");
+        properties.put(SSH_STRICT_HOST_KEY_CHECKING, "false");
+        properties.put(SCAN_TYPE_KEY, "first");
 
         final List<String> queries = ImmutableList.of("SELECT * FROM Person",
                 "SELECT `Person`.`firstName` AS `firstName`, `Cat`.`name` AS `name` FROM `Cat` INNER JOIN `Person` ON (`Cat`.`name` = `Person`.`name`) GROUP BY `Person`.`firstName`, `Cat`.`name`",
@@ -519,15 +533,17 @@ public class SqlGremlinTest {
         final java.sql.Connection connection = new SqlGremlinConnection(new GremlinConnectionProperties(properties));
         final java.sql.DatabaseMetaData databaseMetaData = connection.getMetaData();
         databaseMetaData.getTables(null, null, null, null);
-        databaseMetaData.getColumns(null, null, null, null);
-
+        final java.sql.ResultSet columns = databaseMetaData.getColumns(null, null, null, null);
+        while (columns.next()) {
+            System.out.println("Column " + columns.getString("COLUMN_NAME") + " - " + columns.getString("TYPE_NAME")
+                    + " - " + columns.getString("DATA_TYPE"));
+        }
         for (final String query : queries) {
             runQueryPrintResults(query, connection.createStatement());
         }
     }
 
     @Test
-    @Disabled
     void testSchema() throws SQLException {
         final Properties properties = new Properties();
         properties.put(ConnectionProperties.AUTH_SCHEME_KEY, AuthScheme.IAMSigV4); // set default to IAMSigV4
@@ -586,7 +602,6 @@ public class SqlGremlinTest {
     }
 
     @Test
-    @Disabled
     void getGremlinSchema() throws SQLException, ExecutionException, InterruptedException {
         final Properties properties = new Properties();
         properties.put(ConnectionProperties.AUTH_SCHEME_KEY, AuthScheme.IAMSigV4); // set default to IAMSigV4

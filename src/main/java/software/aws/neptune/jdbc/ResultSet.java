@@ -17,6 +17,7 @@
 package software.aws.neptune.jdbc;
 
 import lombok.Getter;
+import org.apache.commons.beanutils.ConversionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import software.aws.neptune.jdbc.utilities.CastHelper;
@@ -41,7 +42,15 @@ import java.sql.SQLXML;
 import java.sql.Statement;
 import java.sql.Time;
 import java.sql.Timestamp;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.OffsetTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.Calendar;
+import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -51,6 +60,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  */
 public abstract class ResultSet implements java.sql.ResultSet {
     private static final Logger LOGGER = LoggerFactory.getLogger(ResultSet.class);
+    private static final Calendar DEFAULT_CALENDAR = new GregorianCalendar();
     private final AtomicBoolean isClosed = new AtomicBoolean(false);
     private final List<String> columns;
     private final int rowCount;
@@ -64,6 +74,24 @@ public abstract class ResultSet implements java.sql.ResultSet {
         this.columns = columns;
         this.rowCount = rowCount;
         this.rowIndex = -1;
+    }
+
+    private static Date getCalendarDate(final Date date, final Calendar calendar) {
+        final Instant zdtInstant = date.toLocalDate().atStartOfDay(calendar.getTimeZone().toZoneId()).toInstant();
+        return new Date(zdtInstant.toEpochMilli());
+    }
+
+    private static Time getCalendarTime(final Time time, final Calendar calendar) {
+        final LocalDateTime localDateTime = time.toLocalTime().atDate(LocalDate.of(1970, 1, 1));
+        final ZoneId zonedDateTime = ZoneId.from(localDateTime.atZone(calendar.getTimeZone().toZoneId()));
+        return new Time(localDateTime.atZone(zonedDateTime).toInstant().toEpochMilli());
+    }
+
+    private static Timestamp getCalendarTimestamp(final Timestamp timestamp, final Calendar calendar) {
+        final Instant instant = timestamp.toLocalDateTime().atZone(calendar.getTimeZone().toZoneId()).toInstant();
+        final Timestamp timestampAdjusted = new Timestamp(instant.toEpochMilli());
+        timestampAdjusted.setNanos(instant.getNano());
+        return timestampAdjusted;
     }
 
     protected abstract void doClose() throws SQLException;
@@ -263,100 +291,176 @@ public abstract class ResultSet implements java.sql.ResultSet {
         return columns.indexOf(columnLabel) + 1;
     }
 
+    /**
+     * Gets the value in the target type on the current row and given index.
+     *
+     * @param columnIndex the index of the cell value.
+     * @param targetType  the intended target type.
+     * @param <T>         the intended target type.
+     * @return a value that is possibly converted to the target type.
+     * @throws SQLException the result set is closed, the row is incorrect or the given
+     *                      * column index is invalid.
+     */
+    private <T> T getValue(final int columnIndex, final Class<T> targetType) throws SQLException {
+        Object o = getConvertedValue(columnIndex);
+        if (o == null) {
+            return null;
+        }
+        if (o instanceof LocalTime) {
+            o = getCalendarTime(Time.valueOf((LocalTime) o), DEFAULT_CALENDAR);
+        } else if (o instanceof LocalDate) {
+            o = getCalendarDate(Date.valueOf((LocalDate) o), DEFAULT_CALENDAR);
+        } else if (o instanceof LocalDateTime) {
+            o = getCalendarTimestamp(Timestamp.valueOf((LocalDateTime) o), DEFAULT_CALENDAR);
+        } else if (o instanceof ZonedDateTime) {
+            o = getCalendarTimestamp(Timestamp.valueOf(((ZonedDateTime) o).toLocalDateTime()), DEFAULT_CALENDAR);
+        } else if (o instanceof OffsetTime) {
+            o = getCalendarTime(Time.valueOf(((OffsetTime) o).toLocalTime()), DEFAULT_CALENDAR);
+        }
+
+        try {
+            return JavaToJdbcTypeConverter.get(o.getClass(), targetType).convert(targetType, o);
+        } catch (final ConversionException e) {
+            throw SqlError.createSQLException(LOGGER,
+                    SqlState.DATA_EXCEPTION,
+                    SqlError.UNSUPPORTED_CONVERSION,
+                    o.getClass().getSimpleName(),
+                    targetType.getSimpleName());
+        }
+    }
+
     @Override
     public boolean getBoolean(final int columnIndex) throws SQLException {
         LOGGER.trace("Getting column {} as a Boolean.", columnIndex);
-        return JavaToJdbcTypeConverter.toBoolean(getConvertedValue(columnIndex));
+        final Boolean value = getValue(columnIndex, Boolean.class);
+        return value != null && value;
     }
 
     @Override
     public byte getByte(final int columnIndex) throws SQLException {
         LOGGER.trace("Getting column {} as a Byte.", columnIndex);
-        return JavaToJdbcTypeConverter.toByte(getConvertedValue(columnIndex));
+        final Byte value = getValue(columnIndex, Byte.class);
+        return (value == null) ? 0 : value;
     }
 
     @Override
     public short getShort(final int columnIndex) throws SQLException {
         LOGGER.trace("Getting column {} as a Short.", columnIndex);
-        return JavaToJdbcTypeConverter.toShort(getConvertedValue(columnIndex));
+        final Short value = getValue(columnIndex, Short.class);
+        return (value == null) ? 0 : value;
     }
 
     @Override
     public int getInt(final int columnIndex) throws SQLException {
         LOGGER.trace("Getting column {} as a Integer.", columnIndex);
-        return JavaToJdbcTypeConverter.toInteger(getConvertedValue(columnIndex));
+        final Integer value = getValue(columnIndex, Integer.class);
+        return (value == null) ? 0 : value;
     }
 
     @Override
     public long getLong(final int columnIndex) throws SQLException {
         LOGGER.trace("Getting column {} as a Long.", columnIndex);
-        return JavaToJdbcTypeConverter.toLong(getConvertedValue(columnIndex));
+        final Long value = getValue(columnIndex, Long.class);
+        return (value == null) ? 0 : value;
     }
 
     @Override
     public float getFloat(final int columnIndex) throws SQLException {
         LOGGER.trace("Getting column {} as a Float.", columnIndex);
-        return JavaToJdbcTypeConverter.toFloat(getConvertedValue(columnIndex));
+        final Float value = getValue(columnIndex, Float.class);
+        return (value == null) ? 0 : value;
     }
 
     @Override
     public double getDouble(final int columnIndex) throws SQLException {
         LOGGER.trace("Getting column {} as a Double.", columnIndex);
-        return JavaToJdbcTypeConverter.toDouble(getConvertedValue(columnIndex));
+        final Double value = getValue(columnIndex, Double.class);
+        return (value == null) ? 0 : value;
     }
 
     @Override
     public BigDecimal getBigDecimal(final int columnIndex) throws SQLException {
         LOGGER.trace("Getting column {} as a BigDecimal.", columnIndex);
-        return JavaToJdbcTypeConverter.toBigDecimal(getConvertedValue(columnIndex));
+        return getValue(columnIndex, BigDecimal.class);
     }
 
     @Override
     public String getString(final int columnIndex) throws SQLException {
         LOGGER.trace("Getting column {} as a String.", columnIndex);
-        return JavaToJdbcTypeConverter.toString(getConvertedValue(columnIndex));
+        final Object val = getConvertedValue(columnIndex);
+        if (val != null) {
+            return val.toString();
+        }
+        return null;
     }
 
     @Override
     public byte[] getBytes(final int columnIndex) throws SQLException {
         LOGGER.trace("Getting column {} as a byte array.", columnIndex);
-        return JavaToJdbcTypeConverter.toByteArray(getConvertedValue(columnIndex));
+        return getValue(columnIndex, byte[].class);
     }
 
     @Override
     public Date getDate(final int columnIndex) throws SQLException {
         LOGGER.trace("Getting column {} as a Date.", columnIndex);
-        return JavaToJdbcTypeConverter.toDate(getConvertedValue(columnIndex));
+        return getDate(columnIndex, null);
     }
 
     @Override
     public Time getTime(final int columnIndex) throws SQLException {
         LOGGER.trace("Getting column {} as a Time.", columnIndex);
-        return JavaToJdbcTypeConverter.toTime(getConvertedValue(columnIndex));
+        return getTime(columnIndex, null);
     }
 
     @Override
     public Timestamp getTimestamp(final int columnIndex) throws SQLException {
         LOGGER.trace("Getting column {} as a Timestamp.", columnIndex);
-        return JavaToJdbcTypeConverter.toTimestamp(getConvertedValue(columnIndex));
+        return getTimestamp(columnIndex, null);
+    }
+
+    @Override
+    public Date getDate(final int columnIndex, final Calendar cal) throws SQLException {
+        LOGGER.trace("Getting column {} as a Date.", columnIndex);
+        return getMaybeAdjustedTime(getValue(columnIndex, Date.class), cal);
+    }
+
+    @Override
+    public Time getTime(final int columnIndex, final Calendar cal) throws SQLException {
+        LOGGER.trace("Getting column {} as a Time.", columnIndex);
+        return getMaybeAdjustedTime(getValue(columnIndex, Time.class), cal);
     }
 
     @Override
     public Timestamp getTimestamp(final int columnIndex, final Calendar cal) throws SQLException {
         LOGGER.trace("Getting column {} as a Timestamp.", columnIndex);
-        return JavaToJdbcTypeConverter.toTimestamp(getConvertedValue(columnIndex), cal);
+        return getMaybeAdjustedTime(getValue(columnIndex, Timestamp.class), cal);
     }
 
-    @Override
-    public Date getDate(final int columnIndex, final Calendar cal) throws SQLException {
-        LOGGER.trace("Getting column {} as a Date with Calendar.", columnIndex);
-        return JavaToJdbcTypeConverter.toDate(getConvertedValue(columnIndex), cal);
+    private Date getMaybeAdjustedTime(final Date utcTime, final Calendar cal) {
+        if (utcTime != null && cal != null) {
+            long adjustedTime = utcTime.getTime();
+            adjustedTime -= cal.getTimeZone().getOffset(adjustedTime);
+            return new Date(adjustedTime);
+        }
+        return utcTime;
     }
 
-    @Override
-    public Time getTime(final int columnIndex, final Calendar cal) throws SQLException {
-        LOGGER.trace("Getting column {} as a Time with Calendar.", columnIndex);
-        return JavaToJdbcTypeConverter.toTime(getConvertedValue(columnIndex), cal);
+    private Time getMaybeAdjustedTime(final Time utcTime, final Calendar cal) {
+        if (utcTime != null && cal != null) {
+            long adjustedTime = utcTime.getTime();
+            adjustedTime -= cal.getTimeZone().getOffset(adjustedTime);
+            return new Time(adjustedTime);
+        }
+        return utcTime;
+    }
+
+    private Timestamp getMaybeAdjustedTime(final Timestamp utcTime, final Calendar cal) {
+        if (utcTime != null && cal != null) {
+            long adjustedTime = utcTime.getTime();
+            adjustedTime -= cal.getTimeZone().getOffset(adjustedTime);
+            return new Timestamp(adjustedTime);
+        }
+        return utcTime;
     }
 
     @Override
@@ -368,13 +472,7 @@ public abstract class ResultSet implements java.sql.ResultSet {
     @Override
     public <T> T getObject(final int columnIndex, final Class<T> type) throws SQLException {
         LOGGER.trace("Getting column {} as an Object using provided Type.", columnIndex);
-        if (type == null) {
-            throw SqlError.createSQLException(
-                    LOGGER,
-                    SqlState.DATA_EXCEPTION,
-                    SqlError.INVALID_TYPE);
-        }
-        return (T) JavaToJdbcTypeConverter.CLASS_CONVERTER_MAP.get(type).function(getConvertedValue(columnIndex));
+        return getValue(columnIndex, type);
     }
 
     @Override

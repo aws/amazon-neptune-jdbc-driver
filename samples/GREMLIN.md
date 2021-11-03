@@ -26,7 +26,10 @@ The following properties are available for Gremlin:
 | sshStrictHostKeyChecking | If true, the 'known_hosts' file is checked to ensure the target host is trusted when creating the internal SSH tunnel. If false, the target host is not checked. Disabling this option is less secure as it can lead to a ["man-in-the-middle" attack](https://en.wikipedia.org/wiki/Man-in-the-middle_attack). If provided, options `sshUser`, `sshHost` and `sshPrivateKeyFile` must also be provided, otherwise this option is ignored. | Boolean values. |`true` |
 | sshKnownHostsFile        | The path to the 'known_hosts' file used for checking the target host for the SSH tunnel when option `sshStrictHostKeyChecking` is `true`. The 'known_hosts' file can be populated using the `ssh-keyscan` [tool](maintain_known_hosts.md). If provided, options `sshUser`, `sshHost` and `sshPrivateKeyFile` must also be provided, otherwise this option is ignored. | String values. | `~/.ssh/known_hosts` |
 
-The above properties are configurations that are shared across all query languages in the driver. For all the Gremlin-specific properties take a look at their [documentation.](https://tinkerpop.apache.org/javadocs/current/full/org/apache/tinkerpop/gremlin/driver/Cluster.Builder.html)
+#### Important note:
+The above properties are configurations that are shared across all query languages in the driver.
+
+*For all the Gremlin-specific properties take a look at their* [documentation](https://tinkerpop.apache.org/javadocs/current/full/org/apache/tinkerpop/gremlin/driver/Cluster.Builder.html).
 
 Each Builder method listed in the documentation is accepted as a property. For example, "**[port](https://tinkerpop.apache.org/javadocs/current/full/org/apache/tinkerpop/gremlin/driver/Cluster.Builder.html#port-int-)**(int port)" means that as a part of the connection string it may be configured as a property or added as a Key-Value Pair in Properties. See below for examples.
 
