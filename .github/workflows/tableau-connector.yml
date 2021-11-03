@@ -1,0 +1,26 @@
+name: Asssemble Tableau Connector
+on:
+  push:
+    branches: [ master, develop ]
+  pull_request:
+    branches: [ master, develop ]
+
+jobs:
+  build-taco:
+    name: Assemble Tableau Connector
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v2
+      - name: Ensure Executable Permissions
+        run: chmod a+x ./tableau-connector/build.sh
+      - name: Assemble Tableau Connector
+        run: ./tableau-connector/build.sh
+      - name: View assembled file
+        run: ls -l tableau-connector/target
+      - name: Upload Build
+        if: always()
+        uses: actions/upload-artifact@v1
+        with:
+          name: neptunejdbc.taco
+          path: tableau-connector/target/neptunejdbc.taco

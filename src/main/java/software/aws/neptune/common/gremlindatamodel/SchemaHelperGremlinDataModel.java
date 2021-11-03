@@ -149,7 +149,7 @@ public class SchemaHelperGremlinDataModel {
         } catch (final ExecutionException | InterruptedException e) {
             e.printStackTrace();
             executor.shutdown();
-            throw new SQLException("Error occurred during schema collection. '" + e.getMessage() + "'.");
+            throw new SQLException("Error occurred during schema collection. '" + e.getMessage() + "'.", e);
         }
     }
 
