@@ -56,8 +56,8 @@ public class SqlConverter {
     private static final Logger LOGGER = LoggerFactory.getLogger(SqlConverter.class);
     private static final List<RelTraitDef> TRAIT_DEFS =
             ImmutableList.of(ConventionTraitDef.INSTANCE, RelCollationTraitDef.INSTANCE);
-    private static final SqlParser.Config PARSER_CONFIG = SqlParser.configBuilder().setLex(Lex.MYSQL).setQuoting(
-            Quoting.DOUBLE_QUOTE).build();
+    private static final SqlParser.Config PARSER_CONFIG =
+            SqlParser.config().withLex(Lex.MYSQL).withQuoting(Quoting.DOUBLE_QUOTE);
     private static final Program PROGRAM =
             Programs.sequence(Programs.ofRules(Programs.RULE_SET), Programs.CALC_PROGRAM);
     private final FrameworkConfig frameworkConfig;

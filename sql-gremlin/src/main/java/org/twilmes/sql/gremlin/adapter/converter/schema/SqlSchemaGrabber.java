@@ -19,6 +19,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Callable;
@@ -249,7 +250,7 @@ public final class SqlSchemaGrabber {
 
             final List<GremlinProperty> columns = new ArrayList<>();
             for (int i = 0; i < properties.size(); i++) {
-                columns.add(new GremlinProperty(properties.get(i), propertyTypes.get(i).get().toLowerCase()));
+                columns.add(new GremlinProperty(properties.get(i), propertyTypes.get(i).get().toLowerCase(Locale.getDefault())));
             }
 
             LOGGER.debug(String.format("End %s%n", query));

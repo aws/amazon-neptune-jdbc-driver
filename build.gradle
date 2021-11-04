@@ -1,17 +1,9 @@
-buildscript {
-    repositories {
-        jcenter()
-    }
-    dependencies {
-        classpath 'com.github.jengelman.gradle.plugins:shadow:5.2.0'
-    }
-}
-
 plugins {
     id 'java'
     id "com.github.spotbugs" version "4.5.1"
     id 'checkstyle'
     id 'com.github.hierynomus.license' version '0.15.0'
+    id 'com.github.johnrengelman.shadow' version '6.1.0'
     id 'jacoco'
 }
 
@@ -247,7 +239,7 @@ dependencies {
 
     // Testing
     testImplementation group: 'com.googlecode.json-simple', name: 'json-simple', version: '1.1'
-    testImplementation  group: 'junit', name: 'junit', version: '4.12'
+    testImplementation group: 'junit', name: 'junit', version: '4.12'
     testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-api', version: jupiterVersion
     testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-engine', version: jupiterVersion
     testImplementation group: 'org.mockito', name: 'mockito-core', version: '2.1.0'

@@ -31,6 +31,7 @@ import org.twilmes.sql.gremlin.adapter.results.SqlGremlinQueryResult;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 import static org.twilmes.sql.gremlin.adapter.converter.schema.gremlin.GremlinTableBase.IN_ID;
 import static org.twilmes.sql.gremlin.adapter.converter.schema.gremlin.GremlinTableBase.OUT_ID;
@@ -127,7 +128,7 @@ public class SqlTraversalEngine {
             }
         } else {
             // It's this vertex/edge.
-            if (columnName.toLowerCase().startsWith(gremlinTableBase.getLabel())) {
+            if (columnName.toLowerCase(Locale.getDefault()).startsWith(gremlinTableBase.getLabel())) {
                 graphTraversal.id();
             } else {
                 if (columnName.endsWith(IN_ID)) {
