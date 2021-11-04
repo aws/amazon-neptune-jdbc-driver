@@ -232,7 +232,7 @@ dependencies {
     // Dependencies
     implementation group: 'org.apache.tinkerpop', name: 'gremlin-driver', version: gremlinVersion
     implementation group: 'com.amazonaws', name: 'amazon-neptune-sparql-java-sigv4', version: amazonSigv4SignerVersion
-    implementation group: 'com.amazonaws', name: 'amazon-neptune-gremlin-java-sigv4', version: '1.0'
+    implementation group: 'com.amazonaws', name: 'amazon-neptune-gremlin-java-sigv4', version: '2.4.0'
     implementation group: 'com.jcraft', name: 'jsch', version: '0.1.55'
     implementation group: 'io.netty', name: 'netty-all', version: nettyVersion
     implementation group: 'org.neo4j.driver', name: 'neo4j-java-driver', version: neo4jDriverVersion
