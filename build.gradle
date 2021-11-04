@@ -247,7 +247,7 @@ dependencies {
 
     // Testing
     testImplementation group: 'com.googlecode.json-simple', name: 'json-simple', version: '1.1'
-    testImplementation  group: 'junit', name: 'junit', version: '4.12'
+    testImplementation  group: 'junit', name: 'junit', version: '4.13.2'
     testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-api', version: jupiterVersion
     testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-engine', version: jupiterVersion
     testImplementation group: 'org.mockito', name: 'mockito-core', version: '2.1.0'
