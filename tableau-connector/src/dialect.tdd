@@ -1,6 +1,833 @@
 <?xml version="1.0" encoding="utf-8"?>
 <dialect name='SQL via Gremlin Dialect'
          class='neptunejdbc'
-         base='SQL92Dialect'
          version='18.1'>
+  <function-map>
+    <!-- numeric max needs case support, commenting out for now -->
+<!--     <function group='numeric' name='MAX' return-type='real'>
+      <formula>(CASE
+        WHEN %1 IS NULL OR %2 IS NULL THEN NULL
+        WHEN %1 &gt; %2 THEN %1
+        ELSE %2 END)
+      </formula>
+      <argument type='real' />
+      <argument type='real' />
+    </function>
+    <function group='numeric' name='MAX' return-type='int'>
+      <formula>(CASE
+        WHEN %1 IS NULL OR %2 IS NULL THEN NULL
+        WHEN %1 &gt; %2 THEN %1
+        ELSE %2 END)
+      </formula>
+      <argument type='int' />
+      <argument type='int' />
+    </function>
+    <function group='numeric' name='MIN' return-type='real'>
+      <formula>(CASE
+        WHEN %1 IS NULL OR %2 IS NULL THEN NULL
+        WHEN %1 &lt; %2 THEN %1
+        ELSE %2 END)
+      </formula>
+      <argument type='real' />
+      <argument type='real' />
+    </function>
+    <function group='numeric' name='MIN' return-type='int'>
+      <formula>(CASE
+        WHEN %1 IS NULL OR %2 IS NULL THEN NULL
+        WHEN %1 &lt; %2 THEN %1
+        ELSE %2 END)
+      </formula>
+      <argument type='int' />
+      <argument type='int' />
+    </function> -->
+    <!-- will need to add math support later -->
+<!--     <function group='numeric' name='SQUARE' return-type='real'>
+      <formula>(%1 * %1)</formula>
+      <argument type='real' />
+    </function>
+    <function group='numeric' name='SQUARE' return-type='int'>
+      <formula>(%1 * %1)</formula>
+      <argument type='int' />
+    </function>
+    <function group='numeric;logical' name='ZN' return-type='real'>
+      <formula>(CASE
+        WHEN %1 IS NOT NULL THEN %1
+        ELSE 0 END)
+      </formula>
+      <argument type='real' />
+    </function>
+    <function group='numeric;logical' name='ZN' return-type='int'>
+      <formula>(CASE
+        WHEN %1 IS NOT NULL THEN %1
+        ELSE 0 END)
+      </formula>
+      <argument type='int' />
+    </function> -->
+    <!-- cast is not supported -->
+<!--     <function group='cast' name='DATE' return-type='date'>
+      <formula>FLOOR(TIMESTAMPADD(DAY, %1, DATE '1900-01-01') TO DAY)</formula>
+      <argument type='real' />
+    </function>
+    <function group='cast' name='DATE' return-type='date'>
+      <formula>CAST(%1 AS DATE)</formula>
+      <argument type='str' />
+    </function>
+    <function group='cast' name='DATE' return-type='date'>
+      <formula>CAST(%1 AS DATE)</formula>
+      <argument type='datetime' />
+    </function>
+    <function group='cast' name='DATETIME' return-type='datetime'>
+      <formula>FLOOR(TIMESTAMPADD(DAY, %1, TIMESTAMP '1900-01-01 00:00:00') TO DAY)</formula>
+      <argument type='real' />
+    </function>
+    <function group='cast' name='DATETIME' return-type='datetime'>
+      <formula>CAST(%1 AS TIMESTAMP)</formula>
+      <argument type='str' />
+    </function>
+    <function group='cast' name='DATETIME' return-type='datetime'>
+      <formula>CAST(%1 AS TIMESTAMP)</formula>
+      <argument type='datetime' />
+    </function>
+    <function group='cast' name='FLOAT' return-type='real'>
+      <formula>(CASE
+        WHEN %1 THEN 1.0
+        WHEN NOT %1 THEN 0.0
+        ELSE NULL END)
+      </formula>
+      <argument type='bool' />
+    </function>
+    <function group='cast' name='FLOAT' return-type='real'>
+      <formula>CAST(%1 AS FLOAT)</formula>
+      <argument type='real' />
+    </function>
+    <function group='cast' name='FLOAT' return-type='real'>
+      <formula>CAST(%1 AS FLOAT)</formula>
+      <argument type='str' />
+    </function>
+    <function group='cast' name='FLOAT' return-type='real'>
+      <formula>CAST(%1 AS FLOAT)</formula>
+      <argument type='datetime' />
+    </function>
+    <function group='cast' name='INT' return-type='int'>
+      <formula>(CASE
+        WHEN %1 THEN 1
+        WHEN NOT %1 THEN 0
+        ELSE NULL END)
+      </formula>
+      <argument type='bool' />
+    </function>
+    <function group='cast' name='INT' return-type='int'>
+      <formula>CAST(%1 AS BIGINT)</formula>
+      <argument type='real' />
+    </function>
+    <function group='cast' name='INT' return-type='int'>
+      <formula>CAST(%1 AS BIGINT)</formula>
+      <argument type='str' />
+    </function>
+    <function group='cast' name='INT' return-type='int'>
+      <formula>CAST(%1 AS BIGINT)</formula>
+      <argument type='datetime' />
+    </function>
+    <function group='cast' name='STR' return-type='str'>
+      <formula>(CASE
+        WHEN %1 THEN &apos;1&apos;
+        WHEN NOT %1 THEN &apos;0&apos;
+        ELSE NULL END)
+      </formula>
+      <argument type='bool' />
+    </function>
+    <function group='cast' name='STR' return-type='str'>
+      <formula>CAST(%1 AS VARCHAR)</formula>
+      <argument type='real' />
+    </function>
+    <function group='cast' name='STR' return-type='str'>
+      <formula>CAST(%1 AS VARCHAR)</formula>
+      <argument type='str' />
+    </function>
+    <function group='cast' name='STR' return-type='str'>
+      <formula>CAST(%1 AS VARCHAR)</formula>
+      <argument type='datetime' />
+    </function> -->
+    <!-- no logical case or null support yet -->
+<!--     <function group='logical' name='IFNULL' return-type='bool'>
+      <formula>(CASE WHEN %1 IS NOT NULL THEN %1 ELSE %2 END)</formula>
+      <argument type='bool' />
+      <argument type='bool' />
+    </function>
+    <function group='logical' name='IFNULL' return-type='real'>
+      <formula>(CASE WHEN %1 IS NOT NULL THEN %1 ELSE %2 END)</formula>
+      <argument type='real' />
+      <argument type='real' />
+    </function>
+    <function group='logical' name='IFNULL' return-type='int'>
+      <formula>(CASE WHEN %1 IS NOT NULL THEN %1 ELSE %2 END)</formula>
+      <argument type='int' />
+      <argument type='int' />
+    </function>
+    <function group='logical' name='IFNULL' return-type='str'>
+      <formula>(CASE WHEN %1 IS NOT NULL THEN %1 ELSE %2 END)</formula>
+      <argument type='str' />
+      <argument type='str' />
+    </function>
+    <function group='logical' name='IFNULL' return-type='datetime'>
+      <formula>(CASE WHEN %1 IS NOT NULL THEN %1 ELSE %2 END)</formula>
+      <argument type='datetime' />
+      <argument type='datetime' />
+    </function>
+    <function group='logical' name='IFNULL' return-type='date'>
+      <formula>(CASE WHEN %1 IS NOT NULL THEN %1 ELSE %2 END)</formula>
+      <argument type='date' />
+      <argument type='date' />
+    </function>
+    <function group='logical' name='IIF' return-type='bool'>
+      <formula>((%1 AND %2) OR ((NOT %1) AND %3))</formula>
+      <argument type='bool' />
+      <argument type='bool' />
+      <argument type='bool' />
+    </function>
+    <function group='logical' name='IIF' return-type='real'>
+      <formula>(CASE WHEN %1 THEN %2 WHEN NOT %1 THEN %3 ELSE NULL END)</formula>
+      <argument type='bool' />
+      <argument type='real' />
+      <argument type='real' />
+    </function>
+    <function group='logical' name='IIF' return-type='real'>
+      <formula>(CASE WHEN %1 THEN %2 WHEN NOT %1 THEN %3 ELSE %4 END)</formula>
+      <argument type='bool' />
+      <argument type='real' />
+      <argument type='real' />
+      <argument type='real' />
+    </function>
+    <function group='logical' name='IIF' return-type='int'>
+      <formula>(CASE WHEN %1 THEN %2 WHEN NOT %1 THEN %3 ELSE NULL END)</formula>
+      <argument type='bool' />
+      <argument type='int' />
+      <argument type='int' />
+    </function>
+    <function group='logical' name='IIF' return-type='int'>
+      <formula>(CASE WHEN %1 THEN %2 WHEN NOT %1 THEN %3 ELSE %4 END)</formula>
+      <argument type='bool' />
+      <argument type='int' />
+      <argument type='int' />
+      <argument type='int' />
+    </function>
+    <function group='logical' name='IIF' return-type='str'>
+      <formula>(CASE WHEN %1 THEN %2 WHEN NOT %1 THEN %3 ELSE NULL END)</formula>
+      <argument type='bool' />
+      <argument type='str' />
+      <argument type='str' />
+    </function>
+    <function group='logical' name='IIF' return-type='str'>
+      <formula>(CASE WHEN %1 THEN %2 WHEN NOT %1 THEN %3 ELSE %4 END)</formula>
+      <argument type='bool' />
+      <argument type='str' />
+      <argument type='str' />
+      <argument type='str' />
+    </function>
+    <function group='logical' name='IIF' return-type='datetime'>
+      <formula>(CASE WHEN %1 THEN %2 WHEN NOT %1 THEN %3 ELSE NULL END)</formula>
+      <argument type='bool' />
+      <argument type='datetime' />
+      <argument type='datetime' />
+    </function>
+    <function group='logical' name='IIF' return-type='datetime'>
+      <formula>(CASE WHEN %1 THEN %2 WHEN NOT %1 THEN %3 ELSE %4 END)</formula>
+      <argument type='bool' />
+      <argument type='datetime' />
+      <argument type='datetime' />
+      <argument type='datetime' />
+    </function>
+    <function group='logical' name='IIF' return-type='date'>
+      <formula>(CASE WHEN %1 THEN %2 WHEN NOT %1 THEN %3 ELSE NULL END)</formula>
+      <argument type='bool' />
+      <argument type='date' />
+      <argument type='date' />
+    </function>
+    <function group='logical' name='IIF' return-type='date'>
+      <formula>(CASE WHEN %1 THEN %2 WHEN NOT %1 THEN %3 ELSE %4 END)</formula>
+      <argument type='bool' />
+      <argument type='date' />
+      <argument type='date' />
+      <argument type='date' />
+    </function>
+    <function group='logical' name='ISNULL' return-type='bool'>
+      <formula>(%1 IS NULL)</formula>
+      <argument type='bool' />
+    </function>
+    <function group='logical' name='ISNULL' return-type='bool'>
+      <formula>(%1 IS NULL)</formula>
+      <argument type='real' />
+    </function>
+    <function group='logical' name='ISNULL' return-type='bool'>
+      <formula>(%1 IS NULL)</formula>
+      <argument type='str' />
+    </function>
+    <function group='logical' name='ISNULL' return-type='bool'>
+      <formula>(%1 IS NULL)</formula>
+      <argument type='datetime' />
+    </function> -->
+    <function group='aggregate' name='AVG' return-type='real'>
+      <formula>AVG(%1)</formula>
+      <unagg-formula>%1</unagg-formula>
+      <argument type='real' />
+    </function>
+    <function group='aggregate' name='AVG' return-type='real'>
+      <formula>AVG(%1)</formula>
+      <unagg-formula>%1</unagg-formula>
+      <argument type='int' />
+    </function>
+    <function group='aggregate' name='COUNT' return-type='int'>
+      <formula>COUNT(%1)</formula>
+      <unagg-formula>COUNT(%1)</unagg-formula>
+      <argument type='bool' />
+    </function>
+    <function group='aggregate' name='COUNT' return-type='int'>
+      <formula>COUNT(%1)</formula>
+      <unagg-formula>COUNT(%1)</unagg-formula>
+      <argument type='real' />
+    </function>
+    <function group='aggregate' name='COUNT' return-type='int'>
+      <formula>COUNT(%1)</formula>
+      <unagg-formula>COUNT(%1)</unagg-formula>
+      <argument type='str' />
+    </function>
+    <function group='aggregate' name='COUNT' return-type='int'>
+      <formula>COUNT(%1)</formula>
+      <unagg-formula>COUNT(%1)</unagg-formula>
+      <argument type='datetime' />
+    </function>
+    <!-- countd support will need to be implemented -->
+<!--     <function group='aggregate' name='COUNTD' return-type='int'>
+      <formula>COUNT(DISTINCT %1)</formula>
+      <unagg-formula>COUNT(DISTINCT %1)</unagg-formula>
+      <argument type='bool' />
+    </function>
+    <function group='aggregate' name='COUNTD' return-type='int'>
+      <formula>COUNT(DISTINCT %1)</formula>
+      <unagg-formula>(CASE WHEN %1 IS NULL THEN 0 ELSE 1 END)</unagg-formula>
+      <argument type='real' />
+    </function>
+    <function group='aggregate' name='COUNTD' return-type='int'>
+      <formula>COUNT(DISTINCT %1)</formula>
+      <unagg-formula>(CASE WHEN %1 IS NULL THEN 0 ELSE 1 END)</unagg-formula>
+      <argument type='str' />
+    </function>
+    <function group='aggregate' name='COUNTD' return-type='int'>
+      <formula>COUNT(DISTINCT %1)</formula>
+      <unagg-formula>(CASE WHEN %1 IS NULL THEN 0 ELSE 1 END)</unagg-formula>
+      <argument type='datetime' />
+    </function>
+ -->    <function group='aggregate' name='MAX' return-type='bool'>
+      <formula>MAX(%1)</formula>
+      <unagg-formula>%1</unagg-formula>
+      <argument type='bool' />
+    </function>
+    <function group='aggregate' name='MAX' return-type='real'>
+      <formula>MAX(%1)</formula>
+      <unagg-formula>%1</unagg-formula>
+      <argument type='real' />
+    </function>
+    <function group='aggregate' name='MAX' return-type='int'>
+      <formula>MAX(%1)</formula>
+      <unagg-formula>%1</unagg-formula>
+      <argument type='int' />
+    </function>
+    <function group='aggregate' name='MAX' return-type='str'>
+      <formula>MAX(%1)</formula>
+      <unagg-formula>%1</unagg-formula>
+      <argument type='str' />
+    </function>
+    <function group='aggregate' name='MAX' return-type='datetime'>
+      <formula>MAX(%1)</formula>
+      <unagg-formula>%1</unagg-formula>
+      <argument type='datetime' />
+    </function>
+    <function group='aggregate' name='MAX' return-type='date'>
+      <formula>MAX(%1)</formula>
+      <unagg-formula>%1</unagg-formula>
+      <argument type='date' />
+    </function>
+    <function group='aggregate' name='MIN' return-type='bool'>
+      <formula>MIN(%1)</formula>
+      <unagg-formula>%1</unagg-formula>
+      <argument type='bool' />
+    </function>
+    <function group='aggregate' name='MIN' return-type='real'>
+      <formula>MIN(%1)</formula>
+      <unagg-formula>%1</unagg-formula>
+      <argument type='real' />
+    </function>
+    <function group='aggregate' name='MIN' return-type='int'>
+      <formula>MIN(%1)</formula>
+      <unagg-formula>%1</unagg-formula>
+      <argument type='int' />
+    </function>
+    <function group='aggregate' name='MIN' return-type='str'>
+      <formula>MIN(%1)</formula>
+      <unagg-formula>%1</unagg-formula>
+      <argument type='str' />
+    </function>
+    <function group='aggregate' name='MIN' return-type='datetime'>
+      <formula>MIN(%1)</formula>
+      <unagg-formula>%1</unagg-formula>
+      <argument type='datetime' />
+    </function>
+    <function group='aggregate' name='MIN' return-type='date'>
+      <formula>MIN(%1)</formula>
+      <unagg-formula>%1</unagg-formula>
+      <argument type='date' />
+    </function>
+    <function group='aggregate' name='SUM' return-type='real'>
+      <formula>SUM(%1)</formula>
+      <unagg-formula>%1</unagg-formula>
+      <argument type='real' />
+    </function>
+    <function group='aggregate' name='SUM' return-type='int'>
+      <formula>SUM(%1)</formula>
+      <unagg-formula>%1</unagg-formula>
+      <argument type='int' />
+    </function>
+    <function group='operator' name='!' return-type='bool'>
+      <formula>(NOT %1)</formula>
+      <argument type='bool' />
+    </function>
+    <function group='operator' name='!=' return-type='bool'>
+      <formula>(%1 AND NOT %2 OR NOT %1 AND %2)</formula>
+      <argument type='bool' />
+      <argument type='bool' />
+    </function>
+    <function group='operator' name='!=' return-type='bool'>
+      <formula>(%1 &lt;&gt; %2)</formula>
+      <argument type='real' />
+      <argument type='real' />
+    </function>
+    <function group='operator' name='!=' return-type='bool'>
+      <formula>(%1 &lt;&gt; %2)</formula>
+      <argument type='str' />
+      <argument type='str' />
+    </function>
+    <function group='operator' name='!=' return-type='bool'>
+      <formula>(%1 &lt;&gt; %2)</formula>
+      <argument type='datetime' />
+      <argument type='datetime' />
+    </function>
+<!--     <function group='operator' name='%' return-type='int'>
+      <formula>MOD(%1, %2)</formula>
+      <argument type='int' />
+      <argument type='int' />
+    </function>
+    <function group='operator' name='%' return-type='int'>
+      <formula>MOD(%1, %2)</formula>
+      <argument type='real' />
+      <argument type='real' />
+    </function> -->
+    <function group='operator' name='&amp;&amp;' return-type='bool'>
+      <formula>(%1 AND %2)</formula>
+      <argument type='bool' />
+      <argument type='bool' />
+    </function>
+<!--     <function group='operator' name='*' return-type='real'>
+      <formula>(%1 * %2)</formula>
+      <argument type='real' />
+      <argument type='real' />
+    </function>
+    <function group='operator' name='*' return-type='int'>
+      <formula>(%1 * %2)</formula>
+      <argument type='int' />
+      <argument type='int' />
+    </function>
+    <function group='operator' name='+' return-type='real'>
+      <formula>(%1 + %2)</formula>
+      <argument type='real' />
+      <argument type='real' />
+    </function>
+    <function group='operator' name='+' return-type='int'>
+      <formula>(%1 + %2)</formula>
+      <argument type='int' />
+      <argument type='int' />
+    </function> -->
+<!--     <function group='operator' name='+' return-type='datetime'>
+      <formula>TIMESTAMPADD(SECOND, CAST((%2 * 86400) AS BIGINT), %1)</formula>
+      <argument type='datetime' />
+      <argument type='real' />
+    </function>
+    <function group='operator' name='+' return-type='date'>
+      <formula>TIMESTAMPADD(DAY, %2, %1)</formula>
+      <argument type='date' />
+      <argument type='int' />
+    </function>
+    <function group='operator' name='-' return-type='real'>
+      <formula>(0 - %1)</formula>
+      <argument type='real' />
+    </function>
+    <function group='operator' name='-' return-type='real'>
+      <formula>(%1 - %2)</formula>
+      <argument type='real' />
+      <argument type='real' />
+    </function>
+    <function group='operator' name='-' return-type='int'>
+      <formula>(0 - %1)</formula>
+      <argument type='int' />
+    </function>
+    <function group='operator' name='-' return-type='int'>
+      <formula>(%1 - %2)</formula>
+      <argument type='int' />
+      <argument type='int' />
+    </function>
+    <function group='operator' name='-' return-type='datetime'>
+      <formula>TIMESTAMPADD(SECOND, CAST((%2 * -86400) AS BIGINT), %1)</formula>
+      <argument type='datetime' />
+      <argument type='real' />
+    </function>
+    <function group='operator' name='-' return-type='date'>
+      <formula>TIMESTAMPADD(DAY, %2 * -1, %1)</formula>
+      <argument type='date' />
+      <argument type='int' />
+    </function>
+    <function group='operator' name='-' return-type='real'>
+      <formula>TIMESTAMPDIFF(DAY, %2, %1)</formula>
+      <argument type='datetime' />
+      <argument type='datetime' />
+    </function>
+    <function group='operator' name='/' return-type='real'>
+      <formula>(%1 / %2)</formula>
+      <argument type='real' />
+      <argument type='real' />
+    </function> -->
+    <function group='operator' name='&lt;' return-type='bool'>
+      <formula>(%1 &lt; %2)</formula>
+      <argument type='real' />
+      <argument type='real' />
+    </function>
+    <function group='operator' name='&lt;' return-type='bool'>
+      <formula>(%1 &lt; %2)</formula>
+      <argument type='str' />
+      <argument type='str' />
+    </function>
+    <function group='operator' name='&lt;' return-type='bool'>
+      <formula>(%1 &lt; %2)</formula>
+      <argument type='datetime' />
+      <argument type='datetime' />
+    </function>
+    <function group='operator' name='&lt;=' return-type='bool'>
+      <formula>(%1 &lt;= %2)</formula>
+      <argument type='real' />
+      <argument type='real' />
+    </function>
+    <function group='operator' name='&lt;=' return-type='bool'>
+      <formula>(%1 &lt;= %2)</formula>
+      <argument type='str' />
+      <argument type='str' />
+    </function>
+    <function group='operator' name='&lt;=' return-type='bool'>
+      <formula>(%1 &lt;= %2)</formula>
+      <argument type='datetime' />
+      <argument type='datetime' />
+    </function>
+    <function group='operator' name='==' return-type='bool'>
+      <formula>(%1 = %2)</formula>
+      <argument type='bool' />
+      <argument type='bool' />
+    </function>
+    <function group='operator' name='==' return-type='bool'>
+      <formula>(%1 = %2)</formula>
+      <argument type='real' />
+      <argument type='real' />
+    </function>
+    <function group='operator' name='==' return-type='bool'>
+      <formula>(%1 = %2)</formula>
+      <argument type='str' />
+      <argument type='str' />
+    </function>
+    <function group='operator' name='==' return-type='bool'>
+      <formula>(%1 = %2)</formula>
+      <argument type='datetime' />
+      <argument type='datetime' />
+    </function>
+    <function group='operator' name='&gt;' return-type='bool'>
+      <formula>(%1 &gt; %2)</formula>
+      <argument type='real' />
+      <argument type='real' />
+    </function>
+    <function group='operator' name='&gt;' return-type='bool'>
+      <formula>(%1 &gt; %2)</formula>
+      <argument type='str' />
+      <argument type='str' />
+    </function>
+    <function group='operator' name='&gt;' return-type='bool'>
+      <formula>(%1 &gt; %2)</formula>
+      <argument type='datetime' />
+      <argument type='datetime' />
+    </function>
+    <function group='operator' name='&gt;=' return-type='bool'>
+      <formula>(%1 &gt;= %2)</formula>
+      <argument type='real' />
+      <argument type='real' />
+    </function>
+    <function group='operator' name='&gt;=' return-type='bool'>
+      <formula>(%1 &gt;= %2)</formula>
+      <argument type='str' />
+      <argument type='str' />
+    </function>
+    <function group='operator' name='&gt;=' return-type='bool'>
+      <formula>(%1 &gt;= %2)</formula>
+      <argument type='datetime' />
+      <argument type='datetime' />
+    </function>
+    <function group='operator' name='||' return-type='bool'>
+      <formula>(%1 OR %2)</formula>
+      <argument type='bool' />
+      <argument type='bool' />
+    </function>
+    <!-- <function group='string' name='MID' return-type='str'>
+      <formula>SUBSTRING(%1, %2)</formula>
+      <argument type='str' />
+      <argument type='int' />
+    </function>
+    <function group='string' name='MID' return-type='str'>
+      <formula>SUBSTRING(%1, %2, %3)</formula>
+      <argument type='str' />
+      <argument type='int' />
+      <argument type='int' />
+    </function>
+    <function group='string' name='MAX' return-type='str'>
+      <formula>(CASE
+        WHEN %1 IS NULL OR %2 IS NULL THEN NULL
+        WHEN %1 &gt; %2 THEN %1
+        ELSE %2 END)
+      </formula>
+      <argument type='str' />
+      <argument type='str' />
+    </function>
+    <function group='string' name='MIN' return-type='str'>
+      <formula>(CASE
+        WHEN %1 IS NULL OR %2 IS NULL THEN NULL
+        WHEN %1 &lt; %2 THEN %1
+        ELSE %2 END)
+      </formula>
+      <argument type='str' />
+      <argument type='str' />
+    </function> -->
+<!--     <function group='date' name='DAY' return-type='int'>
+      <formula>DAYOFMONTH(%1)</formula>
+      <argument type='datetime' />
+    </function>
+    <function group='date' name='MONTH' return-type='int'>
+      <formula>MONTH(%1)</formula>
+      <argument type='datetime' />
+    </function> -->
+    <!-- Week # is between 0-53 (standard) not 1-52 (Tableau expectation). -->
+<!--     <function group='date' name='WEEK' return-type='int'>
+      <formula>WEEK(%1)</formula>
+      <argument type='datetime' />
+    </function>
+    <function group='date' name='YEAR' return-type='int'>
+      <formula>YEAR(%1)</formula>
+      <argument type='datetime' />
+    </function>
+    <function group='date' name='QUARTER' return-type='int'>
+      <formula>QUARTER(%1)</formula>
+      <argument type='datetime' />
+    </function>
+    <function group='date' name='ISOYEAR' return-type='int'>
+      <formula>EXTRACT(ISOYEAR FROM %1)</formula>
+      <argument type='datetime' />
+    </function>
+    <function group='date' name='ISOWEEKDAY' return-type='int'>
+      <formula>EXTRACT(ISODOW FROM %1)</formula>
+      <argument type='datetime' />
+    </function>
+    <function group='date' name='TODAY' return-type='date'>
+      <formula>CURRENT_DATE</formula>
+    </function>
+    <function group='date' name='NOW' return-type='datetime'>
+      <formula>CURRENT_TIMESTAMP</formula>
+    </function>
+    <function group='date' name='MAX' return-type='datetime'>
+      <formula>(CASE
+        WHEN %1 IS NULL OR %2 IS NULL THEN NULL
+        WHEN %1 &gt; %2 THEN %1
+        ELSE %2 END)
+      </formula>
+      <argument type='datetime' />
+      <argument type='datetime' />
+    </function>
+    <function group='date' name='MAX' return-type='date'>
+      <formula>(CASE
+        WHEN %1 IS NULL OR %2 IS NULL THEN NULL
+        WHEN %1 &gt; %2 THEN %1
+        ELSE %2 END)
+      </formula>
+      <argument type='date' />
+      <argument type='date' />
+    </function>
+    <function group='date' name='MIN' return-type='datetime'>
+      <formula>(CASE
+        WHEN %1 IS NULL OR %2 IS NULL THEN NULL
+        WHEN %1 &lt; %2 THEN %1
+        ELSE %2 END)
+      </formula>
+      <argument type='datetime' />
+      <argument type='datetime' />
+    </function>
+    <function group='date' name='MIN' return-type='date'>
+      <formula>(CASE
+        WHEN %1 IS NULL OR %2 IS NULL THEN NULL
+        WHEN %1 &lt; %2 THEN %1
+        ELSE %2 END)
+      </formula>
+      <argument type='date' />
+      <argument type='date' />
+    </function>
+    <date-function name='DATEADD' return-type='datetime'>
+      <formula>TIMESTAMPADD(%1, %2, %3)</formula>
+      <argument type='localstr' />
+      <argument type='int' />
+      <argument type='datetime' />
+    </date-function>
+    <date-function name='DATEDIFF' return-type='int'>
+      <formula>TIMESTAMPDIFF(%1, %2, %3)</formula>
+      <argument type='localstr' />
+      <argument type='datetime' />
+      <argument type='datetime' />
+    </date-function> -->
+    <!-- DATENAME is not supported syntax. Emulate by casting datepart to string. -->
+<!--     <date-function name='DATENAME' return-type='str'>
+      <formula>CAST(EXTRACT(%1 FROM %2) AS VARCHAR)</formula>
+      <formula part='year'>CAST(YEAR(%2) AS VARCHAR)</formula>
+      <formula part='quarter'>CAST(QUARTER(%2) AS VARCHAR)</formula>
+      <formula part='month'>MONTHNAME(%2)</formula>
+      <formula part='dayofyear'>CAST(DAYOFYEAR(%2) AS VARCHAR)</formula>
+      <formula part='day'>CAST(DAYOFMONTH(%2) AS VARCHAR)</formula>
+      <formula part='weekday'>DAYNAME(%2)</formula>
+      <formula part='week'>CAST(WEEK(%2) AS VARCHAR)</formula>
+      <formula part='hour'>CAST(HOUR(%2) AS VARCHAR)</formula>
+      <formula part='minute'>CAST(MINUTE(%2) AS VARCHAR)</formula>
+      <formula part='second'>CAST(SECOND(%2) AS VARCHAR)</formula>
+      <argument type='localstr' />
+      <argument type='datetime' />
+    </date-function>
+    <date-function name='DATEPART' return-type='int'>
+      <formula>EXTRACT(%1 FROM %2)</formula>
+      <formula part='year'>YEAR(%2)</formula>
+      <formula part='quarter'>QUARTER(%2)</formula>
+      <formula part='month'>MONTH(%2)</formula>
+      <formula part='dayofyear'>DAYOFYEAR(%2)</formula>
+      <formula part='day'>DAYOFMONTH(%2)</formula>
+      <formula part='weekday'>DAYOFWEEK(%2)</formula>
+      <formula part='week'>WEEK(%2)</formula>
+      <formula part='hour'>HOUR(%2)</formula>
+      <formula part='minute'>MINUTE(%2)</formula>
+      <formula part='second'>SECOND(%2)</formula>
+      <argument type='localstr' />
+      <argument type='datetime' />
+    </date-function>
+    <date-function name='DATETRUNC' return-type='datetime'>
+      <formula>FLOOR(%2 TO %1)</formula>
+      <argument type='localstr' />
+      <argument type='datetime' />
+    </date-function> -->
+  </function-map>
+  <supported-aggregations>
+    <aggregation value='AGG_COUNT'/>
+    <!-- <aggregation value='AGG_COUNTD'/> -->
+    <aggregation value='AGG_SUM'/>
+    <aggregation value='AGG_AVG'/>
+    <aggregation value='AGG_MIN'/>
+    <aggregation value='AGG_MAX'/>
+<!--     <aggregation value='AGG_YEAR'/>
+    <aggregation value='AGG_QTR'/>
+    <aggregation value='AGG_MONTH'/>
+    <aggregation value='AGG_DAY'/>
+    <aggregation value='AGG_WEEK'/>
+    <aggregation value='AGG_WEEKDAY'/>
+    <aggregation value='AGG_HOUR'/>
+    <aggregation value='AGG_MINUTE'/>
+    <aggregation value='AGG_SECOND'/>
+    <aggregation value='AGG_ISO_YEAR'/>
+    <aggregation value='AGG_ISO_WEEKDAY'/>
+    <aggregation value='TRUNC_YEAR'/>
+    <aggregation value='TRUNC_QTR'/>
+    <aggregation value='TRUNC_MONTH'/>
+    <aggregation value='TRUNC_DAY'/>
+    <aggregation value='TRUNC_WEEK'/>
+    <aggregation value='TRUNC_HOUR'/>
+    <aggregation value='TRUNC_MINUTE'/>
+    <aggregation value='TRUNC_SECOND'/> -->
+  </supported-aggregations>
+  <sql-format>
+    <date-literal-escape value='PostgresStyle' />
+    <date-parts>
+      <date-part-group>
+        <!-- Default: used by DATEPART and DATENAME-->
+        <part name='year' value='YEAR' />
+        <part name='quarter' value='QUARTER' />
+        <part name='month' value='MONTH' />
+        <part name='week' value='WEEK' />
+        <part name='weekday' value='DOW' />
+        <part name='dayofyear' value='DOY' />
+        <part name='day' value='DAY' />
+        <part name='hour' value='HOUR' />
+        <part name='minute' value='MINUTE' />
+        <part name='second' value='SECOND' />
+      </date-part-group>
+      <date-part-group>
+        <date-function name='DATEADD' />
+        <part name='year' value='YEAR' />
+        <part name='quarter' value='QUARTER' />
+        <part name='month' value='MONTH' />
+        <part name='week' value='WEEK' />
+        <part name='weekday' value='DAY' />
+        <part name='dayofyear' value='DAY' />
+        <part name='day' value='DAY' />
+        <part name='hour' value='HOUR' />
+        <part name='minute' value='MINUTE' />
+        <part name='second' value='SECOND' />
+      </date-part-group>
+      <date-part-group>
+        <date-function name='DATEDIFF' />
+        <part name='year' value='YEAR' />
+        <part name='quarter' value='QUARTER' />
+        <part name='month' value='MONTH' />
+        <part name='week' value='WEEK' />
+        <part name='weekday' value='DAY' />
+        <part name='dayofyear' value='DAY' />
+        <part name='day' value='DAY' />
+        <part name='hour' value='HOUR' />
+        <part name='minute' value='MINUTE' />
+        <part name='second' value='SECOND' />
+      </date-part-group>
+      <date-part-group>
+        <date-function name='DATETRUNC' />
+        <part name='year' value='YEAR' />
+        <part name='quarter' value='QUARTER' />
+        <part name='month' value='MONTH' />
+        <part name='week' value='WEEK' />
+        <part name='weekday' value='DAY' />
+        <part name='dayofyear' value='DAY' />
+        <part name='day' value='DAY' />
+        <part name='hour' value='HOUR' />
+        <part name='minute' value='MINUTE' />
+        <part name='second' value='SECOND' />
+      </date-part-group>
+    </date-parts>
+    <format-date-literal formula="(DATE '%1')" format='yyyy-MM-dd' />
+    <format-datetime-literal formula="(TIMESTAMP '%1')" format='yyyy-MM-dd HH:mm:ss.SSS' />
+    <format-false literal='FALSE' predicate='FALSE' />
+    <format-is-distinct value='Keyword' />
+    <format-order-by value='Nulls' />
+    <format-select>
+      <part name='Select' value='SELECT %1' />
+      <part name='From' value='FROM %1' />
+      <!-- <part name='Where' value='WHERE %1' /> -->
+      <part name='Group' value='GROUP BY %1' />
+      <part name='Having' value='HAVING %1' />
+      <part name='OrderBy' value='ORDER BY %1' />
+      <part name='Top' value='LIMIT %1' />
+    </format-select>
+    <format-true literal='TRUE' predicate='TRUE' />
+    <supported-joins>
+      <part name='Inner' />
+    </supported-joins>
+  </sql-format>
 </dialect>

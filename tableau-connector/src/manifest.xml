@@ -1,14 +1,14 @@
 <?xml version='1.0' encoding='utf-8' ?>
 
-<connector-plugin class='neptunejdbc' superclass='jdbc' plugin-version='1.13.0.0' name='SQL via Gremlin' version='18.1' min-version-tableau='2020.3'>
+<connector-plugin class='neptunejdbc' superclass='jdbc' plugin-version='1.13.0.0' name='Amazon Neptune' version='18.1' min-version-tableau='2020.3'>
     <vendor-information>
-        <company name="Amazon Neptune"/>
+        <company name="AWS"/>
         <support-link url="https://docs.aws.amazon.com/neptune/latest/userguide/intro.html"/>
         <driver-download-link url="https://docs.aws.amazon.com/neptune/latest/userguide/intro.html"/>
     </vendor-information>
     <connection-customization class="neptunejdbc" enabled="true" version="10.0">
-        <vendor name="Amazon Neptune"/>
-        <driver name="SQL via Gremlin Connector"/>
+        <vendor name="Amazon"/>
+        <driver name="Neptune JDBC"/>
         <customizations>
             <customization name="CAP_SUPPORTS_INITIAL_SQL" value="no" />
             <customization name='CAP_CREATE_TEMP_TABLES' value='no'/>
@@ -16,9 +16,35 @@
             <customization name='CAP_SUPPRESS_DISPLAY_LIMITATIONS' value='yes'/>
             <customization name='CAP_QUERY_SUBQUERIES' value='yes'/>
             <customization name='CAP_QUERY_SUBQUERIES_WITH_TOP' value='no'/>
-            <customization name='CAP_QUERY_TOP_N' value='no'/>
             <customization name='CAP_QUERY_TOPSTYLE_LIMIT' value='no'/>
             <customization name='CAP_QUERY_TOPSTYLE_TOP' value='no'/>
+            <customization name="CAP_SELECT_INTO" value="no"/>
+            <customization name="CAP_SELECT_TOP_INTO" value="no"/>
+            <customization name="CAP_QUERY_BOOLEXPR_TO_INTEXPR" value="no"/>
+            <customization name="CAP_QUERY_GROUP_BY_BOOL" value="yes"/>
+            <customization name="CAP_QUERY_GROUP_BY_DEGREE" value="no"/>
+            <customization name="CAP_QUERY_HAVING_UNSUPPORTED" value="no"/>
+            <customization name="CAP_QUERY_HAVING_REQUIRES_GROUP_BY" value="no"/>
+            <!-- put sort by to no if sort menu operation fail-->
+            <customization name="CAP_QUERY_SORT_BY" value="yes"/>
+            <customization name="CAP_QUERY_SORT_BY_DEGREE" value="no"/>
+            <!-- Although subqueries are not fully supported, allowing either
+            creation of temporary tables or subqueries is required for Tableau to proceed. -->
+            <customization name="CAP_QUERY_SUBQUERIES" value="yes"/>
+            <!-- potentially no for with top -->
+            <customization name="CAP_QUERY_SUBQUERIES_WITH_TOP" value="yes"/>
+            <!-- potentially no for with top -->
+            <customization name="CAP_QUERY_TOP_N" value="yes"/>
+            <customization name="CAP_QUERY_TOP_SAMPLE" value="no"/>
+            <customization name="CAP_QUERY_TOP_SAMPLE_PERCENT" value="no"/>
+            <customization name="CAP_QUERY_WHERE_FALSE_METADATA" value="no"/>
+            <customization name="CAP_SUPPORTS_SPLIT_FROM_LEFT" value="no"/>
+            <customization name="CAP_SUPPORTS_SPLIT_FROM_RIGHT" value="no"/>
+            <customization name="CAP_QUERY_ALLOW_PARTIAL_AGGREGATION" value="no"/>
+            <customization name="CAP_CONNECT_STORED_PROCEDURE" value="no"/>
+            <customization name="CAP_SUPPORTS_UNION" value="no"/>
+            <customization name="CAP_JDBC_QUERY_ASYNC" value="yes"/>
+            <customization name="CAP_JDBC_QUERY_CANCEL" value="no"/>
         </customizations>
     </connection-customization>
     <connection-fields file='connection-fields.xml'/>
