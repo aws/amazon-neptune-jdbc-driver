@@ -188,9 +188,6 @@ license {
 
 repositories {
     mavenCentral()
-    flatDir {
-        dir 'sql-gremlin/target'
-    }
 }
 
 ext {
@@ -218,8 +215,7 @@ subprojects {
 
 dependencies {
     // Local sql-gremlin build.
-    implementation('org.twilmes:sql-gremlin')
-    implementation(':sql-gremlin')
+    implementation project(":sql-gremlin")
 
     // Dependencies
     implementation group: 'org.apache.tinkerpop', name: 'gremlin-driver', version: gremlinVersion
