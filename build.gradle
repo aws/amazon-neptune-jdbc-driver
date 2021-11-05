@@ -191,6 +191,7 @@ repositories {
 }
 
 ext {
+    calciteVersion = '1.26.0'
     log4jVersion = '2.13.3'
     lombokVersion = '1.18.16'
     jupiterVersion = '5.4.0'
@@ -230,6 +231,8 @@ dependencies {
     implementation group: 'com.google.guava', name: 'guava', version: '31.0.1-jre'
     implementation group: 'com.puppycrawl.tools', name: 'checkstyle', version: puppyCrawlVersion
     implementation group: 'com.google.code.findbugs', name: 'annotations', version: findBugsVersion
+    implementation group: 'org.apache.calcite', name: 'calcite-core', version: calciteVersion
+    implementation group: 'org.apache.calcite', name: 'calcite-linq4j', version: calciteVersion
     compileOnly group: 'org.projectlombok', name: 'lombok', version: lombokVersion
     annotationProcessor group: 'org.projectlombok', name: 'lombok', version: lombokVersion
 
