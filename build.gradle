@@ -230,11 +230,11 @@ dependencies {
     implementation group: 'com.google.code.gson', name: 'gson', version: '2.7'
     implementation group: 'com.google.guava', name: 'guava', version: '31.0.1-jre'
     implementation group: 'com.puppycrawl.tools', name: 'checkstyle', version: puppyCrawlVersion
-    implementation group: 'com.google.code.findbugs', name: 'annotations', version: findBugsVersion
     implementation group: 'org.apache.calcite', name: 'calcite-core', version: calciteVersion
     implementation group: 'org.apache.calcite', name: 'calcite-linq4j', version: calciteVersion
     compileOnly group: 'org.projectlombok', name: 'lombok', version: lombokVersion
     annotationProcessor group: 'org.projectlombok', name: 'lombok', version: lombokVersion
+    testCompileOnly group: 'com.google.code.findbugs', name: 'annotations', version: findBugsVersion
 
     // Testing
     testImplementation group: 'com.googlecode.json-simple', name: 'json-simple', version: '1.1.1'
