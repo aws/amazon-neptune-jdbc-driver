@@ -28,7 +28,6 @@ import software.aws.neptune.opencypher.OpenCypherConnection;
 import software.aws.neptune.opencypher.OpenCypherConnectionProperties;
 import software.aws.neptune.sparql.SparqlConnection;
 import software.aws.neptune.sparql.SparqlConnectionProperties;
-import javax.annotation.Nullable;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.Map;
@@ -61,7 +60,7 @@ public class NeptuneDriver extends Driver implements java.sql.Driver {
             "sparql", SparqlConnection.class);
 
     @Override
-    public boolean acceptsURL(final @Nullable String url) throws SQLException {
+    public boolean acceptsURL(final String url) throws SQLException {
         try {
             // TODO AN-550: Switch to map with class that holds Conn properties, key, query executor, etc.
             return url != null
@@ -73,7 +72,7 @@ public class NeptuneDriver extends Driver implements java.sql.Driver {
     }
 
     @Override
-    public java.sql.Connection connect(final @Nullable String url, final Properties info) throws SQLException {
+    public java.sql.Connection connect(final String url, final Properties info) throws SQLException {
         if (!acceptsURL(url)) {
             return null;
         }
