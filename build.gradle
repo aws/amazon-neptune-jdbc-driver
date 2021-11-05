@@ -244,7 +244,6 @@ dependencies {
     testImplementation group: 'org.mockito', name: 'mockito-core', version: '2.1.0'
     testImplementation group: 'com.massisframework', name: 'j-text-utils', version: '0.3.4'
     testImplementation group: 'org.neo4j.test', name: 'neo4j-harness', version: neo4jDBVersion
-    testImplementation group: 'org.neo4j', name: 'neo4j-common', version: neo4jDBVersion, classifier: "tests"
     testImplementation group: 'org.neo4j.community', name: 'it-test-support', version: neo4jDBVersion
     testImplementation group: 'org.neo4j', name: 'neo4j-kernel', version: neo4jDBVersion, classifier: "tests"
     testImplementation group: 'org.neo4j', name: 'neo4j-io', version: neo4jDBVersion, classifier: "tests"
