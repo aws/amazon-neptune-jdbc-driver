@@ -22,7 +22,6 @@ import org.apache.tinkerpop.gremlin.driver.Cluster;
 import org.apache.tinkerpop.gremlin.driver.Result;
 import org.apache.tinkerpop.gremlin.driver.ResultSet;
 import org.apache.tinkerpop.gremlin.driver.remote.DriverRemoteConnection;
-import org.apache.tinkerpop.gremlin.groovy.jsr223.GroovyTranslator;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversal;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource;
 import org.joda.time.DateTime;
@@ -30,6 +29,7 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.junit.Assert;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -163,11 +163,7 @@ public class TDVTDataUpload {
             System.out.println("Total queries " + total);
         } catch (final Exception e) {
             e.printStackTrace();
-            if (graphTraversal != null) {
-                System.out.println(
-                        "Traversal: " + GroovyTranslator.of("g").translate(graphTraversal.asAdmin().getBytecode()));
-            }
-            Assert.fail(e.getMessage());
+            Assertions.fail(e.getMessage());
         }
     }
 
