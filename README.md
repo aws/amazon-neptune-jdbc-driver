@@ -2,9 +2,15 @@
 
 This driver provides JDBC connectivity for the Amazon Neptune service using openCypher, Gremlin, SQL-Gremlin, and SPARQL queries.
 
+## Using the Driver
+
+For the initial public preview release, the driver will be available for download on GitHub along with the driver's .taco file. To use the Driver in Tableau, please refer to the documentation on connecting with Tableau provided below.
+
 ## Connection Requirements
 
 To connect to Amazon Neptune using the JDBC driver, the Neptune instance must be available through an SSH tunnel, load balancer, or the JDBC driver must be deployed in an EC2 instance. The SSH tunnel can be setup internally in the driver or externally.
+
+#### Important note: SSH Tunnel and host file must be configured, please see SSH Tunneling section below.
 
 ## Specifications
 
@@ -14,13 +20,34 @@ This driver is compatible with JDBC 4.2 and requires a minimum of Java 8.
 
 The driver comes packed in a single jar file. To use the driver, place the jar file in the classpath of the application which is going to use it. Alternatively, if using the driver with a Maven/Gradle application, the jar can be used to install the driver via their respective commands.
 
-### SSH Tunneling
+### Using an SSH Tunnel to Connect to Amazon Neptune
 
-Connecting to Neptune requires an SSH tunnel which can be done internally in the driver, or manually using an ssh command.
+Amazon Neptune clusters are deployed within an Amazon Virtual Private Cloud (Amazon VPC).
+They can be accessed directly by Amazon EC2 instances or other AWS services that are deployed in the same Amazon VPC. Additionally, Amazon Neptune can be accessed by EC2 instances or other AWS services in different VPCs in the same AWS Region or other Regions via VPC peering.
+
+However, suppose that your use case requires that you (or your application) access your Amazon Neptune resources from outside the cluster's VPC. This will be the case for most users not running their application on a VM in the same VPC as the Neptune cluster. When connecting from outside the VPC, you can use SSH tunneling (also known as  _port forwarding_) to access your Amazon Neptune resources.
+
+To create an SSH tunnel, you need an Amazon EC2 instance running in the same Amazon VPC as your Amazon Neptune cluster. You can either use an existing EC2 instance in the same VPC as your cluster or create one.
+
+You can set up an SSH tunnel to the Amazon Neptune cluster `sample-cluster.node.us-east-1.neptune.amazonaws.com` by running the following command on your local computer. The `-L` flag is used for forwarding a local port.
+
+Note: The username of the ec2 connection depends on the type of your ec2 instance. In the below example, we are using Ubuntu.
+```
+ssh -i "ec2Access.pem" -L 8182:sample-cluster.node.us-east-1.docdb.amazonaws.com:8182 ubuntu@ec2-34-229-221-164.compute-1.amazonaws.com -N 
+```
+
+This is a prerequisite for connecting to any BI tool running on a client outside your VPC.
+
+Important: You must also add the SSH tunnel lookup detailed below.
+
+### Adding a SSH Tunnel Lookup Connection to Amazon Neptune
 
 To add to hosts, add the cluster name to your host file (`/etc/hosts` on Mac or `C:\Windows\System32\drivers\etc\hosts` on Windows).
 Add the following line to the list of hosts lookup:
 `127.0.0.1        <endpoint>`
+
+From our sample above, we would use:
+`127.0.0.1        sample-cluster.node.us-east-1.docdb.amazonaws.com`
 
 #### Connection URL and Settings
 
@@ -88,6 +115,7 @@ To start, download and install the most recent version of Tableau Desktop availa
    
 ### Connecting with Tableau
 
+##TODO AN-826: Update Taco file, take new screenshot, and update documentation.
 Tableau must be opened with command line to use the Tableau connector (until the Tableau connector is signed). 
 
 On Mac, the following command can be used: `/Applications/Tableau\ Desktop\ 2021.1.app/Contents/MacOS/Tableau -DDisableVerifyConnectorPluginSignature=true`
