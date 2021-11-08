@@ -219,6 +219,7 @@ dependencies {
     implementation project(":sql-gremlin")
 
     // Dependencies
+    implementation group: 'commons-beanutils', name: 'commons-beanutils', version: '1.9.4'
     implementation group: 'org.apache.tinkerpop', name: 'gremlin-driver', version: gremlinVersion
     implementation group: 'com.amazonaws', name: 'amazon-neptune-sparql-java-sigv4', version: amazonSigv4SignerVersion
     implementation group: 'com.amazonaws', name: 'amazon-neptune-gremlin-java-sigv4', version: '1.0'
