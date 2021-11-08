@@ -17,9 +17,9 @@ on:
   # Trigger the workflow on push or pull request,
   # but only for the master and develop branch
   push:
-    branches: [ master, develop ]
+    branches: [ main, develop ]
   pull_request:
-    branches: [ master, develop ]
+    branches: [ main, develop ]
 
 jobs:
   build:
