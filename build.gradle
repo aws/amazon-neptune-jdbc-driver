@@ -247,7 +247,7 @@ dependencies {
     testImplementation group: 'org.neo4j.community', name: 'it-test-support', version: neo4jDBVersion
     testImplementation group: 'org.neo4j', name: 'neo4j-kernel', version: neo4jDBVersion, classifier: "tests"
     testImplementation group: 'org.neo4j', name: 'neo4j-io', version: neo4jDBVersion, classifier: "tests"
-    testImplementation 'org.codehaus.janino:janino:3.1.0'
+    testImplementation 'org.codehaus.janino:janino:3.1.6'
     testImplementation group: 'com.google.code.findbugs', name: 'annotations', version: findBugsVersion
     testImplementation group: 'com.github.javafaker', name: 'javafaker', version: '1.0.2'
     testImplementation group: 'org.apache.jena', name: 'jena-fuseki-main', version: '3.17.0'
