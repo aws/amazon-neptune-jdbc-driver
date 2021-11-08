@@ -17,9 +17,9 @@ on:
   # Trigger the workflow on push or pull request,
   # but only for the master and develop branch
   push:
-    branches: [ master, develop ]
+    branches: [ main, develop ]
   pull_request:
-    branches: [ master, develop ]
+    branches: [ main, develop ]
 
 jobs:
   build:
@@ -35,12 +35,16 @@ jobs:
       uses: actions/setup-java@v1
       with:
         java-version: 1.8
-    - name: Build SQL-Gremlin jar
-      run: mvn -B package --file ./sql-gremlin/pom.xml
-    - name: Grant Execute Permission for gradlew
-      run: chmod +x gradlew
-    - name: Run tests with Gradle
-      run: ./gradlew build
+    - name: Build driver and run tests
+      run: |
+        chmod +x gradlew
+        ./gradlew build
+    - name: Build sql-gremlin shadow jar with Gradle
+      run: |
+        cd sql-gremlin
+        chmod +x gradlew
+        gradlew shadowJar
+        cd ..
     - name: Build shadow jar with Gradle
       run: ./gradlew shadowJar
     - name: Copy Build

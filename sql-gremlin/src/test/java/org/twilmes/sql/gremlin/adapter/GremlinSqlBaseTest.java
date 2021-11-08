@@ -58,7 +58,8 @@ public abstract class GremlinSqlBaseTest {
         assertColumns(result.getColumns(), columnNames);
     }
 
-    public List<List<Object>> rows(final List<Object>... rows) {
+    @SafeVarargs
+    public final List<List<Object>> rows(final List<Object>... rows) {
         return new ArrayList<>(Arrays.asList(rows));
     }
 

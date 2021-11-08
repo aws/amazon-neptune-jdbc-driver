@@ -1,0 +1,164 @@
+buildscript {
+    repositories {
+        maven {
+            url "https://plugins.gradle.org/m2/"
+        }
+    }
+    dependencies {
+        classpath "com.github.jengelman.gradle.plugins:shadow:6.1.0";
+    }
+}
+
+apply plugin: 'java'
+apply plugin: 'jacoco'
+apply plugin: 'checkstyle'
+apply plugin: 'com.github.johnrengelman.shadow'
+
+group 'org.twilmes'
+version '1.0-SNAPSHOT'
+description 'sql-gremlin'
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_1_8
+}
+
+tasks.withType(JavaCompile) {
+    options.compilerArgs << '-Xlint:unchecked'
+    options.deprecation = true
+    options.encoding 'UTF-8'
+}
+// Silently agree to build scan terms.
+if (hasProperty('buildScan')) {
+    buildScan {
+        termsOfServiceUrl = 'https://gradle.com/terms-of-service'
+        termsOfServiceAgree = 'yes'
+    }
+}
+
+jar {
+    manifest {
+        attributes 'Implementation-Version': archiveVersion.get()
+    }
+}
+
+/**
+ * CheckStyle Plugin
+ */
+apply plugin: 'checkstyle'
+checkstyle {
+    toolVersion '8.37'
+    configFile file("../config/checkstyle/checkstyle-rules.xml")
+    ignoreFailures = false
+}
+checkstyleMain {
+    source = 'src/main/java'
+}
+checkstyleTest {
+    source = 'src/test/java'
+}
+
+test {
+    useJUnitPlatform()
+    testLogging.showStandardStreams = true
+    testLogging.events("passed", "skipped", "failed")
+}
+
+/**
+ * JaCoCo Plugin
+ */
+test {
+    jacoco {
+        excludes = ['org/codehaus/**', 'org.codehaus.*']
+    }
+}
+
+jacoco {
+    toolVersion = "0.8.5"
+}
+jacocoTestReport {
+    reports {
+        html.enabled true
+        csv.enabled true
+    }
+    afterEvaluate {
+        classDirectories.setFrom(files(classDirectories.files.collect {
+            fileTree(dir: it,
+                    exclude: ['**/resources/**', '**janino**', '**commons**'])
+        }))
+    }
+}
+test.finalizedBy(project.tasks.jacocoTestReport)
+jacocoTestCoverageVerification {
+    violationRules {
+        rule {
+            element = 'CLASS'
+            excludes = ['org.codehaus.*']
+            limit {
+                counter = 'LINE'
+                minimum = 0.00
+            }
+            limit {
+                counter = 'BRANCH'
+                minimum = 0.00
+            }
+        }
+    }
+    afterEvaluate {
+        classDirectories.setFrom(files(classDirectories.files.collect {
+            fileTree(dir: it,
+                    exclude: ['org/codehaus/**'])
+        }))
+    }
+}
+
+check.dependsOn jacocoTestCoverageVerification
+jacocoTestCoverageVerification.dependsOn jacocoTestReport
+
+repositories {
+    mavenCentral()
+}
+
+ext {
+    tinkerpopVersion = '3.4.8'
+    calciteVersion = '1.26.0'
+    lombokVersion = '1.18.16'
+    jupiterVersion = '5.4.0'
+}
+
+subprojects {
+    tasks.withType(Test) {
+        // Gradle documentation suggests using this number of cores.
+        maxParallelForks = Runtime.runtime.availableProcessors().intdiv(2) ?: 1
+    }
+}
+
+dependencies {
+    implementation group: 'org.apache.tinkerpop', name: 'tinkergraph-gremlin', version: tinkerpopVersion
+    implementation group: 'org.apache.tinkerpop', name: 'gremlin-groovy', version: tinkerpopVersion
+    implementation group: 'org.apache.tinkerpop', name: 'gremlin-driver', version: tinkerpopVersion
+    implementation group: 'org.apache.tinkerpop', name: 'gremlin-core', version: tinkerpopVersion
+    implementation group: 'org.apache.calcite', name: 'calcite-core', version: calciteVersion
+    implementation group: 'org.apache.calcite', name: 'calcite-linq4j', version: calciteVersion
+    implementation group: 'com.google.guava', name: 'guava', version: '30.1.1-jre'
+    implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.9.10.7'
+    compileOnly group: 'org.projectlombok', name: 'lombok', version: lombokVersion
+    annotationProcessor group: 'org.projectlombok', name: 'lombok', version: lombokVersion
+
+    testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-engine', version: jupiterVersion
+    testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-api', version: jupiterVersion
+    testImplementation group: 'org.apache.calcite', name: 'calcite-core', version: calciteVersion
+    testImplementation group: 'org.apache.tinkerpop', name: 'gremlin-test', version: tinkerpopVersion
+    testImplementation group: 'org.slf4j', name: 'slf4j-log4j12', version: '1.7.29'
+    testCompileOnly group: 'org.projectlombok', name: 'lombok', version: lombokVersion
+    testAnnotationProcessor group: 'org.projectlombok', name: 'lombok', version: lombokVersion
+}
+
+shadowJar {
+    baseName = rootProject.name
+    classifier = ''
+
+    dependencies {
+        exclude(dependency('org.slf4j:.*'))
+    }
+}

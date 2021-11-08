@@ -55,9 +55,9 @@ public class GremlinTableBase extends AbstractQueryableTable implements Translat
     }
 
     public GremlinProperty getColumn(final String column) throws SQLException {
-        for (final String key : columns.keySet()) {
-            if (key.equalsIgnoreCase(column)) {
-                return columns.get(key);
+        for (final Map.Entry<String, GremlinProperty> entry : columns.entrySet()) {
+            if (entry.getKey().equalsIgnoreCase(column)) {
+                return entry.getValue();
             }
         }
         throw new SQLException(String.format(

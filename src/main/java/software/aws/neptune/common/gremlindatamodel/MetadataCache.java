@@ -19,6 +19,7 @@ package software.aws.neptune.common.gremlindatamodel;
 import lombok.Getter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.twilmes.sql.gremlin.adapter.converter.schema.SqlSchemaGrabber;
 import org.twilmes.sql.gremlin.adapter.converter.schema.calcite.GremlinSchema;
 import org.twilmes.sql.gremlin.adapter.converter.schema.gremlin.GremlinEdgeTable;
 import org.twilmes.sql.gremlin.adapter.converter.schema.gremlin.GremlinVertexTable;
@@ -50,7 +51,7 @@ public class MetadataCache {
      * @throws SQLException Thrown if error occurs during update.
      */
     public static void updateCache(final String endpoint, final int port, final boolean useIam, final boolean useSsl,
-                                   final PathType pathType, final SchemaHelperGremlinDataModel.ScanType scanType)
+                                   final PathType pathType, final SqlSchemaGrabber.ScanType scanType)
             throws SQLException {
         synchronized (LOCK) {
             if (gremlinSchema == null) {

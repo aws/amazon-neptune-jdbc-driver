@@ -19,6 +19,7 @@
 
 package org.twilmes.sql.gremlin.adapter.converter.schema.calcite;
 
+import com.google.common.collect.ImmutableList;
 import org.apache.calcite.plan.RelOptCluster;
 import org.apache.calcite.plan.RelOptPlanner;
 import org.apache.calcite.plan.RelOptRule;
@@ -43,8 +44,8 @@ public class GremlinTableScan extends TableScan implements GremlinRel {
 
     public GremlinTableScan(final RelOptCluster cluster, final RelTraitSet traitSet,
                             final RelOptTable table, final int[] fields) {
-        super(cluster, traitSet, table);
-        this.fields = fields;
+        super(cluster, traitSet, ImmutableList.of(), table);
+        this.fields = fields.clone();
     }
 
     @Override

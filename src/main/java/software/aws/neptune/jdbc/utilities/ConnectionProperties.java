@@ -22,8 +22,7 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Level;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import software.aws.neptune.common.gremlindatamodel.SchemaHelperGremlinDataModel;
-import software.aws.neptune.gremlin.GremlinConnectionProperties;
+import org.twilmes.sql.gremlin.adapter.converter.schema.SqlSchemaGrabber;
 import software.aws.neptune.jdbc.Connection;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -54,7 +53,7 @@ public abstract class ConnectionProperties extends Properties {
     public static final String SSH_STRICT_HOST_KEY_CHECKING = "sshStrictHostKeyChecking";
     public static final String SSH_KNOWN_HOSTS_FILE = "sshKnownHostsFile";
     public static final AuthScheme DEFAULT_AUTH_SCHEME = AuthScheme.IAMSigV4;
-    public static final SchemaHelperGremlinDataModel.ScanType DEFAULT_SCAN_TYPE = SchemaHelperGremlinDataModel.ScanType.All;
+    public static final SqlSchemaGrabber.ScanType DEFAULT_SCAN_TYPE = SqlSchemaGrabber.ScanType.All;
     public static final int DEFAULT_CONNECTION_TIMEOUT_MILLIS = 5000;
     public static final int DEFAULT_CONNECTION_RETRY_COUNT = 3;
     public static final String DEFAULT_SSH_STRICT_CHECKING = "true";
@@ -66,7 +65,7 @@ public abstract class ConnectionProperties extends Properties {
     private static final Logger LOGGER = LoggerFactory.getLogger(ConnectionProperties.class);
 
     static {
-        PROPERTY_CONVERTER_MAP.put(SCAN_TYPE_KEY, GremlinConnectionProperties::toScanType);
+        PROPERTY_CONVERTER_MAP.put(SCAN_TYPE_KEY, ConnectionProperties::toScanType);
         PROPERTY_CONVERTER_MAP.put(APPLICATION_NAME_KEY, (key, value) -> value);
         PROPERTY_CONVERTER_MAP.put(AUTH_SCHEME_KEY, ConnectionProperties::toAuthScheme);
         PROPERTY_CONVERTER_MAP.put(CONNECTION_TIMEOUT_MILLIS_KEY, ConnectionProperties::toUnsigned);
@@ -121,33 +120,15 @@ public abstract class ConnectionProperties extends Properties {
         resolveProperties(properties);
     }
 
-    protected static SchemaHelperGremlinDataModel.ScanType toScanType(@NonNull final String key, @NonNull final String value)
+    protected static SqlSchemaGrabber.ScanType toScanType(@NonNull final String key, @NonNull final String value)
             throws SQLException {
         if (isWhitespace(value)) {
             return DEFAULT_SCAN_TYPE;
         }
-        if (SchemaHelperGremlinDataModel.ScanType.fromString(value) == null) {
+        if (SqlSchemaGrabber.ScanType.fromString(value) == null) {
             throw invalidConnectionPropertyError(key, value);
         }
-        return SchemaHelperGremlinDataModel.ScanType.fromString(value);
-    }
-
-    /**
-     * Gets the scan type.
-     *
-     * @return The scan type.
-     */
-    public SchemaHelperGremlinDataModel.ScanType getScanType() {
-        return (SchemaHelperGremlinDataModel.ScanType) get(SCAN_TYPE_KEY);
-    }
-
-    /**
-     * Sets the scan type.
-     *
-     * @param scanType Thescan type
-     */
-    public void setScanType(@NonNull final SchemaHelperGremlinDataModel.ScanType scanType) {
-        put(SCAN_TYPE_KEY, scanType);
+        return SqlSchemaGrabber.ScanType.fromString(value);
     }
 
     protected static Level toLogLevel(@NonNull final String key, @NonNull final String value) throws SQLException {
@@ -256,6 +237,24 @@ public abstract class ConnectionProperties extends Properties {
             return Paths.get(filePath.replaceFirst("~", userHomePath)).toAbsolutePath();
         }
         return Paths.get(filePath).toAbsolutePath();
+    }
+
+    /**
+     * Gets the scan type.
+     *
+     * @return The scan type.
+     */
+    public SqlSchemaGrabber.ScanType getScanType() {
+        return (SqlSchemaGrabber.ScanType) get(SCAN_TYPE_KEY);
+    }
+
+    /**
+     * Sets the scan type.
+     *
+     * @param scanType Thescan type
+     */
+    public void setScanType(@NonNull final SqlSchemaGrabber.ScanType scanType) {
+        put(SCAN_TYPE_KEY, scanType);
     }
 
     /**

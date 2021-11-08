@@ -1,17 +1,9 @@
-buildscript {
-    repositories {
-        jcenter()
-    }
-    dependencies {
-        classpath 'com.github.jengelman.gradle.plugins:shadow:5.2.0'
-    }
-}
-
 plugins {
     id 'java'
-    id "com.github.spotbugs" version "4.5.1"
+    id "com.github.spotbugs" version "4.7.9"
     id 'checkstyle'
     id 'com.github.hierynomus.license' version '0.15.0'
+    id 'com.github.johnrengelman.shadow' version '6.1.0'
     id 'jacoco'
 }
 
@@ -196,12 +188,10 @@ license {
 
 repositories {
     mavenCentral()
-    flatDir {
-        dir 'sql-gremlin/target'
-    }
 }
 
 ext {
+    calciteVersion = '1.26.0'
     log4jVersion = '2.13.3'
     lombokVersion = '1.18.16'
     jupiterVersion = '5.4.0'
@@ -226,10 +216,10 @@ subprojects {
 
 dependencies {
     // Local sql-gremlin build.
-    implementation('org.twilmes:sql-gremlin')
-    implementation(':sql-gremlin')
+    implementation project(":sql-gremlin")
 
     // Dependencies
+    implementation group: 'commons-beanutils', name: 'commons-beanutils', version: '1.9.4'
     implementation group: 'org.apache.tinkerpop', name: 'gremlin-driver', version: gremlinVersion
     implementation group: 'com.amazonaws', name: 'amazon-neptune-sparql-java-sigv4', version: amazonSigv4SignerVersion
     implementation group: 'com.amazonaws', name: 'amazon-neptune-gremlin-java-sigv4', version: '1.0'
@@ -240,30 +230,31 @@ dependencies {
     implementation group: 'org.slf4j', name: 'slf4j-log4j12', version: slf4jVersion
     implementation group: 'com.google.code.gson', name: 'gson', version: '2.7'
     implementation group: 'com.google.guava', name: 'guava', version: '31.0.1-jre'
-    implementation group: 'com.puppycrawl.tools', name: 'checkstyle', version: puppyCrawlVersion
-    implementation group: 'com.google.code.findbugs', name: 'annotations', version: findBugsVersion
+    implementation group: 'org.apache.calcite', name: 'calcite-core', version: calciteVersion
+    implementation group: 'org.apache.calcite', name: 'calcite-linq4j', version: calciteVersion
     compileOnly group: 'org.projectlombok', name: 'lombok', version: lombokVersion
+    compileOnly group: 'com.puppycrawl.tools', name: 'checkstyle', version: puppyCrawlVersion
     annotationProcessor group: 'org.projectlombok', name: 'lombok', version: lombokVersion
 
     // Testing
-    testImplementation group: 'com.googlecode.json-simple', name: 'json-simple', version: '1.1'
+    testImplementation group: 'com.googlecode.json-simple', name: 'json-simple', version: '1.1.1'
     testImplementation  group: 'junit', name: 'junit', version: '4.13.2'
     testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-api', version: jupiterVersion
     testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-engine', version: jupiterVersion
     testImplementation group: 'org.mockito', name: 'mockito-core', version: '2.1.0'
     testImplementation group: 'com.massisframework', name: 'j-text-utils', version: '0.3.4'
     testImplementation group: 'org.neo4j.test', name: 'neo4j-harness', version: neo4jDBVersion
-    testImplementation group: 'org.neo4j', name: 'neo4j-common', version: neo4jDBVersion, classifier: "tests"
     testImplementation group: 'org.neo4j.community', name: 'it-test-support', version: neo4jDBVersion
     testImplementation group: 'org.neo4j', name: 'neo4j-kernel', version: neo4jDBVersion, classifier: "tests"
     testImplementation group: 'org.neo4j', name: 'neo4j-io', version: neo4jDBVersion, classifier: "tests"
-    testImplementation group: 'com.puppycrawl.tools', name: 'checkstyle', version: puppyCrawlVersion
     testImplementation 'org.codehaus.janino:janino:3.1.0'
     testImplementation group: 'com.google.code.findbugs', name: 'annotations', version: findBugsVersion
     testImplementation group: 'com.github.javafaker', name: 'javafaker', version: '1.0.2'
     testImplementation group: 'org.apache.jena', name: 'jena-fuseki-main', version: '3.17.0'
     testCompileOnly group: 'org.projectlombok', name: 'lombok', version: lombokVersion
     testAnnotationProcessor group: 'org.projectlombok', name: 'lombok', version: lombokVersion
+    testCompileOnly group: 'com.google.code.findbugs', name: 'annotations', version: findBugsVersion
+    testCompileOnly group: 'com.puppycrawl.tools', name: 'checkstyle', version: puppyCrawlVersion
 }
 
 shadowJar {
