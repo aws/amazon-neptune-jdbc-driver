@@ -141,7 +141,7 @@ dependencies {
     implementation group: 'org.apache.calcite', name: 'calcite-core', version: calciteVersion
     implementation group: 'org.apache.calcite', name: 'calcite-linq4j', version: calciteVersion
     implementation group: 'com.google.guava', name: 'guava', version: '30.1.1-jre'
-    implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.9.10.7'
+    implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.13.0'
     compileOnly group: 'org.projectlombok', name: 'lombok', version: lombokVersion
     annotationProcessor group: 'org.projectlombok', name: 'lombok', version: lombokVersion
 
