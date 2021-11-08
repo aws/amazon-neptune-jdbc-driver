@@ -39,12 +39,6 @@ jobs:
       run: |
         chmod +x gradlew
         ./gradlew build
-    - name: Build sql-gremlin shadow jar with Gradle
-      run: |
-        cd sql-gremlin
-        chmod +x gradlew
-        gradlew shadowJar
-        cd ..
     - name: Build shadow jar with Gradle
       run: ./gradlew shadowJar
     - name: Copy Build
