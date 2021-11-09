@@ -49,7 +49,7 @@ public class SqlGremlinQueryResult {
         }
     }
 
-    private String getType(String column, SqlMetadata sqlMetadata, final List<GremlinTableBase> gremlinTableBases) throws SQLException {
+    private String getType(final String column, final SqlMetadata sqlMetadata, final List<GremlinTableBase> gremlinTableBases) throws SQLException {
         if (sqlMetadata.aggregateTypeExists(column)) {
             return sqlMetadata.getOutputType(column, "string");
         }

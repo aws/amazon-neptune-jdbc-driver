@@ -98,26 +98,21 @@ public class GremlinSqlAggFunction extends GremlinSqlOperator {
      * Aggregation columns will be named in the form of AGG(xxx) if no rename is specified in SQL
      */
     public String getNewName() throws SQLException {
-        if (sqlOperands.size() == 1 && sqlOperands.get(0) instanceof GremlinSqlIdentifier) {
+        if (sqlOperands.get((sqlOperands.size() - 1)) instanceof GremlinSqlIdentifier) {
             return String.format("%s(%s)", sqlAggFunction.kind.name(),
-                    ((GremlinSqlIdentifier) sqlOperands.get(0)).getColumn());
-        } else if (sqlOperands.size() == 2 && sqlOperands.get(1) instanceof GremlinSqlIdentifier) {
+                    ((GremlinSqlIdentifier) sqlOperands.get(sqlOperands.size() - 1)).getColumn());
+        } else if (sqlOperands.get((sqlOperands.size() - 1)) instanceof GremlinSqlNumericLiteral) {
             return String.format("%s(%s)", sqlAggFunction.kind.name(),
-                    ((GremlinSqlIdentifier) sqlOperands.get(1)).getColumn());
-        } else if (sqlOperands.size() == 1 && sqlOperands.get(0) instanceof GremlinSqlNumericLiteral) {
-            return String.format("%s(%s)", sqlAggFunction.kind.name(),
-                    ((GremlinSqlNumericLiteral) sqlOperands.get(0)).getValue().toString());
+                    ((GremlinSqlNumericLiteral) sqlOperands.get(sqlOperands.size() - 1)).getValue().toString());
         }
         throw new SQLException("Error, unable to get rename name in GremlinSqlAggOperator.");
     }
 
     public String getActual() throws SQLException {
-        if (sqlOperands.size() == 1 && sqlOperands.get(0) instanceof GremlinSqlIdentifier) {
-            return ((GremlinSqlIdentifier) sqlOperands.get(0)).getColumn();
-        } else if (sqlOperands.size() == 2 && sqlOperands.get(1) instanceof GremlinSqlIdentifier) {
-            return ((GremlinSqlIdentifier) sqlOperands.get(1)).getColumn();
-        } else if (sqlOperands.size() == 1 && sqlOperands.get(0) instanceof GremlinSqlNumericLiteral) {
-            return ((GremlinSqlNumericLiteral) sqlOperands.get(0)).getValue().toString();
+        if (sqlOperands.get((sqlOperands.size() - 1)) instanceof GremlinSqlIdentifier) {
+            return ((GremlinSqlIdentifier) sqlOperands.get(sqlOperands.size() - 1)).getColumn();
+        } else if (sqlOperands.get((sqlOperands.size() - 1)) instanceof GremlinSqlNumericLiteral) {
+            return ((GremlinSqlNumericLiteral) sqlOperands.get(sqlOperands.size() - 1)).getValue().toString();
         }
         throw new SQLException("Error, unable to get rename name in GremlinSqlAggOperator.");
     }

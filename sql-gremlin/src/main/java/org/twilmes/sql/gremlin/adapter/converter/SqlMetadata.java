@@ -243,11 +243,11 @@ public class SqlMetadata {
         return getGremlinTable(table).getColumn(actualColumnName);
     }
 
-    public void addOutputType(String outputName, String colType) {
+    public void addOutputType(final String outputName, final String colType) {
         aggregateTypeMap.put(outputName, colType);
     }
 
-    public String getOutputType(String outputName, String colType) {
+    public String getOutputType(final String outputName, final String colType) {
         return aggregateTypeMap.getOrDefault(outputName, colType);
     }
 }
