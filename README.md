@@ -119,7 +119,7 @@ With Tableau now open, select More on under to a server on the left side. If the
 
 Select **SQL via Gremlin by Amazon Neptune**, you will see the following window:
 
-[<img src="samples/images/tableauSQLgremlin-main.png" width="500"/>](samples/images/tableau-sql-gremlin.png)
+[<img src="samples/images/tableau-sql-gremlin.png" width="500"/>](samples/images/tableau-sql-gremlin.png)
 
 You should not need to edit the port or add any additional connection options. Simply enter the Neptune Endpoint in a similar fashion to the above example, and select your IAM/SSL configuration. Note: you must enable SSL to use IAM.
 
