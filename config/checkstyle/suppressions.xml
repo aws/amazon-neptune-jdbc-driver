@@ -9,4 +9,5 @@
     <suppress files="\\*.template" checks="[a-zA-Z0-9]*"/>
     <suppress files="\\*.yaml" checks="[a-zA-Z0-9]*"/>
     <suppress files="\\*.properties" checks="[a-zA-Z0-9]*"/>
+    <suppress files="sql-gremlin/\\*.\\*" checks="[a-zA-Z0-9]*"/>
 </suppressions>
