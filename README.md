@@ -4,11 +4,7 @@ This driver provides JDBC connectivity for the Amazon Neptune service using open
 
 ## Using the Driver
 
-For the initial public preview release, the driver will be available for download on GitHub along with the driver's .taco file. To use the Driver in Tableau, please refer to the documentation on connecting with Tableau provided below.
-
-## Connection Requirements
-
-To connect to Amazon Neptune using the JDBC driver, the Neptune instance must be available through an SSH tunnel, load balancer, or the JDBC driver must be deployed in an EC2 instance. The SSH tunnel can be setup internally in the driver or externally.
+For the initial public preview release, the driver will be available for download on GitHub along with the driver's .jar file and .taco file. To use the Driver in Tableau, please refer to the documentation on connecting with Tableau provided below.
 
 #### Important note: SSH Tunnel and host file must be configured, please see SSH Tunneling section below.
 
@@ -19,6 +15,8 @@ This driver is compatible with JDBC 4.2 and requires a minimum of Java 8.
 ## Using the Driver
 
 The driver comes packed in a single jar file. To use the driver, place the jar file in the classpath of the application which is going to use it. Alternatively, if using the driver with a Maven/Gradle application, the jar can be used to install the driver via their respective commands.
+
+To connect to Amazon Neptune using the JDBC driver, the Neptune instance must be available through an SSH tunnel, load balancer, or the JDBC driver must be deployed in an EC2 instance. The SSH tunnel can be setup following the instructions below.
 
 ### Using an SSH Tunnel to Connect to Amazon Neptune
 
@@ -38,7 +36,7 @@ ssh -i "ec2Access.pem" -L 8182:sample-cluster.node.us-east-1.docdb.amazonaws.com
 
 This is a prerequisite for connecting to any BI tool running on a client outside your VPC.
 
-Important: You must also add the SSH tunnel lookup detailed below.
+#### Important: You must also add the SSH tunnel lookup detailed below.
 
 ### Adding a SSH Tunnel Lookup Connection to Amazon Neptune
 
