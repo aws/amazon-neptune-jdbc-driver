@@ -55,6 +55,8 @@ public class SqlMetadata {
     private final Map<String, String> tableRenameMap = new HashMap<>();
     private final Map<String, String> columnRenameMap = new HashMap<>();
     private final Map<String, List<String>> columnOutputListMap = new HashMap<>();
+    // maps the aggregated columns to type
+    private final Map<String, String> aggregateTypeMap = new HashMap<>();
     private boolean isAggregate = false;
 
     public SqlMetadata(final GraphTraversalSource g, final GremlinSchema gremlinSchema) {
@@ -179,6 +181,10 @@ public class SqlMetadata {
         return columnRenameMap.getOrDefault(column, column);
     }
 
+    public boolean aggregateTypeExists(final String column) {
+        return aggregateTypeMap.containsKey(column);
+    }
+
     public String getRenameFromActual(final String actual) {
         final Optional<Map.Entry<String, String>>
                 rename = tableRenameMap.entrySet().stream().filter(t -> t.getValue().equals(actual)).findFirst();
@@ -235,5 +241,13 @@ public class SqlMetadata {
     public GremlinProperty getGremlinProperty(final String table, final String column) throws SQLException {
         final String actualColumnName = getActualColumnName(getGremlinTable(table), column);
         return getGremlinTable(table).getColumn(actualColumnName);
+    }
+
+    public void addOutputType(String outputName, String colType) {
+        aggregateTypeMap.put(outputName, colType);
+    }
+
+    public String getOutputType(String outputName, String colType) {
+        return aggregateTypeMap.getOrDefault(outputName, colType);
     }
 }

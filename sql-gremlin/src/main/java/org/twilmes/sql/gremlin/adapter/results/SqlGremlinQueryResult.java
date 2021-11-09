@@ -45,15 +45,25 @@ public class SqlGremlinQueryResult {
                                  final SqlMetadata sqlMetadata) throws SQLException {
         this.columns = columns;
         for (final String column : columns) {
-            GremlinProperty col = null;
+            columnTypes.add(getType(column, sqlMetadata, gremlinTableBases));
+        }
+    }
+
+    private String getType(String column, SqlMetadata sqlMetadata, final List<GremlinTableBase> gremlinTableBases) throws SQLException {
+        if (sqlMetadata.aggregateTypeExists(column)) {
+            return sqlMetadata.getOutputType(column, "string");
+        }
+        String renamedColumn = sqlMetadata.getRenamedColumn(column);
+        if (!sqlMetadata.aggregateTypeExists(renamedColumn)) {
+            // Sometimes columns are double renamed.
+            renamedColumn = sqlMetadata.getRenamedColumn(renamedColumn);
             for (final GremlinTableBase gremlinTableBase : gremlinTableBases) {
-                if (sqlMetadata.getTableHasColumn(gremlinTableBase, column)) {
-                    col = sqlMetadata.getGremlinProperty(gremlinTableBase.getLabel(), column);
-                    break;
+                if (sqlMetadata.getTableHasColumn(gremlinTableBase, renamedColumn)) {
+                    return sqlMetadata.getGremlinProperty(gremlinTableBase.getLabel(), renamedColumn).getType();
                 }
             }
-            columnTypes.add((col == null || col.getType() == null) ? "string" : col.getType());
         }
+        return sqlMetadata.getOutputType(renamedColumn, "string");
     }
 
     public void setPaginationException(final SQLException e) {

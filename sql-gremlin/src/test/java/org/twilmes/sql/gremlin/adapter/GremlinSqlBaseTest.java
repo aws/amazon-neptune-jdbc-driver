@@ -50,6 +50,53 @@ public abstract class GremlinSqlBaseTest {
 
     protected abstract DataSet getDataSet();
 
+    protected void runQueryTestColumnType(final String query) throws SQLException {
+        final SqlGremlinQueryResult sqlGremlinQueryResult = converter.executeQuery(query);
+        final int columnCount = sqlGremlinQueryResult.getColumns().size();
+        final SqlGremlinTestResult result = new SqlGremlinTestResult(sqlGremlinQueryResult);
+        final List<Class<?>> returnedColumnType = new ArrayList<>();
+        final List<Class<?>> metadataColumnType = new ArrayList<>();
+        for (int i = 0; i < columnCount; i++) {
+            returnedColumnType.add(result.getRows().get(0).get(i).getClass());
+            metadataColumnType.add(getType(sqlGremlinQueryResult.getColumnTypes().get(i)));
+        }
+
+        assertResultTypes(returnedColumnType, metadataColumnType);
+    }
+
+    public void assertResultTypes(final List<Class<?>> actual, final List<Class<?>> expected) {
+        Assertions.assertEquals(expected.size(), actual.size());
+        for (int i = 0; i < actual.size(); i++) {
+            Assertions.assertEquals(expected.get(i), actual.get(i));
+        }
+    }
+
+    private Class<?> getType(final String className) {
+        if ("string".equalsIgnoreCase(className)) {
+            return String.class;
+        } else if ("integer".equalsIgnoreCase(className)) {
+            return Integer.class;
+        } else if ("float".equalsIgnoreCase(className)) {
+            return Float.class;
+        } else if ("byte".equalsIgnoreCase(className)) {
+            return Byte.class;
+        } else if ("short".equalsIgnoreCase(className)) {
+            return Short.class;
+        } else if ("double".equalsIgnoreCase(className)) {
+            return Double.class;
+        } else if ("long".equalsIgnoreCase(className)) {
+            return Long.class;
+        } else if ("boolean".equalsIgnoreCase(className)) {
+            return Boolean.class;
+        } else if ("date".equalsIgnoreCase(className) || "long_date".equalsIgnoreCase(className)) {
+            return java.sql.Date.class;
+        } else if ("timestamp".equalsIgnoreCase(className) || "long_timestamp".equalsIgnoreCase(className)) {
+            return java.sql.Timestamp.class;
+        } else {
+            return null;
+        }
+    }
+
     protected void runQueryTestResults(final String query, final List<String> columnNames,
                                        final List<List<Object>> rows)
             throws SQLException {

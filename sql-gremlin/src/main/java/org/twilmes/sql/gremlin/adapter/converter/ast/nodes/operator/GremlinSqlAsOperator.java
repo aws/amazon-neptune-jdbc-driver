@@ -52,6 +52,8 @@ public class GremlinSqlAsOperator extends GremlinSqlOperator {
 
     @Override
     protected void appendTraversal(final GraphTraversal<?, ?> graphTraversal) throws SQLException {
+        sqlMetadata.addRenamedColumn(getActual(), getRename());
+
         if (sqlOperands.get(0) instanceof GremlinSqlBasicCall) {
             ((GremlinSqlBasicCall) sqlOperands.get(0)).generateTraversal(graphTraversal);
         } else if (!(sqlOperands.get(0) instanceof GremlinSqlIdentifier) &&
@@ -70,7 +72,6 @@ public class GremlinSqlAsOperator extends GremlinSqlOperator {
             SqlTraversalEngine
                     .applySqlIdentifier((GremlinSqlIdentifier) sqlOperands.get(0), sqlMetadata, graphTraversal);
         }
-        sqlMetadata.addRenamedColumn(getActual(), getRename());
     }
 
     public String getName(final int operandIdx, final int nameIdx) throws SQLException {

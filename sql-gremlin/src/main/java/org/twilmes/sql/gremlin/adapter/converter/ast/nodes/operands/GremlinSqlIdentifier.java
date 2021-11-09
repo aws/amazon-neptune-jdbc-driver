@@ -52,4 +52,8 @@ public class GremlinSqlIdentifier extends GremlinSqlNode {
         }
         return sqlIdentifier.names.get(sqlIdentifier.names.size() - 1);
     }
+
+    public int getNameCount() {
+        return sqlIdentifier.names.size();
+    }
 }
