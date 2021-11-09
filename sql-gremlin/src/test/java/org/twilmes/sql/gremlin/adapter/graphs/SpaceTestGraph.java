@@ -26,7 +26,7 @@ public class SpaceTestGraph implements TestGraph {
         // astronauts
         final Vertex tom = graph.addVertex(label, "person", "name", "Tom", "age", 35);
         final Vertex patty = graph.addVertex(label, "person", "name", "Patty", "age", 29);
-        final Vertex phil = graph.addVertex(label, "person", "name", "Phil", "age", 30);
+        final Vertex phil = graph.addVertex(label, "person", "name", "Phil", "age", 31);
         final Vertex susan = graph.addVertex(label, "person", "name", "Susan", "age", 45);
         final Vertex juanita = graph.addVertex(label, "person", "name", "Juanita", "age", 50);
         final Vertex pavel = graph.addVertex(label, "person", "name", "Pavel", "age", 30);

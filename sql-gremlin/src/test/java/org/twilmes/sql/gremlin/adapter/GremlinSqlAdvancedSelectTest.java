@@ -40,4 +40,28 @@ public class GremlinSqlAdvancedSelectTest extends GremlinSqlBaseTest {
         runQueryTestResults("select name from person", columns("name"),
                 rows(r("Tom"), r("Patty"), r("Phil"), r("Susan"), r("Juanita"), r("Pavel")));
     }
+
+    @Test
+    public void testWhereNumeric() throws SQLException {
+        runQueryTestResults("SELECT name, age FROM person WHERE age = 35 ORDER BY age", columns("name", "age"),
+                rows(r("Tom", 35)));
+
+        runQueryTestResults("SELECT name, age FROM person WHERE age >= 35 ORDER BY age", columns("name", "age"),
+                rows(r("Tom", 35), r("Susan", 45), r("Juanita", 50)));
+        runQueryTestResults("SELECT name, age FROM person WHERE age <= 35 ORDER BY age", columns("name", "age"),
+                rows(r("Patty", 29),  r("Pavel", 30), r("Phil", 31), r("Tom", 35)));
+        runQueryTestResults("SELECT name, age FROM person WHERE age < 35 ORDER BY age", columns("name", "age"),
+                rows(r("Patty", 29), r("Pavel", 30), r("Phil", 31)));
+        runQueryTestResults("SELECT name, age FROM person WHERE age > 35 ORDER BY age", columns("name", "age"),
+                rows(r("Susan", 45), r("Juanita", 50)));
+
+        runQueryTestResults("SELECT name, age FROM person WHERE age >= 35 ORDER BY age DESC", columns("name", "age"),
+                rows( r("Juanita", 50), r("Susan", 45), r("Tom", 35)));
+        runQueryTestResults("SELECT name, age FROM person WHERE age <= 35 ORDER BY age DESC", columns("name", "age"),
+                rows(r("Tom", 35), r("Phil", 31), r("Pavel", 30), r("Patty", 29)));
+        runQueryTestResults("SELECT name, age FROM person WHERE age < 35 ORDER BY age DESC", columns("name", "age"),
+                rows(r("Phil", 31), r("Pavel", 30), r("Patty", 29)));
+        runQueryTestResults("SELECT name, age FROM person WHERE age > 35 ORDER BY age DESC", columns("name", "age"),
+                rows(r("Juanita", 50), r("Susan", 45)));
+    }
 }

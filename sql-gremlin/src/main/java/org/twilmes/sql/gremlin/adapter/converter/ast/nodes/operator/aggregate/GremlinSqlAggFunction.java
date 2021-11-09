@@ -50,6 +50,11 @@ public class GremlinSqlAggFunction extends GremlinSqlOperator {
                 put(SqlKind.MIN, GremlinSqlAggFunctionImplementations.MIN);
                 put(SqlKind.MAX, GremlinSqlAggFunctionImplementations.MAX);
             }};
+    private static final Map<SqlKind, String> AGGREGATE_TYPE_MAP =
+            new HashMap<SqlKind, String>() {{
+                put(SqlKind.AVG, "double");
+                put(SqlKind.COUNT, "long");
+            }};
     private final SqlAggFunction sqlAggFunction;
     private final SqlMetadata sqlMetadata;
     private final List<GremlinSqlNode> sqlOperands;
@@ -86,23 +91,37 @@ public class GremlinSqlAggFunction extends GremlinSqlOperator {
             throw new SQLException(
                     String.format("Error: Aggregate function %s is not supported.", sqlAggFunction.kind.sql));
         }
+        updateOutputTypeMap();
     }
 
     /**
      * Aggregation columns will be named in the form of AGG(xxx) if no rename is specified in SQL
      */
     public String getNewName() throws SQLException {
-        if (sqlOperands.size() == 1 && sqlOperands.get(0) instanceof GremlinSqlIdentifier) {
+        if (sqlOperands.get((sqlOperands.size() - 1)) instanceof GremlinSqlIdentifier) {
             return String.format("%s(%s)", sqlAggFunction.kind.name(),
-                    ((GremlinSqlIdentifier) sqlOperands.get(0)).getColumn());
-        } else if (sqlOperands.size() == 2 && sqlOperands.get(1) instanceof GremlinSqlIdentifier) {
+                    ((GremlinSqlIdentifier) sqlOperands.get(sqlOperands.size() - 1)).getColumn());
+        } else if (sqlOperands.get((sqlOperands.size() - 1)) instanceof GremlinSqlNumericLiteral) {
             return String.format("%s(%s)", sqlAggFunction.kind.name(),
-                    ((GremlinSqlIdentifier) sqlOperands.get(1)).getColumn());
-        } else if (sqlOperands.size() == 1 && sqlOperands.get(0) instanceof GremlinSqlNumericLiteral) {
-            return String.format("%s(%s)", sqlAggFunction.kind.name(),
-                    ((GremlinSqlNumericLiteral) sqlOperands.get(0)).getValue().toString());
+                    ((GremlinSqlNumericLiteral) sqlOperands.get(sqlOperands.size() - 1)).getValue().toString());
         }
         throw new SQLException("Error, unable to get rename name in GremlinSqlAggOperator.");
+    }
+
+    public String getActual() throws SQLException {
+        if (sqlOperands.get((sqlOperands.size() - 1)) instanceof GremlinSqlIdentifier) {
+            return ((GremlinSqlIdentifier) sqlOperands.get(sqlOperands.size() - 1)).getColumn();
+        } else if (sqlOperands.get((sqlOperands.size() - 1)) instanceof GremlinSqlNumericLiteral) {
+            return ((GremlinSqlNumericLiteral) sqlOperands.get(sqlOperands.size() - 1)).getValue().toString();
+        }
+        throw new SQLException("Error, unable to get rename name in GremlinSqlAggOperator.");
+    }
+
+    private void updateOutputTypeMap() throws SQLException {
+        if (AGGREGATE_TYPE_MAP.containsKey(sqlAggFunction.kind)) {
+            sqlMetadata.addOutputType(getNewName(), AGGREGATE_TYPE_MAP.get(sqlAggFunction.kind));
+        }
+        sqlMetadata.addRenamedColumn(getActual(), getNewName());
     }
 
     private static class GremlinSqlAggFunctionImplementations {

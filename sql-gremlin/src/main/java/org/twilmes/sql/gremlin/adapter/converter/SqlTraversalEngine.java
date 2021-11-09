@@ -102,8 +102,13 @@ public class SqlTraversalEngine {
     public static void applySqlIdentifier(final GremlinSqlIdentifier sqlIdentifier,
                                           final SqlMetadata sqlMetadata,
                                           final GraphTraversal<?, ?> graphTraversal) throws SQLException {
-        // Format of identifier is 'table'.'column => ['table', 'column']
-        appendGraphTraversal(sqlIdentifier.getName(0), sqlIdentifier.getName(1), sqlMetadata, graphTraversal);
+        // With size 2 format of identifier is 'table'.'column' => ['table', 'column']
+        if (sqlIdentifier.getNameCount() == 2) {
+            appendGraphTraversal(sqlIdentifier.getName(0), sqlIdentifier.getName(1), sqlMetadata, graphTraversal);
+        } else {
+            // With size 1, format of identifier is 'column'.
+            appendGraphTraversal(sqlIdentifier.getName(0), sqlMetadata, graphTraversal);
+        }
     }
 
     public static GraphTraversal<?, ?> applyColumnRenames(final List<String> columnsRenamed) throws SQLException {
@@ -153,6 +158,21 @@ public class SqlTraversalEngine {
                     graphTraversal.constant(new ArrayList<>());
                 }
             }
+        }
+    }
+
+    private static void appendGraphTraversal(final String columnName,
+                                             final SqlMetadata sqlMetadata,
+                                             final GraphTraversal<?, ?> graphTraversal) throws SQLException {
+        // Primary/foreign key, need to traverse appropriately.
+        if (columnName.endsWith(GremlinTableBase.ID)) {
+            throw new SQLException("Error, cannot apply ID based traversal appension.");
+        }
+        if (sqlMetadata.getIsAggregate()) {
+            graphTraversal.values(columnName);
+        } else {
+            graphTraversal.choose(__.has(columnName), __.values(columnName),
+                    __.constant(SqlGremlinQueryResult.NULL_VALUE));
         }
     }
 }

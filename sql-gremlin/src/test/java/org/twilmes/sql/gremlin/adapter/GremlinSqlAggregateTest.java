@@ -36,6 +36,36 @@ public class GremlinSqlAggregateTest extends GremlinSqlBaseTest {
     public void testAggregateFunctions() throws SQLException {
         runQueryTestResults("select count(age), min(age), max(age), avg(age) from person",
                 columns("COUNT(age)", "MIN(age)", "MAX(age)", "AVG(age)"),
-                rows(r(6L, 29, 50, 36.5)));
+                rows(r(6L, 29, 50, 36.666666666666664)));
+    }
+
+    @Test
+    public void testAggregateColumnTypeNoRename() throws SQLException {
+        // validate the metadata type matches return type
+        runQueryTestColumnType("select count(age), min(age), max(age), avg(age) from person");
+    }
+
+    @Test
+    public void testAggregateColumnTypeOneRename() throws SQLException {
+        // validate the metadata type matches return type
+        runQueryTestColumnType("select count(age) as c from person");
+    }
+
+    @Test
+    public void testAggregateColumnTypeAllRename() throws SQLException {
+        // validate the metadata type matches return type
+        runQueryTestColumnType("select count(age) as c, min(age) as m1, max(age) as m2, avg(age) as a from person");
+    }
+
+    @Test
+    public void testAggregateColumnTypeMixedRename() throws SQLException {
+        // validate the metadata type matches return type
+        runQueryTestColumnType("select count(age) as c, min(age) as m1, max(age), avg(age) from person");
+    }
+
+    @Test
+    public void testAggregateColumnTypeMixedAgg() throws SQLException {
+        // validate the metadata type matches return type
+        runQueryTestColumnType("select age, count(age) from person group by age");
     }
 }
