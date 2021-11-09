@@ -113,28 +113,19 @@ To start, download and install the most recent version of Tableau Desktop availa
    
 ### Connecting with Tableau
 
-##TODO AN-826: Update Taco file, take new screenshot, and update documentation.
-Tableau must be opened with command line to use the Tableau connector (until the Tableau connector is signed). 
-
-On Mac, the following command can be used: `/Applications/Tableau\ Desktop\ 2021.1.app/Contents/MacOS/Tableau -DDisableVerifyConnectorPluginSignature=true`
-
-On Windows, the following command can be used: `<Tableau exe install directory>/tableau.exe -DDisableVerifyConnectorPluginSignature=true`
+#### Ensure you have setup your SSH tunnel and hostname resolution as detailed above before proceeding.
 
 With Tableau now open, select More on under to a server on the left side. If the Tableau connector is correctly placed, you will see SQL via Gremlin by Amazon Neptune in the list.
 
 Select **SQL via Gremlin by Amazon Neptune**, you will see the following window:
 
-[<img src="samples/images/tableauSQLgremlin-main.png" width="500"/>](samples/images/tableauSQLgremlin-main.png)
+[<img src="samples/images/tableauSQLgremlin-main.png" width="500"/>](samples/images/tableau-sql-gremlin.png)
 
 You should not need to edit the port or add any additional connection options. Simply enter the Neptune Endpoint in a similar fashion to the above example, and select your IAM/SSL configuration. Note: you must enable SSL to use IAM.
 
 When you select Sign In, it may take >30 seconds to connect if you have a large graph as it is collecting vertex/edge tables, join vertices on edges, and perform visualizations.
 
-If you would like an SSH tunnel setup within the driver between the Neptune service and an EC2 instance, an internal SSH tunnel can be configured by the driver by filling in the advanced options tab.
-
-[<img src="samples/images/tableauSQLgremlin-advanced.png" width="500"/>](samples/images/tableauSQLgremlin-advanced.png)
-
-Minimally, an SSH user, SSH host name (or ip address), private key file must be provided. A passphrase for the private key file and hosts file may also be provided. Strict host checking can be disabled if required, however this is less secure.
+Very large graphs are not supported at this time and will cause timeouts.
 
 ### Tableau Troubleshooting
 
