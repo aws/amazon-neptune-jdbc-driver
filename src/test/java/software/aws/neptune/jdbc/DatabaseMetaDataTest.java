@@ -153,7 +153,7 @@ public class DatabaseMetaDataTest {
                 java.sql.DatabaseMetaData.sqlStateSQL);
         HelperFunctions.expectFunctionDoesntThrow(() -> databaseMetaData.getProcedureTerm(), "");
         HelperFunctions.expectFunctionDoesntThrow(() -> databaseMetaData.getSchemaTerm(), "");
-        HelperFunctions.expectFunctionDoesntThrow(() -> databaseMetaData.getIdentifierQuoteString(), "`");
+        HelperFunctions.expectFunctionDoesntThrow(() -> databaseMetaData.getIdentifierQuoteString(), "\"");
         HelperFunctions
                 .expectFunctionDoesntThrow(() -> databaseMetaData.getRowIdLifetime(), RowIdLifetime.ROWID_UNSUPPORTED);
 
