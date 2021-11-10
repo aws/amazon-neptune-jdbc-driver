@@ -21,7 +21,10 @@ package org.twilmes.sql.gremlin.adapter.converter.ast.nodes.select;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import org.apache.calcite.sql.SqlBasicCall;
+import org.apache.calcite.sql.SqlIdentifier;
+import org.apache.calcite.sql.SqlKind;
 import org.apache.calcite.sql.SqlNode;
+import org.apache.calcite.sql.SqlPrefixOperator;
 import org.apache.calcite.sql.SqlSelect;
 import org.apache.tinkerpop.gremlin.groovy.jsr223.GroovyTranslator;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversal;
@@ -38,7 +41,8 @@ import org.twilmes.sql.gremlin.adapter.converter.ast.nodes.operands.GremlinSqlId
 import org.twilmes.sql.gremlin.adapter.converter.ast.nodes.operator.GremlinSqlAsOperator;
 import org.twilmes.sql.gremlin.adapter.converter.ast.nodes.operator.GremlinSqlBasicCall;
 import org.twilmes.sql.gremlin.adapter.converter.ast.nodes.operator.GremlinSqlOperator;
-import org.twilmes.sql.gremlin.adapter.converter.ast.nodes.operator.GremlinSqlPostFixOperator;
+import org.twilmes.sql.gremlin.adapter.converter.ast.nodes.operator.GremlinSqlPostfixOperator;
+import org.twilmes.sql.gremlin.adapter.converter.ast.nodes.operator.logic.GremlinSqlBinaryOperator;
 import org.twilmes.sql.gremlin.adapter.converter.schema.gremlin.GremlinTableBase;
 import org.twilmes.sql.gremlin.adapter.results.SqlGremlinQueryResult;
 import org.twilmes.sql.gremlin.adapter.results.pagination.Pagination;
@@ -210,9 +214,9 @@ public class GremlinSqlSelectSingle extends GremlinSqlSelect {
         } else if (gremlinSqlNode instanceof GremlinSqlBasicCall) {
             final GremlinSqlBasicCall gremlinSqlBasicCall = (GremlinSqlBasicCall) gremlinSqlNode;
             gremlinSqlBasicCall.generateTraversal(graphTraversal1);
-            if (gremlinSqlBasicCall.getGremlinSqlOperator() instanceof GremlinSqlPostFixOperator) {
-                final GremlinSqlPostFixOperator gremlinSqlPostFixOperator =
-                        (GremlinSqlPostFixOperator) gremlinSqlBasicCall.getGremlinSqlOperator();
+            if (gremlinSqlBasicCall.getGremlinSqlOperator() instanceof GremlinSqlPostfixOperator) {
+                final GremlinSqlPostfixOperator gremlinSqlPostFixOperator =
+                        (GremlinSqlPostfixOperator) gremlinSqlBasicCall.getGremlinSqlOperator();
                 graphTraversal.by(graphTraversal1, gremlinSqlPostFixOperator.getOrder());
             } else {
                 graphTraversal.by(graphTraversal1);
@@ -233,8 +237,33 @@ public class GremlinSqlSelectSingle extends GremlinSqlSelect {
         if (sqlSelect.getWhere() == null) {
             return;
         }
-        final GremlinSqlBasicCall gremlinSqlBasicCall = GremlinSqlFactory.createNodeCheckType(sqlSelect.getWhere(),
-                GremlinSqlBasicCall.class);
-        gremlinSqlBasicCall.generateTraversal(graphTraversal);
+        SqlNode sqlNode = sqlSelect.getWhere();
+        if (sqlNode instanceof SqlBasicCall) {
+            SqlBasicCall sqlBasicCall = (SqlBasicCall) sqlNode;
+            if (sqlBasicCall.getOperator() instanceof SqlPrefixOperator) {
+                SqlPrefixOperator sqlPrefixOperator = (SqlPrefixOperator) sqlBasicCall.getOperator();
+                if (sqlPrefixOperator.kind.equals(SqlKind.NOT)) {
+                    if (sqlBasicCall.getOperandList().size() == 1 && sqlBasicCall.operands.length == 1) {
+                        GremlinSqlBinaryOperator.appendBooleanEquals(graphTraversal,
+                                GremlinSqlFactory.createNodeCheckType(sqlBasicCall.operands[0],
+                                        GremlinSqlIdentifier.class), false);
+                        return;
+                    }
+                    throw new SQLException(
+                            "Error: Unsupported WHERE clause - NOT can only be applied to a single boolean value in WHERE.");
+                }
+                throw new SQLException(
+                        "Error: Unsupported WHERE clause - The only WHERE prefix operator supported is 'NOT'.");
+            }
+            GremlinSqlFactory.createNodeCheckType(sqlSelect.getWhere(), GremlinSqlBasicCall.class)
+                    .generateTraversal(graphTraversal);
+            return;
+        } else if (sqlNode instanceof SqlIdentifier) {
+            GremlinSqlBinaryOperator.appendBooleanEquals(graphTraversal, GremlinSqlFactory.createNodeCheckType(sqlNode,
+                    GremlinSqlIdentifier.class),true);
+            return;
+        }
+        throw new SQLException(
+                "Error: Unsupported WHERE clause - Only basic literal comparisons are supported at this time.");
     }
 }

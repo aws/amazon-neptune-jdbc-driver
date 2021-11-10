@@ -24,12 +24,12 @@ public class SpaceTestGraph implements TestGraph {
         final Vertex jupiter = graph.addVertex(label, "planet", "name", "jupiter");
 
         // astronauts
-        final Vertex tom = graph.addVertex(label, "person", "name", "Tom", "age", 35);
-        final Vertex patty = graph.addVertex(label, "person", "name", "Patty", "age", 29);
-        final Vertex phil = graph.addVertex(label, "person", "name", "Phil", "age", 31);
-        final Vertex susan = graph.addVertex(label, "person", "name", "Susan", "age", 45);
-        final Vertex juanita = graph.addVertex(label, "person", "name", "Juanita", "age", 50);
-        final Vertex pavel = graph.addVertex(label, "person", "name", "Pavel", "age", 30);
+        final Vertex tom = graph.addVertex(label, "person", "name", "Tom", "age", 35, "wentToSpace", false);
+        final Vertex patty = graph.addVertex(label, "person", "name", "Patty", "age", 29, "wentToSpace", false);
+        final Vertex phil = graph.addVertex(label, "person", "name", "Phil", "age", 31, "wentToSpace", false);
+        final Vertex susan = graph.addVertex(label, "person", "name", "Susan", "age", 45, "wentToSpace", true);
+        final Vertex juanita = graph.addVertex(label, "person", "name", "Juanita", "age", 50, "wentToSpace", true);
+        final Vertex pavel = graph.addVertex(label, "person", "name", "Pavel", "age", 30, "wentToSpace", true);
 
         // spaceships
         final Vertex spaceship1 = graph.addVertex(label, "spaceship", "name", "Ship 1", "model", "delta 1");

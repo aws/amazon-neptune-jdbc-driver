@@ -29,7 +29,7 @@ import org.twilmes.sql.gremlin.adapter.converter.SqlMetadata;
 import org.twilmes.sql.gremlin.adapter.converter.SqlTraversalEngine;
 import org.twilmes.sql.gremlin.adapter.converter.ast.nodes.GremlinSqlNode;
 import org.twilmes.sql.gremlin.adapter.converter.ast.nodes.operands.GremlinSqlIdentifier;
-import org.twilmes.sql.gremlin.adapter.converter.ast.nodes.operator.logic.GremlinSqlNumericLiteral;
+import org.twilmes.sql.gremlin.adapter.converter.ast.nodes.operator.logic.GremlinSqlLiteral;
 import java.sql.SQLException;
 import java.util.List;
 
@@ -38,14 +38,14 @@ import java.util.List;
  *
  * @author Lyndon Bauto (lyndonb@bitquilltech.com)
  */
-public class GremlinSqlPostFixOperator extends GremlinSqlOperator {
-    private static final Logger LOGGER = LoggerFactory.getLogger(GremlinSqlAsOperator.class);
+public class GremlinSqlPostfixOperator extends GremlinSqlOperator {
+    private static final Logger LOGGER = LoggerFactory.getLogger(GremlinSqlPostfixOperator.class);
     private final SqlPostfixOperator sqlPostfixOperator;
     private final SqlMetadata sqlMetadata;
     private final List<GremlinSqlNode> sqlOperands;
 
-    public GremlinSqlPostFixOperator(final SqlPostfixOperator sqlPostfixOperator, final List<GremlinSqlNode> gremlinSqlNodes,
-                                final SqlMetadata sqlMetadata) {
+    public GremlinSqlPostfixOperator(final SqlPostfixOperator sqlPostfixOperator, final List<GremlinSqlNode> gremlinSqlNodes,
+                                     final SqlMetadata sqlMetadata) {
         super(sqlPostfixOperator, gremlinSqlNodes, sqlMetadata);
         this.sqlPostfixOperator = sqlPostfixOperator;
         this.sqlMetadata = sqlMetadata;
@@ -63,7 +63,7 @@ public class GremlinSqlPostFixOperator extends GremlinSqlOperator {
     protected void appendTraversal(final GraphTraversal<?, ?> graphTraversal) throws SQLException {
         if (sqlOperands.get(0) instanceof GremlinSqlBasicCall) {
             ((GremlinSqlBasicCall) sqlOperands.get(0)).generateTraversal(graphTraversal);
-        } else if (!(sqlOperands.get(0) instanceof GremlinSqlIdentifier) && !(sqlOperands.get(0) instanceof GremlinSqlNumericLiteral)) {
+        } else if (!(sqlOperands.get(0) instanceof GremlinSqlIdentifier) && !(sqlOperands.get(0) instanceof GremlinSqlLiteral)) {
             throw new SQLException(
                     "Error: expected operand to be GremlinSqlBasicCall or GremlinSqlIdentifier in GremlinSqlOperator.");
         }

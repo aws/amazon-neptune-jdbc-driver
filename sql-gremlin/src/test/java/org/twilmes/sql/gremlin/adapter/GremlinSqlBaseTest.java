@@ -98,15 +98,20 @@ public abstract class GremlinSqlBaseTest {
     }
 
     protected void runQueryTestResults(final String query, final List<String> columnNames,
-                                       final List<List<Object>> rows)
+                                       final List<List<?>> rows)
             throws SQLException {
         final SqlGremlinTestResult result = new SqlGremlinTestResult(converter.executeQuery(query));
         assertRows(result.getRows(), rows);
         assertColumns(result.getColumns(), columnNames);
     }
 
+    protected void runQueryTestThrows(final String query, final String errorMessage)
+            throws SQLException {
+        final SqlGremlinTestResult result = new SqlGremlinTestResult(converter.executeQuery(query));
+    }
+
     @SafeVarargs
-    public final List<List<Object>> rows(final List<Object>... rows) {
+    public final List<List<?>> rows(final List<Object>... rows) {
         return new ArrayList<>(Arrays.asList(rows));
     }
 
@@ -118,7 +123,7 @@ public abstract class GremlinSqlBaseTest {
         return new ArrayList<>(Arrays.asList(row));
     }
 
-    public void assertRows(final List<List<Object>> actual, final List<List<Object>> expected) {
+    public void assertRows(final List<List<?>> actual, final List<List<?>> expected) {
         Assertions.assertEquals(expected.size(), actual.size());
         for (int i = 0; i < actual.size(); i++) {
             Assertions.assertEquals(expected.get(i).size(), actual.get(i).size());
@@ -142,7 +147,7 @@ public abstract class GremlinSqlBaseTest {
 
     @Getter
     static class SqlGremlinTestResult {
-        private final List<List<Object>> rows = new ArrayList<>();
+        private final List<List<?>> rows = new ArrayList<>();
         private final List<String> columns;
 
         SqlGremlinTestResult(final SqlGremlinQueryResult sqlGremlinQueryResult) throws SQLException {
@@ -158,7 +163,9 @@ public abstract class GremlinSqlBaseTest {
                         throw e;
                     }
                 }
-                this.rows.add((List<Object>) res);
+                if (res instanceof List<?>) {
+                    this.rows.add((List<?>) res);
+                }
             } while (true);
         }
     }
