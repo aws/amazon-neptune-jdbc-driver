@@ -77,6 +77,7 @@ public abstract class ResultSetMetaData implements java.sql.ResultSetMetaData {
             case Types.BIT:
                 return 1;
             case Types.VARCHAR:
+                return Integer.MAX_VALUE;
             case Types.NULL:
                 return 0;
             case Types.DOUBLE:
@@ -104,10 +105,12 @@ public abstract class ResultSetMetaData implements java.sql.ResultSetMetaData {
         verifyColumnIndex(column);
         final int type = getColumnType(column);
         switch (type) {
+            case Types.BOOLEAN:
+                return 5;
             case Types.BIT:
                 return 1;
             case Types.VARCHAR:
-                return 256;
+                return Integer.MAX_VALUE;
             case Types.NULL:
                 return 0;
             case Types.DOUBLE:
@@ -120,10 +123,13 @@ public abstract class ResultSetMetaData implements java.sql.ResultSetMetaData {
             case Types.TIMESTAMP:
                 return 24;
             case Types.BIGINT:
+                return 20;
             case Types.INTEGER:
+                return 11;
             case Types.SMALLINT:
+                return 5;
             case Types.TINYINT:
-                return 19;
+                return 3;
             default:
                 LOGGER.warn(String.format("Unsupported data type for getPrecision(%d).", type));
                 return 0;
