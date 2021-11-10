@@ -103,6 +103,17 @@ task checkSpotBugsMainReport {
     }
 }
 
+tasks.register('licenseAndNotice') {
+    copy {
+        from "${rootDir}/LICENSE"
+        into 'src/main/resources'
+    }
+    copy {
+        from "${rootDir}/NOTICE"
+        into 'src/main/resources'
+    }
+}
+
 task checkSpotBugsTestReport {
     doLast {
         def xmlReport = spotbugsTest.reports.getByName("XML")
@@ -171,7 +182,10 @@ jacocoTestCoverageVerification.dependsOn jacocoTestReport
  * License Plugin
  */
 license {
+    header =  project.file('license-header.txt')
     ext.year = Calendar.getInstance().get(Calendar.YEAR)
+    exclude "**/*.properties"
+    exclude "**/*.jar"
     headerDefinitions {
         slash_star_with_space {
             firstLine = '/*'
@@ -258,13 +272,15 @@ dependencies {
 }
 
 shadowJar {
-    baseName = rootProject.name
-    classifier = ''
+    dependsOn('licenseAndNotice')
 
-    // todo: exclude
+    //  Exclude driver unnecessary classes.
+    exclude 'org/apache/calcite/jdbc/Driver*'
+    exclude 'org/apache/calcite/avatica/remote/Driver*'
+    exclude 'org/apache/commons/dbcp2/PoolingDriver*'
+
     dependencies {
         exclude(dependency('org.slf4j:.*'))
         exclude(dependency('org.codehaus.janino::'))
-        // exclude(dependency('org.apache.logging.log4j:.*:.*'))
     }
 }
