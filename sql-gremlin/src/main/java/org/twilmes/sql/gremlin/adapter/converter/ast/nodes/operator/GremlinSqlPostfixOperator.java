@@ -38,14 +38,14 @@ import java.util.List;
  *
  * @author Lyndon Bauto (lyndonb@bitquilltech.com)
  */
-public class GremlinSqlPostFixOperator extends GremlinSqlOperator {
-    private static final Logger LOGGER = LoggerFactory.getLogger(GremlinSqlAsOperator.class);
+public class GremlinSqlPostfixOperator extends GremlinSqlOperator {
+    private static final Logger LOGGER = LoggerFactory.getLogger(GremlinSqlPostfixOperator.class);
     private final SqlPostfixOperator sqlPostfixOperator;
     private final SqlMetadata sqlMetadata;
     private final List<GremlinSqlNode> sqlOperands;
 
-    public GremlinSqlPostFixOperator(final SqlPostfixOperator sqlPostfixOperator, final List<GremlinSqlNode> gremlinSqlNodes,
-                                final SqlMetadata sqlMetadata) {
+    public GremlinSqlPostfixOperator(final SqlPostfixOperator sqlPostfixOperator, final List<GremlinSqlNode> gremlinSqlNodes,
+                                     final SqlMetadata sqlMetadata) {
         super(sqlPostfixOperator, gremlinSqlNodes, sqlMetadata);
         this.sqlPostfixOperator = sqlPostfixOperator;
         this.sqlMetadata = sqlMetadata;

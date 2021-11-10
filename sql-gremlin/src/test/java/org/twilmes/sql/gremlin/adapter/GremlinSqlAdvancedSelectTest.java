@@ -28,7 +28,6 @@ import java.sql.SQLException;
 public class GremlinSqlAdvancedSelectTest extends GremlinSqlBaseTest {
 
     GremlinSqlAdvancedSelectTest() throws SQLException {
-
     }
 
     @Override
@@ -81,5 +80,23 @@ public class GremlinSqlAdvancedSelectTest extends GremlinSqlBaseTest {
                 rows(r("Phil", 31), r("Pavel", 30), r("Patty", 29)));
         runQueryTestResults("SELECT name, age FROM person WHERE age > 35 ORDER BY age DESC", columns("name", "age"),
                 rows(r("Juanita", 50), r("Susan", 45)));
+
+        // WHERE with AND.
+        runQueryTestResults("SELECT name, age FROM person WHERE name = 'Tom' AND age = 35 ORDER BY age", columns("name", "age"),
+                rows(r("Tom", 35)));
+        runQueryTestResults("SELECT name, age FROM person WHERE name = 'Tom' AND age = 35 AND NOT wentToSpace ORDER BY age", columns("name", "age"),
+                rows(r("Tom", 35)));
+        runQueryTestResults("SELECT name, age FROM person WHERE name = 'Tom' AND age = 35 AND wentToSpace ORDER BY age", columns("name", "age"),
+                rows());
+        runQueryTestResults("SELECT name, age FROM person WHERE name = 'Pavel' AND age = 30 AND wentToSpace ORDER BY age", columns("name", "age"),
+                rows(r("Pavel", 30)));
+
+        runQueryTestResults("SELECT name, age FROM person WHERE name = 'Tom' OR name = 'Juanita' ORDER BY age", columns("name", "age"),
+                rows(r("Tom", 35), r("Juanita", 50)));
+        runQueryTestResults("SELECT name, age FROM person WHERE name = 'Tom' OR name = 'Juanita' OR age = 31 ORDER BY age", columns("name", "age"),
+                rows(r("Phil", 31), r("Tom", 35), r("Juanita", 50)));
+
+        runQueryTestResults("SELECT name, age FROM person WHERE name = 'Tom' OR name = 'Juanita' ORDER BY age", columns("name", "age"),
+                rows(r("Tom", 35), r("Juanita", 50)));
     }
 }

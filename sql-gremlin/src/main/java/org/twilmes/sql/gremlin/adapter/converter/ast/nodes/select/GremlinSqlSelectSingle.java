@@ -41,7 +41,7 @@ import org.twilmes.sql.gremlin.adapter.converter.ast.nodes.operands.GremlinSqlId
 import org.twilmes.sql.gremlin.adapter.converter.ast.nodes.operator.GremlinSqlAsOperator;
 import org.twilmes.sql.gremlin.adapter.converter.ast.nodes.operator.GremlinSqlBasicCall;
 import org.twilmes.sql.gremlin.adapter.converter.ast.nodes.operator.GremlinSqlOperator;
-import org.twilmes.sql.gremlin.adapter.converter.ast.nodes.operator.GremlinSqlPostFixOperator;
+import org.twilmes.sql.gremlin.adapter.converter.ast.nodes.operator.GremlinSqlPostfixOperator;
 import org.twilmes.sql.gremlin.adapter.converter.ast.nodes.operator.logic.GremlinSqlBinaryOperator;
 import org.twilmes.sql.gremlin.adapter.converter.schema.gremlin.GremlinTableBase;
 import org.twilmes.sql.gremlin.adapter.results.SqlGremlinQueryResult;
@@ -214,9 +214,9 @@ public class GremlinSqlSelectSingle extends GremlinSqlSelect {
         } else if (gremlinSqlNode instanceof GremlinSqlBasicCall) {
             final GremlinSqlBasicCall gremlinSqlBasicCall = (GremlinSqlBasicCall) gremlinSqlNode;
             gremlinSqlBasicCall.generateTraversal(graphTraversal1);
-            if (gremlinSqlBasicCall.getGremlinSqlOperator() instanceof GremlinSqlPostFixOperator) {
-                final GremlinSqlPostFixOperator gremlinSqlPostFixOperator =
-                        (GremlinSqlPostFixOperator) gremlinSqlBasicCall.getGremlinSqlOperator();
+            if (gremlinSqlBasicCall.getGremlinSqlOperator() instanceof GremlinSqlPostfixOperator) {
+                final GremlinSqlPostfixOperator gremlinSqlPostFixOperator =
+                        (GremlinSqlPostfixOperator) gremlinSqlBasicCall.getGremlinSqlOperator();
                 graphTraversal.by(graphTraversal1, gremlinSqlPostFixOperator.getOrder());
             } else {
                 graphTraversal.by(graphTraversal1);
