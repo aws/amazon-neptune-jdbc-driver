@@ -27,7 +27,7 @@ import org.twilmes.sql.gremlin.adapter.converter.SqlMetadata;
 import org.twilmes.sql.gremlin.adapter.converter.SqlTraversalEngine;
 import org.twilmes.sql.gremlin.adapter.converter.ast.nodes.GremlinSqlNode;
 import org.twilmes.sql.gremlin.adapter.converter.ast.nodes.operands.GremlinSqlIdentifier;
-import org.twilmes.sql.gremlin.adapter.converter.ast.nodes.operator.logic.GremlinSqlNumericLiteral;
+import org.twilmes.sql.gremlin.adapter.converter.ast.nodes.operator.logic.GremlinSqlLiteral;
 import java.sql.SQLException;
 import java.util.List;
 
@@ -57,7 +57,7 @@ public class GremlinSqlAsOperator extends GremlinSqlOperator {
         if (sqlOperands.get(0) instanceof GremlinSqlBasicCall) {
             ((GremlinSqlBasicCall) sqlOperands.get(0)).generateTraversal(graphTraversal);
         } else if (!(sqlOperands.get(0) instanceof GremlinSqlIdentifier) &&
-                !(sqlOperands.get(0) instanceof GremlinSqlNumericLiteral)) {
+                !(sqlOperands.get(0) instanceof GremlinSqlLiteral)) {
             throw new SQLException(
                     "Error: expected operand to be GremlinSqlBasicCall or GremlinSqlIdentifier in GremlinSqlOperator.");
         }

@@ -59,7 +59,7 @@ public class Pagination implements Runnable {
             final PrintWriter pw = new PrintWriter(sw);
             e.printStackTrace(pw);
             LOGGER.error("Encountered exception", e);
-            sqlGremlinQueryResult.setPaginationException(new SQLException(e + pw.toString()));
+            sqlGremlinQueryResult.setPaginationException(new SQLException(e + sw.toString()));
         }
     }
 
