@@ -42,7 +42,7 @@ public class GremlinSqlAdvancedSelectTest extends GremlinSqlBaseTest {
     }
 
     @Test
-    public void testWhereNumeric() throws SQLException {
+    public void testWhere() throws SQLException {
         // WHERE with string literal.
         runQueryTestResults("SELECT name, age FROM person WHERE name = 'Tom' ORDER BY age", columns("name", "age"),
                 rows(r("Tom", 35)));
