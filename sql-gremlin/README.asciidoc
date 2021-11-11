@@ -196,10 +196,9 @@ projectItem:
 
 Queries without a `FROM` clause or only using `VALUES` in the `FROM` clause are not supported.
 
-A `tableExpression` must specify 1 or more tables as a comma separated list or using `JOIN` keywords. See the <<_joins>> section for more information on supported join operations.
+A `tableExpression` must specify 1 or more tables as a comma separated list or using `JOIN` keywords. See the <<join, Join>> section for more information on supported join operations.
 
-A `projectItem` in `SELECT` can be a reference to a column, or aggregation expression using the supported aggregation functions listed in <<_operators_and_functions>>.
-A `booleanExpression` is the same but must resolve to a `boolean` value.
+A `projectItem` in `SELECT` can be a reference to a column, or aggregation expression using the supported aggregation functions listed in <<operators, Operators and Functions>>. A `booleanExpression` is the same but must resolve to a `boolean` value.
 
 To order by a value, it must be part of the `SELECT` list. Group by and order by using column aliases is currently not supported.
 
@@ -212,6 +211,7 @@ Quoting is optional but unquoted identifiers must start with a letter and can on
 
 Identifier matching is case-sensitive and identifiers that match a reserved SQL keyword must be quoted or use fully qualified names.
 
+[[join]]
 === Joins
 ==== Cross Collection Joins
 Currently, cross collection joins are not supported.
@@ -232,6 +232,7 @@ The driver recognizes the following SQL data types:
 * `CHAR` and `VARCHAR` - String literal must be enclosed in single-quotes.
 * `DATE`
 
+[[operators]]
 === Operators and Functions
 Supported operators are listed below. Arithmetic, string, conditional and date operators and functions are currently not support.
 
