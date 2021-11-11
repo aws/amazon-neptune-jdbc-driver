@@ -1,26 +1,6 @@
 # Using SQL-Gremlin with Amazon Neptune JDBC Driver
 
-This driver supports using SQL, which it will translate into Gremlin for executing statements against Neptune.
-
-## SQL Support
-
-SQL SELECT and INNER JOIN commands are supports, additionally, the following SQL functions are also supported:
-
-### General Operators and Functions
-
-- LIMIT
-- ORDER BY
-- GROUP BY
-- HAVING
-
-### Aggregate Operators and Functions
-
-- MAX
-- MIN
-- COUNT
-- DISTINCT
-- SUM
-- AVG
+This driver supports using SQL, which it will translate into Gremlin for executing statements against Neptune. For additional information about SQL-Gremlin and the type of SQL queries this driver supports, see the [sql-gremlin documentation](../sql-gremlin/README.asciidoc).
 
 ### Creating a connection
 

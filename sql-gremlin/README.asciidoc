@@ -1,5 +1,7 @@
 SQL-Gremlin
 ===========
+:toc:
+
 The SQL-Gremlin compiler turns your SQL queries into Gremlin traversals and runs them against your favorite TinkerPop 3 enabled graph database.
 
 Motivation
