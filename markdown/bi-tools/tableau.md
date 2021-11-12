@@ -8,11 +8,11 @@ Download the latest version of [Tableau Desktop](https://www.tableau.com/product
 
 #### Adding the Amazon Neptune JDBC Driver
 
-1. [Download](../setup/configuration.md#neptune-jdbc-driver) the Neptune JDBC driver `JAR` file and copy it to one of these directories according to your operating system:
+1. [Download](https://github.com/aws/amazon-neptune-jdbc-driver/releases) the Neptune JDBC driver `JAR` file and copy it to one of these directories according to your operating system:
    - **_Windows_**: `C:\Program Files\Tableau\Drivers`
    - **_Mac_**: `~/Library/Tableau/Drivers`
 
-2. [Download](../setup/configuration.md#neptune-jdbc-driver) the Neptune Tableau connector (a `TACO` file) and copy it to your `My Tableau Repository/Connectors`
+2. [Download](https://github.com/aws/amazon-neptune-jdbc-driver/releases) the Neptune Tableau connector (a `TACO` file) and copy it to your `My Tableau Repository/Connectors`
    directory.
    - **_Windows_**: `C:\Users\[user]\Documents\My Tableau Repository\Connectors`
    - **_Mac_**: `/Users/[user]/Documents/My Tableau Repository/Connectors`
