@@ -94,7 +94,9 @@ Because the JDBC driver is available as open source, contribution from the commu
 
 ## Building from source
 
-If you wish to contribute, you will need to build the driver. The requirements to build the driver are very simple, you only need a Java 8 compiler and runtime environment and you can build and run the driver. This library depends on the neptune-export library, which depends on the gremlin-client library. So before building this library, build the gremlin-client, then the neptune-export library, which are both included in this repository.
+If you wish to contribute, you will need to build the driver. The requirements to build the driver are very simple, you only need a Java 8 compiler with a runtime environment and you can build and run the driver.
+
+Git submodules must be updated before attempting to build the driver.
 
 ## Security issue notifications
 
