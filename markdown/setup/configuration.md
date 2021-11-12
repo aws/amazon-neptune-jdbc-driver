@@ -7,7 +7,7 @@ To connect to Amazon Neptune, follow the instructions below.
 - [Downloading the Driver](#downloading-the-driver)
 - [Using an SSH Tunnel to Connect to Amazon Neptune](#using-an-ssh-tunnel-to-connect-to-amazon-neptune)
 - [Adding a SSH Tunnel Lookup](#adding-a-ssh-tunnel-lookup)
-- [Adding SERVICE_REGION Environment Variable](#adding-service_region-environment-variable)
+- [Setup Environment for IAM Authentication](#setup-environment-for-iam-authentication)
 
 ### Setting up an Amazon Neptune Cluster
 
