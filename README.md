@@ -92,13 +92,13 @@ To troubleshoot or debug issues with the JDBC driver, please see the [troublesho
 
 Because the JDBC driver is available as open source, contribution from the community is encouraged. If you are interested in improving performance, adding new features, or fixing bugs, please see our [contributing guidelines](./CONTRIBUTING.md).
 
-## Building from source
+## Building from Source
 
 If you wish to contribute, you will need to build the driver. The requirements to build the driver are very simple, you only need a Java 8 compiler with a runtime environment and you can build and run the driver.
 
 Git submodules must be updated before attempting to build the driver.
 
-## Security issue notifications
+## Security Issue Notifications
 
 If you discover a potential security issue in this project we ask that you notify AWS/Amazon Security via our [vulnerability reporting page](http://aws.amazon.com/security/vulnerability-reporting/). Please do **not** create a public GitHub issue.
 
