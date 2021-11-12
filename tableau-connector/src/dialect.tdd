@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <dialect name='SQL via Gremlin Dialect'
-         class='neptunejdbc'
+         class='neptune-jdbc'
          version='18.1'>
   <function-map>
     <function group='aggregate' name='MAX' return-type='bool'>

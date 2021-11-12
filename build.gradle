@@ -10,7 +10,7 @@ plugins {
 apply plugin: 'java'
 apply plugin: 'com.github.johnrengelman.shadow'
 group 'software.aws.neptune.jdbc'
-version '1.0-SNAPSHOT'
+version project.hasProperty("BETA_VERSION") ? "${project.MAJOR_VERSION}.${project.MINOR_VERSION}.${project.PATCH_VERSION}-beta.${project.BETA_VERSION}" : "${project.MAJOR_VERSION}.${project.MINOR_VERSION}.${project.PATCH_VERSION}"
 description 'neptune-jdbc-driver'
 
 java {
@@ -133,6 +133,13 @@ task checkSpotBugsTestReport {
 
 spotbugsMain.finalizedBy checkSpotBugsMainReport
 spotbugsTest.finalizedBy checkSpotBugsTestReport
+
+task writeProperties(type: WriteProperties) {
+    outputFile("$projectDir/src/main/resources/project.properties")
+    property("driver.major.version", MAJOR_VERSION)
+    property("driver.minor.version", MINOR_VERSION)
+    property("driver.full.version", project.version)
+}
 
 /**
  * JaCoCo Plugin
