@@ -4,13 +4,17 @@ This driver provides read-only JDBC connectivity for the Amazon Neptune service 
 
 ## Using the Driver
 
-The driver comes packed in a single jar file. To use the driver, place the jar file in the classpath of the application which is going to use it. Alternatively, if using the driver with a Maven/Gradle application, the jar can be used to install the driver via their respective commands.
+The driver comes packed in a single jar file. To use the driver, place the jar file in the classpath of the application which is going to use it.
 
-For the initial public preview release, the driver will be available for download on GitHub along with the driver's .jar file and .taco file. To use the Driver in Tableau, please refer to the documentation on connecting with Tableau provided below. 
+[//]: # (TODO AN-694 - Uncomment this: Alternatively, if using the driver with a Maven/Gradle application, the jar can be used to install the driver via their respective commands.)
+
+For the initial public preview release, the driver will be available for download on GitHub along with the driver's .jar file and .taco file.
+
+To use the Driver in BI tools, please refer to the documentation below. 
 
 To connect to Amazon Neptune using the JDBC driver, the Neptune instance must be available through an SSH tunnel, load balancer, or the JDBC driver must be deployed in an EC2 instance.
 
-#### Important note: SSH Tunnel and host file must be configured before using the drive to connect to Neptune, please see [SSH configuration](markdown/setup/configuration.md).
+**SSH Tunnel and host file must be configured before using the drive to connect to Neptune, please see [SSH configuration](markdown/setup/configuration.md).**
 
 ### Specifications
 
@@ -55,22 +59,28 @@ For more example applications, see the [sample applications](./src/test/java/sam
 
 ### SQL
 The driver supports a subset of SQL-92 and some common extensions. 
-To connection to Neptune using SQL, please see [SQL connection configurations](markdown/sql.md) for details about connection string configurations. 
-#### For information on the limitations of the SQL query support please see [sql-gremlin specifications](sql-gremlin/README.asciidoc).
+
+To connection to Amazon Neptune using SQL, please see the [SQL connection configurations](markdown/sql.md) for details about connection string configurations. 
+
+#### For information on the limitations of the SQL query support please see the [SQL specifications](sql-gremlin/README.asciidoc).
 
 ### Gremlin
+
 Gremlin is a graph traversal language supported by Neptune. To issue Gremlin queries to Neptune though the driver, please see
 [Gremlin connection configurations](markdown/gremlin.md).
 
 ### openCypher
+
 openCypher is an open query language for property graph database supported by Neptune. To issue openCypher queries to Neptune though the driver, please see
 [openCypher connection configurations](markdown/opencypher.md).
 
 ### SPARQL
+
 SPARQL is an RDF query language supported by Neptune. To issue SPARQL queries to Neptune though the driver, please see
 [SPARQL connection configurations](markdown/sparql.md).
 
 ## Driver Setup in BI Applications
+
 To learn how to set up the driver in various BI tools, instructions are outlined here for:
 * [Tableau Desktop](markdown/bi-tools/tableau.md)
 
@@ -85,12 +95,6 @@ Because the JDBC driver is available as open source, contribution from the commu
 ## Building from source
 
 If you wish to contribute, you will need to build the driver. The requirements to build the driver are very simple, you only need a Java 8 compiler and runtime environment and you can build and run the driver. This library depends on the neptune-export library, which depends on the gremlin-client library. So before building this library, build the gremlin-client, then the neptune-export library, which are both included in this repository.
-
-## Testing
-
-[![codecov](https://codecov.io/gh/Bit-Quill/neptunejdbc/branch/develop/graph/badge.svg?token=E54Y02A3HE)](https://codecov.io/gh/Bit-Quill/neptunejdbc)
-
-The project is setup to do continuous unit testing whenever pull requests are generated, merged, or code is checked in. Integration tests can also be executed when major changes are made, but this will require coordination with a properly integrated server.
 
 ## Security issue notifications
 

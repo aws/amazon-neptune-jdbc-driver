@@ -1,6 +1,26 @@
-# Using Gremlin with Amazon Neptune JDBC Driver
+# Connecting to Amazon Neptune
 
-To connect to Amazon Neptune using the JDBC driver, the Neptune instance must be available through an SSH tunnel, load balancer, or the JDBC driver must be deployed in an EC2 instance. The SSH tunnel can be setup following the instructions below.
+To connect to Amazon Neptune, follow the instructions below.
+
+## Topics
+- [Setting up an Amazon Neptune Cluster](#setting-up-an-amazon-neptune-cluster)
+- [Downloading the Driver](#downloading-the-driver)
+- [Using an SSH Tunnel to Connect to Amazon Neptune](#using-an-ssh-tunnel-to-connect-to-amazon-neptune)
+- [Adding a SSH Tunnel Lookup](#adding-a-ssh-tunnel-lookup)
+- [Adding SERVICE_REGION Environment Variable](#adding-service_region-environment-variable)
+
+### Setting up an Amazon Neptune Cluster
+
+If you don't already have an Amazon Neptune cluster, please refer to the [get started](https://aws.amazon.com/neptune/getting-started/) documentation for Amazon neptune.
+
+
+### Downloading the Driver
+
+Download the Neptune JDBC driver [here](https://github.com/aws/amazon-neptune-jdbc-driver/releases). 
+
+The driver is packaged as a single JAR file (e.g., `neptune-jdbc-1.0.0-beta.1-all.jar`).
+
+To connect to Amazon Neptune using the JDBC driver, the Neptune instance must be available through an SSH tunnel, load balancer, or the JDBC driver must be deployed in an EC2 instance.
 
 ### Using an SSH Tunnel to Connect to Amazon Neptune
 
@@ -20,9 +40,7 @@ ssh -i "ec2Access.pem" -L 8182:sample-cluster.node.us-east-1.docdb.amazonaws.com
 
 This is a prerequisite for connecting to any BI tool running on a client outside your VPC.
 
-#### Important: You must also add the SSH tunnel lookup detailed below.
-
-### Adding a SSH Tunnel Lookup Connection to Amazon Neptune
+### Adding a SSH Tunnel Lookup
 
 To add to hosts, add the cluster name to your host file (`/etc/hosts` on Mac or `C:\Windows\System32\drivers\etc\hosts` on Windows).
 Add the following line to the list of hosts lookup:
@@ -30,3 +48,11 @@ Add the following line to the list of hosts lookup:
 
 From our sample above, we would use:
 `127.0.0.1        sample-cluster.node.us-east-1.docdb.amazonaws.com`
+
+### Setup Environment for IAM Authentication
+
+First follow the [IAM Authentication setup instructions](https://docs.aws.amazon.com/general/latest/gr/aws-access-keys-best-practices.html#iam-user-access-keys) to configure your system for IAM. 
+
+If you are using IAM authentication, you must set the SERVICE_REGION environment variable to an appropriate value (the region you are connecting to, such as `us-east-1`).
+
+**For Mac you must launch your BI tool through terminal to have the environment variables loaded.**
