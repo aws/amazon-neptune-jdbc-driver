@@ -1,12 +1,12 @@
 <?xml version='1.0' encoding='utf-8' ?>
 
-<connector-plugin class='neptunejdbc' superclass='jdbc' plugin-version='1.13.0.0' name='Amazon Neptune' version='18.1' min-version-tableau='2020.3'>
+<connector-plugin class='neptune-jdbc' superclass='jdbc' plugin-version='1.13.0.0' name='Amazon Neptune' version='18.1' min-version-tableau='2020.3'>
     <vendor-information>
         <company name="AWS"/>
         <support-link url="https://docs.aws.amazon.com/neptune/latest/userguide/intro.html"/>
         <driver-download-link url="https://docs.aws.amazon.com/neptune/latest/userguide/intro.html"/>
     </vendor-information>
-    <connection-customization class="neptunejdbc" enabled="true" version="10.0">
+    <connection-customization class="neptune-jdbc" enabled="true" version="10.0">
         <vendor name="Amazon"/>
         <driver name="Neptune JDBC"/>
         <customizations>
