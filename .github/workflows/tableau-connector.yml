@@ -22,5 +22,5 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v1
         with:
-          name: neptunejdbc.taco
-          path: tableau-connector/target/neptunejdbc.taco
+          name: neptune-jdbc.taco
+          path: tableau-connector/target/neptune-jdbc.taco

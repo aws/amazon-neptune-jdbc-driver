@@ -1,38 +1,36 @@
 # JDBC Driver for Amazon Neptune
 
-This driver provides JDBC connectivity for the Amazon Neptune service using openCypher, Gremlin, SQL-Gremlin, and SPARQL queries.
-
-## Connection Requirements
-
-To connect to Amazon Neptune using the JDBC driver, the Neptune instance must be available through an SSH tunnel, load balancer, or the JDBC driver must be deployed in an EC2 instance. The SSH tunnel can be setup internally in the driver or externally.
-
-## Specifications
-
-This driver is compatible with JDBC 4.2 and requires a minimum of Java 8.
+This driver provides read-only JDBC connectivity for the Amazon Neptune service using SQL, Gremlin, openCypher and SPARQL queries.
 
 ## Using the Driver
 
-The driver comes packed in a single jar file. To use the driver, place the jar file in the classpath of the application which is going to use it. Alternatively, if using the driver with a Maven/Gradle application, the jar can be used to install the driver via their respective commands.
+The driver comes packed in a single jar file. To use the driver, place the jar file in the classpath of the application which is going to use it.
 
-### SSH Tunneling
+[//]: # (TODO AN-694 - Uncomment this: Alternatively, if using the driver with a Maven/Gradle application, the jar can be used to install the driver via their respective commands.)
 
-Connecting to Neptune requires an SSH tunnel which can be done internally in the driver, or manually using an ssh command.
+For the initial public preview release, the driver will be available for download on GitHub along with the driver's .jar file and .taco file.
 
-To add to hosts, add the cluster name to your host file (`/etc/hosts` on Mac or `C:\Windows\System32\drivers\etc\hosts` on Windows).
-Add the following line to the list of hosts lookup:
-`127.0.0.1        <endpoint>`
+To use the Driver in BI tools, please refer to the documentation below. 
 
-#### Connection URL and Settings
+To connect to Amazon Neptune using the JDBC driver, the Neptune instance must be available through an SSH tunnel, load balancer, or the JDBC driver must be deployed in an EC2 instance.
 
-To setup a connection, the driver requires a JDBC connection URL. The connection URL is generally of the form:
+**SSH Tunnel and host file must be configured before using the drive to connect to Neptune, please see [SSH configuration](markdown/setup/configuration.md).**
+
+### Specifications
+
+This driver is compatible with JDBC 4.2 and requires a minimum of Java 8.
+
+### Connection URL and Settings
+
+To set up a connection, the driver requires a JDBC connection URL. The connection URL is generally of the form:
 
 ```
 jdbc:neptune:[connectionType]://[host];[propertyKey1=value1];[propertyKey2=value2]..;[propertyKeyN=valueN]
 ```
 
-Specific requirements for the string can be found below in the specific query language documentation.
+Specific requirements for the string can be found [below](#graph-query-language-support) in the specific query language documentation.
 
-#### Connecting using the DriverManager Interface
+### Connecting using the DriverManager Interface
 
 If the jar is in the application's classpath, no other configuration is required. The driver can be connected to using the JDBC DriverManager by connecting using an Amazon Neptune connection string.
 
@@ -55,96 +53,52 @@ void example() {
 
 Refer to the connection string options in the specific query language documentation below for more information about configuring the connection.
 
-[SQL-Gremlin](samples/SQLGREMLIN.md)
-
-[Gremlin](samples/GREMLIN.md)
-
-[openCypher](samples/OPENCYPHER.md)
-
-[SPARQL](samples/SPARQL.md)
-
 For more example applications, see the [sample applications](./src/test/java/sample/applications).
 
-## BI Tool Setup
+## Graph Query Language Support
 
-### Tableau Desktop
-To start, download and install the most recent version of Tableau Desktop available, the Neptune JDBC driver JAR file, and the Neptune Tableau connector (a TACO file). Once this is finished, set up the environment as detailed below.
+### SQL
+The driver supports a subset of SQL-92 and some common extensions. 
 
-#### Mac
+To connection to Amazon Neptune using SQL, please see the [SQL connection configurations](markdown/sql.md) for details about connection string configurations. 
 
-1. Place the JAR file in `/Users/<user>/Library/Tableau/Drivers`
-2. Place the TACO file in `/Users/<user>/Documents/My Tableau Repository/Connectors`
-3. Setup environment for IAM auth if enabled
-   - Note that environment variables set in `.zprofile/` , `.zshenv/`, `.bash_profile`, etc., will not work, they must be set in a way that can be loaded from a GUI application
-     - To set the credentials, one way is to use `/Users/<user>/.aws/credentials` for the access key and secret key
-     - A simple way to set the service region is to open a terminal and enter `launchctl setenv SERVICE_REGION us-east-1` or wherever the applicable service region is. There are other ways that persist after a restart, but whatever technique is used must set the environment variable for GUI applications
+#### For information on the limitations of the SQL query support please see the [SQL specifications](sql-gremlin/README.asciidoc).
 
-#### Windows
+### Gremlin
 
-1. Place the JAR file in `C:\Program Files\Tableau\Drivers`
-2. Place the TACO file in `C:\Users\<user>\Documents\My Tableau Repository\Connectors`
-3. Setup environment for IAM auth if enabled
-   - Can simply set `ACCESS_KEY`, `SECRET_KEY`, and `SERVICE_REGION` in environment variables of user account if desired
-   
-### Connecting with Tableau
+Gremlin is a graph traversal language supported by Neptune. To issue Gremlin queries to Neptune though the driver, please see
+[Gremlin connection configurations](markdown/gremlin.md).
 
-Tableau must be opened with command line to use the Tableau connector (until the Tableau connector is signed). 
+### openCypher
 
-On Mac, the following command can be used: `/Applications/Tableau\ Desktop\ 2021.1.app/Contents/MacOS/Tableau -DDisableVerifyConnectorPluginSignature=true`
+openCypher is an open query language for property graph database supported by Neptune. To issue openCypher queries to Neptune though the driver, please see
+[openCypher connection configurations](markdown/opencypher.md).
 
-On Windows, the following command can be used: `<Tableau exe install directory>/tableau.exe -DDisableVerifyConnectorPluginSignature=true`
+### SPARQL
 
-With Tableau now open, select More on under to a server on the left side. If the Tableau connector is correctly placed, you will see SQL via Gremlin by Amazon Neptune in the list.
+SPARQL is an RDF query language supported by Neptune. To issue SPARQL queries to Neptune though the driver, please see
+[SPARQL connection configurations](markdown/sparql.md).
 
-Select **SQL via Gremlin by Amazon Neptune**, you will see the following window:
+## Driver Setup in BI Applications
 
-[<img src="samples/images/tableauSQLgremlin-main.png" width="500"/>](samples/images/tableauSQLgremlin-main.png)
-
-You should not need to edit the port or add any additional connection options. Simply enter the Neptune Endpoint in a similar fashion to the above example, and select your IAM/SSL configuration. Note: you must enable SSL to use IAM.
-
-When you select Sign In, it may take >30 seconds to connect if you have a large graph as it is collecting vertex/edge tables, join vertices on edges, and perform visualizations.
-
-If you would like an SSH tunnel setup within the driver between the Neptune service and an EC2 instance, an internal SSH tunnel can be configured by the driver by filling in the advanced options tab.
-
-[<img src="samples/images/tableauSQLgremlin-advanced.png" width="500"/>](samples/images/tableauSQLgremlin-advanced.png)
-
-Minimally, an SSH user, SSH host name (or ip address), private key file must be provided. A passphrase for the private key file and hosts file may also be provided. Strict host checking can be disabled if required, however this is less secure.
-
-### Tableau Troubleshooting
-
-Some basic problems may be troubleshooted through looking at the logs:
-- `C:\Users\<user>\Documents\My Tableau Repository\Logs` on Windows
-- `/Users/<user>/Documents/My Tableau Repository/Logs` on Mac
-
-Logs that can be found are:
-
-- `jprotocolserver.log` - Contains logs from the JDBC drivers logger
-- `stdout_jprotocolserver.log` - Contains logs from the JDBC driver that went through standard output (neptune export utility logs go out here)
-- `log.txt` - Contains logs for higher level Tableau operations, can be used to determine if TDC file was loaded among other things
-
-They may be useful as a debugging tool and can be sent with error accompanying messages if the initial setup fails in any way.
-
-For more information, consult the [Tableau documentation](https://tableau.github.io/connector-plugin-sdk/docs/run-taco).
+To learn how to set up the driver in various BI tools, instructions are outlined here for:
+* [Tableau Desktop](markdown/bi-tools/tableau.md)
 
 ## Troubleshooting
 
-To troubleshoot or debug issues with the JDBC driver, please see the [troubleshooting instructions](./TROUBLESHOOTING.md).
+To troubleshoot or debug issues with the JDBC driver, please see the [troubleshooting instructions](markdown/troubleshooting.md).
 
 ## Contributing
 
 Because the JDBC driver is available as open source, contribution from the community is encouraged. If you are interested in improving performance, adding new features, or fixing bugs, please see our [contributing guidelines](./CONTRIBUTING.md).
 
-## Building from source
+## Building from Source
 
-If you wish to contribute, you will need to build the driver. The requirements to build the driver are very simple, you only need a Java 8 compiler and runtime environment and you can build and run the driver. This library depends on the neptune-export library, which depends on the gremlin-client library. So before building this library, build the gremlin-client, then the neptune-export library, which are both included in this repository.
+If you wish to contribute, you will need to build the driver. The requirements to build the driver are very simple, you only need a Java 8 compiler with a runtime environment and you can build and run the driver.
 
-## Testing
+Git submodules must be updated before attempting to build the driver.
 
-[![codecov](https://codecov.io/gh/Bit-Quill/neptunejdbc/branch/develop/graph/badge.svg?token=E54Y02A3HE)](https://codecov.io/gh/Bit-Quill/neptunejdbc)
-
-The project is setup to do continuous unit testing whenever pull requests are generated, merged, or code is checked in. Integration tests can also be executed when major changes are made, but this will require coordination with a properly integrated server.
-
-## Security issue notifications
+## Security Issue Notifications
 
 If you discover a potential security issue in this project we ask that you notify AWS/Amazon Security via our [vulnerability reporting page](http://aws.amazon.com/security/vulnerability-reporting/). Please do **not** create a public GitHub issue.
 

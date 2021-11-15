@@ -1,36 +1,16 @@
-# Using SQL-Gremlin with Amazon Neptune JDBC Driver
+# Using SQL with Amazon Neptune JDBC Driver
 
-This driver supports using SQL, which it will translate into Gremlin for executing statements against Neptune.
-
-## SQL Support
-
-SQL SELECT and INNER JOIN commands are supports, additionally, the following SQL functions are also supported:
-
-### General Operators and Functions
-
-- LIMIT
-- ORDER BY
-- GROUP BY
-- HAVING
-
-### Aggregate Operators and Functions
-
-- MAX
-- MIN
-- COUNT
-- DISTINCT
-- SUM
-- AVG
+This driver supports using SQL, which it will translate into Gremlin for executing statements against Neptune. For additional information about SQL and the type of SQL queries this driver supports, see the [sql-gremlin documentation](../sql-gremlin/README.asciidoc).
 
 ### Creating a connection
 
-The connection string for SQL-Gremlin connections follows the following form:
+The connection string for SQL connections follows the following form:
 
 `jdbc:neptune:sqlgremlin://[host];[port=portValue];[propertyKey1=value1];[propertyKey2=value2]..;[propertyKeyN=valueN]`
 
-**Note: SQL-Gremlin configures the port as a property and not as a part of the connection string. If a port is not specified it defaults to 8182.**
+**Note: SQL configures the port as a property and not as a part of the connection string. If a port is not specified it defaults to 8182.**
 
-The following properties are available for SQL-Gremlin:
+The following properties are available for SQL:
 
 | Property Key             | Description                                                  | Accepted Value(s)                                            | Default value                                                |
 | ------------------------ | ------------------------------------------------------------ | ------------------------------------------------------------ | ------------------------------------------------------------ |

@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='utf-8' ?>
-<tdr class='neptunejdbc'>
+<tdr class='neptune-jdbc'>
 	<connection-resolver>
     <connection-builder>
       <script file='connectionBuilder.js'/>
@@ -12,13 +12,6 @@
           <attr>vendor1</attr>
           <attr>authentication</attr>
           <attr>sslmode</attr>
-          <attr>v-ssh-tunnel</attr>
-          <attr>v-ssh-user</attr>
-          <attr>v-ssh-host</attr>
-          <attr>v-ssh-priv-key-filename</attr>
-          <attr>v-ssh-priv-key-passphrase</attr>
-          <attr>v-ssh-strict-host-key-check</attr>
-          <attr>v-ssh-known-hosts-file</attr>
         </attribute-list>
       </required-attributes>
     </connection-normalizer>
