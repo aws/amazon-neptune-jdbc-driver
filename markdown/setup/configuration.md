@@ -11,7 +11,7 @@ To connect to Amazon Neptune, follow the instructions below.
 
 ### Setting up an Amazon Neptune Cluster
 
-If you don't already have an Amazon Neptune cluster, please refer to the [get started](https://aws.amazon.com/neptune/getting-started/) documentation for Amazon neptune.
+If you don't already have an Amazon Neptune cluster, please refer to the [get started](https://aws.amazon.com/neptune/getting-started/) documentation for Amazon Neptune.
 
 
 ### Downloading the Driver
