@@ -56,18 +56,19 @@ public abstract class ResultSetGetTables extends GenericResultSet implements jav
     private static final String TABLE_NAME = "TABLE_NAME";
 
     static {
-        MAPPED_KEYS.put("TABLE_CAT", "catalog");
+        MAPPED_KEYS.put("TABLE_CAT", null);
         MAPPED_KEYS.put("TABLE_SCHEM", "gremlin");
         MAPPED_KEYS.put("TABLE_TYPE", "TABLE");
         MAPPED_KEYS.put("REMARKS", "");
-        MAPPED_KEYS.put("TYPE_CAT", "typecat");
-        MAPPED_KEYS.put("TYPE_SCHEM", "typeschem");
-        MAPPED_KEYS.put("TYPE_NAME", "typename");
-        MAPPED_KEYS.put("SELF_REFERENCING_COL_NAME", "selfreferencingcolname");
-        MAPPED_KEYS.put("REF_GENERATION", "selfgeneration");
+        MAPPED_KEYS.put("TYPE_CAT", null);
+        MAPPED_KEYS.put("TYPE_SCHEM", null);
+        MAPPED_KEYS.put("TYPE_NAME", null);
+        MAPPED_KEYS.put("SELF_REFERENCING_COL_NAME", null);
+        MAPPED_KEYS.put("REF_GENERATION", null);
     }
 
     private final List<Map<String, Object>> rows = new ArrayList<>();
+    private boolean wasNull = false;
 
     /**
      * ResultSetGetTables constructor, initializes super class.
@@ -123,7 +124,9 @@ public abstract class ResultSetGetTables extends GenericResultSet implements jav
 
         final String key = ORDERED_COLUMNS.get(columnIndex - 1);
         if (rows.get(index).containsKey(key)) {
-            return rows.get(index).get(key);
+            final Object data = rows.get(index).get(key);
+            wasNull = (data == null);
+            return data;
         } else {
             throw SqlError.createSQLFeatureNotSupportedException(LOGGER);
         }
@@ -131,7 +134,7 @@ public abstract class ResultSetGetTables extends GenericResultSet implements jav
 
     @Override
     public boolean wasNull() throws SQLException {
-        return false;
+        return wasNull;
     }
 
     @Override

@@ -50,7 +50,7 @@ public class NeptuneDatabaseMetadata extends DatabaseMetaData implements java.sq
 
     @Override
     public String getCatalogSeparator() throws SQLException {
-        return "-";
+        return "";
     }
 
     @Override

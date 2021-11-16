@@ -44,6 +44,7 @@ import java.util.Optional;
  */
 public abstract class ResultSetGetColumns extends ResultSet
         implements java.sql.ResultSet {
+    public static final Map<String, Class<?>> GREMLIN_STRING_TYPE_TO_JAVA_TYPE_CONVERTER_MAP = new HashMap<>();
     private static final Logger LOGGER = LoggerFactory.getLogger(ResultSetGetColumns.class);
     /**
      * TABLE_CAT String => table catalog (may be null)
@@ -85,10 +86,9 @@ public abstract class ResultSetGetColumns extends ResultSet
      */
     private static final Map<String, Object> CONVERSION_MAP = new HashMap<>();
     private static final List<String> ORDERED_COLUMNS = new ArrayList<>();
-    public static final Map<String, Class<?>> GREMLIN_STRING_TYPE_TO_JAVA_TYPE_CONVERTER_MAP = new HashMap<>();
 
     static {
-        CONVERSION_MAP.put("TABLE_CAT", "catalog");
+        CONVERSION_MAP.put("TABLE_CAT", null);
         CONVERSION_MAP.put("TABLE_SCHEM", "gremlin");
         CONVERSION_MAP.put("BUFFER_LENGTH", null); // null
         CONVERSION_MAP.put("NULLABLE", DatabaseMetaData.columnNullable);
@@ -142,6 +142,7 @@ public abstract class ResultSetGetColumns extends ResultSet
     }
 
     private final List<Map<String, Object>> rows = new ArrayList<>();
+    private boolean wasNull = false;
 
     /**
      * ResultSetGetColumns constructor, initializes super class.
@@ -177,6 +178,7 @@ public abstract class ResultSetGetColumns extends ResultSet
                 final int jdbcType = JavaToJdbcTypeConverter.CLASS_TO_JDBC_ORDINAL
                         .getOrDefault(javaClass, JdbcType.VARCHAR.getJdbcCode());
                 map.put("DATA_TYPE", jdbcType);
+                map.put("SQL_DATA_TYPE", jdbcType);
 
                 map.put("COLUMN_NAME", property.getKey());
                 map.put("NULLABLE", DatabaseMetaData.columnNullable);
@@ -186,6 +188,7 @@ public abstract class ResultSetGetColumns extends ResultSet
                 map.put("DECIMAL_DIGITS", null);
                 map.put("NUM_PREC_RADIX", 10);
                 map.put("ORDINAL_POSITION", i++);
+                // TODO AN-839: Fix COLUMN_SIZE.
                 map.put("COLUMN_SIZE", 10);
 
                 if (!map.keySet().equals(new HashSet<>(ORDERED_COLUMNS))) {
@@ -221,7 +224,9 @@ public abstract class ResultSetGetColumns extends ResultSet
 
         final String key = ORDERED_COLUMNS.get(columnIndex - 1);
         if (rows.get(index).containsKey(key)) {
-            return rows.get(index).get(key);
+            final Object data = rows.get(index).get(key);
+            wasNull = (data == null);
+            return data;
         } else {
             throw SqlError.createSQLFeatureNotSupportedException(LOGGER);
         }
@@ -229,7 +234,7 @@ public abstract class ResultSetGetColumns extends ResultSet
 
     @Override
     public boolean wasNull() throws SQLException {
-        return false;
+        return wasNull;
     }
 
     @Override
