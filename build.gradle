@@ -286,6 +286,43 @@ shadowJar {
     exclude 'org/apache/calcite/avatica/remote/Driver*'
     exclude 'org/apache/commons/dbcp2/PoolingDriver*'
 
+    // Remove any unused dependencies
+    minimize {
+        exclude(dependency('org.apache.calcite::'))
+        exclude(dependency('org.apache.tinkerpop::'))
+        exclude(dependency('org.apache.log4j.*::'))
+        exclude(dependency('com.jcraft::'))
+    }
+
+    // NOTE: DO NOT relocate 'javax' 'org.apache.log4j', 'org.codehaus'
+    // Relocate (shadow) the following packages.
+    relocate 'org.yaml', 'shadow.org.yaml'
+    relocate 'org.twilmes', 'shadow.org.twilmes'
+    relocate 'org.reactivestreams', 'shadow.org.reactivestreams'
+    relocate 'org.pentaho', 'shadow.org.pentaho'
+    relocate 'org.objectweb', 'shadow.org.objectweb'
+    relocate 'org.neo4j', 'shadow.org.neo4j'
+    relocate 'org.joda', 'shadow.org.joda'
+    relocate 'org.javatuples', 'shadow.org.javatuples'
+    relocate 'org.eclipse', 'shadow.org.eclipse'
+    relocate 'org.checkerframework', 'shadow.org.checkerframework'
+    relocate 'org.apiguardian', 'shadow.org.apiguardian'
+    relocate 'org.apache.tinkerpop', 'shadow.org.apache.tinkerpop'
+    relocate 'org.apache.thrift', 'shadow.org.apache.thrift'
+    relocate 'org.apache.jena', 'shadow.org.apache.jena'
+    relocate 'org.apache.ivy', 'shadow.org.apache.ivy'
+    relocate 'org.apache.http', 'shadow.org.apache.tinkerhttp'
+    relocate 'org.apache.groovy', 'shadow.org.apache.groovy'
+    relocate 'org.apache.commons', 'shadow.org.apache.commons'
+    relocate 'org.apache.calcite', 'shadow.org.apache.calcite'
+    relocate 'net', 'shadow.net'
+    relocate 'io', 'shadow.io'
+    relocate 'groovyjarjarpicocli', 'shadow.groovyjarjarpicocli'
+    relocate 'groovyjarjarasm', 'shadow.groovyjarjarasm'
+    relocate 'groovyjarjarantlr', 'shadow.groovyjarjarantlr'
+    relocate 'groovy', 'shadow.groovy'
+    relocate 'com', 'shadow.com'
+
     dependencies {
         exclude(dependency('org.slf4j:.*'))
         exclude(dependency('org.codehaus.janino::'))
