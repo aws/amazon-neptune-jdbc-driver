@@ -6,7 +6,7 @@ labels: enhancement
 assignees: ''
 ---
 
-- [ ] **Is this feature described in the current 
+- [ ] **Have you validated that this is not currently reported in 
     [limitations](https://github.com/aws/amazon-neptune-jdbc-driver/blob/develop/sql-gremlin/README.asciidoc#sql-support-and-limitations) or
     [milestones](https://github.com/aws/amazon-neptune-jdbc-driver/milestones)? If so, please link it.**
 

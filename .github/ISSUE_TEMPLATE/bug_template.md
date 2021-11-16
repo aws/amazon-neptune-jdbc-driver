@@ -1,19 +1,19 @@
 ---
 name: 🐛Bug Report🐛
 about: Report an Issue with the JDBC Driver
-title: "[BUG]"
-labels: 'bug, untriaged, Beta'
+title: '[BUG]'
+labels: bug
 assignees: ''
 ---
 
 ## Describe the bug
 <!-- A clear and concise description of what the bug is. -->
 
-- [ ] **Is this bug/limitation described in the current 
+- [ ] **Have you validated that this is not currently reported in
     [SQL Support and Limitations](https://github.com/aws/amazon-neptune-jdbc-driver/blob/develop/sql-gremlin/README.asciidoc#sql-support-and-limitations)?**
 
 ## Steps to Reproduce
-- [ ] **Is JDBC Driver being used in a BI tool?**
+- [ ] **Is the JDBC Driver being used in a BI tool?**
 <!-- 
     If being used in BI Tool, fill in:
     1. What vesion of the JDBC Driver are you using?
@@ -27,7 +27,7 @@ assignees: ''
 <!-- 
     If being used outside of a BI Tool, fill in:
     1. What vesion of the JDBC Driver are you using?    
-    2. What language variant are you using (sparql, gremlin, opencypher, sql)?
+    2. What language variant are you using (SPARQL, Gremlin, openCypher, SQL)?
     3. What database are you connecting to (Amazon Neptune, Neo4J, etc)?
     4. What engine version of the database are you using?
     5. What Java version are you using?
