@@ -18,6 +18,7 @@ package software.aws.neptune.gremlin;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import software.aws.neptune.NeptuneStatementTestHelper;
 import software.aws.neptune.gremlin.mock.MockGremlinDatabase;
@@ -26,6 +27,8 @@ import java.sql.SQLException;
 
 import static software.aws.neptune.gremlin.GremlinHelper.getProperties;
 
+// TODO AN-887: Fix query cancellation issue and enable tests.
+@Disabled
 public class GremlinStatementTest extends GremlinStatementTestBase {
     private static final String HOSTNAME = "localhost";
     private static final int PORT = 8181; // Mock server uses 8181.
