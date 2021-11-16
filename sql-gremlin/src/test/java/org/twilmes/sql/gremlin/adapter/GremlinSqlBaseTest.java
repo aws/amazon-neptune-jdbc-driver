@@ -105,9 +105,8 @@ public abstract class GremlinSqlBaseTest {
         assertColumns(result.getColumns(), columnNames);
     }
 
-    protected void runQueryTestThrows(final String query, final String errorMessage)
-            throws SQLException {
-        final SqlGremlinTestResult result = new SqlGremlinTestResult(converter.executeQuery(query));
+    protected void runQueryTestThrows(final String query, final String errorMessage) {
+        Assertions.assertThrows(SQLException.class, () -> converter.executeQuery(query), errorMessage);
     }
 
     @SafeVarargs

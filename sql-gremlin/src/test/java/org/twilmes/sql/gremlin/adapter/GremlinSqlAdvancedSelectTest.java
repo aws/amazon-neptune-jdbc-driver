@@ -99,4 +99,10 @@ public class GremlinSqlAdvancedSelectTest extends GremlinSqlBaseTest {
         runQueryTestResults("SELECT name, age FROM person WHERE name = 'Tom' OR name = 'Juanita' ORDER BY age", columns("name", "age"),
                 rows(r("Tom", 35), r("Juanita", 50)));
     }
+
+    @Test
+    public void testOffset() throws SQLException {
+        // OFFSET testing - currently not implemented.
+        runQueryTestThrows("SELECT name FROM person OFFSET 1", "Error, OFFSET is not currently supported.");
+    }
 }

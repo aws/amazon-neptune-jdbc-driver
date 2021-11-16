@@ -59,6 +59,7 @@ public abstract class GremlinSqlSelect extends GremlinSqlNode {
         sqlMetadata.checkAggregate(sqlSelect.getSelectList());
         final GraphTraversal<?, ?> graphTraversal = generateTraversal();
         applyDistinct(graphTraversal);
+        applyOffset(graphTraversal);
         applyLimit(graphTraversal);
         final SqlGremlinQueryResult sqlGremlinQueryResult = generateSqlGremlinQueryResult();
         runTraversalExecutor(graphTraversal, sqlGremlinQueryResult);
@@ -133,6 +134,17 @@ public abstract class GremlinSqlSelect extends GremlinSqlNode {
     protected void applyColumnRetrieval(final GraphTraversal<?, ?> graphTraversal, final String table,
                                         final List<GremlinSqlNode> sqlNodeList) throws SQLException {
         applyColumnRetrieval(graphTraversal, table, sqlNodeList, StepDirection.None);
+    }
+
+    private void applyOffset(final GraphTraversal<?, ?> graphTraversal) throws SQLException {
+        // TODO: AN-885 implement OFFSET
+        // Gremlin doesn't seem to directly support offset,
+        // we probably need to inject numeric literal value
+        // into the pagination and have it know to jump the
+        // first X number of results.
+        if (sqlSelect.getOffset() != null) {
+            throw new SQLException("Error, OFFSET is not currently supported.");
+        }
     }
 
     private void applyLimit(final GraphTraversal<?, ?> graphTraversal) {
