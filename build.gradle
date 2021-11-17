@@ -285,6 +285,8 @@ shadowJar {
     exclude 'org/apache/calcite/jdbc/Driver*'
     exclude 'org/apache/calcite/avatica/remote/Driver*'
     exclude 'org/apache/commons/dbcp2/PoolingDriver*'
+    exclude 'META-INF/NOTICE*'
+    exclude 'META-INF/LICENSE*'
 
     // Remove any unused dependencies
     minimize {
