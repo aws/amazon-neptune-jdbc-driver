@@ -64,6 +64,15 @@ public class GremlinTableBase extends AbstractQueryableTable implements Translat
                 "Error: Could not find column '%s' on %s with label '%s'.", column, isVertex ? "vertex" : "edge", label));
     }
 
+    public boolean hasColumn(final String column) {
+        for (final Map.Entry<String, GremlinProperty> entry : columns.entrySet()) {
+            if (entry.getKey().equalsIgnoreCase(column)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     @Override
     public <T> Queryable<T> asQueryable(final QueryProvider queryProvider, final SchemaPlus schema, final String tableName) {
         return null;
