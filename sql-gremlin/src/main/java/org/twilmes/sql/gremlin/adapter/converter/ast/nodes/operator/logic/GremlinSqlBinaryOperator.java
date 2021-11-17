@@ -27,6 +27,7 @@ import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.__;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.twilmes.sql.gremlin.adapter.converter.SqlMetadata;
+import org.twilmes.sql.gremlin.adapter.converter.SqlTraversalEngine;
 import org.twilmes.sql.gremlin.adapter.converter.ast.nodes.GremlinSqlNode;
 import org.twilmes.sql.gremlin.adapter.converter.ast.nodes.operands.GremlinSqlIdentifier;
 import org.twilmes.sql.gremlin.adapter.converter.ast.nodes.operator.GremlinSqlBasicCall;
@@ -47,21 +48,17 @@ import java.util.Random;
 public class GremlinSqlBinaryOperator extends GremlinSqlOperator {
     private static final String CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890";
     private static final Logger LOGGER = LoggerFactory.getLogger(GremlinSqlBinaryOperator.class);
-    private static final Map<SqlKind, GremlinSqlTraversalAppender> BINARY_APPENDERS =
+    private final Map<SqlKind, GremlinSqlTraversalAppender> BINARY_APPENDERS =
             new HashMap<SqlKind, GremlinSqlTraversalAppender>() {
                 {
-                    put(SqlKind.EQUALS, new GremlinSqlBinaryOperatorAppender.GremlinSqlBinaryOperatorAppenderEquals());
-                    put(SqlKind.NOT_EQUALS,
-                            new GremlinSqlBinaryOperatorAppender.GremlinSqlBinaryOperatorAppenderNotEquals());
-                    put(SqlKind.GREATER_THAN,
-                            new GremlinSqlBinaryOperatorAppender.GremlinSqlBinaryOperatorAppenderGreater());
-                    put(SqlKind.GREATER_THAN_OR_EQUAL,
-                            new GremlinSqlBinaryOperatorAppender.GremlinSqlBinaryOperatorAppenderGreaterEquals());
-                    put(SqlKind.LESS_THAN, new GremlinSqlBinaryOperatorAppender.GremlinSqlBinaryOperatorAppenderLess());
-                    put(SqlKind.LESS_THAN_OR_EQUAL,
-                            new GremlinSqlBinaryOperatorAppender.GremlinSqlBinaryOperatorAppenderLessEquals());
-                    put(SqlKind.AND, new GremlinSqlBinaryOperatorAppender.GremlinSqlBinaryOperatorAppenderAnd());
-                    put(SqlKind.OR, new GremlinSqlBinaryOperatorAppender.GremlinSqlBinaryOperatorAppenderOr());
+                    put(SqlKind.EQUALS, new GremlinSqlBinaryOperatorAppenderEquals());
+                    put(SqlKind.NOT_EQUALS, new GremlinSqlBinaryOperatorAppenderNotEquals());
+                    put(SqlKind.GREATER_THAN, new GremlinSqlBinaryOperatorAppenderGreater());
+                    put(SqlKind.GREATER_THAN_OR_EQUAL, new GremlinSqlBinaryOperatorAppenderGreaterEquals());
+                    put(SqlKind.LESS_THAN, new GremlinSqlBinaryOperatorAppenderLess());
+                    put(SqlKind.LESS_THAN_OR_EQUAL, new GremlinSqlBinaryOperatorAppenderLessEquals());
+                    put(SqlKind.AND, new GremlinSqlBinaryOperatorAppenderAnd());
+                    put(SqlKind.OR, new GremlinSqlBinaryOperatorAppenderOr());
                 }
             };
     private final SqlBinaryOperator sqlBinaryOperator;
@@ -77,13 +74,14 @@ public class GremlinSqlBinaryOperator extends GremlinSqlOperator {
         this.sqlOperands = sqlOperands;
     }
 
-    public static void appendBooleanEquals(final GraphTraversal<?, ?> graphTraversal,
+    public static void appendBooleanEquals(final SqlMetadata sqlMetadata, GraphTraversal<?, ?> graphTraversal,
                                            final GremlinSqlIdentifier identifier, boolean expectedValue)
             throws SQLException {
+        GraphTraversal<?, ?> graphTraversal1 = __.unfold();
+        SqlTraversalEngine.applySqlIdentifier(identifier, sqlMetadata, graphTraversal1);
         final String randomString = getRandomString();
         graphTraversal.as(randomString).where(randomString, P.eq(randomString)).
-                by(__.unfold().values(identifier.getColumn())).
-                by(__.unfold().constant(expectedValue));
+                by(graphTraversal1).by(__.unfold().constant(expectedValue));
     }
 
     private static String getRandomString() {
@@ -106,127 +104,149 @@ public class GremlinSqlBinaryOperator extends GremlinSqlOperator {
         }
     }
 
-    private static class GremlinSqlBinaryOperatorAppender {
-        private static GraphTraversal<?, ?>[] getTraversalsFromOperands(final List<GremlinSqlNode> operands)
-                throws SQLException {
-            if (operands.size() != 2) {
-                throw new SQLException("Error: Binary operator without 2 operands received.");
-            }
-            final GraphTraversal<?, ?>[] graphTraversals = new GraphTraversal[2];
-            for (int i = 0; i < operands.size(); i++) {
-                graphTraversals[i] = __.unfold();
-                if (operands.get(i) instanceof GremlinSqlIdentifier) {
-                    // Embedded equalities are SqlBasicCall's.
-                    // When the equality is struck, it is a pair of a SqlIdentifier and a SqlLiteral.
-                    // However, boolean columns are exceptions to this, they are just left as a SqlIdentifier
-                    if (!(operands.get((i == 0) ? 1 : 0) instanceof GremlinSqlLiteral)) {
-                        // However inverted logic booleans are added as SqlBasicCalls with a SqlPrefixOperator.
-                        GremlinSqlBinaryOperator.appendBooleanEquals(graphTraversals[i],
-                                (GremlinSqlIdentifier) operands.get(i), true);
-                    } else {
-                        graphTraversals[i].values(((GremlinSqlIdentifier) operands.get(i)).getColumn());
-                    }
-                } else if (operands.get(i) instanceof GremlinSqlBasicCall) {
-                    GremlinSqlBasicCall gremlinSqlBasicCall = ((GremlinSqlBasicCall) operands.get(i));
-                    if (gremlinSqlBasicCall.getGremlinSqlNodes().size() == 1 &&
-                            gremlinSqlBasicCall.getGremlinSqlNodes().get(0) instanceof GremlinSqlIdentifier) {
-                        GremlinSqlIdentifier gremlinSqlIdentifier =
-                                (GremlinSqlIdentifier) gremlinSqlBasicCall.getGremlinSqlNodes().get(0);
-                        if (gremlinSqlBasicCall.getGremlinSqlOperator() instanceof GremlinSqlPrefixOperator) {
-                            GremlinSqlPrefixOperator gremlinSqlPrefixOperator =
-                                    (GremlinSqlPrefixOperator) gremlinSqlBasicCall.getGremlinSqlOperator();
-                            if (gremlinSqlPrefixOperator.isNot()) {
-                                GremlinSqlBinaryOperator.appendBooleanEquals(graphTraversals[i], gremlinSqlIdentifier,
-                                        false);
-                            } else {
-                                throw new SQLException("Error: Only NOT prefix is supported in the WHERE clause.");
-                            }
-                        } else {
-                            GremlinSqlBinaryOperator.appendBooleanEquals(graphTraversals[i], gremlinSqlIdentifier,
-                                    true);
-                        }
-                    } else {
-                        ((GremlinSqlBasicCall) operands.get(i)).generateTraversal(graphTraversals[i]);
-                    }
-                } else if (operands.get(i) instanceof GremlinSqlLiteral) {
-                    ((GremlinSqlLiteral) operands.get(i)).appendTraversal(graphTraversals[i]);
+    void handleEmbeddedGremlinSqlBasicCall(GremlinSqlBasicCall gremlinSqlBasicCall, GraphTraversal<?, ?> graphTraversal)
+            throws SQLException {
+        if (gremlinSqlBasicCall.getGremlinSqlNodes().size() == 1 &&
+                gremlinSqlBasicCall.getGremlinSqlNodes().get(0) instanceof GremlinSqlIdentifier) {
+            GremlinSqlIdentifier gremlinSqlIdentifier =
+                    (GremlinSqlIdentifier) gremlinSqlBasicCall.getGremlinSqlNodes().get(0);
+            if (gremlinSqlBasicCall.getGremlinSqlOperator() instanceof GremlinSqlPrefixOperator) {
+                GremlinSqlPrefixOperator gremlinSqlPrefixOperator =
+                        (GremlinSqlPrefixOperator) gremlinSqlBasicCall.getGremlinSqlOperator();
+                if (gremlinSqlPrefixOperator.isNot()) {
+                    appendBooleanEquals(sqlMetadata, graphTraversal, gremlinSqlIdentifier, false);
+                } else {
+                    throw new SQLException("Error: Only NOT prefix is supported in the WHERE clause.");
                 }
+            } else {
+                appendBooleanEquals(sqlMetadata, graphTraversal, gremlinSqlIdentifier, true);
             }
-            return graphTraversals;
-        }
-
-        public static class GremlinSqlBinaryOperatorAppenderEquals implements GremlinSqlTraversalAppender {
-            public void appendTraversal(final GraphTraversal<?, ?> graphTraversal, final List<GremlinSqlNode> operands)
-                    throws SQLException {
-                final String randomString = getRandomString();
-                final GraphTraversal<?, ?>[] graphTraversals = getTraversalsFromOperands(operands);
-                graphTraversal.as(randomString).where(randomString, P.eq(randomString))
-                        .by(graphTraversals[0]).by(graphTraversals[1]);
-            }
-        }
-
-        public static class GremlinSqlBinaryOperatorAppenderNotEquals implements GremlinSqlTraversalAppender {
-            public void appendTraversal(final GraphTraversal<?, ?> graphTraversal, final List<GremlinSqlNode> operands)
-                    throws SQLException {
-                final String randomString = getRandomString();
-                final GraphTraversal<?, ?>[] graphTraversals = getTraversalsFromOperands(operands);
-                graphTraversal.as(randomString).where(randomString, P.neq(randomString))
-                        .by(graphTraversals[0]).by(graphTraversals[1]);
-            }
-        }
-
-        public static class GremlinSqlBinaryOperatorAppenderGreater implements GremlinSqlTraversalAppender {
-            public void appendTraversal(final GraphTraversal<?, ?> graphTraversal, final List<GremlinSqlNode> operands)
-                    throws SQLException {
-                final String randomString = getRandomString();
-                final GraphTraversal<?, ?>[] graphTraversals = getTraversalsFromOperands(operands);
-                graphTraversal.as(randomString).where(randomString, P.gt(randomString))
-                        .by(graphTraversals[0]).by(graphTraversals[1]);
-            }
-        }
-
-        public static class GremlinSqlBinaryOperatorAppenderGreaterEquals implements GremlinSqlTraversalAppender {
-            public void appendTraversal(final GraphTraversal<?, ?> graphTraversal, final List<GremlinSqlNode> operands)
-                    throws SQLException {
-                final String randomString = getRandomString();
-                final GraphTraversal<?, ?>[] graphTraversals = getTraversalsFromOperands(operands);
-                graphTraversal.as(randomString).where(randomString, P.gte(randomString))
-                        .by(graphTraversals[0]).by(graphTraversals[1]);
-            }
-        }
-
-        public static class GremlinSqlBinaryOperatorAppenderLess implements GremlinSqlTraversalAppender {
-            public void appendTraversal(final GraphTraversal<?, ?> graphTraversal, final List<GremlinSqlNode> operands)
-                    throws SQLException {
-                final String randomString = getRandomString();
-                final GraphTraversal<?, ?>[] graphTraversals = getTraversalsFromOperands(operands);
-                graphTraversal.as(randomString).where(randomString, P.lt(randomString)).by(graphTraversals[0])
-                        .by(graphTraversals[1]);
-            }
-        }
-
-        public static class GremlinSqlBinaryOperatorAppenderLessEquals implements GremlinSqlTraversalAppender {
-            public void appendTraversal(final GraphTraversal<?, ?> graphTraversal, final List<GremlinSqlNode> operands)
-                    throws SQLException {
-                final String randomString = getRandomString();
-                final GraphTraversal<?, ?>[] graphTraversals = getTraversalsFromOperands(operands);
-                graphTraversal.as(randomString).where(randomString, P.lte(randomString)).by(graphTraversals[0])
-                        .by(graphTraversals[1]);
-            }
-        }
-
-        public static class GremlinSqlBinaryOperatorAppenderAnd implements GremlinSqlTraversalAppender {
-            public void appendTraversal(final GraphTraversal<?, ?> graphTraversal, final List<GremlinSqlNode> operands)
-                    throws SQLException {
-                graphTraversal.and(getTraversalsFromOperands(operands));
-            }
-        }
-
-        public static class GremlinSqlBinaryOperatorAppenderOr implements GremlinSqlTraversalAppender {
-            public void appendTraversal(final GraphTraversal<?, ?> graphTraversal, final List<GremlinSqlNode> operands)
-                    throws SQLException {
-                graphTraversal.or(getTraversalsFromOperands(operands));
-            }
+        } else {
+            gremlinSqlBasicCall.generateTraversal(graphTraversal);
         }
     }
+
+    private GraphTraversal<?, ?>[] getEmbeddedLogicOperators(final List<GremlinSqlNode> operands)
+            throws SQLException {
+        if (operands.size() != 2) {
+            throw new SQLException("Error: Binary operator without 2 operands received.");
+        }
+        final GraphTraversal<?, ?>[] graphTraversals = new GraphTraversal[2];
+        for (int i = 0; i < operands.size(); i++) {
+            graphTraversals[i] = __.__();
+            if (operands.get(i) instanceof GremlinSqlIdentifier) {
+                // Embedded equalities are SqlBasicCall's.
+                // When the equality is struck, it is a pair of a SqlIdentifier and a SqlLiteral.
+                // However, boolean columns are exceptions to this, they are just left as a SqlIdentifier
+                if (!(operands.get((i == 0) ? 1 : 0) instanceof GremlinSqlLiteral)) {
+                    // However, inverted logic booleans are added as SqlBasicCalls with a SqlPrefixOperator.
+                    appendBooleanEquals(sqlMetadata, graphTraversals[i], (GremlinSqlIdentifier) operands.get(i), true);
+                } else {
+                    graphTraversals[i].values(((GremlinSqlIdentifier) operands.get(i)).getColumn());
+                }
+            } else if (operands.get(i) instanceof GremlinSqlBasicCall) {
+                handleEmbeddedGremlinSqlBasicCall((GremlinSqlBasicCall) operands.get(i), graphTraversals[i]);
+            } else if (operands.get(i) instanceof GremlinSqlLiteral) {
+                ((GremlinSqlLiteral) operands.get(i)).appendTraversal(graphTraversals[i]);
+            }
+        }
+        return graphTraversals;
+    }
+
+
+    private GraphTraversal<?, ?>[] getTraversalEqualities(final List<GremlinSqlNode> operands)
+            throws SQLException {
+        if (operands.size() != 2) {
+            throw new SQLException("Error: Binary operator without 2 operands received.");
+        }
+        final GraphTraversal<?, ?>[] graphTraversals = new GraphTraversal[2];
+        for (int i = 0; i < operands.size(); i++) {
+            graphTraversals[i] = __.unfold();
+            if (operands.get(i) instanceof GremlinSqlIdentifier) {
+                SqlTraversalEngine.applySqlIdentifier((GremlinSqlIdentifier) operands.get(i), sqlMetadata,
+                        graphTraversals[i]);
+            } else if (operands.get(i) instanceof GremlinSqlBasicCall) {
+                GremlinSqlBasicCall gremlinSqlBasicCall = ((GremlinSqlBasicCall) operands.get(i));
+                gremlinSqlBasicCall.generateTraversal(graphTraversals[i]);
+            } else if (operands.get(i) instanceof GremlinSqlLiteral) {
+                ((GremlinSqlLiteral) operands.get(i)).appendTraversal(graphTraversals[i]);
+            }
+        }
+        return graphTraversals;
+    }
+
+    public class GremlinSqlBinaryOperatorAppenderEquals implements GremlinSqlTraversalAppender {
+        public void appendTraversal(final GraphTraversal<?, ?> graphTraversal, final List<GremlinSqlNode> operands)
+                throws SQLException {
+            final String randomString = getRandomString();
+            final GraphTraversal<?, ?>[] graphTraversals = getTraversalEqualities(operands);
+            graphTraversal.as(randomString).where(randomString, P.eq(randomString))
+                    .by(graphTraversals[0]).by(graphTraversals[1]);
+        }
+    }
+
+    public class GremlinSqlBinaryOperatorAppenderNotEquals implements GremlinSqlTraversalAppender {
+        public void appendTraversal(final GraphTraversal<?, ?> graphTraversal, final List<GremlinSqlNode> operands)
+                throws SQLException {
+            final String randomString = getRandomString();
+            final GraphTraversal<?, ?>[] graphTraversals = getTraversalEqualities(operands);
+            graphTraversal.as(randomString).where(randomString, P.neq(randomString))
+                    .by(graphTraversals[0]).by(graphTraversals[1]);
+        }
+    }
+
+    public class GremlinSqlBinaryOperatorAppenderGreater implements GremlinSqlTraversalAppender {
+        public void appendTraversal(final GraphTraversal<?, ?> graphTraversal, final List<GremlinSqlNode> operands)
+                throws SQLException {
+            final String randomString = getRandomString();
+            final GraphTraversal<?, ?>[] graphTraversals = getTraversalEqualities(operands);
+            graphTraversal.as(randomString).where(randomString, P.gt(randomString))
+                    .by(graphTraversals[0]).by(graphTraversals[1]);
+        }
+    }
+
+    public class GremlinSqlBinaryOperatorAppenderGreaterEquals implements GremlinSqlTraversalAppender {
+        public void appendTraversal(final GraphTraversal<?, ?> graphTraversal, final List<GremlinSqlNode> operands)
+                throws SQLException {
+            final String randomString = getRandomString();
+            final GraphTraversal<?, ?>[] graphTraversals = getTraversalEqualities(operands);
+            graphTraversal.as(randomString).where(randomString, P.gte(randomString))
+                    .by(graphTraversals[0]).by(graphTraversals[1]);
+        }
+    }
+
+    public class GremlinSqlBinaryOperatorAppenderLess implements GremlinSqlTraversalAppender {
+        public void appendTraversal(final GraphTraversal<?, ?> graphTraversal, final List<GremlinSqlNode> operands)
+                throws SQLException {
+            final String randomString = getRandomString();
+            final GraphTraversal<?, ?>[] graphTraversals = getTraversalEqualities(operands);
+            graphTraversal.as(randomString).where(randomString, P.lt(randomString)).by(graphTraversals[0])
+                    .by(graphTraversals[1]);
+        }
+    }
+
+    public class GremlinSqlBinaryOperatorAppenderLessEquals implements GremlinSqlTraversalAppender {
+        public void appendTraversal(final GraphTraversal<?, ?> graphTraversal, final List<GremlinSqlNode> operands)
+                throws SQLException {
+            final String randomString = getRandomString();
+            final GraphTraversal<?, ?>[] graphTraversals = getTraversalEqualities(operands);
+            graphTraversal.as(randomString).where(randomString, P.lte(randomString)).by(graphTraversals[0])
+                    .by(graphTraversals[1]);
+        }
+    }
+
+    public class GremlinSqlBinaryOperatorAppenderAnd implements GremlinSqlTraversalAppender {
+        public void appendTraversal(final GraphTraversal<?, ?> graphTraversal, final List<GremlinSqlNode> operands)
+                throws SQLException {
+            graphTraversal.and(getEmbeddedLogicOperators(operands));
+        }
+    }
+
+    public class GremlinSqlBinaryOperatorAppenderOr implements GremlinSqlTraversalAppender {
+        public void appendTraversal(final GraphTraversal<?, ?> graphTraversal, final List<GremlinSqlNode> operands)
+                throws SQLException {
+            graphTraversal.or(getEmbeddedLogicOperators(operands));
+        }
+    }
+
 }

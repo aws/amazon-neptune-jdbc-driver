@@ -225,26 +225,24 @@ public class GremlinSqlSelectSingle extends GremlinSqlSelect {
     }
 
     protected void applyHaving(final GraphTraversal<?, ?> graphTraversal) throws SQLException {
-        if (sqlSelect.getHaving() == null) {
-            return;
-        }
-        final GremlinSqlBasicCall gremlinSqlBasicCall = GremlinSqlFactory.createNodeCheckType(sqlSelect.getHaving(),
-                GremlinSqlBasicCall.class);
-        gremlinSqlBasicCall.generateTraversal(graphTraversal);
+        applySqlFilter(sqlSelect.getHaving(), graphTraversal);
     }
 
     protected void applyWhere(final GraphTraversal<?, ?> graphTraversal) throws SQLException {
-        if (sqlSelect.getWhere() == null) {
+        applySqlFilter(sqlSelect.getWhere(), graphTraversal);
+    }
+
+    void applySqlFilter(SqlNode sqlNode, GraphTraversal<?, ?> graphTraversal) throws SQLException {
+        if (sqlNode == null) {
             return;
         }
-        SqlNode sqlNode = sqlSelect.getWhere();
         if (sqlNode instanceof SqlBasicCall) {
             SqlBasicCall sqlBasicCall = (SqlBasicCall) sqlNode;
             if (sqlBasicCall.getOperator() instanceof SqlPrefixOperator) {
                 SqlPrefixOperator sqlPrefixOperator = (SqlPrefixOperator) sqlBasicCall.getOperator();
                 if (sqlPrefixOperator.kind.equals(SqlKind.NOT)) {
                     if (sqlBasicCall.getOperandList().size() == 1 && sqlBasicCall.operands.length == 1) {
-                        GremlinSqlBinaryOperator.appendBooleanEquals(graphTraversal,
+                        GremlinSqlBinaryOperator.appendBooleanEquals(sqlMetadata, graphTraversal,
                                 GremlinSqlFactory.createNodeCheckType(sqlBasicCall.operands[0],
                                         GremlinSqlIdentifier.class), false);
                         return;
@@ -255,12 +253,12 @@ public class GremlinSqlSelectSingle extends GremlinSqlSelect {
                 throw new SQLException(
                         "Error: Unsupported WHERE clause - The only WHERE prefix operator supported is 'NOT'.");
             }
-            GremlinSqlFactory.createNodeCheckType(sqlSelect.getWhere(), GremlinSqlBasicCall.class)
+            GremlinSqlFactory.createNodeCheckType(sqlNode, GremlinSqlBasicCall.class)
                     .generateTraversal(graphTraversal);
             return;
         } else if (sqlNode instanceof SqlIdentifier) {
-            GremlinSqlBinaryOperator.appendBooleanEquals(graphTraversal, GremlinSqlFactory.createNodeCheckType(sqlNode,
-                    GremlinSqlIdentifier.class),true);
+            GremlinSqlBinaryOperator.appendBooleanEquals(sqlMetadata, graphTraversal,
+                    GremlinSqlFactory.createNodeCheckType(sqlNode, GremlinSqlIdentifier.class), true);
             return;
         }
         throw new SQLException(
