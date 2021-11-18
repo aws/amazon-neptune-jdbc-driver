@@ -31,6 +31,7 @@ import software.aws.neptune.jdbc.utilities.SqlError;
 import software.aws.neptune.jdbc.utilities.SqlState;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.sql.SQLClientInfoException;
 import java.sql.SQLException;
 import java.util.HashMap;
@@ -1106,7 +1107,7 @@ public class GremlinConnectionProperties extends ConnectionProperties {
                                     "property to the appropriate value. For example, 'serviceRegion=us-east-1'.");
 
                 }
-                // Technically this doesn't need to be set if we are using "SERVICE_REGION" in Gremlin (and only in Gremlin)
+                // Technically this doesn't need to be set if we are using "SERVICE_REGION" in Gremlin
                 setRegion(System.getenv("SERVICE_REGION"));
             } else {
                 try {
@@ -1146,27 +1147,14 @@ public class GremlinConnectionProperties extends ConnectionProperties {
             LOGGER.warn(String.format("Overriding the current SERVICE_REGION environment variable with %s.", region));
         }
         try {
-            final Map<String, String> newEnv = new HashMap<>();
-            newEnv.put("SERVICE_REGION", region);
-
-            final Class<?> processEnvironmentClass = Class.forName("java.lang.ProcessEnvironment");
-            final Field theEnvironmentField = processEnvironmentClass.getDeclaredField("theEnvironment");
-            theEnvironmentField.setAccessible(true);
-            final Map<String, String> env = (Map<String, String>) theEnvironmentField.get(null);
-            env.putAll(newEnv);
-            final Field theCaseInsensitiveEnvironmentField = processEnvironmentClass.getDeclaredField("theCaseInsensitiveEnvironment");
-            theCaseInsensitiveEnvironmentField.setAccessible(true);
-            final Map<String, String> cIEnv = (Map<String, String>) theCaseInsensitiveEnvironmentField.get(null);
-            cIEnv.putAll(newEnv);
-
-            // final Class<?> processEnv = Class.forName("java.lang.ProcessEnvironment");
-            // final Method getenv = processEnv.getDeclaredMethod("getenv", String.class);
-            // getenv.setAccessible(true);
-            // final Field caseInsensitiveEnv = processEnv.getDeclaredField("theCaseInsensitiveEnvironment");
-            // caseInsensitiveEnv.setAccessible(true);
-            // final Map<String, String> envMap = (Map<String, String>) caseInsensitiveEnv.get(null);
-            // envMap.put("SERVICE_REGION", region);
-
+            // Sets SERVICE_REGION JVM env in Windows OS
+            final Class<?> processEnv = Class.forName("java.lang.ProcessEnvironment");
+            final Method getenv = processEnv.getDeclaredMethod("getenv", String.class);
+            getenv.setAccessible(true);
+            final Field caseInsensitiveEnv = processEnv.getDeclaredField("theCaseInsensitiveEnvironment");
+            caseInsensitiveEnv.setAccessible(true);
+            final Map<String, String> envMap = (Map<String, String>) caseInsensitiveEnv.get(null);
+            envMap.put("SERVICE_REGION", region);
         } catch (NoSuchFieldException e) {
             final Map<String, String> env = System.getenv();
             final Field field = env.getClass().getDeclaredField("m");

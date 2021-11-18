@@ -67,7 +67,7 @@ public class TDVTDataUpload {
     private static Client client;
 
     @BeforeAll
-    static void initialize() throws SQLException {
+    static void initialize() throws Exception {
         final Properties properties = new Properties();
         properties.put(ConnectionProperties.AUTH_SCHEME_KEY, AuthScheme.IAMSigV4); // set default to IAMSigV4
         properties.put(CONTACT_POINT_KEY, ENDPOINT);
