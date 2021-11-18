@@ -102,8 +102,13 @@ public class SqlTraversalEngine {
     public static void applySqlIdentifier(final GremlinSqlIdentifier sqlIdentifier,
                                           final SqlMetadata sqlMetadata,
                                           final GraphTraversal<?, ?> graphTraversal) throws SQLException {
-        // With size 2 format of identifier is 'table'.'column' => ['table', 'column']
-        if (sqlIdentifier.getNameCount() == 2) {
+        if (sqlIdentifier.isStar()) {
+            // SELECT * will be fixed by calcite so that it is all the underlying nodes.
+            // SELECT COUNT(*) on the other hand will actually just be replaced with an empty string.
+            // So we need to inject something into our traversal for this.
+            graphTraversal.constant(1);
+        } else if (sqlIdentifier.getNameCount() == 2) {
+            // With size 2 format of identifier is 'table'.'column' => ['table', 'column']
             appendGraphTraversal(sqlIdentifier.getName(0), sqlMetadata.getRenamedColumn(sqlIdentifier.getName(1)), sqlMetadata, graphTraversal);
         } else {
             // With size 1, format of identifier is 'column'.

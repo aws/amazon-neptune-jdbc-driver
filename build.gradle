@@ -324,7 +324,17 @@ shadowJar {
     relocate 'groovyjarjarasm', 'shadow.groovyjarjarasm'
     relocate 'groovyjarjarantlr', 'shadow.groovyjarjarantlr'
     relocate 'groovy', 'shadow.groovy'
-    relocate 'com', 'shadow.com'
+    relocate 'com.amazon', 'shadow.com.amazon'
+    relocate 'com.amazonaws', 'shadow.com.amazonaws'
+    relocate 'com.carrotsearch', 'shadow.com.carrotsearch'
+    relocate 'com.google', 'shadow.com.google'
+    relocate 'com.ersi', 'shadow.com.ersi'
+    relocate 'com.github', 'shadow.com.github'
+    relocate 'com.jayway', 'shadow.com.jayway'
+    relocate 'com.jcabi', 'shadow.com.jcabi'
+    relocate 'com.jcraft', 'shadow.com.jcraft'
+    relocate 'com.squareup', 'shadow.com.squareup'
+    relocate 'com.yahoo', 'shadow.com.yahoo'
 
     dependencies {
         exclude(dependency('org.slf4j:.*'))
