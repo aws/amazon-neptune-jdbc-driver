@@ -114,16 +114,20 @@ public class GremlinSqlSelectSingle extends GremlinSqlSelect {
         final GraphTraversal<?, ?> graphTraversal =
                 SqlTraversalEngine.generateInitialSql(gremlinSqlIdentifiers, sqlMetadata, g);
         final String label = sqlMetadata.getActualTableName(gremlinSqlIdentifiers.get(0).getName(1));
+
+        // This function basically generates the latter parts of the traversal, by doing this it prepares all the
+        // renamed labels in the metadata so that queries like 'SELECT foo AS bar FROM baz ORDER BY bar'
+        // can properly recognize that bar=>foo.
+        // __.__() is passed in as an anonymous traversal that will be discarded.
+        generateDataRetrieval(gremlinSqlIdentifiers, __.__());
+
+        // Generate actual traversal.
         applyGroupBy(graphTraversal, label);
         applySelectValues(graphTraversal);
         applyOrderBy(graphTraversal, label);
         applyHaving(graphTraversal);
         applyWhere(graphTraversal);
-        SqlTraversalEngine.applyAggregateFold(sqlMetadata, graphTraversal);
-        SqlTraversalEngine.addProjection(gremlinSqlIdentifiers, sqlMetadata, graphTraversal);
-        final String projectLabel = gremlinSqlIdentifiers.get(1).getName(0);
-        applyColumnRetrieval(graphTraversal, projectLabel,
-                GremlinSqlFactory.createNodeList(sqlSelect.getSelectList().getList()));
+        generateDataRetrieval(gremlinSqlIdentifiers, graphTraversal);
 
         if (sqlMetadata.getRenamedColumns() == null) {
             throw new SQLException("Error: Column rename list is empty.");
@@ -132,6 +136,14 @@ public class GremlinSqlSelectSingle extends GremlinSqlSelect {
             throw new SQLException("Error: Expected one table for traversal execution.");
         }
         return graphTraversal;
+    }
+
+    private void generateDataRetrieval(final List<GremlinSqlIdentifier> gremlinSqlIdentifiers, GraphTraversal<?, ?> graphTraversal) throws SQLException {
+        SqlTraversalEngine.applyAggregateFold(sqlMetadata, graphTraversal);
+        SqlTraversalEngine.addProjection(gremlinSqlIdentifiers, sqlMetadata, graphTraversal);
+        final String projectLabel = gremlinSqlIdentifiers.get(1).getName(0);
+        applyColumnRetrieval(graphTraversal, projectLabel,
+                GremlinSqlFactory.createNodeList(sqlSelect.getSelectList().getList()));
     }
 
     public String getStringTraversal() throws SQLException {
