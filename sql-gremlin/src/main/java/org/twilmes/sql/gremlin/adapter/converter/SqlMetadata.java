@@ -245,7 +245,7 @@ public class SqlMetadata {
         isAggregate = sqlNodeList.getList().stream().anyMatch(SqlMetadata::isAggregate);
     }
 
-    public void checkGroup(final SqlNode sqlNode) {
+    public void checkGroupByNodeIsNull(final SqlNode sqlNode) {
         isGrouped = sqlNode != null;
     }
 
