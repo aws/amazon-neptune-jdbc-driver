@@ -76,7 +76,7 @@ public class GremlinQueryExecutor extends QueryExecutor {
      * @throws SQLException if internal functions in the properties fail.
      */
     public static Cluster.Builder createClusterBuilder(final GremlinConnectionProperties properties)
-            throws Exception {
+            throws SQLException {
         final Cluster.Builder builder = Cluster.build();
 
         if (properties.containsKey(GremlinConnectionProperties.CONTACT_POINT_KEY)) {
@@ -156,7 +156,6 @@ public class GremlinQueryExecutor extends QueryExecutor {
         }
 
         if (properties.getAuthScheme() == AuthScheme.IAMSigV4) {
-            System.out.println("=== GET REGION: " + System.getenv("SERVICE_REGION"));
             builder.channelizer(SigV4WebSocketChannelizer.class);
         } else if (properties.containsKey(GremlinConnectionProperties.CHANNELIZER_KEY)) {
             if (properties.isChannelizerGeneric()) {
@@ -194,7 +193,7 @@ public class GremlinQueryExecutor extends QueryExecutor {
     }
 
     protected static Cluster getCluster(final GremlinConnectionProperties gremlinConnectionProperties)
-            throws Exception {
+            throws SQLException {
         if (cluster == null ||
                 !propertiesEqual(previousGremlinConnectionProperties, gremlinConnectionProperties)) {
             previousGremlinConnectionProperties = gremlinConnectionProperties;
@@ -216,7 +215,7 @@ public class GremlinQueryExecutor extends QueryExecutor {
     }
 
     protected static Client getClient(final GremlinConnectionProperties gremlinConnectionProperties)
-            throws Exception {
+            throws SQLException {
         synchronized (CLUSTER_LOCK) {
             cluster = getCluster(gremlinConnectionProperties);
             return cluster.connect().init();

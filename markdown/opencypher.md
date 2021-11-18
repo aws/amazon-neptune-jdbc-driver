@@ -16,6 +16,7 @@ The following properties are available for openCypher:
 | ------------------------ | ------------------------------------------------------------ | ------------------------------------------------------------ | ------------------------------------------------------------ |
 | logLevel                 | Log level for application.                                   | In order of least logging to most logging: `OFF`, `FATAL`, `ERROR`, `WARN`, `INFO`, `DEBUG`, `TRACE`, `ALL`. | `INFO`                                                       |
 | authScheme               | Authentication mechanism to use.                             | `NONE` (no auth), `IAMSigV4` (IAM / SIGV4 logging).          | If `IAMSigV4` is selected, the user must have AWS SIGV4 credentials properly set up in their environment, including a region. See [environment setup for IAM authentication on Neptune](https://docs.aws.amazon.com/neptune/latest/userguide/iam-auth-connecting-gremlin-java.html) for more information. |
+| serviceRegion | If `IAMSigv4` is selected, this region variable must be set for connecting to IAM authenticated Neptune instance | String values. For example, `us-east-1` | `NONE`. For a list of regions see [Neptune service regions](https://docs.aws.amazon.com/neptune/latest/userguide/iam-auth-connecting-gremlin-java.html). An alternative to setting this is through exporting the `SERVICE_REGION` environment variable as instructed in the link. |
 | connectionTimeout        | Amount of time to wait for initial connection in _milliseconds_. | Integer values.                                              | `5000`                                                       |
 | connectionRetryCount     | Number of times to retry if establishing initial connection fails. | Integer values.                                              | `3`                                                          |
 | connectionPoolSize       | The max size of the connection pool to establish with the cluster. | Integer values.                                              | `1000`                                                       |
@@ -73,7 +74,7 @@ IAM is the standard way to access Neptune under an authorized account.
 import java.sql.*;
 
 class Example {
-    static final String CONNECTION_STRING = "jdbc:neptune:opencypher://bolt://example.neptune.amazonaws.com:8182;authScheme=IAMSigV4;useEncryption=true";
+    static final String CONNECTION_STRING = "jdbc:neptune:opencypher://bolt://example.neptune.amazonaws.com:8182;authScheme=IAMSigV4;useEncryption=true;serviceRegion=us-east-1";
     
     public static void main(String[] args) throws SQLException {
         Connection connection = DriverManager.getConnection(CONNECTION_STRING);
@@ -94,6 +95,7 @@ class Example {
     public static void main(String[] args) throws SQLException {
         Properties properties = new Properties();
         properties.put("authScheme", "IAMSigV4");
+        properties.put("serviceRegion", "us-east-1");
         properties.put("useEncryption", true);
         
         Connection connection = DriverManager.getConnection(CONNECTION_STRING, properties);

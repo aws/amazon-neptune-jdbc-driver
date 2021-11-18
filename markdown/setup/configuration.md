@@ -53,6 +53,6 @@ From our sample above, we would use:
 
 First follow the [IAM Authentication setup instructions](https://docs.aws.amazon.com/general/latest/gr/aws-access-keys-best-practices.html#iam-user-access-keys) to configure your system for IAM. 
 
-If you are using IAM authentication, you must set the SERVICE_REGION environment variable to an appropriate value (the region you are connecting to, such as `us-east-1`).
+If you are using IAM authentication, you must set the `SERVICE_REGION` environment variable to an appropriate value (the region you are connecting to, such as `us-east-1`). Or set the appropriate region through the `serviceRegion` connection property as part of the connection string.
 
 **For Mac you must launch your BI tool through terminal to have the environment variables loaded.**
