@@ -57,6 +57,7 @@ public abstract class GremlinSqlSelect extends GremlinSqlNode {
 
     public SqlGremlinQueryResult executeTraversal() throws SQLException {
         sqlMetadata.checkAggregate(sqlSelect.getSelectList());
+        sqlMetadata.checkGroupByNodeIsNull(sqlSelect.getGroup());
         final GraphTraversal<?, ?> graphTraversal = generateTraversal();
         applyDistinct(graphTraversal);
         applyOffset(graphTraversal);

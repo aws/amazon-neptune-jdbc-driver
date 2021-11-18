@@ -82,22 +82,94 @@ public class GremlinSqlAdvancedSelectTest extends GremlinSqlBaseTest {
                 rows(r("Juanita", 50), r("Susan", 45)));
 
         // WHERE with AND.
-        runQueryTestResults("SELECT name, age FROM person WHERE name = 'Tom' AND age = 35 ORDER BY age", columns("name", "age"),
+        runQueryTestResults("SELECT name, age FROM person WHERE name = 'Tom' AND age = 35 ORDER BY age",
+                columns("name", "age"),
                 rows(r("Tom", 35)));
-        runQueryTestResults("SELECT name, age FROM person WHERE name = 'Tom' AND age = 35 AND NOT wentToSpace ORDER BY age", columns("name", "age"),
+        runQueryTestResults(
+                "SELECT name, age FROM person WHERE name = 'Tom' AND age = 35 AND NOT wentToSpace ORDER BY age",
+                columns("name", "age"),
                 rows(r("Tom", 35)));
-        runQueryTestResults("SELECT name, age FROM person WHERE name = 'Tom' AND age = 35 AND wentToSpace ORDER BY age", columns("name", "age"),
+        runQueryTestResults("SELECT name, age FROM person WHERE name = 'Tom' AND age = 35 AND wentToSpace ORDER BY age",
+                columns("name", "age"),
                 rows());
-        runQueryTestResults("SELECT name, age FROM person WHERE name = 'Pavel' AND age = 30 AND wentToSpace ORDER BY age", columns("name", "age"),
+        runQueryTestResults(
+                "SELECT name, age FROM person WHERE name = 'Pavel' AND age = 30 AND wentToSpace ORDER BY age",
+                columns("name", "age"),
                 rows(r("Pavel", 30)));
 
-        runQueryTestResults("SELECT name, age FROM person WHERE name = 'Tom' OR name = 'Juanita' ORDER BY age", columns("name", "age"),
+        // WHERE with OR.
+        runQueryTestResults("SELECT name, age FROM person WHERE name = 'Tom' OR name = 'Juanita' ORDER BY age",
+                columns("name", "age"),
                 rows(r("Tom", 35), r("Juanita", 50)));
-        runQueryTestResults("SELECT name, age FROM person WHERE name = 'Tom' OR name = 'Juanita' OR age = 31 ORDER BY age", columns("name", "age"),
+        runQueryTestResults(
+                "SELECT name, age FROM person WHERE name = 'Tom' OR name = 'Juanita' OR age = 31 ORDER BY age",
+                columns("name", "age"),
                 rows(r("Phil", 31), r("Tom", 35), r("Juanita", 50)));
-
-        runQueryTestResults("SELECT name, age FROM person WHERE name = 'Tom' OR name = 'Juanita' ORDER BY age", columns("name", "age"),
+        runQueryTestResults("SELECT name, age FROM person WHERE name = 'Tom' OR name = 'Juanita' ORDER BY age",
+                columns("name", "age"),
                 rows(r("Tom", 35), r("Juanita", 50)));
+    }
+
+    @Test
+    public void testHaving() throws SQLException {
+        // HAVING with aggregate literal.
+        runQueryTestResults("SELECT wentToSpace, SUM(age) FROM person GROUP BY wentToSpace HAVING SUM(age) > 1000",
+                columns("wentToSpace", "SUM(age)"),
+                rows());
+        runQueryTestResults("SELECT wentToSpace, COUNT(age) FROM person GROUP BY wentToSpace HAVING COUNT(age) < 1000",
+                columns("wentToSpace", "COUNT(age)"),
+                rows(r(false, 3L), r(true, 3L)));
+        runQueryTestResults("SELECT wentToSpace, COUNT(age) FROM person GROUP BY wentToSpace HAVING COUNT(age) <> 3",
+                columns("wentToSpace", "COUNT(age)"),
+                rows());
+        runQueryTestResults("SELECT COUNT(age), SUM(age) FROM person GROUP BY wentToSpace HAVING SUM(age) > 100",
+                columns("COUNT(age)", "SUM(age)"),
+                rows(r(3L, 125L)));
+        runQueryTestResults("SELECT COUNT(age), SUM(age) FROM person GROUP BY wentToSpace HAVING SUM(age) < 100",
+                columns("COUNT(age)", "SUM(age)"),
+                rows(r(3L, 95L)));
+        runQueryTestResults("SELECT COUNT(age), SUM(age) FROM person GROUP BY age HAVING SUM(age) <> 1000",
+                columns("COUNT(age)", "SUM(age)"),
+                rows(r(1L, 35L), r(1L, 29L), r(1L, 31L), r(1L, 45L), r(1L, 50L), r(1L, 30L)));
+        runQueryTestResults("SELECT COUNT(age), SUM(age) FROM person GROUP BY age HAVING SUM(age) = 35",
+                columns("COUNT(age)", "SUM(age)"),
+                rows(r(1L, 35L)));
+
+        // Having with AND.
+        runQueryTestResults(
+                "SELECT COUNT(age), SUM(age) FROM person GROUP BY wentToSpace HAVING SUM(age) <> 1000 AND COUNT(age) = 3",
+                columns("COUNT(age)", "SUM(age)"),
+                rows(r(3L, 95L), r(3L, 125L)));
+        runQueryTestResults(
+                "SELECT COUNT(age), SUM(age) FROM person GROUP BY wentToSpace HAVING SUM(age) = 125 AND COUNT(age) = 3",
+                columns("COUNT(age)", "SUM(age)"),
+                rows(r(3L, 125L)));
+        runQueryTestResults(
+                "SELECT COUNT(age), SUM(age) FROM person GROUP BY wentToSpace HAVING SUM(age) <> 125 AND COUNT(age) = 3",
+                columns("COUNT(age)", "SUM(age)"),
+                rows(r(3L, 95L)));
+        runQueryTestResults(
+                "SELECT COUNT(age), SUM(age) FROM person GROUP BY wentToSpace HAVING SUM(age) <> 125 AND COUNT(age) <> 3",
+                columns("COUNT(age)", "SUM(age)"),
+                rows());
+
+        // Having with OR.
+        runQueryTestResults(
+                "SELECT COUNT(age), SUM(age) FROM person GROUP BY wentToSpace HAVING SUM(age) = 1000 OR COUNT(age) = 3",
+                columns("COUNT(age)", "SUM(age)"),
+                rows(r(3L, 95L), r(3L, 125L)));
+        runQueryTestResults(
+                "SELECT COUNT(age), SUM(age) FROM person GROUP BY wentToSpace HAVING SUM(age) = 1000 OR COUNT(age) <> 3",
+                columns("COUNT(age)", "SUM(age)"),
+                rows());
+        runQueryTestResults(
+                "SELECT COUNT(age), SUM(age) FROM person GROUP BY wentToSpace HAVING SUM(age) = 125 OR COUNT(age) <> 3",
+                columns("COUNT(age)", "SUM(age)"),
+                rows(r(3L, 125L)));
+        runQueryTestResults(
+                "SELECT COUNT(age), SUM(age) FROM person GROUP BY wentToSpace HAVING SUM(age) <> 125 OR COUNT(age) <> 3",
+                columns("COUNT(age)", "SUM(age)"),
+                rows(r(3L, 95L)));
     }
 
     @Test

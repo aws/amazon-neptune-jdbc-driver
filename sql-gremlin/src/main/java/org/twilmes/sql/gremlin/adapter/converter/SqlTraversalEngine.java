@@ -57,14 +57,14 @@ public class SqlTraversalEngine {
     }
 
     public static void applyAggregateFold(final SqlMetadata sqlMetadata, final GraphTraversal<?, ?> graphTraversal) {
-        if (sqlMetadata.getIsAggregate()) {
+        if (sqlMetadata.getIsProjectFoldRequired()) {
             graphTraversal.fold();
         }
     }
 
     public static GraphTraversal<?, ?> getEmptyTraversal(final StepDirection direction, final SqlMetadata sqlMetadata) {
         final GraphTraversal<?, ?> graphTraversal = __.unfold();
-        if (sqlMetadata.getIsAggregate()) {
+        if (sqlMetadata.getIsProjectFoldRequired()) {
             graphTraversal.unfold();
         }
         switch (direction) {
@@ -126,7 +126,7 @@ public class SqlTraversalEngine {
         // Primary/foreign key, need to traverse appropriately.
         if (!columnName.endsWith(GremlinTableBase.ID)) {
             if (sqlMetadata.getIsAggregate()) {
-                graphTraversal.values(columnName);
+                graphTraversal.has(columnName).values(columnName);
             } else {
                 graphTraversal.choose(__.has(columnName), __.values(columnName),
                         __.constant(SqlGremlinQueryResult.NULL_VALUE));
@@ -169,7 +169,7 @@ public class SqlTraversalEngine {
             throw new SQLException("Error, cannot apply ID based traversal appension.");
         }
         if (sqlMetadata.getIsAggregate()) {
-            graphTraversal.values(columnName);
+            graphTraversal.has(columnName).values(columnName);
         } else {
             graphTraversal.choose(__.has(columnName), __.values(columnName),
                     __.constant(SqlGremlinQueryResult.NULL_VALUE));
