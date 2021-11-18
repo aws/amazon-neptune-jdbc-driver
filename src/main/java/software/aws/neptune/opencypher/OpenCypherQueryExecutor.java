@@ -51,13 +51,8 @@ public class OpenCypherQueryExecutor extends QueryExecutor {
     private final Object sessionLock = new Object();
     private Session session = null;
 
-    OpenCypherQueryExecutor(final OpenCypherConnectionProperties openCypherConnectionProperties) throws SQLException {
+    OpenCypherQueryExecutor(final OpenCypherConnectionProperties openCypherConnectionProperties) {
         this.openCypherConnectionProperties = openCypherConnectionProperties;
-        if (openCypherConnectionProperties.getAuthScheme().equals(AuthScheme.IAMSigV4)
-                && (System.getenv().get("SERVICE_REGION") == null)) {
-            throw new SQLException(
-                    "SERVICE_REGION environment variable must be set for IAMSigV4 authentication.");
-        }
     }
 
     /**

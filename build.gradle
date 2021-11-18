@@ -224,7 +224,7 @@ ext {
     gremlinVersion = '3.4.8'
     slf4jVersion = '1.7.29'
     rdf4jVersion = '3.5.0'
-    amazonSigv4SignerVersion = '2.1.1'
+    amazonSigv4SignerVersion = '2.4.0'
     nettyVersion = '4.1.52.Final'
 }
 
@@ -243,7 +243,7 @@ dependencies {
     implementation group: 'commons-beanutils', name: 'commons-beanutils', version: '1.9.4'
     implementation group: 'org.apache.tinkerpop', name: 'gremlin-driver', version: gremlinVersion
     implementation group: 'com.amazonaws', name: 'amazon-neptune-sparql-java-sigv4', version: amazonSigv4SignerVersion
-    implementation group: 'com.amazonaws', name: 'amazon-neptune-gremlin-java-sigv4', version: '1.0'
+    implementation group: 'com.amazonaws', name: 'amazon-neptune-gremlin-java-sigv4', version: amazonSigv4SignerVersion
     implementation group: 'com.jcraft', name: 'jsch', version: '0.1.55'
     implementation group: 'io.netty', name: 'netty-all', version: nettyVersion
     implementation group: 'org.neo4j.driver', name: 'neo4j-java-driver', version: neo4jDriverVersion

@@ -50,7 +50,7 @@ public class SparqlConnection extends Connection implements java.sql.Connection 
     }
 
     @Override
-    public QueryExecutor getQueryExecutor() {
+    public QueryExecutor getQueryExecutor() throws SQLException {
         return new SparqlQueryExecutor(getSparqlConnectionProperties());
     }
 

@@ -64,13 +64,8 @@ public class GremlinQueryExecutor extends QueryExecutor {
      *
      * @param gremlinConnectionProperties GremlinConnectionProperties for use in the executor.
      */
-    public GremlinQueryExecutor(final GremlinConnectionProperties gremlinConnectionProperties) throws SQLException {
+    public GremlinQueryExecutor(final GremlinConnectionProperties gremlinConnectionProperties) {
         this.gremlinConnectionProperties = gremlinConnectionProperties;
-        if (gremlinConnectionProperties.getAuthScheme().equals(AuthScheme.IAMSigV4)
-                && (System.getenv().get("SERVICE_REGION") == null)) {
-            throw new SQLException(
-                    "SERVICE_REGION environment variable must be set for IAMSigV4 authentication.");
-        }
     }
 
     /**
@@ -81,7 +76,7 @@ public class GremlinQueryExecutor extends QueryExecutor {
      * @throws SQLException if internal functions in the properties fail.
      */
     public static Cluster.Builder createClusterBuilder(final GremlinConnectionProperties properties)
-            throws SQLException {
+            throws Exception {
         final Cluster.Builder builder = Cluster.build();
 
         if (properties.containsKey(GremlinConnectionProperties.CONTACT_POINT_KEY)) {
@@ -159,7 +154,9 @@ public class GremlinQueryExecutor extends QueryExecutor {
         if (properties.containsKey(GremlinConnectionProperties.MIN_SIMULT_USAGE_PER_CONNECTION_KEY)) {
             builder.minSimultaneousUsagePerConnection(properties.getMinSimultaneousUsagePerConnection());
         }
+
         if (properties.getAuthScheme() == AuthScheme.IAMSigV4) {
+            System.out.println("=== GET REGION: " + System.getenv("SERVICE_REGION"));
             builder.channelizer(SigV4WebSocketChannelizer.class);
         } else if (properties.containsKey(GremlinConnectionProperties.CHANNELIZER_KEY)) {
             if (properties.isChannelizerGeneric()) {
@@ -197,7 +194,7 @@ public class GremlinQueryExecutor extends QueryExecutor {
     }
 
     protected static Cluster getCluster(final GremlinConnectionProperties gremlinConnectionProperties)
-            throws SQLException {
+            throws Exception {
         if (cluster == null ||
                 !propertiesEqual(previousGremlinConnectionProperties, gremlinConnectionProperties)) {
             previousGremlinConnectionProperties = gremlinConnectionProperties;
@@ -219,7 +216,7 @@ public class GremlinQueryExecutor extends QueryExecutor {
     }
 
     protected static Client getClient(final GremlinConnectionProperties gremlinConnectionProperties)
-            throws SQLException {
+            throws Exception {
         synchronized (CLUSTER_LOCK) {
             cluster = getCluster(gremlinConnectionProperties);
             return cluster.connect().init();

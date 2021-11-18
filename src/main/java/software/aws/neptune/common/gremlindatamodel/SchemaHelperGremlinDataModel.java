@@ -85,15 +85,6 @@ public class SchemaHelperGremlinDataModel {
                                                final SqlSchemaGrabber.ScanType scanType)
             throws SQLException {
         final String adjustedEndpoint = getAdjustedEndpoint(endpoint, pathType);
-        // This gremlin utility requires that the SERVICE_REGION is set no matter what usage of IAM is being used.
-        if (useIAM) {
-            if (!System.getenv().containsKey("SERVICE_REGION")) {
-                throw SqlError.createSQLException(
-                        LOGGER,
-                        SqlState.OPERATION_CANCELED,
-                        SqlError.MISSING_SERVICE_REGION);
-            }
-        }
         return SqlSchemaGrabber.getSchema(
                 traversal().withRemote(DriverRemoteConnection.using(getClient(adjustedEndpoint, port, useIAM, useSsl))),
                 scanType);

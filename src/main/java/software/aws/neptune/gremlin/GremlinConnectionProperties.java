@@ -29,6 +29,8 @@ import software.aws.neptune.jdbc.utilities.AuthScheme;
 import software.aws.neptune.jdbc.utilities.ConnectionProperties;
 import software.aws.neptune.jdbc.utilities.SqlError;
 import software.aws.neptune.jdbc.utilities.SqlState;
+
+import java.lang.reflect.Field;
 import java.sql.SQLClientInfoException;
 import java.sql.SQLException;
 import java.util.HashMap;
@@ -1095,12 +1097,23 @@ public class GremlinConnectionProperties extends ConnectionProperties {
     protected void validateProperties() throws SQLException {
         // If IAMSigV4 is specified, we need the region provided to us.
         if (getAuthScheme() != null && getAuthScheme().equals(AuthScheme.IAMSigV4)) {
-            final String region = System.getenv().get("SERVICE_REGION");
-            if (region == null) {
-                throw new SQLException(
-                        "Error: SERVICE_REGION environment variable must be set to use IAM authentication. " +
-                                "Note, it must be accessible from BI tools if using a BI tool. " +
-                                "Example SERVICE_REGION=us-east-1.");
+            if ("".equals(getRegion())) {
+                if (System.getenv("SERVICE_REGION") == null) {
+                    throw missingConnectionPropertyError(
+                            "A Service Region must be provided to use IAMSigV4 Authentication through " +
+                                    "the SERVICE_REGION environment variable or the serviceRegion connection property. " +
+                                    "If you are using the driver with a BI Tools, you will need to set the serviceRegion " +
+                                    "property to the appropriate value. For example, 'serviceRegion=us-east-1'.");
+
+                }
+                // Technically this doesn't need to be set if we are using "SERVICE_REGION" in Gremlin (and only in Gremlin)
+                setRegion(System.getenv("SERVICE_REGION"));
+            } else {
+                try {
+                    setRegionEnv(getRegion());
+                } catch (Exception e) {
+                    throw new SQLException(String.format("Error: unable to set service region: %s", e));
+                }
             }
 
             if (!getEnableSsl()) {
@@ -1119,5 +1132,46 @@ public class GremlinConnectionProperties extends ConnectionProperties {
     @Override
     public boolean isSupportedProperty(final String name) {
         return SUPPORTED_PROPERTIES_LIST.contains(name);
+    }
+
+    /**
+     * Updates the SERVICE_REGION env variable in JVM to the region set by Gremlin connection properties
+     */
+    @SuppressWarnings({ "unchecked" })
+    private static void setRegionEnv(final String region) throws Exception {
+        if (region.equals(System.getenv("SERVICE_REGION"))) {
+            return;
+        }
+        if (System.getenv("SERVICE_REGION") != null) {
+            LOGGER.warn(String.format("Overriding the current SERVICE_REGION environment variable with %s.", region));
+        }
+        try {
+            final Map<String, String> newEnv = new HashMap<>();
+            newEnv.put("SERVICE_REGION", region);
+
+            final Class<?> processEnvironmentClass = Class.forName("java.lang.ProcessEnvironment");
+            final Field theEnvironmentField = processEnvironmentClass.getDeclaredField("theEnvironment");
+            theEnvironmentField.setAccessible(true);
+            final Map<String, String> env = (Map<String, String>) theEnvironmentField.get(null);
+            env.putAll(newEnv);
+            final Field theCaseInsensitiveEnvironmentField = processEnvironmentClass.getDeclaredField("theCaseInsensitiveEnvironment");
+            theCaseInsensitiveEnvironmentField.setAccessible(true);
+            final Map<String, String> cIEnv = (Map<String, String>) theCaseInsensitiveEnvironmentField.get(null);
+            cIEnv.putAll(newEnv);
+
+            // final Class<?> processEnv = Class.forName("java.lang.ProcessEnvironment");
+            // final Method getenv = processEnv.getDeclaredMethod("getenv", String.class);
+            // getenv.setAccessible(true);
+            // final Field caseInsensitiveEnv = processEnv.getDeclaredField("theCaseInsensitiveEnvironment");
+            // caseInsensitiveEnv.setAccessible(true);
+            // final Map<String, String> envMap = (Map<String, String>) caseInsensitiveEnv.get(null);
+            // envMap.put("SERVICE_REGION", region);
+
+        } catch (NoSuchFieldException e) {
+            final Map<String, String> env = System.getenv();
+            final Field field = env.getClass().getDeclaredField("m");
+            field.setAccessible(true);
+            ((Map<String, String>) field.get(env)).put("SERVICE_REGION", region);
+        }
     }
 }

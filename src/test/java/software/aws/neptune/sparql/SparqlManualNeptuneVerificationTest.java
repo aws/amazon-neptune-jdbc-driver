@@ -39,41 +39,41 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import software.aws.neptune.jdbc.utilities.AuthScheme;
 import software.aws.neptune.jdbc.utilities.ConnectionProperties;
+
+import java.sql.Connection;
+import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.Properties;
-
-import static software.aws.neptune.jdbc.utilities.ConnectionProperties.SSH_HOSTNAME;
-import static software.aws.neptune.jdbc.utilities.ConnectionProperties.SSH_PRIVATE_KEY_FILE;
-import static software.aws.neptune.jdbc.utilities.ConnectionProperties.SSH_STRICT_HOST_KEY_CHECKING;
-import static software.aws.neptune.jdbc.utilities.ConnectionProperties.SSH_USER;
 
 @Disabled
 public class SparqlManualNeptuneVerificationTest {
 
     private static final String NEPTUNE_HOSTNAME =
-            "https://database-1.cluster-cdffsmv2nzf7.us-east-2.neptune.amazonaws.com";
+            "https://jdbc-bug-bash-iam-instance-1.cdubgfjknn5r.us-east-1.neptune.amazonaws.com";
     private static final int NEPTUNE_DEFAULT_PORT = 8182;
-    private static final String AUTH = "None";
+    private static final String AUTH = "IamSigV4";
+    private static final String REGION = "us-east-1";
     private static final String NEPTUNE_QUERY_ENDPOINT = "sparql";
     private static final String NEPTUNE_DESTINATION_STRING =
             String.format("%s:%d", NEPTUNE_HOSTNAME, NEPTUNE_DEFAULT_PORT);
     private static final String CONNECTION_STRING =
-            String.format("jdbc:neptune:sparql://%s;queryEndpoint=%s;authScheme=%s;", NEPTUNE_HOSTNAME,
-                    NEPTUNE_QUERY_ENDPOINT, AUTH);
+            String.format("jdbc:neptune:sparql://%s;queryEndpoint=%s;authScheme=%s;serviceRegion=%s;", NEPTUNE_HOSTNAME,
+                    NEPTUNE_QUERY_ENDPOINT, AUTH, REGION);
     private static java.sql.Statement statement;
     private static java.sql.Connection authConnection;
     private static java.sql.DatabaseMetaData databaseMetaData;
 
     private static Properties authProperties() {
         final Properties properties = new Properties();
-        properties.put(ConnectionProperties.AUTH_SCHEME_KEY, AuthScheme.None);
+        properties.put(ConnectionProperties.AUTH_SCHEME_KEY, AuthScheme.IAMSigV4);
         properties.put(SparqlConnectionProperties.ENDPOINT_KEY, NEPTUNE_HOSTNAME);
         properties.put(SparqlConnectionProperties.PORT_KEY, NEPTUNE_DEFAULT_PORT);
         properties.put(SparqlConnectionProperties.QUERY_ENDPOINT_KEY, NEPTUNE_QUERY_ENDPOINT);
-        properties.put(SSH_USER, "ec2-user");
-        properties.put(SSH_HOSTNAME, "52.14.185.245");
-        properties.put(SSH_PRIVATE_KEY_FILE, "~/Downloads/EC2/neptune-test.pem");
-        properties.put(SSH_STRICT_HOST_KEY_CHECKING, "false");
+        properties.put(SparqlConnectionProperties.SERVICE_REGION_KEY, REGION);
+        //        properties.put(SSH_USER, "ec2-user");
+        //        properties.put(SSH_HOSTNAME, "52.14.185.245");
+        //        properties.put(SSH_PRIVATE_KEY_FILE, "~/Downloads/EC2/neptune-test.pem");
+        //        properties.put(SSH_STRICT_HOST_KEY_CHECKING, "false");
         return properties;
     }
 
@@ -88,6 +88,13 @@ public class SparqlManualNeptuneVerificationTest {
     @Test
     void testBasicIamAuth() throws Exception {
         Assertions.assertTrue(authConnection.isValid(1));
+    }
+
+    @Disabled
+    @Test
+    void testBasicIamAuthThoughConnString() throws Exception {
+        final Connection connection = DriverManager.getConnection(CONNECTION_STRING);
+        Assertions.assertTrue(connection.isValid(1));
     }
 
     @Disabled

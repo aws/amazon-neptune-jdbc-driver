@@ -37,7 +37,6 @@ import java.util.Properties;
 public class OpenCypherConnectionProperties extends ConnectionProperties {
     public static final String ENDPOINT_KEY = "endpoint";
     public static final String USE_ENCRYPTION_KEY = "useEncryption";
-    public static final String REGION_KEY = "region";
     public static final String CONNECTION_POOL_SIZE_KEY = "connectionPoolSize";
 
     // TODO: Revisit. We should probably support these.
@@ -56,14 +55,13 @@ public class OpenCypherConnectionProperties extends ConnectionProperties {
         PROPERTY_CONVERTER_MAP.put(AWS_CREDENTIALS_PROVIDER_CLASS_KEY, (key, value) -> value);
         PROPERTY_CONVERTER_MAP.put(CUSTOM_CREDENTIALS_FILE_PATH_KEY, (key, value) -> value);
         PROPERTY_CONVERTER_MAP.put(ENDPOINT_KEY, (key, value) -> value);
-        PROPERTY_CONVERTER_MAP.put(REGION_KEY, (key, value) -> value);
+        PROPERTY_CONVERTER_MAP.put(SERVICE_REGION_KEY, (key, value) -> value);
         PROPERTY_CONVERTER_MAP.put(USE_ENCRYPTION_KEY, ConnectionProperties::toBoolean);
         PROPERTY_CONVERTER_MAP.put(CONNECTION_POOL_SIZE_KEY, ConnectionProperties::toUnsigned);
     }
 
     static {
         DEFAULT_PROPERTIES_MAP.put(ENDPOINT_KEY, "");
-        DEFAULT_PROPERTIES_MAP.put(REGION_KEY, "");
         DEFAULT_PROPERTIES_MAP.put(USE_ENCRYPTION_KEY, DEFAULT_USE_ENCRYPTION);
         DEFAULT_PROPERTIES_MAP.put(CONNECTION_POOL_SIZE_KEY, DEFAULT_CONNECTION_POOL_SIZE);
     }
@@ -216,26 +214,6 @@ public class OpenCypherConnectionProperties extends ConnectionProperties {
     }
 
     /**
-     * Gets the region.
-     *
-     * @return The region.
-     */
-    public String getRegion() {
-        return getProperty(REGION_KEY);
-    }
-
-    /**
-     * Sets the region.
-     *
-     * @param region The region.
-     * @throws SQLException if value is invalid.
-     */
-    public void setRegion(final String region) throws SQLException {
-        setProperty(REGION_KEY,
-                (String) PROPERTY_CONVERTER_MAP.get(REGION_KEY).convert(REGION_KEY, region));
-    }
-
-    /**
      * Gets the connection pool size.
      *
      * @return The connection pool size.
@@ -264,12 +242,16 @@ public class OpenCypherConnectionProperties extends ConnectionProperties {
     protected void validateProperties() throws SQLException {
         // If IAMSigV4 is specified, we need the region provided to us.
         if (getAuthScheme() != null && getAuthScheme().equals(AuthScheme.IAMSigV4)) {
-            final String region = System.getenv().get("SERVICE_REGION");
-            if (region == null) {
-                throw missingConnectionPropertyError(
-                        "A Region must be provided to use IAMSigV4 Authentication. Set the SERVICE_REGION environment variable to the appropriate region, such as 'us-east-1'.");
+            if ("".equals(getRegion())) {
+                if (System.getenv("SERVICE_REGION") == null) {
+                    throw missingConnectionPropertyError(
+                            "A Service Region must be provided to use IAMSigV4 Authentication through " +
+                                    "the SERVICE_REGION environment variable or the serviceRegion connection property. " +
+                                    "For example, append 'serviceRegion=us-east-1;' to your connection string");
+                }
+                LOGGER.warn("serviceRegion property was not set, using system SERVICE_REGION environment variable");
+                setRegion(System.getenv("SERVICE_REGION"));
             }
-            setRegion(region);
 
             if (!getUseEncryption()) {
                 throw invalidConnectionPropertyValueError(USE_ENCRYPTION_KEY,

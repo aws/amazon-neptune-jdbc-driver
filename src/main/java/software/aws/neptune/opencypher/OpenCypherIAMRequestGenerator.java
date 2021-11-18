@@ -53,6 +53,7 @@ public class OpenCypherIAMRequestGenerator {
     public static AuthToken getSignedHeader(final String url, final String region) throws SQLException {
         final FullHttpRequest request = new DefaultFullHttpRequest(HttpVersion.HTTP_1_1,
                 io.netty.handler.codec.http.HttpMethod.GET, url);
+        System.out.println(region);
         try {
             new NeptuneNettyHttpSigV4Signer(region, AWS_CREDENTIALS_PROVIDER).signRequest(request);
         } catch (final NeptuneSigV4SignerException e) {

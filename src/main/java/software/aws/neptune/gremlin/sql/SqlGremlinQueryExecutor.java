@@ -28,7 +28,6 @@ import software.aws.neptune.gremlin.GremlinConnectionProperties;
 import software.aws.neptune.gremlin.GremlinQueryExecutor;
 import software.aws.neptune.gremlin.resultset.GremlinResultSetGetColumns;
 import software.aws.neptune.gremlin.resultset.GremlinResultSetGetTables;
-import software.aws.neptune.jdbc.utilities.AuthScheme;
 import software.aws.neptune.jdbc.utilities.SqlError;
 import software.aws.neptune.jdbc.utilities.SqlState;
 import java.lang.reflect.Constructor;
@@ -56,11 +55,6 @@ public class SqlGremlinQueryExecutor extends GremlinQueryExecutor {
     public SqlGremlinQueryExecutor(final GremlinConnectionProperties gremlinConnectionProperties) throws SQLException {
         super(gremlinConnectionProperties);
         this.gremlinConnectionProperties = gremlinConnectionProperties;
-        if (gremlinConnectionProperties.getAuthScheme().equals(AuthScheme.IAMSigV4)
-                && (System.getenv().get("SERVICE_REGION") == null)) {
-            throw new SQLException(
-                    "SERVICE_REGION environment variable must be set for IAMSigV4 authentication.");
-        }
     }
 
     /**
@@ -82,7 +76,7 @@ public class SqlGremlinQueryExecutor extends GremlinQueryExecutor {
 
     private static GraphTraversalSource getGraphTraversalSource(
             final GremlinConnectionProperties gremlinConnectionProperties)
-            throws SQLException {
+            throws Exception {
         synchronized (TRAVERSAL_LOCK) {
             if (graphTraversalSource == null) {
                 graphTraversalSource =
@@ -94,7 +88,7 @@ public class SqlGremlinQueryExecutor extends GremlinQueryExecutor {
     }
 
     private static SqlConverter getGremlinSqlConverter(final GremlinConnectionProperties gremlinConnectionProperties)
-            throws SQLException {
+            throws Exception {
         MetadataCache.updateCacheIfNotUpdated(gremlinConnectionProperties);
         if (gremlinSqlConverter == null) {
             gremlinSqlConverter = new SqlConverter(MetadataCache.getGremlinSchema(),

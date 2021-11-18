@@ -24,6 +24,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.twilmes.sql.gremlin.adapter.converter.schema.SqlSchemaGrabber;
 import software.aws.neptune.jdbc.Connection;
+
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -40,24 +41,26 @@ import java.util.regex.Pattern;
  * Class that contains connection properties.
  */
 public abstract class ConnectionProperties extends Properties {
-    public static final String SCAN_TYPE_KEY = "ScanType";
-    public static final String APPLICATION_NAME_KEY = "ApplicationName";
-    public static final String AUTH_SCHEME_KEY = "AuthScheme";
-    public static final String CONNECTION_TIMEOUT_MILLIS_KEY = "ConnectionTimeout";
-    public static final String CONNECTION_RETRY_COUNT_KEY = "ConnectionRetryCount";
-    public static final String LOG_LEVEL_KEY = "LogLevel";
+    public static final String SCAN_TYPE_KEY = "scanType";
+    public static final String APPLICATION_NAME_KEY = "applicationName";
+    public static final String AUTH_SCHEME_KEY = "authScheme";
+    public static final String CONNECTION_TIMEOUT_MILLIS_KEY = "connectionTimeout";
+    public static final String CONNECTION_RETRY_COUNT_KEY = "connectionRetryCount";
+    public static final String LOG_LEVEL_KEY = "logLevel";
     public static final String SSH_USER = "sshUser";
     public static final String SSH_HOSTNAME = "sshHost";
     public static final String SSH_PRIVATE_KEY_FILE = "sshPrivateKeyFile";
     public static final String SSH_PRIVATE_KEY_PASSPHRASE = "sshPrivateKeyPassphrase";
     public static final String SSH_STRICT_HOST_KEY_CHECKING = "sshStrictHostKeyChecking";
     public static final String SSH_KNOWN_HOSTS_FILE = "sshKnownHostsFile";
+    public static final String SERVICE_REGION_KEY = "serviceRegion";
     public static final AuthScheme DEFAULT_AUTH_SCHEME = AuthScheme.IAMSigV4;
     public static final SqlSchemaGrabber.ScanType DEFAULT_SCAN_TYPE = SqlSchemaGrabber.ScanType.All;
     public static final int DEFAULT_CONNECTION_TIMEOUT_MILLIS = 5000;
     public static final int DEFAULT_CONNECTION_RETRY_COUNT = 3;
     public static final String DEFAULT_SSH_STRICT_CHECKING = "true";
     public static final Level DEFAULT_LOG_LEVEL = Level.OFF;
+    public static final String DEFAULT_SERVICE_REGION = "";
 
     public static final Map<String, Object> DEFAULT_PROPERTIES_MAP = new HashMap<>();
     private static final Map<String, ConnectionProperties.PropertyConverter<?>> PROPERTY_CONVERTER_MAP =
@@ -71,6 +74,7 @@ public abstract class ConnectionProperties extends Properties {
         PROPERTY_CONVERTER_MAP.put(CONNECTION_TIMEOUT_MILLIS_KEY, ConnectionProperties::toUnsigned);
         PROPERTY_CONVERTER_MAP.put(CONNECTION_RETRY_COUNT_KEY, ConnectionProperties::toUnsigned);
         PROPERTY_CONVERTER_MAP.put(LOG_LEVEL_KEY, ConnectionProperties::toLogLevel);
+        PROPERTY_CONVERTER_MAP.put(SERVICE_REGION_KEY, (key, value) -> value);
         PROPERTY_CONVERTER_MAP.put(SSH_USER, (key, value) -> value);
         PROPERTY_CONVERTER_MAP.put(SSH_HOSTNAME, (key, value) -> value);
         PROPERTY_CONVERTER_MAP.put(SSH_PRIVATE_KEY_FILE, (key, value) -> value);
@@ -85,6 +89,7 @@ public abstract class ConnectionProperties extends Properties {
         DEFAULT_PROPERTIES_MAP.put(CONNECTION_RETRY_COUNT_KEY, DEFAULT_CONNECTION_RETRY_COUNT);
         DEFAULT_PROPERTIES_MAP.put(AUTH_SCHEME_KEY, DEFAULT_AUTH_SCHEME);
         DEFAULT_PROPERTIES_MAP.put(LOG_LEVEL_KEY, DEFAULT_LOG_LEVEL);
+        DEFAULT_PROPERTIES_MAP.put(SERVICE_REGION_KEY, DEFAULT_SERVICE_REGION);
     }
 
     /**
@@ -389,6 +394,25 @@ public abstract class ConnectionProperties extends Properties {
             throw invalidConnectionPropertyError(CONNECTION_RETRY_COUNT_KEY, retryCount);
         }
         put(CONNECTION_RETRY_COUNT_KEY, retryCount);
+    }
+
+    /**
+     * Gets the region.
+     *
+     * @return The region.
+     */
+    public String getRegion() {
+        return getProperty(SERVICE_REGION_KEY);
+    }
+
+    /**
+     * Sets the region.
+     *
+     * @param region The region.
+     * @throws SQLException if value is invalid.
+     */
+    public void setRegion(@NonNull final String region) throws SQLException {
+        put(SERVICE_REGION_KEY, region);
     }
 
     /**
