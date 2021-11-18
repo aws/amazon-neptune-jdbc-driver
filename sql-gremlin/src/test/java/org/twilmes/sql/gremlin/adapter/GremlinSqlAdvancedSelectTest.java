@@ -42,6 +42,32 @@ public class GremlinSqlAdvancedSelectTest extends GremlinSqlBaseTest {
     }
 
     @Test
+    public void testOrder() throws SQLException {
+        // ORDER with integer column.
+        runQueryTestResults("SELECT name, age FROM person ORDER BY age", columns("name", "age"),
+                rows(r("Patty", 29), r("Pavel", 30), r("Phil", 31), r("Tom", 35), r("Susan", 45), r("Juanita", 50)));
+        runQueryTestResults("SELECT name, age FROM person ORDER BY age DESC", columns("name", "age"),
+                rows(r("Juanita", 50), r("Susan", 45), r("Tom", 35), r("Phil", 31), r("Pavel", 30), r("Patty", 29)));
+
+        runQueryTestResults("SELECT name, age AS a FROM person ORDER BY a", columns("name", "a"),
+                rows(r("Patty", 29), r("Pavel", 30), r("Phil", 31), r("Tom", 35), r("Susan", 45), r("Juanita", 50)));
+        runQueryTestResults("SELECT name, age AS a FROM person ORDER BY a DESC", columns("name", "a"),
+                rows(r("Juanita", 50), r("Susan", 45), r("Tom", 35), r("Phil", 31), r("Pavel", 30), r("Patty", 29)));
+
+        // ORDER with string column.
+        runQueryTestResults("SELECT name, age FROM person ORDER BY name", columns("name", "age"),
+                // j patt, pav, ph, s, t
+                rows(r("Juanita", 50), r("Patty", 29), r("Pavel", 30), r("Phil", 31), r("Susan", 45), r("Tom", 35)));
+        runQueryTestResults("SELECT name, age FROM person ORDER BY name DESC", columns("name", "age"),
+                rows(r("Tom", 35), r("Susan", 45),  r("Phil", 31), r("Pavel", 30), r("Patty", 29), r("Juanita", 50)));
+
+        runQueryTestResults("SELECT name AS n, age AS a FROM person ORDER BY n", columns("n", "a"),
+                rows(r("Juanita", 50), r("Patty", 29), r("Pavel", 30), r("Phil", 31), r("Susan", 45), r("Tom", 35)));
+        runQueryTestResults("SELECT name AS n, age AS a FROM person ORDER BY n DESC", columns("n", "a"),
+                rows(r("Tom", 35), r("Susan", 45),  r("Phil", 31), r("Pavel", 30), r("Patty", 29), r("Juanita", 50)));
+    }
+
+    @Test
     public void testWhere() throws SQLException {
         // WHERE with string literal.
         runQueryTestResults("SELECT name, age FROM person WHERE name = 'Tom' ORDER BY age", columns("name", "age"),
