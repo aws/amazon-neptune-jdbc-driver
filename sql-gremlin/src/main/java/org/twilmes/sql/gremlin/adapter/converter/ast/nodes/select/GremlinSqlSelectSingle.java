@@ -43,6 +43,7 @@ import org.twilmes.sql.gremlin.adapter.converter.ast.nodes.operator.GremlinSqlBa
 import org.twilmes.sql.gremlin.adapter.converter.ast.nodes.operator.GremlinSqlOperator;
 import org.twilmes.sql.gremlin.adapter.converter.ast.nodes.operator.GremlinSqlPostfixOperator;
 import org.twilmes.sql.gremlin.adapter.converter.ast.nodes.operator.logic.GremlinSqlBinaryOperator;
+import org.twilmes.sql.gremlin.adapter.converter.ast.nodes.operator.logic.GremlinSqlLiteral;
 import org.twilmes.sql.gremlin.adapter.converter.schema.gremlin.GremlinTableBase;
 import org.twilmes.sql.gremlin.adapter.results.SqlGremlinQueryResult;
 import org.twilmes.sql.gremlin.adapter.results.pagination.Pagination;
@@ -50,6 +51,7 @@ import org.twilmes.sql.gremlin.adapter.results.pagination.SimpleDataReader;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -138,12 +140,19 @@ public class GremlinSqlSelectSingle extends GremlinSqlSelect {
         return graphTraversal;
     }
 
-    private void generateDataRetrieval(final List<GremlinSqlIdentifier> gremlinSqlIdentifiers, GraphTraversal<?, ?> graphTraversal) throws SQLException {
-        SqlTraversalEngine.applyAggregateFold(sqlMetadata, graphTraversal);
-        SqlTraversalEngine.addProjection(gremlinSqlIdentifiers, sqlMetadata, graphTraversal);
+    private void generateDataRetrieval(final List<GremlinSqlIdentifier> gremlinSqlIdentifiers,
+                                       GraphTraversal<?, ?> graphTraversal) throws SQLException {
         final String projectLabel = gremlinSqlIdentifiers.get(1).getName(0);
-        applyColumnRetrieval(graphTraversal, projectLabel,
+
+        final GraphTraversal<?, Map<String, ?>> graphTraversalDataPath = __.__();
+        SqlTraversalEngine.addProjection(gremlinSqlIdentifiers, sqlMetadata, graphTraversalDataPath);
+        applyColumnRetrieval(graphTraversalDataPath, projectLabel,
                 GremlinSqlFactory.createNodeList(sqlSelect.getSelectList().getList()));
+
+        SqlTraversalEngine.applyAggregateFold(sqlMetadata, graphTraversal);
+        final GraphTraversal<?, ?> graphTraversalChoosePredicate = __.unfold();
+        SqlTraversalEngine.applyAggregateUnfold(sqlMetadata, graphTraversalChoosePredicate);
+        graphTraversal.choose(graphTraversalChoosePredicate, graphTraversalDataPath, __.__());
     }
 
     public String getStringTraversal() throws SQLException {
@@ -233,6 +242,23 @@ public class GremlinSqlSelectSingle extends GremlinSqlSelect {
             } else {
                 graphTraversal.by(graphTraversal1);
             }
+        } else if (gremlinSqlNode instanceof GremlinSqlLiteral) {
+            final GremlinSqlLiteral gremlinSqlLiteral = (GremlinSqlLiteral) gremlinSqlNode;
+            final List<SqlNode> sqlNodeList = sqlSelect.getSelectList().getList();
+            if (gremlinSqlLiteral.getValue() instanceof Number) {
+                final Number value = (Number) gremlinSqlLiteral.getValue();
+                if (sqlNodeList.size() <= value.intValue() || value.intValue() <= 0) {
+                    appendByGraphTraversal(GremlinSqlFactory.createNode(sqlNodeList.get(value.intValue() - 1)), table,
+                            graphTraversal);
+                } else {
+                    throw new SQLException("Error, ordinal value of ORDER BY must be between 1 and the number of columns (inclusive).");
+                }
+            } else {
+                throw new SQLException("Error, invalid ORDER BY column literal.");
+            }
+        } else {
+            throw new SQLException(
+                    String.format("Error, could not apply ORDER BY to {}.", gremlinSqlNode.getClass().getName()));
         }
     }
 

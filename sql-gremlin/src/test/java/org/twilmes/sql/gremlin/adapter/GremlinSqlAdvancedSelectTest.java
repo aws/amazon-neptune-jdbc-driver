@@ -56,15 +56,14 @@ public class GremlinSqlAdvancedSelectTest extends GremlinSqlBaseTest {
 
         // ORDER with string column.
         runQueryTestResults("SELECT name, age FROM person ORDER BY name", columns("name", "age"),
-                // j patt, pav, ph, s, t
                 rows(r("Juanita", 50), r("Patty", 29), r("Pavel", 30), r("Phil", 31), r("Susan", 45), r("Tom", 35)));
         runQueryTestResults("SELECT name, age FROM person ORDER BY name DESC", columns("name", "age"),
-                rows(r("Tom", 35), r("Susan", 45),  r("Phil", 31), r("Pavel", 30), r("Patty", 29), r("Juanita", 50)));
+                rows(r("Tom", 35), r("Susan", 45), r("Phil", 31), r("Pavel", 30), r("Patty", 29), r("Juanita", 50)));
 
         runQueryTestResults("SELECT name AS n, age AS a FROM person ORDER BY n", columns("n", "a"),
                 rows(r("Juanita", 50), r("Patty", 29), r("Pavel", 30), r("Phil", 31), r("Susan", 45), r("Tom", 35)));
         runQueryTestResults("SELECT name AS n, age AS a FROM person ORDER BY n DESC", columns("n", "a"),
-                rows(r("Tom", 35), r("Susan", 45),  r("Phil", 31), r("Pavel", 30), r("Patty", 29), r("Juanita", 50)));
+                rows(r("Tom", 35), r("Susan", 45), r("Phil", 31), r("Pavel", 30), r("Patty", 29), r("Juanita", 50)));
     }
 
     @Test
@@ -202,5 +201,45 @@ public class GremlinSqlAdvancedSelectTest extends GremlinSqlBaseTest {
     public void testOffset() throws SQLException {
         // OFFSET testing - currently not implemented.
         runQueryTestThrows("SELECT name FROM person OFFSET 1", "Error, OFFSET is not currently supported.");
+    }
+
+    @Test
+    void testMisc() throws SQLException {
+        runQueryTestResults(
+                "SELECT wentToSpace, COUNT(wentToSpace) FROM person GROUP BY wentToSpace HAVING COUNT(wentToSpace) > 1",
+                columns("wentToSpace", "COUNT(wentToSpace)"), rows(r(false, 3L), r(true, 3L)));
+        runQueryTestResults("SELECT COUNT(name), COUNT(name) FROM person error", columns("COUNT(name)", "COUNT(name)"),
+                rows(r(6L, 6L)));
+        runQueryTestResults("SELECT SUM(age) FROM \"gremlin\".\"person\" WHERE name = 'test'", columns("SUM(age)"),
+                rows());
+        runQueryTestResults("SELECT COUNT(name), COUNT(*) FROM person error", columns("COUNT(name)", "COUNT(*)"),
+                rows(r(6L, 6L)));
+        runQueryTestResults("SELECT name, COUNT(name), count(1) from \"gremlin\".\"person\" group by name",
+                columns("name", "COUNT(name)", "COUNT(1)"),
+                rows(r("Tom", 1L, 1L), r("Patty", 1L, 1L), r("Phil", 1L, 1L),
+                        r("Susan", 1L, 1L), r("Juanita", 1L, 1L), r("Pavel", 1L, 1L)));
+        runQueryTestResults("SELECT name, COUNT(name), count(1) AS cnt from \"gremlin\".\"person\" group by name",
+                columns("name", "COUNT(name)", "cnt"),
+                rows(r("Tom", 1L, 1L), r("Patty", 1L, 1L), r("Phil", 1L, 1L),
+                        r("Susan", 1L, 1L), r("Juanita", 1L, 1L), r("Pavel", 1L, 1L)));
+        runQueryTestResults(
+                "SELECT wentToSpace, COUNT(name), SUM(age), AVG(age), MIN(age), MAX(age) FROM \"gremlin\".\"person\" GROUP BY wentToSpace",
+                columns("wentToSpace", "COUNT(name)", "SUM(age)", "AVG(age)", "MIN(age)", "MAX(age)"),
+                rows(
+                        r(false, 3L, 95L, 31.666666666666668, 29, 35),
+                        r(true, 3L, 125L, 41.666666666666664, 30, 50))
+        );
+        runQueryTestResults("SELECT name FROM \"gremlin\".\"person\" ORDER BY 1",
+                columns("name"),
+                rows(r("Juanita"), r("Patty"), r("Pavel"), r("Phil"), r("Susan"), r("Tom")));
+        runQueryTestResults("SELECT DISTINCT name FROM \"gremlin\".\"person\" ORDER BY name",
+                columns("name"),
+                rows(r("Juanita"), r("Patty"), r("Pavel"), r("Phil"), r("Susan"), r("Tom")));
+        runQueryTestResults("SELECT DISTINCT name FROM \"gremlin\".\"person\" ORDER BY name DESC",
+                columns("name"),
+                rows(r("Tom"), r("Susan"), r("Phil"), r("Pavel"), r("Patty"), r("Juanita")));
+
+        // NULLS FIRST predicate is not currently supported.
+        runQueryTestThrows("SELECT name FROM \"gremlin\".\"person\" ORDER BY name NULLS FIRST", "Error, no appropriate order for GremlinSqlPostFixOperator of NULLS_FIRST.");
     }
 }
