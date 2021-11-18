@@ -19,6 +19,7 @@ package software.aws.neptune.opencypher;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import software.aws.neptune.NeptunePreparedStatementTestHelper;
 import software.aws.neptune.jdbc.utilities.AuthScheme;
@@ -26,6 +27,8 @@ import software.aws.neptune.opencypher.mock.MockOpenCypherDatabase;
 import java.sql.SQLException;
 import java.util.Properties;
 
+// TODO AN-887: Fix query cancellation issue and enable tests.
+@Disabled
 public class OpenCypherPreparedStatementTest extends OpenCypherStatementTestBase {
     private static final String HOSTNAME = "localhost";
     private static final Properties PROPERTIES = new Properties();

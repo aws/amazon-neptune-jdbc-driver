@@ -171,4 +171,10 @@ public class GremlinSqlAdvancedSelectTest extends GremlinSqlBaseTest {
                 columns("COUNT(age)", "SUM(age)"),
                 rows(r(3L, 95L)));
     }
+
+    @Test
+    public void testOffset() throws SQLException {
+        // OFFSET testing - currently not implemented.
+        runQueryTestThrows("SELECT name FROM person OFFSET 1", "Error, OFFSET is not currently supported.");
+    }
 }

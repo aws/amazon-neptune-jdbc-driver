@@ -207,23 +207,12 @@ public class SqlMetadata {
 
     public String getActualColumnName(final GremlinTableBase table, final String column) throws SQLException {
         final String actualColumnName = getRenamedColumn(column);
-        for (final GremlinProperty gremlinProperty : table.getColumns().values()) {
-            if (gremlinProperty.getName().equalsIgnoreCase(actualColumnName)) {
-                return gremlinProperty.getName();
-            }
-        }
-        throw new SQLException(
-                String.format("Error: Column %s does not exist in table %s.", actualColumnName, table.getLabel()));
+        return table.getColumn(actualColumnName).getName();
     }
 
     public boolean getTableHasColumn(final GremlinTableBase table, final String column) {
         final String actualColumnName = getRenamedColumn(column);
-        for (final GremlinProperty gremlinProperty : table.getColumns().values()) {
-            if (gremlinProperty.getName().equalsIgnoreCase(actualColumnName)) {
-                return true;
-            }
-        }
-        return false;
+        return table.hasColumn(actualColumnName);
     }
 
     public String getActualTableName(final String table) throws SQLException {
