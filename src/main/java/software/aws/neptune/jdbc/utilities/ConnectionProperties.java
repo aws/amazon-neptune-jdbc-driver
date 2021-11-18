@@ -508,6 +508,26 @@ public abstract class ConnectionProperties extends Properties {
     }
 
     /**
+     * Validation if serviceRegion was not provided as a property, that SERVICE_REGION environment variable is set, and
+     * then set the serviceRegion property value to SERVICE_REGION
+     *
+     * @throws SQLException if no region was provided, an error will be thrown
+     */
+    protected void validateServiceRegionEnvVariable() throws SQLException {
+        if ("".equals(getRegion())) {
+            if (System.getenv("SERVICE_REGION") == null) {
+                throw missingConnectionPropertyError(
+                        "A Service Region must be provided to use IAMSigV4 Authentication, set through " +
+                                "the SERVICE_REGION environment variable or the serviceRegion connection property. " +
+                                "For example, append 'serviceRegion=us-east-1' to your connection string");
+            }
+            final String serviceRegion = System.getenv("SERVICE_REGION");
+            LOGGER.info(String.format("serviceRegion property was not set, using system SERVICE_REGION='%s' environment variable", serviceRegion));
+            setRegion(serviceRegion);
+        }
+    }
+
+    /**
      * Gets the SSH tunnel user.
      *
      * @return the SSH tunnel user.

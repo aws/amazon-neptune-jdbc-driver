@@ -240,18 +240,9 @@ public class OpenCypherConnectionProperties extends ConnectionProperties {
      */
     @Override
     protected void validateProperties() throws SQLException {
-        // If IAMSigV4 is specified, we need the region provided to us.
         if (getAuthScheme() != null && getAuthScheme().equals(AuthScheme.IAMSigV4)) {
-            if ("".equals(getRegion())) {
-                if (System.getenv("SERVICE_REGION") == null) {
-                    throw missingConnectionPropertyError(
-                            "A Service Region must be provided to use IAMSigV4 Authentication through " +
-                                    "the SERVICE_REGION environment variable or the serviceRegion connection property. " +
-                                    "For example, append 'serviceRegion=us-east-1;' to your connection string");
-                }
-                LOGGER.warn("serviceRegion property was not set, using system SERVICE_REGION environment variable");
-                setRegion(System.getenv("SERVICE_REGION"));
-            }
+            // If IAMSigV4 is specified, we need the region provided to us.
+            validateServiceRegionEnvVariable();
 
             if (!getUseEncryption()) {
                 throw invalidConnectionPropertyValueError(USE_ENCRYPTION_KEY,
