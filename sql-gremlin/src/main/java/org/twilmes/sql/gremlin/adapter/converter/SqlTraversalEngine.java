@@ -104,10 +104,10 @@ public class SqlTraversalEngine {
                                           final GraphTraversal<?, ?> graphTraversal) throws SQLException {
         // With size 2 format of identifier is 'table'.'column' => ['table', 'column']
         if (sqlIdentifier.getNameCount() == 2) {
-            appendGraphTraversal(sqlIdentifier.getName(0), sqlIdentifier.getName(1), sqlMetadata, graphTraversal);
+            appendGraphTraversal(sqlIdentifier.getName(0), sqlMetadata.getRenamedColumn(sqlIdentifier.getName(1)), sqlMetadata, graphTraversal);
         } else {
             // With size 1, format of identifier is 'column'.
-            appendGraphTraversal(sqlIdentifier.getName(0), sqlMetadata, graphTraversal);
+            appendGraphTraversal(sqlMetadata.getRenamedColumn(sqlIdentifier.getName(0)), sqlMetadata, graphTraversal);
         }
     }
 
