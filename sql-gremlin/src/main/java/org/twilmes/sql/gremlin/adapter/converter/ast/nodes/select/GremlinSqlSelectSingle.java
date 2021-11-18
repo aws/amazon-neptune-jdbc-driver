@@ -114,16 +114,20 @@ public class GremlinSqlSelectSingle extends GremlinSqlSelect {
         final GraphTraversal<?, ?> graphTraversal =
                 SqlTraversalEngine.generateInitialSql(gremlinSqlIdentifiers, sqlMetadata, g);
         final String label = sqlMetadata.getActualTableName(gremlinSqlIdentifiers.get(0).getName(1));
+
+        // This function basically generates the latter parts of the traversal, by doing this it prepares all the
+        // renamed labels in the metadata so that queries like 'SELECT foo AS bar FROM baz ORDER BY bar'
+        // can properly recognize that bar=>foo.
+        // __.__() is passed in as an anonymous traversal that will be discarded.
+        generateDataRetrieval(gremlinSqlIdentifiers, __.__());
+
+        // Generate actual traversal.
         applyGroupBy(graphTraversal, label);
         applySelectValues(graphTraversal);
         applyOrderBy(graphTraversal, label);
         applyHaving(graphTraversal);
         applyWhere(graphTraversal);
-        SqlTraversalEngine.applyAggregateFold(sqlMetadata, graphTraversal);
-        SqlTraversalEngine.addProjection(gremlinSqlIdentifiers, sqlMetadata, graphTraversal);
-        final String projectLabel = gremlinSqlIdentifiers.get(1).getName(0);
-        applyColumnRetrieval(graphTraversal, projectLabel,
-                GremlinSqlFactory.createNodeList(sqlSelect.getSelectList().getList()));
+        generateDataRetrieval(gremlinSqlIdentifiers, graphTraversal);
 
         if (sqlMetadata.getRenamedColumns() == null) {
             throw new SQLException("Error: Column rename list is empty.");
@@ -132,6 +136,14 @@ public class GremlinSqlSelectSingle extends GremlinSqlSelect {
             throw new SQLException("Error: Expected one table for traversal execution.");
         }
         return graphTraversal;
+    }
+
+    private void generateDataRetrieval(final List<GremlinSqlIdentifier> gremlinSqlIdentifiers, GraphTraversal<?, ?> graphTraversal) throws SQLException {
+        SqlTraversalEngine.applyAggregateFold(sqlMetadata, graphTraversal);
+        SqlTraversalEngine.addProjection(gremlinSqlIdentifiers, sqlMetadata, graphTraversal);
+        final String projectLabel = gremlinSqlIdentifiers.get(1).getName(0);
+        applyColumnRetrieval(graphTraversal, projectLabel,
+                GremlinSqlFactory.createNodeList(sqlSelect.getSelectList().getList()));
     }
 
     public String getStringTraversal() throws SQLException {
@@ -225,26 +237,24 @@ public class GremlinSqlSelectSingle extends GremlinSqlSelect {
     }
 
     protected void applyHaving(final GraphTraversal<?, ?> graphTraversal) throws SQLException {
-        if (sqlSelect.getHaving() == null) {
-            return;
-        }
-        final GremlinSqlBasicCall gremlinSqlBasicCall = GremlinSqlFactory.createNodeCheckType(sqlSelect.getHaving(),
-                GremlinSqlBasicCall.class);
-        gremlinSqlBasicCall.generateTraversal(graphTraversal);
+        applySqlFilter(sqlSelect.getHaving(), graphTraversal);
     }
 
     protected void applyWhere(final GraphTraversal<?, ?> graphTraversal) throws SQLException {
-        if (sqlSelect.getWhere() == null) {
+        applySqlFilter(sqlSelect.getWhere(), graphTraversal);
+    }
+
+    void applySqlFilter(SqlNode sqlNode, GraphTraversal<?, ?> graphTraversal) throws SQLException {
+        if (sqlNode == null) {
             return;
         }
-        SqlNode sqlNode = sqlSelect.getWhere();
         if (sqlNode instanceof SqlBasicCall) {
             SqlBasicCall sqlBasicCall = (SqlBasicCall) sqlNode;
             if (sqlBasicCall.getOperator() instanceof SqlPrefixOperator) {
                 SqlPrefixOperator sqlPrefixOperator = (SqlPrefixOperator) sqlBasicCall.getOperator();
                 if (sqlPrefixOperator.kind.equals(SqlKind.NOT)) {
                     if (sqlBasicCall.getOperandList().size() == 1 && sqlBasicCall.operands.length == 1) {
-                        GremlinSqlBinaryOperator.appendBooleanEquals(graphTraversal,
+                        GremlinSqlBinaryOperator.appendBooleanEquals(sqlMetadata, graphTraversal,
                                 GremlinSqlFactory.createNodeCheckType(sqlBasicCall.operands[0],
                                         GremlinSqlIdentifier.class), false);
                         return;
@@ -255,12 +265,12 @@ public class GremlinSqlSelectSingle extends GremlinSqlSelect {
                 throw new SQLException(
                         "Error: Unsupported WHERE clause - The only WHERE prefix operator supported is 'NOT'.");
             }
-            GremlinSqlFactory.createNodeCheckType(sqlSelect.getWhere(), GremlinSqlBasicCall.class)
+            GremlinSqlFactory.createNodeCheckType(sqlNode, GremlinSqlBasicCall.class)
                     .generateTraversal(graphTraversal);
             return;
         } else if (sqlNode instanceof SqlIdentifier) {
-            GremlinSqlBinaryOperator.appendBooleanEquals(graphTraversal, GremlinSqlFactory.createNodeCheckType(sqlNode,
-                    GremlinSqlIdentifier.class),true);
+            GremlinSqlBinaryOperator.appendBooleanEquals(sqlMetadata, graphTraversal,
+                    GremlinSqlFactory.createNodeCheckType(sqlNode, GremlinSqlIdentifier.class), true);
             return;
         }
         throw new SQLException(

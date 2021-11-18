@@ -81,8 +81,8 @@ public class GremlinSqlAggFunction extends GremlinSqlOperator {
 
         if (sqlOperands.size() == 1) {
             if (sqlOperands.get(0) instanceof GremlinSqlIdentifier) {
-                SqlTraversalEngine
-                        .applySqlIdentifier((GremlinSqlIdentifier) sqlOperands.get(0), sqlMetadata, graphTraversal);
+                SqlTraversalEngine.applySqlIdentifier((GremlinSqlIdentifier) sqlOperands.get(0), sqlMetadata,
+                        graphTraversal);
             }
         }
         if (AGGREGATE_APPENDERS.containsKey(sqlAggFunction.kind)) {
@@ -128,24 +128,14 @@ public class GremlinSqlAggFunction extends GremlinSqlOperator {
 
     private static class GremlinSqlAggFunctionImplementations {
         public static final GremlinSqlTraversalAppender AVG =
-                (GraphTraversal<?, ?> graphTraversal, List<GremlinSqlNode> operands) -> {
-                    graphTraversal.mean();
-                };
+                (GraphTraversal<?, ?> graphTraversal, List<GremlinSqlNode> operands) -> graphTraversal.mean();
         public static final GremlinSqlTraversalAppender COUNT =
-                (GraphTraversal<?, ?> graphTraversal, List<GremlinSqlNode> operands) -> {
-                    graphTraversal.count();
-                };
+                (GraphTraversal<?, ?> graphTraversal, List<GremlinSqlNode> operands) -> graphTraversal.count();
         public static final GremlinSqlTraversalAppender SUM =
-                (GraphTraversal<?, ?> graphTraversal, List<GremlinSqlNode> operands) -> {
-                    graphTraversal.sum();
-                };
+                (GraphTraversal<?, ?> graphTraversal, List<GremlinSqlNode> operands) -> graphTraversal.sum();
         public static final GremlinSqlTraversalAppender MIN =
-                (GraphTraversal<?, ?> graphTraversal, List<GremlinSqlNode> operands) -> {
-                    graphTraversal.min();
-                };
+                (GraphTraversal<?, ?> graphTraversal, List<GremlinSqlNode> operands) -> graphTraversal.min();
         public static final GremlinSqlTraversalAppender MAX =
-                (GraphTraversal<?, ?> graphTraversal, List<GremlinSqlNode> operands) -> {
-                    graphTraversal.max();
-                };
+                (GraphTraversal<?, ?> graphTraversal, List<GremlinSqlNode> operands) -> graphTraversal.max();
     }
 }

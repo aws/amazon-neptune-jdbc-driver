@@ -57,14 +57,14 @@ public class SqlTraversalEngine {
     }
 
     public static void applyAggregateFold(final SqlMetadata sqlMetadata, final GraphTraversal<?, ?> graphTraversal) {
-        if (sqlMetadata.getIsAggregate()) {
+        if (sqlMetadata.getIsProjectFoldRequired()) {
             graphTraversal.fold();
         }
     }
 
     public static GraphTraversal<?, ?> getEmptyTraversal(final StepDirection direction, final SqlMetadata sqlMetadata) {
         final GraphTraversal<?, ?> graphTraversal = __.unfold();
-        if (sqlMetadata.getIsAggregate()) {
+        if (sqlMetadata.getIsProjectFoldRequired()) {
             graphTraversal.unfold();
         }
         switch (direction) {
@@ -109,10 +109,10 @@ public class SqlTraversalEngine {
             graphTraversal.constant(1);
         } else if (sqlIdentifier.getNameCount() == 2) {
             // With size 2 format of identifier is 'table'.'column' => ['table', 'column']
-            appendGraphTraversal(sqlIdentifier.getName(0), sqlIdentifier.getName(1), sqlMetadata, graphTraversal);
+            appendGraphTraversal(sqlIdentifier.getName(0), sqlMetadata.getRenamedColumn(sqlIdentifier.getName(1)), sqlMetadata, graphTraversal);
         } else {
             // With size 1, format of identifier is 'column'.
-            appendGraphTraversal(sqlIdentifier.getName(0), sqlMetadata, graphTraversal);
+            appendGraphTraversal(sqlMetadata.getRenamedColumn(sqlIdentifier.getName(0)), sqlMetadata, graphTraversal);
         }
     }
 
@@ -131,7 +131,7 @@ public class SqlTraversalEngine {
         // Primary/foreign key, need to traverse appropriately.
         if (!columnName.endsWith(GremlinTableBase.ID)) {
             if (sqlMetadata.getIsAggregate()) {
-                graphTraversal.values(columnName);
+                graphTraversal.has(columnName).values(columnName);
             } else {
                 graphTraversal.choose(__.has(columnName), __.values(columnName),
                         __.constant(SqlGremlinQueryResult.NULL_VALUE));
@@ -174,7 +174,7 @@ public class SqlTraversalEngine {
             throw new SQLException("Error, cannot apply ID based traversal appension.");
         }
         if (sqlMetadata.getIsAggregate()) {
-            graphTraversal.values(columnName);
+            graphTraversal.has(columnName).values(columnName);
         } else {
             graphTraversal.choose(__.has(columnName), __.values(columnName),
                     __.constant(SqlGremlinQueryResult.NULL_VALUE));

@@ -75,6 +75,14 @@ public class GremlinSqlBasicSelectTest extends GremlinSqlBaseTest {
         runQueryTestResults("SELECT \"key\" FROM datetype", columns("key"), rows(r(GraphConstants.DATE_VALUE)));
     }
 
+    @Test
+    void testEdgeQueries() throws SQLException {
+        runQueryTestResults("SELECT key FROM stringtypeedge", columns("key"), rows(r(GraphConstants.STRING_VALUE)));
+        runQueryTestResults("SELECT * FROM stringtypeedge",
+                columns("stringtype_IN_ID", "stringtypeedge_ID", "stringtype_OUT_ID", "key"),
+                rows(r(0L, 16L, 0L, GraphConstants.STRING_VALUE)));
+    }
+
     String getAsOperatorQuery(final String column, final String asColumn, final String table) {
         return String.format("SELECT %s AS %s FROM %s", column, asColumn, table);
     }

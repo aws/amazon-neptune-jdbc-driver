@@ -58,6 +58,7 @@ public class SqlMetadata {
     // maps the aggregated columns to type
     private final Map<String, String> aggregateTypeMap = new HashMap<>();
     private boolean isAggregate = false;
+    private boolean isGrouped = false;
 
     public SqlMetadata(final GraphTraversalSource g, final GremlinSchema gremlinSchema) {
         this.g = g;
@@ -81,6 +82,16 @@ public class SqlMetadata {
 
     private static boolean isAggregate(final SqlOperator sqlOperator) {
         return sqlOperator instanceof SqlAggFunction;
+    }
+
+    public boolean getIsProjectFoldRequired() {
+        // Grouping invokes an implicit fold before the project that does not require additional unfolding.
+        // Folding is required for aggregates that are not grouped.
+        return getIsAggregate() && !getIsGrouped();
+    }
+
+    public boolean getIsGrouped() {
+        return isGrouped;
     }
 
     public boolean getIsColumnEdge(final String tableName, final String columnName) throws SQLException {
@@ -196,23 +207,12 @@ public class SqlMetadata {
 
     public String getActualColumnName(final GremlinTableBase table, final String column) throws SQLException {
         final String actualColumnName = getRenamedColumn(column);
-        for (final GremlinProperty gremlinProperty : table.getColumns().values()) {
-            if (gremlinProperty.getName().equalsIgnoreCase(actualColumnName)) {
-                return gremlinProperty.getName();
-            }
-        }
-        throw new SQLException(
-                String.format("Error: Column %s does not exist in table %s.", actualColumnName, table.getLabel()));
+        return table.getColumn(actualColumnName).getName();
     }
 
     public boolean getTableHasColumn(final GremlinTableBase table, final String column) {
         final String actualColumnName = getRenamedColumn(column);
-        for (final GremlinProperty gremlinProperty : table.getColumns().values()) {
-            if (gremlinProperty.getName().equalsIgnoreCase(actualColumnName)) {
-                return true;
-            }
-        }
-        return false;
+        return table.hasColumn(actualColumnName);
     }
 
     public String getActualTableName(final String table) throws SQLException {
@@ -231,7 +231,11 @@ public class SqlMetadata {
     }
 
     public void checkAggregate(final SqlNodeList sqlNodeList) {
-        isAggregate = sqlNodeList.getList().stream().allMatch(SqlMetadata::isAggregate);
+        isAggregate = sqlNodeList.getList().stream().anyMatch(SqlMetadata::isAggregate);
+    }
+
+    public void checkGroupByNodeIsNull(final SqlNode sqlNode) {
+        isGrouped = sqlNode != null;
     }
 
     public boolean getIsAggregate() {
