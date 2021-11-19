@@ -31,6 +31,7 @@ public abstract class ResultSetGetString extends GenericResultSet {
     private static final Logger LOGGER = LoggerFactory.getLogger(ResultSetGetString.class);
     private final List<String> columns;
     private final List<Map<String, String>> constantReturns;
+    private boolean wasNull = false;
 
     /**
      * ResultSetGetString constructor, initializes super class.
@@ -59,9 +60,16 @@ public abstract class ResultSetGetString extends GenericResultSet {
         }
         final String key = columns.get(columnIndex - 1);
         if (constantReturns.get(index).containsKey(key)) {
-            return constantReturns.get(index).get(key);
+            final Object value = constantReturns.get(index).get(key);
+            wasNull = value == null;
+            return value;
         } else {
             throw SqlError.createSQLFeatureNotSupportedException(LOGGER);
         }
+    }
+
+    @Override
+    public boolean wasNull() throws SQLException {
+        return this.wasNull;
     }
 }

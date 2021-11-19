@@ -35,7 +35,7 @@ public abstract class ResultSetGetCatalogs extends ResultSetGetString {
     private static final Map<String, String> CONVERSION_MAP = new HashMap<>();
 
     static {
-        CONVERSION_MAP.put("TABLE_CAT", "catalog");
+        CONVERSION_MAP.put("TABLE_CAT", null);
     }
 
     /**
@@ -44,7 +44,7 @@ public abstract class ResultSetGetCatalogs extends ResultSetGetString {
      * @param statement Statement Object.
      */
     public ResultSetGetCatalogs(final Statement statement) {
-        super(statement, ImmutableList.of("TABLE_CAT"), 1, ImmutableList.of(CONVERSION_MAP));
+        super(statement, ImmutableList.of("TABLE_CAT"), 0, ImmutableList.of(CONVERSION_MAP));
     }
 
     protected List<String> getColumns() {

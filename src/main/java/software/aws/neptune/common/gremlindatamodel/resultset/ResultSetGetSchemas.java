@@ -34,7 +34,7 @@ public abstract class ResultSetGetSchemas extends ResultSetGetString {
 
     static {
         CONVERSION_MAP.put("TABLE_SCHEM", "gremlin");
-        CONVERSION_MAP.put("TABLE_CAT", "catalog");
+        CONVERSION_MAP.put("TABLE_CAT", null);
     }
 
     /**
