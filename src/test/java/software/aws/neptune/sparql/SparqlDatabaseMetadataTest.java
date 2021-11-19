@@ -92,7 +92,8 @@ public class SparqlDatabaseMetadataTest {
     @Test
     void testGetCatalogs() throws SQLException {
         final java.sql.ResultSet resultSet = databaseMetaData.getCatalogs();
-        Assertions.assertTrue(resultSet.next());
+        // Catalog is not currently supported
+        Assertions.assertFalse(resultSet.next());
     }
 
     @Test
