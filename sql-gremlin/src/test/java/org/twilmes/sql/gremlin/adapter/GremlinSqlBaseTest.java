@@ -45,13 +45,13 @@ public abstract class GremlinSqlBaseTest {
         graph = TestGraphFactory.createGraph(getDataSet());
         g = graph.traversal();
         final GremlinSchema gremlinSchema = SqlSchemaGrabber.getSchema(g, SqlSchemaGrabber.ScanType.All);
-        converter = new SqlConverter(gremlinSchema, g);
+        converter = new SqlConverter(gremlinSchema);
     }
 
     protected abstract DataSet getDataSet();
 
     protected void runQueryTestColumnType(final String query) throws SQLException {
-        final SqlGremlinQueryResult sqlGremlinQueryResult = converter.executeQuery(query);
+        final SqlGremlinQueryResult sqlGremlinQueryResult = converter.executeQuery(g, query);
         final int columnCount = sqlGremlinQueryResult.getColumns().size();
         final SqlGremlinTestResult result = new SqlGremlinTestResult(sqlGremlinQueryResult);
         final List<Class<?>> returnedColumnType = new ArrayList<>();
@@ -100,13 +100,13 @@ public abstract class GremlinSqlBaseTest {
     protected void runQueryTestResults(final String query, final List<String> columnNames,
                                        final List<List<?>> rows)
             throws SQLException {
-        final SqlGremlinTestResult result = new SqlGremlinTestResult(converter.executeQuery(query));
+        final SqlGremlinTestResult result = new SqlGremlinTestResult(converter.executeQuery(g, query));
         assertRows(result.getRows(), rows);
         assertColumns(result.getColumns(), columnNames);
     }
 
     protected void runQueryTestThrows(final String query, final String errorMessage) {
-        Assertions.assertThrows(SQLException.class, () -> converter.executeQuery(query), errorMessage);
+        Assertions.assertThrows(SQLException.class, () -> converter.executeQuery(g, query), errorMessage);
     }
 
     @SafeVarargs
