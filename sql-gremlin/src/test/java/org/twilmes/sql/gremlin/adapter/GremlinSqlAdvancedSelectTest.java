@@ -20,6 +20,7 @@
 package org.twilmes.sql.gremlin.adapter;
 
 import org.junit.jupiter.api.Test;
+import java.math.BigDecimal;
 import java.sql.SQLException;
 
 /**
@@ -248,34 +249,28 @@ public class GremlinSqlAdvancedSelectTest extends GremlinSqlBaseTest {
         // Tableau was sending queries like this for the preview in 2021.3
         runQueryTestResults("SELECT SUM(1) AS \"cnt:airport_03C2E834E28942D3AA2423AC01F4B33D:ok\" FROM gremlin.person AS person HAVING COUNT(1) > 0",
                 columns("cnt:airport_03C2E834E28942D3AA2423AC01F4B33D:ok"),
-                rows(r(6)));
+                rows(r(new BigDecimal(6))));
         runQueryTestResults("SELECT MIN(1) AS \"cnt:airport_03C2E834E28942D3AA2423AC01F4B33D:ok\" FROM gremlin.person AS person HAVING COUNT(1) > 0",
                 columns("cnt:airport_03C2E834E28942D3AA2423AC01F4B33D:ok"),
-                rows(r(1)));
+                rows(r(new BigDecimal(1))));
         runQueryTestResults("SELECT MAX(1) AS \"cnt:airport_03C2E834E28942D3AA2423AC01F4B33D:ok\" FROM gremlin.person AS person HAVING COUNT(1) > 0",
                 columns("cnt:airport_03C2E834E28942D3AA2423AC01F4B33D:ok"),
-                rows(r(1)));
+                rows(r(new BigDecimal(1))));
         runQueryTestResults("SELECT AVG(1) AS \"cnt:airport_03C2E834E28942D3AA2423AC01F4B33D:ok\" FROM gremlin.person AS person HAVING COUNT(1) > 0",
                 columns("cnt:airport_03C2E834E28942D3AA2423AC01F4B33D:ok"),
-                rows(r(1)));
-        runQueryTestResults("SELECT 1 AS \"cnt:airport_03C2E834E28942D3AA2423AC01F4B33D:ok\" FROM gremlin.person AS person HAVING COUNT(1) > 0",
-                columns("cnt:airport_03C2E834E28942D3AA2423AC01F4B33D:ok"),
-                rows(r(1)));
+                rows(r(new BigDecimal(1))));
 
-        runQueryTestResults("SELECT SUM(1) AS \"cnt:airport_03C2E834E28942D3AA2423AC01F4B33D:ok\" FROM gremlin.person AS person HAVING COUNT(1) > 0",
+        runQueryTestResults("SELECT SUM(2) AS \"cnt:airport_03C2E834E28942D3AA2423AC01F4B33D:ok\" FROM gremlin.person AS person HAVING COUNT(1) > 0",
                 columns("cnt:airport_03C2E834E28942D3AA2423AC01F4B33D:ok"),
-                rows(r(12)));
-        runQueryTestResults("SELECT MIN(1) AS \"cnt:airport_03C2E834E28942D3AA2423AC01F4B33D:ok\" FROM gremlin.person AS person HAVING COUNT(1) > 0",
+                rows(r(new BigDecimal(12))));
+        runQueryTestResults("SELECT MIN(2) AS \"cnt:airport_03C2E834E28942D3AA2423AC01F4B33D:ok\" FROM gremlin.person AS person HAVING COUNT(1) > 0",
                 columns("cnt:airport_03C2E834E28942D3AA2423AC01F4B33D:ok"),
-                rows(r(2)));
-        runQueryTestResults("SELECT MAX(1) AS \"cnt:airport_03C2E834E28942D3AA2423AC01F4B33D:ok\" FROM gremlin.person AS person HAVING COUNT(1) > 0",
+                rows(r(new BigDecimal(2))));
+        runQueryTestResults("SELECT MAX(2) AS \"cnt:airport_03C2E834E28942D3AA2423AC01F4B33D:ok\" FROM gremlin.person AS person HAVING COUNT(1) > 0",
                 columns("cnt:airport_03C2E834E28942D3AA2423AC01F4B33D:ok"),
-                rows(r(2)));
-        runQueryTestResults("SELECT AVG(1) AS \"cnt:airport_03C2E834E28942D3AA2423AC01F4B33D:ok\" FROM gremlin.person AS person HAVING COUNT(1) > 0",
+                rows(r(new BigDecimal(2))));
+        runQueryTestResults("SELECT AVG(2) AS \"cnt:airport_03C2E834E28942D3AA2423AC01F4B33D:ok\" FROM gremlin.person AS person HAVING COUNT(1) > 0",
                 columns("cnt:airport_03C2E834E28942D3AA2423AC01F4B33D:ok"),
-                rows(r(2)));
-        runQueryTestResults("SELECT 1 AS \"cnt:airport_03C2E834E28942D3AA2423AC01F4B33D:ok\" FROM gremlin.person AS person HAVING COUNT(1) > 0",
-                columns("cnt:airport_03C2E834E28942D3AA2423AC01F4B33D:ok"),
-                rows(r(2)));
+                rows(r(new BigDecimal(2))));
     }
 }
