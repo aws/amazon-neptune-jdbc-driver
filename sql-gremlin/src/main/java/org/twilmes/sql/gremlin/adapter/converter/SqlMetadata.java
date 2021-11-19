@@ -50,7 +50,6 @@ import java.util.Set;
 @Getter
 public class SqlMetadata {
     private static final Logger LOGGER = LoggerFactory.getLogger(SqlMetadata.class);
-    private final GraphTraversalSource g;
     private final GremlinSchema gremlinSchema;
     private final Map<String, String> tableRenameMap = new HashMap<>();
     private final Map<String, String> columnRenameMap = new HashMap<>();
@@ -60,8 +59,7 @@ public class SqlMetadata {
     private boolean isAggregate = false;
     private boolean isGrouped = false;
 
-    public SqlMetadata(final GraphTraversalSource g, final GremlinSchema gremlinSchema) {
-        this.g = g;
+    public SqlMetadata(final GremlinSchema gremlinSchema) {
         this.gremlinSchema = gremlinSchema;
     }
 

@@ -48,23 +48,34 @@ public abstract class GremlinSqlSelect extends GremlinSqlNode {
     private final SqlSelect sqlSelect;
     private final SqlMetadata sqlMetadata;
 
-    public GremlinSqlSelect(final SqlSelect sqlSelect, final SqlMetadata sqlMetadata) {
+    public GremlinSqlSelect(final SqlSelect sqlSelect, final SqlMetadata sqlMetadata, final GraphTraversalSource g) {
         super(sqlSelect, sqlMetadata);
         this.sqlSelect = sqlSelect;
-        this.g = sqlMetadata.getG();
+        this.g = g;
         this.sqlMetadata = sqlMetadata;
     }
 
     public SqlGremlinQueryResult executeTraversal() throws SQLException {
-        sqlMetadata.checkAggregate(sqlSelect.getSelectList());
-        sqlMetadata.checkGroupByNodeIsNull(sqlSelect.getGroup());
-        final GraphTraversal<?, ?> graphTraversal = generateTraversal();
-        applyDistinct(graphTraversal);
-        applyOffset(graphTraversal);
-        applyLimit(graphTraversal);
-        final SqlGremlinQueryResult sqlGremlinQueryResult = generateSqlGremlinQueryResult();
-        runTraversalExecutor(graphTraversal, sqlGremlinQueryResult);
-        return sqlGremlinQueryResult;
+        GraphTraversal<?, ?> graphTraversal = null;
+        try {
+            sqlMetadata.checkAggregate(sqlSelect.getSelectList());
+            sqlMetadata.checkGroupByNodeIsNull(sqlSelect.getGroup());
+            graphTraversal = generateTraversal();
+            applyDistinct(graphTraversal);
+            applyOffset(graphTraversal);
+            applyLimit(graphTraversal);
+            final SqlGremlinQueryResult sqlGremlinQueryResult = generateSqlGremlinQueryResult();
+            runTraversalExecutor(graphTraversal, sqlGremlinQueryResult);
+            return sqlGremlinQueryResult;
+        } catch (final SQLException e) {
+            if (graphTraversal != null) {
+                try {
+                    graphTraversal.close();
+                } catch (final Exception ignored) {
+                }
+            }
+            throw e;
+        }
     }
 
     private SqlGremlinQueryResult generateSqlGremlinQueryResult() throws SQLException {

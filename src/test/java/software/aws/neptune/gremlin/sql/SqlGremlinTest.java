@@ -629,13 +629,12 @@ public class SqlGremlinTest {
         final List<GremlinVertexTable> vertices = gremlinVertexTablesFuture.get();
         final List<GremlinEdgeTable> edges = gremlinEdgeTablesFuture.get();
         final GremlinSchema gremlinSchema = new GremlinSchema(vertices, edges);
-        final SqlConverter sqlConverter =
-                new SqlConverter(gremlinSchema, traversal().withRemote(DriverRemoteConnection.using(client)));
-        SqlGremlinQueryResult result = sqlConverter.executeQuery("SELECT airport.city AS c FROM airport");
+        final SqlConverter sqlConverter = new SqlConverter(gremlinSchema);
+        SqlGremlinQueryResult result = sqlConverter.executeQuery(traversal().withRemote(DriverRemoteConnection.using(client)), "SELECT airport.city AS c FROM airport");
         System.out.println("Columns: " + result.getColumns());
-        result = sqlConverter.executeQuery("SELECT city AS c FROM airport");
+        result = sqlConverter.executeQuery(traversal().withRemote(DriverRemoteConnection.using(client)), "SELECT city AS c FROM airport");
         System.out.println("Columns: " + result.getColumns());
-        result = sqlConverter.executeQuery("SELECT city FROM airport HAVING (COUNT(1) > 0)");
+        result = sqlConverter.executeQuery(traversal().withRemote(DriverRemoteConnection.using(client)), "SELECT city FROM airport HAVING (COUNT(1) > 0)");
         System.out.println("Columns: " + result.getColumns());
     }
 
