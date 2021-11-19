@@ -148,8 +148,8 @@ public class OpenCypherDatabaseMetadataTest {
     @Test
     void testGetCatalogs() throws SQLException {
         final java.sql.ResultSet resultSet = databaseMetaData.getCatalogs();
-        Assertions.assertTrue(resultSet.next());
-        // TODO: Fix this to check the value later.
+        // Catalog is not currently supported
+        Assertions.assertFalse(resultSet.next());
     }
 
     @Test

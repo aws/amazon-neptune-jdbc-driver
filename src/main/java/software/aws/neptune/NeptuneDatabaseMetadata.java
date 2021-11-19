@@ -45,7 +45,7 @@ public class NeptuneDatabaseMetadata extends DatabaseMetaData implements java.sq
 
     @Override
     public String getCatalogTerm() throws SQLException {
-        return "graph";
+        return "";
     }
 
     @Override
