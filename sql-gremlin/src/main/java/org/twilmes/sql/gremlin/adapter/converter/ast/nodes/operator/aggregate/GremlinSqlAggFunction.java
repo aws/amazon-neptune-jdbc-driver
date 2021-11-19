@@ -83,6 +83,9 @@ public class GremlinSqlAggFunction extends GremlinSqlOperator {
             if (sqlOperands.get(0) instanceof GremlinSqlIdentifier) {
                 SqlTraversalEngine.applySqlIdentifier((GremlinSqlIdentifier) sqlOperands.get(0), sqlMetadata,
                         graphTraversal);
+            } else if (sqlOperands.get(0) instanceof GremlinSqlLiteral) {
+                GremlinSqlLiteral gremlinSqlLiteral = (GremlinSqlLiteral) sqlOperands.get(0);
+                gremlinSqlLiteral.appendTraversal(graphTraversal);
             }
         }
         if (AGGREGATE_APPENDERS.containsKey(sqlAggFunction.kind)) {

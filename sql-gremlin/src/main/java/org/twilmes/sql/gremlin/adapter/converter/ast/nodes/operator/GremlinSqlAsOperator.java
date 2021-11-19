@@ -90,6 +90,8 @@ public class GremlinSqlAsOperator extends GremlinSqlOperator {
             return ((GremlinSqlIdentifier) sqlOperands.get(0)).getColumn();
         } else if (sqlOperands.get(0) instanceof GremlinSqlBasicCall) {
             return ((GremlinSqlBasicCall) sqlOperands.get(0)).getActual();
+        } else if (sqlOperands.get(0) instanceof GremlinSqlLiteral) {
+            return ((GremlinSqlLiteral) sqlOperands.get(0)).getValue().toString();
         }
         throw new SQLException("Error, unable to get actual name in GremlinSqlAsOperator.");
     }

@@ -73,6 +73,36 @@
       <unagg-formula>%1</unagg-formula>
       <argument type='int' />
     </function>
+    <function group='aggregate' name='COUNT' return-type='int'>
+      <formula>COUNT(%1)</formula>
+      <unagg-formula>%1</unagg-formula>
+      <argument type='bool' />
+    </function>
+    <function group='aggregate' name='COUNT' return-type='int'>
+      <formula>COUNT(%1)</formula>
+      <unagg-formula>%1</unagg-formula>
+      <argument type='real' />
+    </function>
+    <function group='aggregate' name='COUNT' return-type='int'>
+      <formula>COUNT(%1)</formula>
+      <unagg-formula>%1</unagg-formula>
+      <argument type='str' />
+    </function>
+    <function group='aggregate' name='COUNT' return-type='int'>
+      <formula>COUNT(%1)</formula>
+      <unagg-formula>%1</unagg-formula>
+      <argument type='datetime' />
+    </function>
+    <function group='aggregate' name='AVG' return-type='real'>
+      <formula>AVG(%1)</formula>
+      <unagg-formula>%1</unagg-formula>
+      <argument type='real' />
+    </function>
+    <function group='aggregate' name='AVG' return-type='real'>
+      <formula>AVG(%1)</formula>
+      <unagg-formula>%1</unagg-formula>
+      <argument type='int' />
+    </function>
     <function group='operator' name='!' return-type='bool'>
       <formula>(NOT %1)</formula>
       <argument type='bool' />
