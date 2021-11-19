@@ -72,10 +72,10 @@ public class SqlConverter {
                 .traitDefs(TRAIT_DEFS)
                 .programs(PROGRAM)
                 .build();
-        GremlinSqlFactory.setSqlMetadata(new SqlMetadata(gremlinSchema));
     }
 
     private GremlinSqlSelect getSelect(final GraphTraversalSource g, final String query) throws SQLException {
+        GremlinSqlFactory.setSqlMetadata(new SqlMetadata(gremlinSchema));
         final QueryPlanner queryPlanner = new QueryPlanner(frameworkConfig);
         queryPlanner.plan(query);
         final SqlNode sqlNode = queryPlanner.getValidate();
