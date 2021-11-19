@@ -43,7 +43,6 @@ public class SparqlConnectionProperties extends ConnectionProperties {
     // The query endpoints for sparql database
     // as a read-only driver we only support the query endpoint
     public static final String QUERY_ENDPOINT_KEY = "queryEndpoint";
-    public static final String REGION_KEY = "region";
     // RDFConnection builder has default header: "application/sparql-results+json, application/sparql-results+xml;q=0.9,
     // text/tab-separated-values;q=0.7, text/csv;q=0.5, application/json;q=0.2, application/xml;q=0.2, */*;q=0.1"
     public static final String ACCEPT_HEADER_QUERY_KEY = "acceptHeaderQuery";
@@ -73,7 +72,6 @@ public class SparqlConnectionProperties extends ConnectionProperties {
             .add(DATASET_KEY)
             .add(DESTINATION_KEY)
             .add(QUERY_ENDPOINT_KEY)
-            .add(REGION_KEY)
             .add(ACCEPT_HEADER_ASK_QUERY_KEY)
             .add(ACCEPT_HEADER_DATASET_KEY)
             .add(ACCEPT_HEADER_QUERY_KEY)
@@ -90,7 +88,6 @@ public class SparqlConnectionProperties extends ConnectionProperties {
         PROPERTY_CONVERTER_MAP.put(DATASET_KEY, (key, value) -> value);
         PROPERTY_CONVERTER_MAP.put(DESTINATION_KEY, (key, value) -> value);
         PROPERTY_CONVERTER_MAP.put(QUERY_ENDPOINT_KEY, (key, value) -> value);
-        PROPERTY_CONVERTER_MAP.put(REGION_KEY, (key, value) -> value);
         PROPERTY_CONVERTER_MAP.put(PARSE_CHECK_SPARQL_KEY, ConnectionProperties::toBoolean);
         PROPERTY_CONVERTER_MAP.put(ACCEPT_HEADER_ASK_QUERY_KEY, (key, value) -> value);
         PROPERTY_CONVERTER_MAP.put(ACCEPT_HEADER_DATASET_KEY, (key, value) -> value);
@@ -104,7 +101,6 @@ public class SparqlConnectionProperties extends ConnectionProperties {
         DEFAULT_PROPERTIES_MAP.put(DATASET_KEY, "");
         DEFAULT_PROPERTIES_MAP.put(QUERY_ENDPOINT_KEY, "");
         DEFAULT_PROPERTIES_MAP.put(DESTINATION_KEY, "");
-        DEFAULT_PROPERTIES_MAP.put(REGION_KEY, "");
         DEFAULT_PROPERTIES_MAP.put(ACCEPT_HEADER_QUERY_KEY, NEPTUNE_ACCEPTED_HEADERS);
     }
 
@@ -401,43 +397,15 @@ public class SparqlConnectionProperties extends ConnectionProperties {
     }
 
     /**
-     * Gets the region.
-     *
-     * @return The region.
-     */
-    public String getRegion() {
-        return getProperty(REGION_KEY);
-    }
-
-    /**
-     * Sets the region.
-     *
-     * @param region The region.
-     * @throws SQLException if value is invalid.
-     */
-    public void setRegion(final String region) throws SQLException {
-        setProperty(REGION_KEY,
-                (String) PROPERTY_CONVERTER_MAP.get(REGION_KEY).convert(REGION_KEY, region));
-    }
-
-
-    /**
      * Validate the supported properties.
      */
     @Override
     protected void validateProperties() throws SQLException {
-        // If IAMSigV4 is specified, we need the region provided to us.
         if (AuthScheme.IAMSigV4.equals(getAuthScheme())) {
-            if ("".equals(getRegion())) {
-                final String region = System.getenv().get("SERVICE_REGION");
-                if (region == null) {
-                    throw missingConnectionPropertyError(
-                            "A Region must be provided to use IAMSigV4 Authentication. Set the SERVICE_REGION " +
-                                    "environment variable to the appropriate region, such as 'us-east-1'.");
-                }
-                setRegion(region);
-            }
-            // Throw if both IAM AUTH and HTTP_CLIENT_KEY are given
+            // If IAMSigV4 is specified, we need the region provided to us.
+            validateServiceRegionEnvVariable();
+
+            // Throw exception if both IAM AUTH and HTTP_CLIENT_KEY are given
             if (getHttpClient() != null) {
                 throw invalidConnectionPropertyValueError(AUTH_SCHEME_KEY, "IAMSigV4 does not support custom" +
                         "HttpClient input. Set AuthScheme to None to pass in custom HttpClient.");

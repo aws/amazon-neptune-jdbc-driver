@@ -76,7 +76,7 @@ public class SparqlQueryExecutor extends QueryExecutor {
     private final Object queryExecutionLock = new Object();
     private final SparqlConnectionProperties sparqlConnectionProperties;
 
-    SparqlQueryExecutor(final SparqlConnectionProperties sparqlConnectionProperties) {
+    SparqlQueryExecutor(final SparqlConnectionProperties sparqlConnectionProperties) throws SQLException {
         this.sparqlConnectionProperties = sparqlConnectionProperties;
     }
 
@@ -138,7 +138,7 @@ public class SparqlQueryExecutor extends QueryExecutor {
         final HttpClient v4SigningClient;
 
         try {
-            v4Signer = new NeptuneApacheHttpSigV4Signer(properties.getRegion(), awsCredentialsProvider);
+            v4Signer = new NeptuneApacheHttpSigV4Signer(properties.getServiceRegion(), awsCredentialsProvider);
             v4SigningClient =
                     HttpClientBuilder.create().addInterceptorLast(new HttpRequestInterceptor() {
 

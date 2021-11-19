@@ -28,7 +28,6 @@ import software.aws.neptune.gremlin.GremlinConnectionProperties;
 import software.aws.neptune.gremlin.GremlinQueryExecutor;
 import software.aws.neptune.gremlin.resultset.GremlinResultSetGetColumns;
 import software.aws.neptune.gremlin.resultset.GremlinResultSetGetTables;
-import software.aws.neptune.jdbc.utilities.AuthScheme;
 import software.aws.neptune.jdbc.utilities.SqlError;
 import software.aws.neptune.jdbc.utilities.SqlState;
 import java.lang.reflect.Constructor;
@@ -56,11 +55,6 @@ public class SqlGremlinQueryExecutor extends GremlinQueryExecutor {
     public SqlGremlinQueryExecutor(final GremlinConnectionProperties gremlinConnectionProperties) throws SQLException {
         super(gremlinConnectionProperties);
         this.gremlinConnectionProperties = gremlinConnectionProperties;
-        if (gremlinConnectionProperties.getAuthScheme().equals(AuthScheme.IAMSigV4)
-                && (System.getenv().get("SERVICE_REGION") == null)) {
-            throw new SQLException(
-                    "SERVICE_REGION environment variable must be set for IAMSigV4 authentication.");
-        }
     }
 
     /**

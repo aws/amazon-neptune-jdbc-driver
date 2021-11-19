@@ -16,6 +16,7 @@ The following properties are available for SQL:
 | ------------------------ | ------------------------------------------------------------ | ------------------------------------------------------------ | ------------------------------------------------------------ |
 | logLevel                 | Log level for application.                                   | In order of least logging to most logging: `OFF`, `FATAL`, `ERROR`, `WARN`, `INFO`, `DEBUG`, `TRACE`, `ALL`. | `INFO`                                                       |
 | authScheme               | Authentication mechanism to use.                             | `NONE` (no auth), `IAMSigV4` (IAM / SIGV4 logging).          | `IAMSigV4`, AWS SIGV4 credentials must be properly set up, including a region. See [environment setup for IAM authentication on Neptune](https://docs.aws.amazon.com/neptune/latest/userguide/iam-auth-connecting-gremlin-java.html) for more information. |
+| serviceRegion            | If `IAMSigv4` is selected, this region variable must be set for connecting to IAM authenticated Neptune instance | String values. For example, `us-east-1` | `NONE`. For a list of regions see [Neptune service regions](https://docs.aws.amazon.com/neptune/latest/userguide/iam-auth-connecting-gremlin-java.html). An alternative to setting this is through exporting the `SERVICE_REGION` environment variable as instructed in the link. |
 | scanType                 | To scan all nodes or only the first node when creating database schema. | `ALL` (schema creation scans all nodes), `FIRST` (schema creation scans the first node only). |`ALL` |
 | connectionTimeout        | Amount of time to wait for initial connection in _milliseconds_. | Integer values.                                              | `5000`                                                       |
 | connectionRetryCount     | Number of times to retry if establishing initial connection fails. | Integer values.                                              | `3`                                                          |
@@ -78,7 +79,7 @@ IAM is the standard way to access Neptune under an authorized account. Note that
 import java.sql.*;
 
 class Example {
-    static final String CONNECTION_STRING = "jdbc:neptune:sqlgremlin://example.neptune.amazonaws.com;port=8182;authScheme=IAMSigV4;enableSsl=true;";
+    static final String CONNECTION_STRING = "jdbc:neptune:sqlgremlin://example.neptune.amazonaws.com;port=8182;authScheme=IAMSigV4;enableSsl=true;serviceRegion=us-east-1";
     
     public static void main(String[] args) throws SQLException {
         Connection connection = DriverManager.getConnection(CONNECTION_STRING);
@@ -100,6 +101,7 @@ class Example {
         Properties properties = new Properties();
         properties.put("port", 8182);
         properties.put("authScheme", "IAMSigV4");
+        properties.put("serviceRegion", "us-east-1");
         properties.put("useEncryption", true);
         
         Connection connection = DriverManager.getConnection(CONNECTION_STRING, properties);

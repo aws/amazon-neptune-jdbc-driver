@@ -70,7 +70,7 @@ public class SparqlConnectionPropertiesTest {
                 connectionProperties.getConnectionRetryCount());
         Assertions
                 .assertEquals(SparqlConnectionProperties.DEFAULT_AUTH_SCHEME, connectionProperties.getAuthScheme());
-        Assertions.assertEquals("", connectionProperties.getRegion());
+        Assertions.assertEquals(SparqlConnectionProperties.DEFAULT_SERVICE_REGION, connectionProperties.getServiceRegion());
     }
 
     @Test
@@ -183,7 +183,7 @@ public class SparqlConnectionPropertiesTest {
         connectionProperties = new SparqlConnectionProperties();
         connectionProperties.setAuthScheme(AuthScheme.None);
         Assertions.assertEquals(AuthScheme.None, connectionProperties.getAuthScheme());
-        System.out.println("region is: " + connectionProperties.getRegion());
+        System.out.println("region is: " + connectionProperties.getServiceRegion());
 
         // the constructor test with DESTINATION properties properly set to avoid throws
         setInitialDestinationProperty(connectionProperties);
@@ -197,15 +197,12 @@ public class SparqlConnectionPropertiesTest {
         connectionProperties = new SparqlConnectionProperties();
 
         connectionProperties.put(ConnectionProperties.AUTH_SCHEME_KEY, AuthScheme.None); // set to None
-        final String testValue = "test region";
-        connectionProperties.setRegion(testValue);
-        Assertions.assertEquals(testValue, connectionProperties.getRegion());
+        connectionProperties.setServiceRegion("ca-central-1");
+        Assertions.assertEquals("ca-central-1", connectionProperties.getServiceRegion());
 
         connectionProperties.put(ConnectionProperties.AUTH_SCHEME_KEY, AuthScheme.IAMSigV4); // set to IAMSigV4
-        final String serviceRegion = System.getenv().get("SERVICE_REGION");
-        Assertions.assertNotNull(serviceRegion);
-        connectionProperties.setRegion(serviceRegion);
-        Assertions.assertEquals(serviceRegion, connectionProperties.getRegion());
+        connectionProperties.setServiceRegion("us-east-1");
+        Assertions.assertEquals("us-east-1", connectionProperties.getServiceRegion());
 
         // the constructor test with DESTINATION properties properly set to avoid throws
         setInitialDestinationProperty(connectionProperties);

@@ -43,7 +43,7 @@ public class OpenCypherConnectionTest {
     private static final Properties PROPERTIES = new Properties();
     private static final String TEST_PROP_KEY_UNSUPPORTED = "unsupported";
     private static final String TEST_PROP_VAL_UNSUPPORTED = "unsupported";
-    private static final String TEST_PROP_KEY = "ConnectionTimeout";
+    private static final String TEST_PROP_KEY = "connectionTimeout";
     private static final String TEST_PROP_VAL = "1";
     private static final Properties TEST_PROP = new Properties();
     private static final Properties TEST_PROP_INITIAL = new Properties();

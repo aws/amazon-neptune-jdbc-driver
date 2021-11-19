@@ -22,6 +22,7 @@ import lombok.SneakyThrows;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.DriverManager;
@@ -41,13 +42,13 @@ import java.util.concurrent.Executors;
 
 public class OpenCypherManualIAMTest {
     private static final int PORT = 8182;
-    private static final String HOSTNAME = "iam-auth-test.cluster-cdubgfjknn5r.us-east-1.neptune.amazonaws.com";
+    private static final String HOSTNAME = "jdbc-bug-bash-iam-instance-1.cdubgfjknn5r.us-east-1.neptune.amazonaws.com";
     private static final String ENDPOINT = String.format("bolt://%s:%d", HOSTNAME, PORT);
     private static final String REGION = "us-east-1";
     private static final String AUTH = "IamSigV4";
     private static final String ENCRYPTION = "TRUE";
     private static final String CONNECTION_STRING =
-            String.format("jdbc:neptune:opencypher://%s;useEncryption=%s;authScheme=%s;region=%s;", ENDPOINT,
+            String.format("jdbc:neptune:opencypher://%s;useEncryption=%s;authScheme=%s;serviceRegion=%s;", ENDPOINT,
                     ENCRYPTION,
                     AUTH, REGION);
     private static final String CREATE_NODES = String.format("CREATE (:%s %s)", "Person:Developer", "{hello:'world'}") +
@@ -73,7 +74,7 @@ public class OpenCypherManualIAMTest {
         final Properties properties = new Properties();
         properties.put(OpenCypherConnectionProperties.ENDPOINT_KEY, ENDPOINT);
         properties.put(OpenCypherConnectionProperties.AUTH_SCHEME_KEY, AUTH);
-        properties.put(OpenCypherConnectionProperties.REGION_KEY, REGION);
+        properties.put(OpenCypherConnectionProperties.SERVICE_REGION_KEY, REGION);
         final Connection connection = new OpenCypherConnection(new OpenCypherConnectionProperties(properties));
         Assertions.assertTrue(connection.isValid(1));
         final Statement statement = connection.createStatement();

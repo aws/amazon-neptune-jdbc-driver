@@ -64,13 +64,8 @@ public class GremlinQueryExecutor extends QueryExecutor {
      *
      * @param gremlinConnectionProperties GremlinConnectionProperties for use in the executor.
      */
-    public GremlinQueryExecutor(final GremlinConnectionProperties gremlinConnectionProperties) throws SQLException {
+    public GremlinQueryExecutor(final GremlinConnectionProperties gremlinConnectionProperties) {
         this.gremlinConnectionProperties = gremlinConnectionProperties;
-        if (gremlinConnectionProperties.getAuthScheme().equals(AuthScheme.IAMSigV4)
-                && (System.getenv().get("SERVICE_REGION") == null)) {
-            throw new SQLException(
-                    "SERVICE_REGION environment variable must be set for IAMSigV4 authentication.");
-        }
     }
 
     /**

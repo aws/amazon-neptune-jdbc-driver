@@ -16,6 +16,7 @@ The following properties are available for SPARQL:
 | ------------------------ | ------------------------------------------------------------ | ------------------------------------------------------------ | ------------------------------------------------------------ |
 | logLevel                 | Log level for application.                                   | In order of least logging to most logging: `OFF`, `FATAL`, `ERROR`, `WARN`, `INFO`, `DEBUG`, `TRACE`, `ALL`. | `INFO`                                                       |
 | authScheme               | Authentication mechanism to use.                             | `NONE` (no auth), `IAMSigV4` (IAM / SIGV4 logging).          | If `IAMSigV4` is selected, the user must have AWS SIGV4 credentials properly set up in their environment, including a region. See [environment setup for IAM authentication on Neptune](https://docs.aws.amazon.com/neptune/latest/userguide/iam-auth-connecting-gremlin-java.html) for more information. |
+| serviceRegion | If `IAMSigv4` is selected, this region variable must be set for connecting to IAM authenticated Neptune instance | String values. For example, `us-east-1` | `NONE`. For a list of regions see [Neptune service regions](https://docs.aws.amazon.com/neptune/latest/userguide/iam-auth-connecting-gremlin-java.html). An alternative to setting this is through exporting the `SERVICE_REGION` environment variable as instructed in the link. |
 | connectionTimeout        | Amount of time to wait for initial connection in _milliseconds_. | Integer values.                                              | `5000`                                                       |
 | connectionRetryCount     | Number of times to retry if establishing initial connection fails. | Integer values.                                              | `3`                                                          |
 | port                     | The port used for connection.                                | Integer values.                                              | `8182`                                                       |
@@ -82,7 +83,7 @@ IAM is the standard way to access Neptune under an authorized account.
 import java.sql.*;
 
 class Example {
-    static final String CONNECTION_STRING = "jdbc:neptune:sparql://https://example.neptune.amazonaws.com;port=8182;queryEndpoint=sparql;authScheme=IAMSigV4";
+    static final String CONNECTION_STRING = "jdbc:neptune:sparql://https://example.neptune.amazonaws.com;port=8182;queryEndpoint=sparql;authScheme=IAMSigV4;serviceRegion=us-east-1";
     
     public static void main(String[] args) throws SQLException {
         Connection connection = DriverManager.getConnection(CONNECTION_STRING);
@@ -105,6 +106,7 @@ class Example {
         properties.put("port", 8182);
         properties.put("queryEndpoint", "sparql");
         properties.put("authScheme", "IAMSigV4");
+        properties.put("serviceRegion", "us-east-1");
         
         Connection connection = DriverManager.getConnection(CONNECTION_STRING, properties);
         connection.close();

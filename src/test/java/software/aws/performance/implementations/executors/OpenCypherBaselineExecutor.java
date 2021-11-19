@@ -46,7 +46,7 @@ public class OpenCypherBaselineExecutor extends PerformanceTestExecutor {
         properties.put(OpenCypherConnectionProperties.ENDPOINT_KEY,
                 String.format("bolt://%s:%d", PerformanceTestConstants.ENDPOINT, PerformanceTestConstants.PORT));
         properties.put(OpenCypherConnectionProperties.AUTH_SCHEME_KEY, PerformanceTestConstants.AUTH_SCHEME);
-        properties.put(OpenCypherConnectionProperties.REGION_KEY, PerformanceTestConstants.REGION);
+        properties.put(OpenCypherConnectionProperties.SERVICE_REGION_KEY, PerformanceTestConstants.REGION);
         final OpenCypherConnectionProperties openCypherConnectionProperties =
                 new OpenCypherConnectionProperties(properties);
 
@@ -67,7 +67,7 @@ public class OpenCypherBaselineExecutor extends PerformanceTestExecutor {
         if (openCypherConnectionProperties.getAuthScheme().equals(AuthScheme.IAMSigV4)) {
             authToken = OpenCypherIAMRequestGenerator
                     .getSignedHeader(openCypherConnectionProperties.getEndpoint(),
-                            openCypherConnectionProperties.getRegion());
+                            openCypherConnectionProperties.getServiceRegion());
         }
         final Driver driver = GraphDatabase.driver(openCypherConnectionProperties.getEndpoint(), authToken,
                 configBuilder.build());

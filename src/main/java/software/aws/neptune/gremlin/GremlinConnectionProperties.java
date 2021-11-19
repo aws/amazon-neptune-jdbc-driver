@@ -19,6 +19,7 @@ package software.aws.neptune.gremlin;
 import com.google.common.collect.ImmutableList;
 import io.netty.handler.ssl.SslContext;
 import lombok.NonNull;
+import org.apache.commons.lang.SystemUtils;
 import org.apache.tinkerpop.gremlin.driver.LoadBalancingStrategy;
 import org.apache.tinkerpop.gremlin.driver.MessageSerializer;
 import org.apache.tinkerpop.gremlin.driver.ser.Serializers;
@@ -29,6 +30,9 @@ import software.aws.neptune.jdbc.utilities.AuthScheme;
 import software.aws.neptune.jdbc.utilities.ConnectionProperties;
 import software.aws.neptune.jdbc.utilities.SqlError;
 import software.aws.neptune.jdbc.utilities.SqlState;
+
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.sql.SQLClientInfoException;
 import java.sql.SQLException;
 import java.util.HashMap;
@@ -1093,15 +1097,11 @@ public class GremlinConnectionProperties extends ConnectionProperties {
      */
     @Override
     protected void validateProperties() throws SQLException {
-        // If IAMSigV4 is specified, we need the region provided to us.
         if (getAuthScheme() != null && getAuthScheme().equals(AuthScheme.IAMSigV4)) {
-            final String region = System.getenv().get("SERVICE_REGION");
-            if (region == null) {
-                throw new SQLException(
-                        "Error: SERVICE_REGION environment variable must be set to use IAM authentication. " +
-                                "Note, it must be accessible from BI tools if using a BI tool. " +
-                                "Example SERVICE_REGION=us-east-1.");
-            }
+            // If IAMSigV4 is specified, we need the region provided to us.
+            validateServiceRegionEnvVariable();
+
+            setServiceRegionEnvironmentVariable(getServiceRegion());
 
             if (!getEnableSsl()) {
                 throw invalidConnectionPropertyValueError(ENABLE_SSL_KEY,
@@ -1120,4 +1120,45 @@ public class GremlinConnectionProperties extends ConnectionProperties {
     public boolean isSupportedProperty(final String name) {
         return SUPPORTED_PROPERTIES_LIST.contains(name);
     }
+
+    /**
+     * Updates the SERVICE_REGION env variable in JVM to the region set by Gremlin connection properties
+     */
+    private void setServiceRegionEnvironmentVariable(final String region) throws SQLException {
+        if (region.equals(System.getenv("SERVICE_REGION"))) {
+            return;
+        }
+        if (System.getenv("SERVICE_REGION") != null) {
+            LOGGER.info(String.format("Overriding the current SERVICE_REGION environment variable with '%s'.", region));
+        }
+        try {
+            if (SystemUtils.IS_OS_WINDOWS) {
+                setWindowsEnvironmentVariable(region);
+            } else {
+                setMacEnvironmentVariable(region);
+            }
+        } catch (final Exception e) {
+            throw new SQLException(String.format("Error: unable to set SERVICE_REGION environment variable to '%s' - %s.", region, e));
+        }
+    }
+
+    @SuppressWarnings({ "unchecked" })
+    private void setWindowsEnvironmentVariable(final String value) throws Exception {
+        final Class<?> processEnv = Class.forName("java.lang.ProcessEnvironment");
+        final Method getenv = processEnv.getDeclaredMethod("getenv", String.class);
+        getenv.setAccessible(true);
+        final Field caseInsensitiveEnv = processEnv.getDeclaredField("theCaseInsensitiveEnvironment");
+        caseInsensitiveEnv.setAccessible(true);
+        final Map<String, String> envMap = (Map<String, String>) caseInsensitiveEnv.get(null);
+        envMap.put("SERVICE_REGION", value);
+    }
+
+    @SuppressWarnings({ "unchecked" })
+    private void setMacEnvironmentVariable(final String value) throws Exception {
+        final Map<String, String> env = System.getenv();
+        final Field field = env.getClass().getDeclaredField("m");
+        field.setAccessible(true);
+        ((Map<String, String>) field.get(env)).put("SERVICE_REGION", value);
+    }
+
 }

@@ -22,6 +22,7 @@ import org.junit.jupiter.api.Test;
 import software.aws.neptune.ConnectionPropertiesTestBase;
 import software.aws.neptune.jdbc.utilities.AuthScheme;
 import software.aws.neptune.jdbc.utilities.ConnectionProperties;
+
 import java.sql.SQLClientInfoException;
 import java.sql.SQLException;
 import java.util.Properties;
@@ -61,7 +62,7 @@ class OpenCypherConnectionPropertiesTest extends ConnectionPropertiesTestBase {
                 .assertEquals(OpenCypherConnectionProperties.DEFAULT_AUTH_SCHEME, connectionProperties.getAuthScheme());
         Assertions.assertEquals(OpenCypherConnectionProperties.DEFAULT_USE_ENCRYPTION,
                 connectionProperties.getUseEncryption());
-        Assertions.assertEquals("", connectionProperties.getRegion());
+        Assertions.assertEquals(OpenCypherConnectionProperties.DEFAULT_SERVICE_REGION, connectionProperties.getServiceRegion());
     }
 
     @Test
@@ -94,7 +95,7 @@ class OpenCypherConnectionPropertiesTest extends ConnectionPropertiesTestBase {
 
         testStringPropertyViaConstructor(
                 initProperties,
-                OpenCypherConnectionProperties.REGION_KEY,
+                OpenCypherConnectionProperties.SERVICE_REGION_KEY,
                 DEFAULT_EMPTY_STRING);
 
         initProperties = new Properties();
@@ -102,17 +103,11 @@ class OpenCypherConnectionPropertiesTest extends ConnectionPropertiesTestBase {
         assertDoesNotThrowOnNewConnectionProperties(initProperties);
 
         final String testValue = "test region";
-        connectionProperties.setRegion(testValue);
-        Assertions.assertEquals(testValue, connectionProperties.getRegion());
+        connectionProperties.setServiceRegion(testValue);
+        Assertions.assertEquals(testValue, connectionProperties.getServiceRegion());
 
-        initProperties = new Properties();
-        initProperties.put(ConnectionProperties.AUTH_SCHEME_KEY, AuthScheme.IAMSigV4); // set to IAMSigV4
-        assertDoesNotThrowOnNewConnectionProperties(initProperties);
-
-        final String serviceRegion = System.getenv().get("SERVICE_REGION");
-        Assertions.assertNotNull(serviceRegion);
-        connectionProperties.setRegion(serviceRegion);
-        Assertions.assertEquals(serviceRegion, connectionProperties.getRegion());
+        connectionProperties.setServiceRegion("us-east-1");
+        Assertions.assertEquals("us-east-1", connectionProperties.getServiceRegion());
     }
 
     @Test
