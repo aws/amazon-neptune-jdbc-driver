@@ -99,8 +99,10 @@ public class GremlinSqlAggFunction extends GremlinSqlOperator {
      */
     public String getNewName() throws SQLException {
         if (sqlOperands.get((sqlOperands.size() - 1)) instanceof GremlinSqlIdentifier) {
+            final GremlinSqlIdentifier gremlinSqlIdentifier =
+                    (GremlinSqlIdentifier) sqlOperands.get((sqlOperands.size() - 1));
             return String.format("%s(%s)", sqlAggFunction.kind.name(),
-                    ((GremlinSqlIdentifier) sqlOperands.get(sqlOperands.size() - 1)).getColumn());
+                    gremlinSqlIdentifier.isStar() ? "*" : gremlinSqlIdentifier.getColumn());
         } else if (sqlOperands.get((sqlOperands.size() - 1)) instanceof GremlinSqlLiteral) {
             return String.format("%s(%s)", sqlAggFunction.kind.name(),
                     ((GremlinSqlLiteral) sqlOperands.get(sqlOperands.size() - 1)).getValue().toString());

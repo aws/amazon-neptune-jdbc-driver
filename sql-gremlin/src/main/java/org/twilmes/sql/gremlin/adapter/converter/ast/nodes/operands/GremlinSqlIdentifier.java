@@ -56,4 +56,8 @@ public class GremlinSqlIdentifier extends GremlinSqlNode {
     public int getNameCount() {
         return sqlIdentifier.names.size();
     }
+
+    public boolean isStar() {
+        return sqlIdentifier.isStar();
+    }
 }

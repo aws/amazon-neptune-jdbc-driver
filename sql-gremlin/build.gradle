@@ -4,15 +4,11 @@ buildscript {
             url "https://plugins.gradle.org/m2/"
         }
     }
-    dependencies {
-        classpath "com.github.jengelman.gradle.plugins:shadow:6.1.0";
-    }
 }
 
 apply plugin: 'java'
 apply plugin: 'jacoco'
 apply plugin: 'checkstyle'
-apply plugin: 'com.github.johnrengelman.shadow'
 
 group 'org.twilmes'
 version '1.0-SNAPSHOT'
@@ -152,13 +148,4 @@ dependencies {
     testImplementation group: 'org.slf4j', name: 'slf4j-log4j12', version: '1.7.32'
     testCompileOnly group: 'org.projectlombok', name: 'lombok', version: lombokVersion
     testAnnotationProcessor group: 'org.projectlombok', name: 'lombok', version: lombokVersion
-}
-
-shadowJar {
-    baseName = rootProject.name
-    classifier = ''
-
-    dependencies {
-        exclude(dependency('org.slf4j:.*'))
-    }
 }

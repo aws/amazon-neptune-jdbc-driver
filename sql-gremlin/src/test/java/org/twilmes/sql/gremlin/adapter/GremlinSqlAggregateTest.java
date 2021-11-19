@@ -68,4 +68,10 @@ public class GremlinSqlAggregateTest extends GremlinSqlBaseTest {
         // validate the metadata type matches return type
         runQueryTestColumnType("select age, count(age) from person group by age");
     }
+
+    @Test
+    public void testCountStar() throws SQLException {
+        // Validate that the output column is COUNT(*) and the value is correct.
+        runQueryTestResults("SELECT COUNT(*) FROM person", columns("COUNT(*)"), rows(r(6L)));
+    }
 }
