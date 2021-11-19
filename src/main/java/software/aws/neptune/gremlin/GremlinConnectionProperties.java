@@ -1138,8 +1138,7 @@ public class GremlinConnectionProperties extends ConnectionProperties {
                 setMacEnvironmentVariable(region);
             }
         } catch (final Exception e) {
-            throw new SQLException(String.format("Error: unable to set SERVICE_REGION environment variable to '%s'. " +
-                    "See %s", region, e));
+            throw new SQLException(String.format("Error: unable to set SERVICE_REGION environment variable to '%s' - %s.", region, e));
         }
     }
 
