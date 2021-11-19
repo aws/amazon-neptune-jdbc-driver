@@ -258,7 +258,7 @@ public class GremlinSqlSelectSingle extends GremlinSqlSelect {
             }
         } else {
             throw new SQLException(
-                    String.format("Error, could not apply ORDER BY to {}.", gremlinSqlNode.getClass().getName()));
+                    String.format("Error, could not apply ORDER BY to %s. See documentation for ORDER BY limitations.", gremlinSqlNode.getClass().getName()));
         }
     }
 
