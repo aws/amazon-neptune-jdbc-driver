@@ -60,14 +60,14 @@ public class Pagination implements Runnable {
             }
             // If we run out of traversal data (or hit our limit), stop and signal to the result that it is done.
             sqlGremlinQueryResult.assertIsEmpty();
-            closeTraversal();
         } catch (final Exception e) {
-            closeTraversal();
             final StringWriter sw = new StringWriter();
             final PrintWriter pw = new PrintWriter(sw);
             e.printStackTrace(pw);
             LOGGER.error("Encountered exception", e);
             sqlGremlinQueryResult.setPaginationException(new SQLException(e + sw.toString()));
+        } finally {
+            closeTraversal();
         }
     }
 
