@@ -33,6 +33,17 @@ The above properties are configurations that are shared across all query languag
 
 Each Builder method listed in the documentation is accepted as a property. For example, "**[port](https://tinkerpop.apache.org/javadocs/current/full/org/apache/tinkerpop/gremlin/driver/Cluster.Builder.html#port-int-)**(int port)" means that as a part of the connection string it may be configured as a property or added as a Key-Value Pair in Properties. See below for examples.
 
+#### Establishing Connection Manually
+ 
+Amazon Neptune Database is a VPC only service, and you need to establish an SSH tunnel before connecting to the database outside of the VPC (e.g. from the local machine).
+To establish an SSH tunnel, you need an EC2 instance deployed in the same VPC as Neptune Database. More information on how to configure SSH Tunnel is described in [Connecting to Neptune](/markdown/setup/configuration.md#using-an-ssh-tunnel-to-connect-to-amazon-neptune)
+
+- Step 1. Establish Port Forwarding through SSH Tunnel
+- Step 2. Add Neptune Database hostname in /etc/hosts (see [Adding SSH Tunnel Lookup](/markdown/setup/configuration.md#adding-a-ssh-tunnel-lookup) for more details).
+- Step 3. Enter Connection String. As an example in [DBVisualizer](https://www.dbvis.com/) enter *Database URL* `jdbc:neptune:sqlgremlin://<hostname>;port=8182;authScheme=NONE`. If you are using default port and using IAM athentication you do not need to supply addiitonal parameters.
+- Step 4. Now you can connect to your Amazon Neptune Database instance.
+
+
 #### No authentication using string only
 
 ```java
