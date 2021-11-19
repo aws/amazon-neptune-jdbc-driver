@@ -63,7 +63,6 @@ public class SqlConverter {
     private final FrameworkConfig frameworkConfig;
     private final GremlinSchema gremlinSchema;
 
-
     public SqlConverter(final GremlinSchema gremlinSchema) {
         this.gremlinSchema = gremlinSchema;
         final SchemaPlus rootSchema = Frameworks.createRootSchema(true);
@@ -73,45 +72,26 @@ public class SqlConverter {
                 .traitDefs(TRAIT_DEFS)
                 .programs(PROGRAM)
                 .build();
+        GremlinSqlFactory.setSqlMetadata(new SqlMetadata(gremlinSchema));
     }
 
-    // NOT THREAD SAFE
-    public SqlGremlinQueryResult executeQuery(final GraphTraversalSource g, final String query) throws SQLException {
-        try {
-            final SqlMetadata sqlMetadata = new SqlMetadata(gremlinSchema);
-            GremlinSqlFactory.setSqlMetadata(sqlMetadata);
-            // Not sure if this can be re-used?
-            final QueryPlanner queryPlanner = new QueryPlanner(frameworkConfig);
-
-            queryPlanner.plan(query);
-            final SqlNode sqlNode = queryPlanner.getValidate();
-
-            if (sqlNode instanceof SqlSelect) {
-                final GremlinSqlSelect gremlinSqlSelect = GremlinSqlFactory.createSelect((SqlSelect) sqlNode, g);
-                return gremlinSqlSelect.executeTraversal();
-            } else {
-                throw new SQLException("Only sql select statements are supported right now.");
-            }
-        } catch (SQLException e) {
-            throw e;
-        }
-    }
-
-    private GraphTraversal<?, ?> getGraphTraversal(GraphTraversalSource g, final String query) throws SQLException {
-        final SqlMetadata sqlMetadata = new SqlMetadata(gremlinSchema);
-        GremlinSqlFactory.setSqlMetadata(sqlMetadata);
-        // Not sure if this can be re-used?
+    private GremlinSqlSelect getSelect(final GraphTraversalSource g, final String query) throws SQLException {
         final QueryPlanner queryPlanner = new QueryPlanner(frameworkConfig);
-
         queryPlanner.plan(query);
         final SqlNode sqlNode = queryPlanner.getValidate();
-
         if (sqlNode instanceof SqlSelect) {
-            final GremlinSqlSelect gremlinSqlSelect = GremlinSqlFactory.createSelect((SqlSelect) sqlNode, g);
-            return gremlinSqlSelect.generateTraversal();
+            return GremlinSqlFactory.createSelect((SqlSelect) sqlNode, g);
         } else {
             throw new SQLException("Only sql select statements are supported right now.");
         }
+    }
+
+    public SqlGremlinQueryResult executeQuery(final GraphTraversalSource g, final String query) throws SQLException {
+        return getSelect(g, query).executeTraversal();
+    }
+
+    private GraphTraversal<?, ?> getGraphTraversal(GraphTraversalSource g, final String query) throws SQLException {
+        return getSelect(g, query).generateTraversal();
     }
 
     public String getStringTraversal(final GraphTraversalSource g, final String query) throws SQLException {
