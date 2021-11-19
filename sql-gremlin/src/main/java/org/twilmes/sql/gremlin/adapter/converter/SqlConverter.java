@@ -61,11 +61,9 @@ public class SqlConverter {
     private static final Program PROGRAM =
             Programs.sequence(Programs.ofRules(Programs.RULE_SET), Programs.CALC_PROGRAM);
     private final FrameworkConfig frameworkConfig;
-    private final GraphTraversalSource g;
     private final GremlinSchema gremlinSchema;
 
-
-    public SqlConverter(final GremlinSchema gremlinSchema, final GraphTraversalSource g) {
+    public SqlConverter(final GremlinSchema gremlinSchema) {
         this.gremlinSchema = gremlinSchema;
         final SchemaPlus rootSchema = Frameworks.createRootSchema(true);
         this.frameworkConfig = Frameworks.newConfigBuilder()
@@ -74,46 +72,30 @@ public class SqlConverter {
                 .traitDefs(TRAIT_DEFS)
                 .programs(PROGRAM)
                 .build();
-        this.g = g;
     }
 
-    // NOT THREAD SAFE
-    public SqlGremlinQueryResult executeQuery(final String query) throws SQLException {
-        final SqlMetadata sqlMetadata = new SqlMetadata(g, gremlinSchema);
-        GremlinSqlFactory.setSqlMetadata(sqlMetadata);
-        // Not sure if this can be re-used?
+    private GremlinSqlSelect getSelect(final GraphTraversalSource g, final String query) throws SQLException {
+        GremlinSqlFactory.setSqlMetadata(new SqlMetadata(gremlinSchema));
         final QueryPlanner queryPlanner = new QueryPlanner(frameworkConfig);
-
         queryPlanner.plan(query);
         final SqlNode sqlNode = queryPlanner.getValidate();
-
         if (sqlNode instanceof SqlSelect) {
-            final GremlinSqlSelect gremlinSqlSelect = GremlinSqlFactory.createSelect((SqlSelect) sqlNode, g);
-            return gremlinSqlSelect.executeTraversal();
+            return GremlinSqlFactory.createSelect((SqlSelect) sqlNode, g);
         } else {
             throw new SQLException("Only sql select statements are supported right now.");
         }
     }
 
-    private GraphTraversal<?, ?> getGraphTraversal(final String query) throws SQLException {
-        final SqlMetadata sqlMetadata = new SqlMetadata(g, gremlinSchema);
-        GremlinSqlFactory.setSqlMetadata(sqlMetadata);
-        // Not sure if this can be re-used?
-        final QueryPlanner queryPlanner = new QueryPlanner(frameworkConfig);
-
-        queryPlanner.plan(query);
-        final SqlNode sqlNode = queryPlanner.getValidate();
-
-        if (sqlNode instanceof SqlSelect) {
-            final GremlinSqlSelect gremlinSqlSelect = GremlinSqlFactory.createSelect((SqlSelect) sqlNode, g);
-            return gremlinSqlSelect.generateTraversal();
-        } else {
-            throw new SQLException("Only sql select statements are supported right now.");
-        }
+    public SqlGremlinQueryResult executeQuery(final GraphTraversalSource g, final String query) throws SQLException {
+        return getSelect(g, query).executeTraversal();
     }
 
-    public String getStringTraversal(final String query) throws SQLException {
-        return GroovyTranslator.of("g").translate(getGraphTraversal(query).asAdmin().getBytecode());
+    private GraphTraversal<?, ?> getGraphTraversal(GraphTraversalSource g, final String query) throws SQLException {
+        return getSelect(g, query).generateTraversal();
+    }
+
+    public String getStringTraversal(final GraphTraversalSource g, final String query) throws SQLException {
+        return GroovyTranslator.of("g").translate(getGraphTraversal(g, query).asAdmin().getBytecode());
     }
 
     @Getter

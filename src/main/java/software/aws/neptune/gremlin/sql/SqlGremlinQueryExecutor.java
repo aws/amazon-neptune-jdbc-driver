@@ -43,7 +43,7 @@ import static org.apache.tinkerpop.gremlin.process.traversal.AnonymousTraversalS
 public class SqlGremlinQueryExecutor extends GremlinQueryExecutor {
     private static final Logger LOGGER = LoggerFactory.getLogger(SqlGremlinQueryExecutor.class);
     private static final Object TRAVERSAL_LOCK = new Object();
-    private static SqlConverter gremlinSqlConverter = null;
+    private SqlConverter gremlinSqlConverter = null;
     private static GraphTraversalSource graphTraversalSource = null;
     private final GremlinConnectionProperties gremlinConnectionProperties;
 
@@ -74,7 +74,7 @@ public class SqlGremlinQueryExecutor extends GremlinQueryExecutor {
         GremlinQueryExecutor.close();
     }
 
-    private static GraphTraversalSource getGraphTraversalSource(
+    private GraphTraversalSource getGraphTraversalSource(
             final GremlinConnectionProperties gremlinConnectionProperties)
             throws SQLException {
         synchronized (TRAVERSAL_LOCK) {
@@ -87,12 +87,11 @@ public class SqlGremlinQueryExecutor extends GremlinQueryExecutor {
 
     }
 
-    private static SqlConverter getGremlinSqlConverter(final GremlinConnectionProperties gremlinConnectionProperties)
+    private SqlConverter getGremlinSqlConverter(final GremlinConnectionProperties gremlinConnectionProperties)
             throws SQLException {
         MetadataCache.updateCacheIfNotUpdated(gremlinConnectionProperties);
         if (gremlinSqlConverter == null) {
-            gremlinSqlConverter = new SqlConverter(MetadataCache.getGremlinSchema(),
-                    getGraphTraversalSource(gremlinConnectionProperties));
+            gremlinSqlConverter = new SqlConverter(MetadataCache.getGremlinSchema());
         }
         return gremlinSqlConverter;
     }
@@ -167,7 +166,7 @@ public class SqlGremlinQueryExecutor extends GremlinQueryExecutor {
     @Override
     @SuppressWarnings("unchecked")
     protected <T> T runQuery(final String query) {
-        return (T) getGremlinSqlConverter(gremlinConnectionProperties).executeQuery(query);
+        return (T) getGremlinSqlConverter(gremlinConnectionProperties).executeQuery(getGraphTraversalSource(gremlinConnectionProperties), query);
     }
 
     // TODO AN-540: Look into query cancellation.

@@ -65,7 +65,7 @@ public class GremlinSqlSelectMulti extends GremlinSqlSelect {
 
     public GremlinSqlSelectMulti(final SqlSelect sqlSelect, final SqlJoin sqlJoin,
                                  final SqlMetadata sqlMetadata, final GraphTraversalSource g) {
-        super(sqlSelect, sqlMetadata);
+        super(sqlSelect, sqlMetadata, g);
         this.sqlMetadata = sqlMetadata;
         this.sqlSelect = sqlSelect;
         this.g = g;
@@ -198,18 +198,29 @@ public class GremlinSqlSelectMulti extends GremlinSqlSelect {
             }
         }
 
-        final GraphTraversal<?, ?> graphTraversal = g.E().hasLabel(edgeLabel)
-                .where(__.inV().hasLabel(inVLabel))
-                .where(__.outV().hasLabel(outVLabel));
-        applyGroupBy(graphTraversal, edgeLabel, inVRename, outVRename);
-        applySelectValues(graphTraversal);
-        applyOrderBy(graphTraversal, edgeLabel, inVRename, outVRename);
-        applyHaving(graphTraversal);
-        SqlTraversalEngine.applyAggregateFold(sqlMetadata, graphTraversal);
-        graphTraversal.project(inVRename, outVRename);
-        applyColumnRetrieval(graphTraversal, inVRename, gremlinSqlNodesIn, StepDirection.In);
-        applyColumnRetrieval(graphTraversal, outVRename, gremlinSqlNodesOut, StepDirection.Out);
-        return graphTraversal;
+        GraphTraversal<?, ?> graphTraversal = null;
+        try {
+            graphTraversal = g.E().hasLabel(edgeLabel)
+                    .where(__.inV().hasLabel(inVLabel))
+                    .where(__.outV().hasLabel(outVLabel));
+            applyGroupBy(graphTraversal, edgeLabel, inVRename, outVRename);
+            applySelectValues(graphTraversal);
+            applyOrderBy(graphTraversal, edgeLabel, inVRename, outVRename);
+            applyHaving(graphTraversal);
+            SqlTraversalEngine.applyAggregateFold(sqlMetadata, graphTraversal);
+            graphTraversal.project(inVRename, outVRename);
+            applyColumnRetrieval(graphTraversal, inVRename, gremlinSqlNodesIn, StepDirection.In);
+            applyColumnRetrieval(graphTraversal, outVRename, gremlinSqlNodesOut, StepDirection.Out);
+            return graphTraversal;
+        } catch (final SQLException e) {
+            if (graphTraversal != null) {
+                try {
+                    graphTraversal.close();
+                } catch (final Exception ignored) {
+                }
+            }
+            throw e;
+        }
     }
 
     private void applySelectValues(final GraphTraversal<?, ?> graphTraversal) {
