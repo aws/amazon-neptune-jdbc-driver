@@ -49,7 +49,13 @@ public class Pagination implements Runnable {
                     GroovyTranslator.of("g").translate(traversal.asAdmin().getBytecode()));
             while (traversal.hasNext()) {
                 final List<Object> rows = new ArrayList<>();
-                traversal.next(pageSize).forEach(map -> rows.add(getRowFromMap.execute((Map<String, Object>) map)));
+                traversal.next(pageSize).forEach(map -> {
+                    // Our choose(<predicate>, <expected>, <empty>) returns an empty list.
+                    // If we get that, we just want to skip over it.
+                    if (map instanceof Map) {
+                        rows.add(getRowFromMap.execute((Map<String, Object>) map));
+                    }
+                });
                 convertAndInsertResult(sqlGremlinQueryResult, rows);
             }
             // If we run out of traversal data (or hit our limit), stop and signal to the result that it is done.

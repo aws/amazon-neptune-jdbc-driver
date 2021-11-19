@@ -87,15 +87,7 @@ public abstract class GremlinSqlSelect extends GremlinSqlNode {
 
     public abstract GraphTraversal<?, ?> generateTraversal() throws SQLException;
 
-    protected void applyColumnRetrieval(final GraphTraversal<?, ?> graphTraversal, final String table,
-                                        final List<GremlinSqlNode> sqlNodeList, final StepDirection stepDirection)
-            throws SQLException {
-        // If there are no nodes, we should simply append a by and exit.
-        if (sqlNodeList.isEmpty()) {
-            graphTraversal.by();
-            return;
-        }
-
+    protected GraphTraversal<?, ?> applyColumnRenames(final List<GremlinSqlNode> sqlNodeList, final String table) throws SQLException {
         // Determine what the names should be for renaming.
         final List<String> columnsRenamed = new ArrayList<>();
         for (final GremlinSqlNode gremlinSqlNode : sqlNodeList) {
@@ -110,8 +102,20 @@ public abstract class GremlinSqlSelect extends GremlinSqlNode {
         }
 
         final List<String> renamedColumnsTemp = new ArrayList<>(columnsRenamed);
-        final GraphTraversal<?, ?> subGraphTraversal = SqlTraversalEngine.applyColumnRenames(renamedColumnsTemp);
         sqlMetadata.setColumnOutputList(table, columnsRenamed);
+        return SqlTraversalEngine.applyColumnRenames(renamedColumnsTemp);
+    }
+
+    protected void applyColumnRetrieval(final GraphTraversal<?, ?> graphTraversal, final String table,
+                                        final List<GremlinSqlNode> sqlNodeList, final StepDirection stepDirection)
+            throws SQLException {
+        // If there are no nodes, we should simply append a by and exit.
+        if (sqlNodeList.isEmpty()) {
+            graphTraversal.by();
+            return;
+        }
+
+        final GraphTraversal<?, ?> subGraphTraversal = applyColumnRenames(sqlNodeList, table);
         for (final GremlinSqlNode gremlinSqlNode : sqlNodeList) {
             if (gremlinSqlNode instanceof GremlinSqlIdentifier) {
                 final GraphTraversal<?, ?> subSubGraphTraversal =

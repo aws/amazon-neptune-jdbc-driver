@@ -29,6 +29,7 @@ import org.twilmes.sql.gremlin.adapter.converter.ast.nodes.GremlinSqlFactory;
 import org.twilmes.sql.gremlin.adapter.converter.ast.nodes.GremlinSqlNode;
 import org.twilmes.sql.gremlin.adapter.converter.ast.nodes.operands.GremlinSqlIdentifier;
 import org.twilmes.sql.gremlin.adapter.converter.ast.nodes.operator.aggregate.GremlinSqlAggFunction;
+import org.twilmes.sql.gremlin.adapter.converter.ast.nodes.operator.logic.GremlinSqlLiteral;
 import java.sql.SQLException;
 import java.util.List;
 
@@ -74,7 +75,9 @@ public class GremlinSqlBasicCall extends GremlinSqlNode {
         if (gremlinSqlOperator instanceof GremlinSqlAsOperator) {
             return ((GremlinSqlAsOperator) gremlinSqlOperator).getRename();
         } else if (gremlinSqlOperator instanceof GremlinSqlAggFunction) {
-            if (gremlinSqlNodes.size() == 1 && gremlinSqlNodes.get(0) instanceof GremlinSqlIdentifier) {
+            if (gremlinSqlNodes.size() == 1 &&
+                    (gremlinSqlNodes.get(0) instanceof GremlinSqlIdentifier ||
+                            gremlinSqlNodes.get(0) instanceof GremlinSqlLiteral)) {
                 // returns the formatted column name for aggregations
                 return ((GremlinSqlAggFunction) gremlinSqlOperator).getNewName();
             }

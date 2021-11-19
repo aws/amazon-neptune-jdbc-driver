@@ -62,11 +62,15 @@ public class SqlTraversalEngine {
         }
     }
 
-    public static GraphTraversal<?, ?> getEmptyTraversal(final StepDirection direction, final SqlMetadata sqlMetadata) {
-        final GraphTraversal<?, ?> graphTraversal = __.unfold();
+    public static void applyAggregateUnfold(final SqlMetadata sqlMetadata, final GraphTraversal<?, ?> graphTraversal) {
         if (sqlMetadata.getIsProjectFoldRequired()) {
             graphTraversal.unfold();
         }
+    }
+
+    public static GraphTraversal<?, ?> getEmptyTraversal(final StepDirection direction, final SqlMetadata sqlMetadata) {
+        final GraphTraversal<?, ?> graphTraversal = __.unfold();
+        applyAggregateUnfold(sqlMetadata, graphTraversal);
         switch (direction) {
             case Out:
                 return graphTraversal.outV();
