@@ -67,7 +67,7 @@ public class OpenCypherBaselineExecutor extends PerformanceTestExecutor {
         if (openCypherConnectionProperties.getAuthScheme().equals(AuthScheme.IAMSigV4)) {
             authToken = OpenCypherIAMRequestGenerator
                     .getSignedHeader(openCypherConnectionProperties.getEndpoint(),
-                            openCypherConnectionProperties.getRegion());
+                            openCypherConnectionProperties.getServiceRegion());
         }
         final Driver driver = GraphDatabase.driver(openCypherConnectionProperties.getEndpoint(), authToken,
                 configBuilder.build());

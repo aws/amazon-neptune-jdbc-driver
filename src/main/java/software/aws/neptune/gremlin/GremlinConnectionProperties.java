@@ -1101,7 +1101,7 @@ public class GremlinConnectionProperties extends ConnectionProperties {
             // If IAMSigV4 is specified, we need the region provided to us.
             validateServiceRegionEnvVariable();
 
-            setServiceRegionEnvironmentVariable(getRegion());
+            setServiceRegionEnvironmentVariable(getServiceRegion());
 
             if (!getEnableSsl()) {
                 throw invalidConnectionPropertyValueError(ENABLE_SSL_KEY,
@@ -1129,7 +1129,7 @@ public class GremlinConnectionProperties extends ConnectionProperties {
             return;
         }
         if (System.getenv("SERVICE_REGION") != null) {
-            LOGGER.info(String.format("Overriding the current SERVICE_REGION environment variable with %s.", region));
+            LOGGER.info(String.format("Overriding the current SERVICE_REGION environment variable with '%s'.", region));
         }
         try {
             if (SystemUtils.IS_OS_WINDOWS) {
@@ -1138,7 +1138,8 @@ public class GremlinConnectionProperties extends ConnectionProperties {
                 setMacEnvironmentVariable(region);
             }
         } catch (final Exception e) {
-            throw new SQLException(String.format("Error: unable to set SERVICE_REGION environment variable: %s", e));
+            throw new SQLException(String.format("Error: unable to set SERVICE_REGION environment variable to '%s'. " +
+                    "See %s", region, e));
         }
     }
 

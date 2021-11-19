@@ -76,7 +76,7 @@ public class SqlGremlinQueryExecutor extends GremlinQueryExecutor {
 
     private static GraphTraversalSource getGraphTraversalSource(
             final GremlinConnectionProperties gremlinConnectionProperties)
-            throws Exception {
+            throws SQLException {
         synchronized (TRAVERSAL_LOCK) {
             if (graphTraversalSource == null) {
                 graphTraversalSource =
@@ -88,7 +88,7 @@ public class SqlGremlinQueryExecutor extends GremlinQueryExecutor {
     }
 
     private static SqlConverter getGremlinSqlConverter(final GremlinConnectionProperties gremlinConnectionProperties)
-            throws Exception {
+            throws SQLException {
         MetadataCache.updateCacheIfNotUpdated(gremlinConnectionProperties);
         if (gremlinSqlConverter == null) {
             gremlinSqlConverter = new SqlConverter(MetadataCache.getGremlinSchema(),

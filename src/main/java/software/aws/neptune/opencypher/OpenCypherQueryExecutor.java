@@ -75,7 +75,7 @@ public class OpenCypherQueryExecutor extends QueryExecutor {
             LOGGER.info("Creating driver with IAMSigV4 authentication.");
             authToken = OpenCypherIAMRequestGenerator
                     .getSignedHeader(openCypherConnectionProperties.getEndpoint(),
-                            openCypherConnectionProperties.getRegion());
+                            openCypherConnectionProperties.getServiceRegion());
         }
         return GraphDatabase.driver(openCypherConnectionProperties.getEndpoint(), authToken, config);
     }

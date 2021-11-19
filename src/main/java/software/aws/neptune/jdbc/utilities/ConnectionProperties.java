@@ -401,7 +401,7 @@ public abstract class ConnectionProperties extends Properties {
      *
      * @return The region.
      */
-    public String getRegion() {
+    public String getServiceRegion() {
         return getProperty(SERVICE_REGION_KEY);
     }
 
@@ -411,7 +411,7 @@ public abstract class ConnectionProperties extends Properties {
      * @param region The region.
      * @throws SQLException if value is invalid.
      */
-    public void setRegion(@NonNull final String region) throws SQLException {
+    public void setServiceRegion(@NonNull final String region) throws SQLException {
         put(SERVICE_REGION_KEY, region);
     }
 
@@ -514,16 +514,17 @@ public abstract class ConnectionProperties extends Properties {
      * @throws SQLException if no region was provided, an error will be thrown
      */
     protected void validateServiceRegionEnvVariable() throws SQLException {
-        if ("".equals(getRegion())) {
-            if (System.getenv("SERVICE_REGION") == null) {
+        final String envServiceRegion = System.getenv("SERVICE_REGION");
+        if ("".equals(getServiceRegion())) {
+            if (envServiceRegion == null || isWhitespace(envServiceRegion)) {
                 throw missingConnectionPropertyError(
                         "A Service Region must be provided to use IAMSigV4 Authentication, set through " +
                                 "the SERVICE_REGION environment variable or the serviceRegion connection property. " +
                                 "For example, append 'serviceRegion=us-east-1' to your connection string");
             }
-            final String serviceRegion = System.getenv("SERVICE_REGION");
-            LOGGER.info(String.format("serviceRegion property was not set, using system SERVICE_REGION='%s' environment variable", serviceRegion));
-            setRegion(serviceRegion);
+            LOGGER.info(String.format("serviceRegion property was not set by user, using system SERVICE_REGION='%s' " +
+                    "environment variable", envServiceRegion));
+            setServiceRegion(envServiceRegion);
         }
     }
 

@@ -62,7 +62,7 @@ class OpenCypherConnectionPropertiesTest extends ConnectionPropertiesTestBase {
                 .assertEquals(OpenCypherConnectionProperties.DEFAULT_AUTH_SCHEME, connectionProperties.getAuthScheme());
         Assertions.assertEquals(OpenCypherConnectionProperties.DEFAULT_USE_ENCRYPTION,
                 connectionProperties.getUseEncryption());
-        Assertions.assertEquals(OpenCypherConnectionProperties.DEFAULT_SERVICE_REGION, connectionProperties.getRegion());
+        Assertions.assertEquals(OpenCypherConnectionProperties.DEFAULT_SERVICE_REGION, connectionProperties.getServiceRegion());
     }
 
     @Test
@@ -103,11 +103,11 @@ class OpenCypherConnectionPropertiesTest extends ConnectionPropertiesTestBase {
         assertDoesNotThrowOnNewConnectionProperties(initProperties);
 
         final String testValue = "test region";
-        connectionProperties.setRegion(testValue);
-        Assertions.assertEquals(testValue, connectionProperties.getRegion());
+        connectionProperties.setServiceRegion(testValue);
+        Assertions.assertEquals(testValue, connectionProperties.getServiceRegion());
 
-        connectionProperties.setRegion("us-east-1");
-        Assertions.assertEquals("us-east-1", connectionProperties.getRegion());
+        connectionProperties.setServiceRegion("us-east-1");
+        Assertions.assertEquals("us-east-1", connectionProperties.getServiceRegion());
     }
 
     @Test

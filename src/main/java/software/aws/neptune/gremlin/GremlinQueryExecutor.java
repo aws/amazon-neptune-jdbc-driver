@@ -154,7 +154,6 @@ public class GremlinQueryExecutor extends QueryExecutor {
         if (properties.containsKey(GremlinConnectionProperties.MIN_SIMULT_USAGE_PER_CONNECTION_KEY)) {
             builder.minSimultaneousUsagePerConnection(properties.getMinSimultaneousUsagePerConnection());
         }
-
         if (properties.getAuthScheme() == AuthScheme.IAMSigV4) {
             builder.channelizer(SigV4WebSocketChannelizer.class);
         } else if (properties.containsKey(GremlinConnectionProperties.CHANNELIZER_KEY)) {
