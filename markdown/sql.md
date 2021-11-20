@@ -38,10 +38,22 @@ Each Builder method listed in the documentation is accepted as a property. For e
 Amazon Neptune Database is a VPC only service, and you need to establish an SSH tunnel before connecting to the database outside of the VPC (e.g. from the local machine).
 To establish an SSH tunnel, you need an EC2 instance deployed in the same VPC as Neptune Database. More information on how to configure SSH Tunnel is described in [Connecting to Neptune](/markdown/setup/configuration.md#using-an-ssh-tunnel-to-connect-to-amazon-neptune).
 
-1. Establish Port Forwarding through SSH Tunnel
-2. Add Neptune Database hostname in `hosts` (see [Adding SSH Tunnel Lookup](/markdown/setup/configuration.md#adding-a-ssh-tunnel-lookup) for more details how to add configuration in Windows and macOS).
-3. Enter Connection String. As an example in [DBVisualizer](https://www.dbvis.com/) enter *Database URL* `jdbc:neptune:sqlgremlin://<hostname>;port=<port>;authScheme=NONE`. Default *port* is `8182`, however you can configure port forwarding to any available port on your machine. If you are using default port and using IAM authentication you do not need to supply additional parameters.
-4. Now you can connect to your Amazon Neptune Database instance.
+1. Establish Port Forwarding through SSH Tunnel using the instruction above.
+
+Example: `ssh -i ~/.ssh/<ec2-certificate.pem> -N -L <local port>:<hostname>:<database port> ec2-user@<ec2-host>`
+ - *ec2-certificate.pem* - certificate obatined in the instruction above
+ - *ec2-host* - hostname of the EC2 machine which is used for the SSH Tunnel
+ - *local port* - any available network port on **the local machine**, default port 8182 is recommended.
+ - *hostname* - hostname of the Neptune Database
+ - *database port* - remote database port, the default port is 8182
+ 
+ e.g.  `ssh -i ~/.ssh/ec2-certificate.pem -N -L 8182:example.us-east-1.neptune.amazonaws.com:8182 ec2-user@12.345.67.189`
+
+3. Add Neptune Database hostname in `hosts` file (see [Adding SSH Tunnel Lookup](/markdown/setup/configuration.md#adding-a-ssh-tunnel-lookup) for more details how to add configuration in Windows and macOS).
+e.g. `127.0.0.1 example.us-east-1.neptune.amazonaws.com`
+
+5. Enter Connection String. As an example in [DBVisualizer](https://www.dbvis.com/) enter *Database URL* `jdbc:neptune:sqlgremlin://<hostname>;port=<local port>;authScheme=NONE`. *local port* sleected in step 1. If you are using default 8182 port and using IAM authentication you do not need to supply additional parameters.
+6. Now, you can connect to your Amazon Neptune Database instance.
 
 #### No authentication using string only
 
