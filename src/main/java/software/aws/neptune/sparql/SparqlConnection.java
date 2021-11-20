@@ -56,6 +56,6 @@ public class SparqlConnection extends Connection implements java.sql.Connection 
 
     @Override
     public String getDriverName() {
-        return "neptune:sparql";
+        return "Neptune:SPARQL";
     }
 }

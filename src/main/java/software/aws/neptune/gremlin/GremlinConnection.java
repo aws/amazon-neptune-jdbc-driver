@@ -59,6 +59,6 @@ public class GremlinConnection extends Connection implements java.sql.Connection
 
     @Override
     public String getDriverName() {
-        return "neptune:gremlin";
+        return "Neptune:Gremlin";
     }
 }

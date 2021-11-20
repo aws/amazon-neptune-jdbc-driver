@@ -53,6 +53,6 @@ public class SqlGremlinConnection extends GremlinConnection {
 
     @Override
     public String getDriverName() {
-        return "neptune:sqlgremlin";
+        return "Neptune:SQL-Gremlin";
     }
 }

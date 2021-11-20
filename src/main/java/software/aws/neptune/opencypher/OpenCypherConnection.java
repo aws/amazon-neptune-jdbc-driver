@@ -59,6 +59,6 @@ public class OpenCypherConnection extends Connection implements java.sql.Connect
 
     @Override
     public String getDriverName() {
-        return "neptune:opencypher";
+        return "Neptune:openCypher";
     }
 }
