@@ -14,7 +14,7 @@ echo TARGET_FOLDER=${TARGET_FOLDER}
 mkdir -p $TARGET_FOLDER
 
 echo "Building Docker Image"
-docker build -t taco-builder $CURRENT_FOLDER
+docker build -t taco-builder $CURRENT_FOLDER --progress=plain --no-cache
 
 echo "Assembling Tableau Connector"
 docker run -d -it --name=taco-builder --mount type=bind,source=$TARGET_FOLDER,target=/output taco-builder
