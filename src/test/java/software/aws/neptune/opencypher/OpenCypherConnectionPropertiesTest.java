@@ -22,7 +22,6 @@ import org.junit.jupiter.api.Test;
 import software.aws.neptune.ConnectionPropertiesTestBase;
 import software.aws.neptune.jdbc.utilities.AuthScheme;
 import software.aws.neptune.jdbc.utilities.ConnectionProperties;
-
 import java.sql.SQLClientInfoException;
 import java.sql.SQLException;
 import java.util.Properties;
@@ -35,6 +34,9 @@ class OpenCypherConnectionPropertiesTest extends ConnectionPropertiesTestBase {
 
     protected void assertDoesNotThrowOnNewConnectionProperties(final Properties properties) {
         Assertions.assertDoesNotThrow(() -> {
+            // Since we have added the check for service region and IAMSigV4 is set by default, we need to add a mock
+            // region property here in case the system running these tests does not have SERVICE_REGION variable set.
+            properties.put("serviceRegion", "mock-region");
             connectionProperties = new OpenCypherConnectionProperties(properties);
         });
     }
@@ -90,15 +92,7 @@ class OpenCypherConnectionPropertiesTest extends ConnectionPropertiesTestBase {
 
     @Test
     void testRegion() throws SQLException {
-        Properties initProperties = new Properties();
-        initProperties.put(ConnectionProperties.AUTH_SCHEME_KEY, AuthScheme.None); // reset to None
-
-        testStringPropertyViaConstructor(
-                initProperties,
-                OpenCypherConnectionProperties.SERVICE_REGION_KEY,
-                DEFAULT_EMPTY_STRING);
-
-        initProperties = new Properties();
+        final Properties initProperties = new Properties();
         initProperties.put(ConnectionProperties.AUTH_SCHEME_KEY, AuthScheme.None); // reset to None
         assertDoesNotThrowOnNewConnectionProperties(initProperties);
 
@@ -186,6 +180,7 @@ class OpenCypherConnectionPropertiesTest extends ConnectionPropertiesTestBase {
         // new set of properties
         properties = new Properties();
         properties.put(ConnectionProperties.AUTH_SCHEME_KEY, AuthScheme.None); // reset to None
+        properties.put("serviceRegion", "mock-region");
         assertDoesNotThrowOnNewConnectionProperties(properties);
         final ImmutableList<Boolean> boolValues = ImmutableList.of(true, false);
         for (final Boolean boolValue : boolValues) {
@@ -199,6 +194,7 @@ class OpenCypherConnectionPropertiesTest extends ConnectionPropertiesTestBase {
         final Properties properties = new Properties();
         properties.put("authScheme", "IAMSigV4");
         properties.put("useEncryption", true);
+        properties.put("serviceRegion", "mock-region");
         connectionProperties = new OpenCypherConnectionProperties(properties);
         Assertions.assertTrue(connectionProperties.getUseEncryption());
         Assertions.assertEquals(connectionProperties.getAuthScheme(), AuthScheme.IAMSigV4);
