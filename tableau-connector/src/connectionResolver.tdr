@@ -9,8 +9,8 @@
         <attribute-list>
           <attr>server</attr>
           <attr>port</attr>
-          <attr>vendor1</attr>
           <attr>authentication</attr>
+          <attr>v-service-region</attr>
           <attr>sslmode</attr>
         </attribute-list>
       </required-attributes>

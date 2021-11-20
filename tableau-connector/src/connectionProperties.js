@@ -2,6 +2,7 @@
     logging.log("entering propertiesBuilder");
     const AUTH_SCHEME_KEY = "authScheme";
     const USE_ENCRYPTION_KEY = "enableSsl";
+    const SERVICE_REGION_KEY = "serviceRegion";
 
     var strJSON = JSON.stringify(attr);
     logging.log("connectionProperties attr=" + strJSON);
@@ -17,6 +18,8 @@
     else if (authAttrValue == "auth-user") {
         params[AUTH_SCHEME_KEY] = "IAMSigV4";
     }
+
+    params[SERVICE_REGION_KEY] = attr["v-service-region"]
 
     if (attr[connectionHelper.attributeSSLMode] == "require"){
         params[USE_ENCRYPTION_KEY] = "true";

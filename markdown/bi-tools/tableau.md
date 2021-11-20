@@ -23,16 +23,18 @@ Download the latest version of [Tableau Desktop](https://www.tableau.com/product
 
 1. Launch the Tableau Desktop application.
 
-2. Navigate to **Connect > To A Server > More**. **Amazon Neptune by AWS** should be listed under **Installed Connectors**. Select it.
+2. Navigate to **Connect > To A Server > More**. **Amazon Neptune by Amazon Web Services** should be listed under **Installed Connectors**. Select it. 
+
+   ![Driver selection](../images/driver_selection.png)
 
 #### Connecting to Amazon Neptune Using Tableau - External SSH Tunnel
 
 1. If connecting from outside the Neptune cluster's VPC, ensure you have followed the [configuration instructions](../configuration.md).
 
-2. Enter the parameters. **Neptune Endpoint**, **Port**, **Use IAM Authentication**, and **Require SSL**
-   are required, while the others are optional. Descriptions for each parameter can be found in
-   the [SQL JDBC documentation](../sql.md).
+2. Enter the connection parameters as shown below. **Neptune Endpoint**, **Port**, **Use IAM Authentication** (and **Service Region** if IAM is selected), and **Require SSL** are required. Descriptions for each parameter can be found in the [SQL JDBC documentation](../sql.md).
 
-![Tableau login dialog general tab](../images/tableau-sql-gremlin.png)
+   Example for connecting to an instance without IAM authentication: ![No auth connection](../images/non_auth.png)
+
+   Example for connecting to an instance IAM authentication. Note that service region is a required field: ![IAM auth connection](../images/iam_auth.png)
 
 3. Click the **Sign In** button.
