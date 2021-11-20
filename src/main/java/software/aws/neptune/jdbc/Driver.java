@@ -38,13 +38,13 @@ import java.util.regex.Pattern;
 public abstract class Driver implements java.sql.Driver {
     public static final int DRIVER_MAJOR_VERSION;
     public static final int DRIVER_MINOR_VERSION;
-    public static final String DRIVER_VERSION;
+    public static final String DRIVER_FULL_VERSION;
     public static final String APP_NAME_SUFFIX;
     public static final String APPLICATION_NAME;
     private static final String PROPERTIES_PATH = "/project.properties";
     private static final String MAJOR_VERSION_KEY = "driver.major.version";
     private static final String MINOR_VERSION_KEY = "driver.minor.version";
-    private static final String VERSION_KEY = "driver.full.version";
+    private static final String FULL_VERSION_KEY = "driver.full.version";
     private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(Driver.class);
 
     static {
@@ -54,20 +54,20 @@ public abstract class Driver implements java.sql.Driver {
 
         int majorVersion = 0;
         int minorVersion = 0;
-        String version = "";
+        String fullVersion = "";
         try (InputStream input = Driver.class.getResourceAsStream(PROPERTIES_PATH)) {
             final Properties properties = new Properties();
             properties.load(input);
             majorVersion = Integer.parseInt(properties.getProperty(MAJOR_VERSION_KEY));
             minorVersion = Integer.parseInt(properties.getProperty(MINOR_VERSION_KEY));
-            version = properties.getProperty(VERSION_KEY);
+            fullVersion = properties.getProperty(FULL_VERSION_KEY);
         } catch (IOException e) {
             LOGGER.error("Error loading driver version: ", e);
         }
 
         DRIVER_MAJOR_VERSION = majorVersion;
         DRIVER_MINOR_VERSION = minorVersion;
-        DRIVER_VERSION = version;
+        DRIVER_FULL_VERSION = fullVersion;
     }
 
     /**
