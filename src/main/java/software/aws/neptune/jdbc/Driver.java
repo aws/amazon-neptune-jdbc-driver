@@ -47,8 +47,6 @@ public abstract class Driver implements java.sql.Driver {
     private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(Driver.class);
 
     static {
-        APPLICATION_NAME = getApplicationName();
-
         int majorVersion = 0;
         int minorVersion = 0;
         String fullVersion = "";
@@ -65,6 +63,7 @@ public abstract class Driver implements java.sql.Driver {
         DRIVER_MAJOR_VERSION = majorVersion;
         DRIVER_MINOR_VERSION = minorVersion;
         DRIVER_FULL_VERSION = fullVersion;
+        APPLICATION_NAME = getApplicationName();
     }
 
     /**
