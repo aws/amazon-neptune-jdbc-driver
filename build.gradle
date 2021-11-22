@@ -262,7 +262,7 @@ dependencies {
     testImplementation  group: 'junit', name: 'junit', version: '4.13.2'
     testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-api', version: jupiterVersion
     testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-engine', version: jupiterVersion
-    testImplementation group: 'org.mockito', name: 'mockito-core', version: '4.0.0'
+    testImplementation group: 'org.mockito', name: 'mockito-core', version: '4.1.0'
     testImplementation group: 'com.massisframework', name: 'j-text-utils', version: '0.3.4'
     testImplementation group: 'org.neo4j.test', name: 'neo4j-harness', version: neo4jDBVersion
     testImplementation group: 'org.neo4j.community', name: 'it-test-support', version: neo4jDBVersion
