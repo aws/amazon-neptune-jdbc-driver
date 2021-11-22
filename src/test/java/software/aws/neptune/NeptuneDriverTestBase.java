@@ -19,11 +19,15 @@ package software.aws.neptune;
 import com.google.common.collect.ImmutableList;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import software.aws.neptune.jdbc.Driver;
 import software.aws.neptune.jdbc.helpers.HelperFunctions;
 import software.aws.neptune.jdbc.utilities.AuthScheme;
 import software.aws.neptune.jdbc.utilities.SqlError;
 import software.aws.neptune.opencypher.OpenCypherConnection;
 import software.aws.neptune.opencypher.mock.MockOpenCypherDatabase;
+
+import java.io.IOException;
+import java.io.InputStream;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.List;
@@ -32,6 +36,10 @@ import java.util.Properties;
 public abstract class NeptuneDriverTestBase {
     private static MockOpenCypherDatabase database;
     private static String validEndpoint;
+    private static final String PROPERTIES_PATH = "/project.properties";
+    private static final String MAJOR_VERSION_KEY = "driver.major.version";
+    private static final String MINOR_VERSION_KEY = "driver.minor.version";
+    private static final String FULL_VERSION_KEY = "driver.full.version";
     private final List<String> invalidUrls = ImmutableList.of(
             "jbdc:neptune:opencyher://;", "jdbc:netune:opencyher://;", "jdbc:neptune:openyher://;",
             "jdbc:neptune:opencyher//;", "jdbc:neptune:opencypher:/");
@@ -135,5 +143,21 @@ public abstract class NeptuneDriverTestBase {
     @Test
     void testDriverProperties() {
         HelperFunctions.expectFunctionThrows(SqlError.FEATURE_NOT_SUPPORTED, () -> driver.getParentLogger());
+    }
+
+    @Test
+    void testDriverVersion() {
+        try (InputStream input = Driver.class.getResourceAsStream(PROPERTIES_PATH)) {
+            final Properties properties = new Properties();
+            properties.load(input);
+            Assertions.assertEquals(driver.getMajorVersion(), Integer.parseInt(properties.getProperty(MAJOR_VERSION_KEY)));
+            Assertions.assertEquals(driver.getMinorVersion(), Integer.parseInt(properties.getProperty(MINOR_VERSION_KEY)));
+
+            // Ensure the version did not default
+            Assertions.assertNotEquals(driver.getMajorVersion(), 0);
+            Assertions.assertTrue(properties.containsKey(FULL_VERSION_KEY));
+        } catch (IOException e) {
+            Assertions.fail(e.getMessage());
+        }
     }
 }

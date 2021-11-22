@@ -78,7 +78,7 @@ public abstract class DatabaseMetaData implements java.sql.DatabaseMetaData {
 
     @Override
     public String getDriverVersion() {
-        return Driver.DRIVER_VERSION;
+        return Driver.DRIVER_FULL_VERSION;
     }
 
     @Override

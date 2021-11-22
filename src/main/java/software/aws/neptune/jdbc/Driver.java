@@ -20,6 +20,8 @@ import org.slf4j.LoggerFactory;
 import software.aws.neptune.jdbc.utilities.SqlError;
 import software.aws.neptune.jdbc.utilities.SqlState;
 import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.lang.management.ManagementFactory;
 import java.nio.charset.StandardCharsets;
@@ -36,18 +38,32 @@ import java.util.regex.Pattern;
 public abstract class Driver implements java.sql.Driver {
     public static final int DRIVER_MAJOR_VERSION;
     public static final int DRIVER_MINOR_VERSION;
-    public static final String DRIVER_VERSION;
-    public static final String APP_NAME_SUFFIX;
+    public static final String DRIVER_FULL_VERSION;
     public static final String APPLICATION_NAME;
+    private static final String PROPERTIES_PATH = "/project.properties";
+    private static final String MAJOR_VERSION_KEY = "driver.major.version";
+    private static final String MINOR_VERSION_KEY = "driver.minor.version";
+    private static final String FULL_VERSION_KEY = "driver.full.version";
     private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(Driver.class);
 
     static {
+        int majorVersion = 0;
+        int minorVersion = 0;
+        String fullVersion = "";
+        try (InputStream input = Driver.class.getResourceAsStream(PROPERTIES_PATH)) {
+            final Properties properties = new Properties();
+            properties.load(input);
+            majorVersion = Integer.parseInt(properties.getProperty(MAJOR_VERSION_KEY));
+            minorVersion = Integer.parseInt(properties.getProperty(MINOR_VERSION_KEY));
+            fullVersion = properties.getProperty(FULL_VERSION_KEY);
+        } catch (IOException e) {
+            LOGGER.error("Error loading driver version: ", e);
+        }
+
+        DRIVER_MAJOR_VERSION = majorVersion;
+        DRIVER_MINOR_VERSION = minorVersion;
+        DRIVER_FULL_VERSION = fullVersion;
         APPLICATION_NAME = getApplicationName();
-        // TODO: Get driver version, suffix
-        DRIVER_MAJOR_VERSION = 1;
-        DRIVER_MINOR_VERSION = 1;
-        APP_NAME_SUFFIX = "TODO";
-        DRIVER_VERSION = "0.0.0";
     }
 
     /**
@@ -101,15 +117,14 @@ public abstract class Driver implements java.sql.Driver {
         return new java.sql.DriverPropertyInfo[0];
     }
 
-    // TODO: Fix functions below.
     @Override
     public int getMajorVersion() {
-        return 0;
+        return DRIVER_MAJOR_VERSION;
     }
 
     @Override
     public int getMinorVersion() {
-        return 0;
+        return DRIVER_MINOR_VERSION;
     }
 
     @Override

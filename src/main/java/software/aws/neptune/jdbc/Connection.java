@@ -71,13 +71,6 @@ public abstract class Connection implements java.sql.Connection {
      */
     public abstract QueryExecutor getQueryExecutor() throws SQLException;
 
-    /**
-     * Function to get Driver name as a String.
-     *
-     * @return Driver name as String.
-     */
-    public abstract String getDriverName();
-
     protected ConnectionProperties getConnectionProperties() {
         return this.connectionProperties;
     }

@@ -56,9 +56,4 @@ public class GremlinConnection extends Connection implements java.sql.Connection
     public QueryExecutor getQueryExecutor() throws SQLException {
         return new GremlinQueryExecutor(getGremlinConnectionProperties());
     }
-
-    @Override
-    public String getDriverName() {
-        return "neptune:gremlin";
-    }
 }

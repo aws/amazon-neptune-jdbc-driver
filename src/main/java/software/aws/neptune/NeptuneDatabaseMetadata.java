@@ -16,12 +16,11 @@
 
 package software.aws.neptune;
 
-import software.aws.neptune.jdbc.Connection;
 import software.aws.neptune.jdbc.DatabaseMetaData;
 import java.sql.SQLException;
 
 public class NeptuneDatabaseMetadata extends DatabaseMetaData implements java.sql.DatabaseMetaData {
-    private final Connection connection;
+    private static final String DRIVER_NAME = "Amazon Neptune JDBC";
 
     /**
      * NeptuneDatabaseMetadata constructor, initializes super class.
@@ -30,7 +29,6 @@ public class NeptuneDatabaseMetadata extends DatabaseMetaData implements java.sq
      */
     public NeptuneDatabaseMetadata(final java.sql.Connection connection) {
         super(connection);
-        this.connection = (Connection) connection;
     }
 
     @Override
@@ -55,6 +53,6 @@ public class NeptuneDatabaseMetadata extends DatabaseMetaData implements java.sq
 
     @Override
     public String getDriverName() {
-        return connection.getDriverName();
+        return DRIVER_NAME;
     }
 }

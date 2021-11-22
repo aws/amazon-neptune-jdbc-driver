@@ -192,7 +192,7 @@ public class DatabaseMetaDataTest {
                 .expectFunctionDoesntThrow(() -> databaseMetaData.getDriverMajorVersion(), Driver.DRIVER_MAJOR_VERSION);
         HelperFunctions
                 .expectFunctionDoesntThrow(() -> databaseMetaData.getDriverMinorVersion(), Driver.DRIVER_MINOR_VERSION);
-        HelperFunctions.expectFunctionDoesntThrow(() -> databaseMetaData.getDriverVersion(), Driver.DRIVER_VERSION);
+        HelperFunctions.expectFunctionDoesntThrow(() -> databaseMetaData.getDriverVersion(), Driver.DRIVER_FULL_VERSION);
     }
 
     @Test

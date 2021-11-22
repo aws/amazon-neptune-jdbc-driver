@@ -44,11 +44,6 @@ public class MockConnection extends Connection implements java.sql.Connection {
     }
 
     @Override
-    public String getDriverName() {
-        return "neptune:mock";
-    }
-
-    @Override
     protected void doClose() {
     }
 

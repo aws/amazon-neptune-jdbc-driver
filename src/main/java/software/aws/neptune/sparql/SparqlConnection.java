@@ -53,9 +53,4 @@ public class SparqlConnection extends Connection implements java.sql.Connection 
     public QueryExecutor getQueryExecutor() throws SQLException {
         return new SparqlQueryExecutor(getSparqlConnectionProperties());
     }
-
-    @Override
-    public String getDriverName() {
-        return "neptune:sparql";
-    }
 }
