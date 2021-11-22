@@ -39,7 +39,6 @@ public abstract class Driver implements java.sql.Driver {
     public static final int DRIVER_MAJOR_VERSION;
     public static final int DRIVER_MINOR_VERSION;
     public static final String DRIVER_FULL_VERSION;
-    public static final String APP_NAME_SUFFIX;
     public static final String APPLICATION_NAME;
     private static final String PROPERTIES_PATH = "/project.properties";
     private static final String MAJOR_VERSION_KEY = "driver.major.version";
@@ -49,8 +48,6 @@ public abstract class Driver implements java.sql.Driver {
 
     static {
         APPLICATION_NAME = getApplicationName();
-        // TODO: suffix
-        APP_NAME_SUFFIX = "TODO";
 
         int majorVersion = 0;
         int minorVersion = 0;

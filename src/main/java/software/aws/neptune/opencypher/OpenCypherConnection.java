@@ -56,9 +56,4 @@ public class OpenCypherConnection extends Connection implements java.sql.Connect
     public QueryExecutor getQueryExecutor() throws SQLException {
         return new OpenCypherQueryExecutor(getOpenCypherConnectionProperties());
     }
-
-    @Override
-    public String getDriverName() {
-        return "Neptune:openCypher";
-    }
 }

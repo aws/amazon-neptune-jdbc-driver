@@ -50,9 +50,4 @@ public class SqlGremlinConnection extends GremlinConnection {
     public QueryExecutor getQueryExecutor() throws SQLException {
         return new SqlGremlinQueryExecutor(getGremlinConnectionProperties());
     }
-
-    @Override
-    public String getDriverName() {
-        return "Neptune:SQL-Gremlin";
-    }
 }
