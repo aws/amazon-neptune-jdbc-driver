@@ -45,6 +45,9 @@ class GremlinConnectionPropertiesTest extends ConnectionPropertiesTestBase {
 
     protected void assertDoesNotThrowOnNewConnectionProperties(final Properties properties) {
         Assertions.assertDoesNotThrow(() -> {
+            // Since we have added the check for service region and IAMSigV4 is set by default, we need to add a mock
+            // region property here in case the system running these tests does not have SERVICE_REGION variable set.
+            properties.put("serviceRegion", "mock-region");
             connectionProperties = new GremlinConnectionProperties(properties);
         });
     }
@@ -501,6 +504,7 @@ class GremlinConnectionPropertiesTest extends ConnectionPropertiesTestBase {
         final Properties properties = new Properties();
         properties.put("authScheme", "IAMSigV4");
         properties.put("enableSsl", true);
+        properties.put("serviceRegion", "mock-region");
         connectionProperties = new GremlinConnectionProperties(properties);
         Assertions.assertTrue(connectionProperties.getEnableSsl());
         Assertions.assertEquals(connectionProperties.getAuthScheme(), AuthScheme.IAMSigV4);

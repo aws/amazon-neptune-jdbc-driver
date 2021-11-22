@@ -3,8 +3,8 @@
 <connector-plugin class='neptune-jdbc' superclass='jdbc' plugin-version='1.13.0.0' name='Amazon Neptune' version='18.1' min-version-tableau='2020.3'>
     <vendor-information>
         <company name="Amazon Web Services"/>
-        <support-link url="https://docs.aws.amazon.com/neptune/latest/userguide/intro.html"/>
-        <driver-download-link url="https://docs.aws.amazon.com/neptune/latest/userguide/intro.html"/>
+        <support-link url="https://github.com/aws/amazon-neptune-jdbc-driver/issues"/>
+        <driver-download-link url="https://github.com/aws/amazon-neptune-jdbc-driver/releases"/>
     </vendor-information>
     <connection-customization class="neptune-jdbc" enabled="true" version="10.0">
         <vendor name="Amazon"/>
