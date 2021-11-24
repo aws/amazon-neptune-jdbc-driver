@@ -59,7 +59,7 @@ public abstract class ConnectionProperties extends Properties {
     public static final int DEFAULT_CONNECTION_TIMEOUT_MILLIS = 5000;
     public static final int DEFAULT_CONNECTION_RETRY_COUNT = 3;
     public static final String DEFAULT_SSH_STRICT_CHECKING = "true";
-    public static final Level DEFAULT_LOG_LEVEL = Level.ALL;
+    public static final Level DEFAULT_LOG_LEVEL = Level.OFF;
     public static final String DEFAULT_SERVICE_REGION = "";
 
     public static final Map<String, Object> DEFAULT_PROPERTIES_MAP = new HashMap<>();
