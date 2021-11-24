@@ -19,9 +19,9 @@ package software.aws.neptune.gremlin.sql;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.twilmes.sql.gremlin.adapter.results.SqlGremlinQueryResult;
+import software.aws.neptune.common.EmptyResultSet;
 import software.aws.neptune.common.gremlindatamodel.resultset.ResultSetGetColumns;
 import software.aws.neptune.gremlin.GremlinTypeMapping;
-import software.aws.neptune.gremlin.resultset.GremlinResultSet;
 import software.aws.neptune.gremlin.resultset.GremlinResultSetMetadata;
 import software.aws.neptune.jdbc.ResultSet;
 import software.aws.neptune.jdbc.utilities.SqlError;
@@ -33,7 +33,7 @@ import java.util.Map;
 import java.util.Optional;
 
 public class SqlGremlinResultSet extends ResultSet implements java.sql.ResultSet {
-    private static final Logger LOGGER = LoggerFactory.getLogger(GremlinResultSet.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(SqlGremlinResultSet.class);
 
     private final List<String> columns;
     private final List<String> columnTypes;
@@ -79,15 +79,9 @@ public class SqlGremlinResultSet extends ResultSet implements java.sql.ResultSet
     @Override
     public boolean next() throws SQLException {
         final Object res;
-        try {
-            res = sqlQueryResult.getResult();
-        } catch (final SQLException e) {
-            if (e.getMessage().equals(SqlGremlinQueryResult.EMPTY_MESSAGE)) {
-                LOGGER.trace(SqlGremlinQueryResult.EMPTY_MESSAGE);
-                return false;
-            } else {
-                throw e;
-            }
+        res = sqlQueryResult.getResult();
+        if (res instanceof SqlGremlinQueryResult.EmptyResult) {
+            return false;
         }
         this.row = (List<Object>) res;
         return true;

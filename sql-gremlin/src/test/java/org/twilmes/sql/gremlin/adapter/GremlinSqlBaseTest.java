@@ -151,20 +151,12 @@ public abstract class GremlinSqlBaseTest {
 
         SqlGremlinTestResult(final SqlGremlinQueryResult sqlGremlinQueryResult) throws SQLException {
             columns = sqlGremlinQueryResult.getColumns();
-            Object res;
             do {
-                try {
-                    res = sqlGremlinQueryResult.getResult();
-                } catch (final SQLException e) {
-                    if (e.getMessage().equals(SqlGremlinQueryResult.EMPTY_MESSAGE)) {
-                        break;
-                    } else {
-                        throw e;
-                    }
+                final List<?> res = sqlGremlinQueryResult.getResult();
+                if (res instanceof SqlGremlinQueryResult.EmptyResult) {
+                    break;
                 }
-                if (res instanceof List<?>) {
-                    this.rows.add((List<?>) res);
-                }
+                this.rows.add(res);
             } while (true);
         }
     }
