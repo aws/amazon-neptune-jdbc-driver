@@ -241,36 +241,82 @@ public class GremlinSqlAdvancedSelectTest extends GremlinSqlBaseTest {
                 rows(r("Tom"), r("Susan"), r("Phil"), r("Pavel"), r("Patty"), r("Juanita")));
 
         // NULLS FIRST predicate is not currently supported.
-        runQueryTestThrows("SELECT name FROM \"gremlin\".\"person\" ORDER BY name NULLS FIRST", "Error, no appropriate order for GremlinSqlPostFixOperator of NULLS_FIRST.");
+        runQueryTestThrows("SELECT name FROM \"gremlin\".\"person\" ORDER BY name NULLS FIRST",
+                "Error, no appropriate order for GremlinSqlPostFixOperator of NULLS_FIRST.");
     }
 
     @Test
     void testAggregateLiteralHavingNoGroupBy() throws SQLException {
         // Tableau was sending queries like this for the preview in 2021.3
-        runQueryTestResults("SELECT SUM(1) AS \"cnt:airport_03C2E834E28942D3AA2423AC01F4B33D:ok\" FROM gremlin.person AS person HAVING COUNT(1) > 0",
+        runQueryTestResults(
+                "SELECT SUM(1) AS \"cnt:airport_03C2E834E28942D3AA2423AC01F4B33D:ok\" FROM gremlin.person AS person HAVING COUNT(1) > 0",
                 columns("cnt:airport_03C2E834E28942D3AA2423AC01F4B33D:ok"),
                 rows(r(new BigDecimal(6))));
-        runQueryTestResults("SELECT MIN(1) AS \"cnt:airport_03C2E834E28942D3AA2423AC01F4B33D:ok\" FROM gremlin.person AS person HAVING COUNT(1) > 0",
+        runQueryTestResults(
+                "SELECT MIN(1) AS \"cnt:airport_03C2E834E28942D3AA2423AC01F4B33D:ok\" FROM gremlin.person AS person HAVING COUNT(1) > 0",
                 columns("cnt:airport_03C2E834E28942D3AA2423AC01F4B33D:ok"),
                 rows(r(new BigDecimal(1))));
-        runQueryTestResults("SELECT MAX(1) AS \"cnt:airport_03C2E834E28942D3AA2423AC01F4B33D:ok\" FROM gremlin.person AS person HAVING COUNT(1) > 0",
+        runQueryTestResults(
+                "SELECT MAX(1) AS \"cnt:airport_03C2E834E28942D3AA2423AC01F4B33D:ok\" FROM gremlin.person AS person HAVING COUNT(1) > 0",
                 columns("cnt:airport_03C2E834E28942D3AA2423AC01F4B33D:ok"),
                 rows(r(new BigDecimal(1))));
-        runQueryTestResults("SELECT AVG(1) AS \"cnt:airport_03C2E834E28942D3AA2423AC01F4B33D:ok\" FROM gremlin.person AS person HAVING COUNT(1) > 0",
+        runQueryTestResults(
+                "SELECT AVG(1) AS \"cnt:airport_03C2E834E28942D3AA2423AC01F4B33D:ok\" FROM gremlin.person AS person HAVING COUNT(1) > 0",
                 columns("cnt:airport_03C2E834E28942D3AA2423AC01F4B33D:ok"),
                 rows(r(new BigDecimal(1))));
 
-        runQueryTestResults("SELECT SUM(2) AS \"cnt:airport_03C2E834E28942D3AA2423AC01F4B33D:ok\" FROM gremlin.person AS person HAVING COUNT(1) > 0",
+        runQueryTestResults(
+                "SELECT SUM(2) AS \"cnt:airport_03C2E834E28942D3AA2423AC01F4B33D:ok\" FROM gremlin.person AS person HAVING COUNT(1) > 0",
                 columns("cnt:airport_03C2E834E28942D3AA2423AC01F4B33D:ok"),
                 rows(r(new BigDecimal(12))));
-        runQueryTestResults("SELECT MIN(2) AS \"cnt:airport_03C2E834E28942D3AA2423AC01F4B33D:ok\" FROM gremlin.person AS person HAVING COUNT(1) > 0",
+        runQueryTestResults(
+                "SELECT MIN(2) AS \"cnt:airport_03C2E834E28942D3AA2423AC01F4B33D:ok\" FROM gremlin.person AS person HAVING COUNT(1) > 0",
                 columns("cnt:airport_03C2E834E28942D3AA2423AC01F4B33D:ok"),
                 rows(r(new BigDecimal(2))));
-        runQueryTestResults("SELECT MAX(2) AS \"cnt:airport_03C2E834E28942D3AA2423AC01F4B33D:ok\" FROM gremlin.person AS person HAVING COUNT(1) > 0",
+        runQueryTestResults(
+                "SELECT MAX(2) AS \"cnt:airport_03C2E834E28942D3AA2423AC01F4B33D:ok\" FROM gremlin.person AS person HAVING COUNT(1) > 0",
                 columns("cnt:airport_03C2E834E28942D3AA2423AC01F4B33D:ok"),
                 rows(r(new BigDecimal(2))));
-        runQueryTestResults("SELECT AVG(2) AS \"cnt:airport_03C2E834E28942D3AA2423AC01F4B33D:ok\" FROM gremlin.person AS person HAVING COUNT(1) > 0",
+        runQueryTestResults(
+                "SELECT AVG(2) AS \"cnt:airport_03C2E834E28942D3AA2423AC01F4B33D:ok\" FROM gremlin.person AS person HAVING COUNT(1) > 0",
                 columns("cnt:airport_03C2E834E28942D3AA2423AC01F4B33D:ok"),
                 rows(r(new BigDecimal(2))));
+    }
+
+    @Test
+    void testLimit() throws SQLException {
+        // LIMIT 1 tests.
+        // Single result query.
+        runQueryTestResults("SELECT name, age FROM person WHERE name = 'Tom' ORDER BY age LIMIT 1",
+                columns("name", "age"),
+                rows(r("Tom", 35)));
+        // Multi result query.
+        runQueryTestResults("SELECT name, age FROM person ORDER BY age LIMIT 1",
+                columns("name", "age"),
+                rows(r("Patty", 29)));
+
+        // LIMIT > 1 tests.
+        runQueryTestResults("SELECT name, age FROM person WHERE name <> 'Tom' ORDER BY age LIMIT 2",
+                columns("name", "age"),
+                rows(r("Patty", 29), r("Pavel", 30)));
+        runQueryTestResults("SELECT name, age FROM person WHERE name <> 'Tom' ORDER BY age LIMIT 3",
+                columns("name", "age"),
+                rows(r("Patty", 29), r("Pavel", 30), r("Phil", 31)));
+        runQueryTestResults("SELECT name, age FROM person WHERE name <> 'Tom' ORDER BY age LIMIT 4",
+                columns("name", "age"),
+                rows(r("Patty", 29), r("Pavel", 30), r("Phil", 31), r("Susan", 45)));
+        runQueryTestResults("SELECT name, age FROM person WHERE name <> 'Tom' ORDER BY age LIMIT 5",
+                columns("name", "age"),
+                rows(r("Patty", 29), r("Pavel", 30), r("Phil", 31), r("Susan", 45), r("Juanita", 50)));
+        runQueryTestResults("SELECT name, age FROM person WHERE name <> 'Tom' ORDER BY age LIMIT 6",
+                columns("name", "age"),
+                rows(r("Patty", 29), r("Pavel", 30), r("Phil", 31), r("Susan", 45), r("Juanita", 50)));
+        runQueryTestResults("SELECT name, age FROM person WHERE name <> 'Tom' ORDER BY age LIMIT 1000",
+                columns("name", "age"),
+                rows(r("Patty", 29), r("Pavel", 30), r("Phil", 31), r("Susan", 45), r("Juanita", 50)));
+        runQueryTestResults(
+                String.format("SELECT name, age FROM person WHERE name <> 'Tom' ORDER BY age LIMIT %d", Long.MAX_VALUE),
+                columns("name", "age"),
+                rows(r("Patty", 29), r("Pavel", 30), r("Phil", 31), r("Susan", 45), r("Juanita", 50)));
     }
 }
