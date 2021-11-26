@@ -203,10 +203,10 @@ public class GremlinSqlSelectMulti extends GremlinSqlSelect {
             graphTraversal = g.E().hasLabel(edgeLabel)
                     .where(__.inV().hasLabel(inVLabel))
                     .where(__.outV().hasLabel(outVLabel));
-            applyHaving(graphTraversal);
             applyGroupBy(graphTraversal, edgeLabel, inVRename, outVRename);
             applySelectValues(graphTraversal);
             applyOrderBy(graphTraversal, edgeLabel, inVRename, outVRename);
+            applyHaving(graphTraversal);
             SqlTraversalEngine.applyAggregateFold(sqlMetadata, graphTraversal);
             graphTraversal.project(inVRename, outVRename);
             applyColumnRetrieval(graphTraversal, inVRename, gremlinSqlNodesIn, StepDirection.In);

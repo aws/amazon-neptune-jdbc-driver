@@ -126,11 +126,11 @@ public class GremlinSqlSelectSingle extends GremlinSqlSelect {
             generateDataRetrieval(gremlinSqlIdentifiers, __.__());
 
             // Generate actual traversal.
-            applyHaving(graphTraversal);
             applyWhere(graphTraversal);
             applyGroupBy(graphTraversal, label);
             applySelectValues(graphTraversal);
             applyOrderBy(graphTraversal, label);
+            applyHaving(graphTraversal);
             generateDataRetrieval(gremlinSqlIdentifiers, graphTraversal);
 
             if (sqlMetadata.getRenamedColumns() == null) {
