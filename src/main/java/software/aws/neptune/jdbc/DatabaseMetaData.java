@@ -776,7 +776,7 @@ public abstract class DatabaseMetaData implements java.sql.DatabaseMetaData {
 
     @Override
     public String getURL() throws SQLException {
-        return "";
+        return this.connection.getClientInfo("contactPoint");
     }
 
     @Override
@@ -863,7 +863,8 @@ public abstract class DatabaseMetaData implements java.sql.DatabaseMetaData {
 
     @Override
     public ResultSet getTypeInfo() throws SQLException {
-        return new EmptyResultSet(getConnection().createStatement());
+        LOGGER.info("Getting database type info.");
+        return connection.getQueryExecutor().executeGetTypeInfo(getConnection().createStatement());
     }
 
     @Override

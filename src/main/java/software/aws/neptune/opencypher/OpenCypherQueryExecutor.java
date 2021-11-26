@@ -27,16 +27,13 @@ import org.neo4j.driver.Session;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import software.aws.neptune.common.gremlindatamodel.MetadataCache;
+import software.aws.neptune.gremlin.resultset.GremlinResultSetGetTypeInfo;
 import software.aws.neptune.jdbc.utilities.AuthScheme;
 import software.aws.neptune.jdbc.utilities.QueryExecutor;
 import software.aws.neptune.jdbc.utilities.SqlError;
 import software.aws.neptune.jdbc.utilities.SqlState;
-import software.aws.neptune.opencypher.resultset.OpenCypherResultSet;
-import software.aws.neptune.opencypher.resultset.OpenCypherResultSetGetCatalogs;
-import software.aws.neptune.opencypher.resultset.OpenCypherResultSetGetColumns;
-import software.aws.neptune.opencypher.resultset.OpenCypherResultSetGetSchemas;
-import software.aws.neptune.opencypher.resultset.OpenCypherResultSetGetTableTypes;
-import software.aws.neptune.opencypher.resultset.OpenCypherResultSetGetTables;
+import software.aws.neptune.opencypher.resultset.*;
+
 import java.lang.reflect.Constructor;
 import java.sql.SQLException;
 import java.util.List;
@@ -234,6 +231,19 @@ public class OpenCypherQueryExecutor extends QueryExecutor {
         return new OpenCypherResultSetGetColumns(statement, MetadataCache.getFilteredCacheNodeColumnInfos(nodes),
                 MetadataCache.getFilteredResultSetInfoWithoutRowsForColumns(nodes));
     }
+
+    /**
+     * Function to get type info.
+     *
+     * @param statement java.sql.Statement Object required for result set.
+     * @return java.sql.ResultSet Object containing type info.
+     */
+    @Override
+    public java.sql.ResultSet executeGetTypeInfo(final java.sql.Statement statement)
+            throws SQLException {
+        return new OpenCypherResultSetGetTypeInfo(statement);
+    }
+
 
     @Override
     @SuppressWarnings("unchecked")

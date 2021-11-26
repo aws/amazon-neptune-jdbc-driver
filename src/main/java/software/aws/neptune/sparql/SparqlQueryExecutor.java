@@ -44,18 +44,13 @@ import org.slf4j.LoggerFactory;
 import org.twilmes.sql.gremlin.adapter.converter.schema.calcite.GremlinSchema;
 import software.aws.neptune.common.ResultSetInfoWithoutRows;
 import software.aws.neptune.common.gremlindatamodel.resultset.ResultSetGetTables;
+import software.aws.neptune.gremlin.resultset.GremlinResultSetGetTypeInfo;
 import software.aws.neptune.jdbc.utilities.AuthScheme;
 import software.aws.neptune.jdbc.utilities.QueryExecutor;
 import software.aws.neptune.jdbc.utilities.SqlError;
 import software.aws.neptune.jdbc.utilities.SqlState;
-import software.aws.neptune.sparql.resultset.SparqlAskResultSet;
-import software.aws.neptune.sparql.resultset.SparqlResultSetGetCatelogs;
-import software.aws.neptune.sparql.resultset.SparqlResultSetGetColumns;
-import software.aws.neptune.sparql.resultset.SparqlResultSetGetSchemas;
-import software.aws.neptune.sparql.resultset.SparqlResultSetGetTableTypes;
-import software.aws.neptune.sparql.resultset.SparqlResultSetGetTables;
-import software.aws.neptune.sparql.resultset.SparqlSelectResultSet;
-import software.aws.neptune.sparql.resultset.SparqlTriplesResultSet;
+import software.aws.neptune.sparql.resultset.*;
+
 import java.lang.reflect.Constructor;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -335,6 +330,19 @@ public class SparqlQueryExecutor extends QueryExecutor {
         return new SparqlResultSetGetColumns(statement, new GremlinSchema(new ArrayList<>(), new ArrayList<>()),
                 new ResultSetInfoWithoutRows(0, ResultSetGetTables.getColumns()));
     }
+
+    /**
+     * Function to get type info.
+     *
+     * @param statement java.sql.Statement Object required for result set.
+     * @return java.sql.ResultSet Object containing type info.
+     */
+    @Override
+    public java.sql.ResultSet executeGetTypeInfo(final java.sql.Statement statement)
+            throws SQLException {
+        return new SparqlResultSetGetTypeInfo(statement);
+    }
+
 
     @Override
     @SuppressWarnings("unchecked")

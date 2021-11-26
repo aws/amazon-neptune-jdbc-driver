@@ -24,12 +24,7 @@ import org.apache.tinkerpop.gremlin.driver.SigV4WebSocketChannelizer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import software.aws.neptune.common.gremlindatamodel.MetadataCache;
-import software.aws.neptune.gremlin.resultset.GremlinResultSet;
-import software.aws.neptune.gremlin.resultset.GremlinResultSetGetCatalogs;
-import software.aws.neptune.gremlin.resultset.GremlinResultSetGetColumns;
-import software.aws.neptune.gremlin.resultset.GremlinResultSetGetSchemas;
-import software.aws.neptune.gremlin.resultset.GremlinResultSetGetTableTypes;
-import software.aws.neptune.gremlin.resultset.GremlinResultSetGetTables;
+import software.aws.neptune.gremlin.resultset.*;
 import software.aws.neptune.jdbc.utilities.AuthScheme;
 import software.aws.neptune.jdbc.utilities.QueryExecutor;
 import software.aws.neptune.jdbc.utilities.SqlError;
@@ -370,6 +365,19 @@ public class GremlinQueryExecutor extends QueryExecutor {
         return new GremlinResultSetGetColumns(statement,
                 MetadataCache.getFilteredCacheNodeColumnInfos(nodes),
                 MetadataCache.getFilteredResultSetInfoWithoutRowsForColumns(nodes));
+    }
+
+    /**
+     * Function to get type info.
+     *
+     * @param statement java.sql.Statement Object required for result set.
+     * @return java.sql.ResultSet Object containing type info.
+     */
+    @Override
+    public java.sql.ResultSet executeGetTypeInfo(final java.sql.Statement statement)
+            throws SQLException {
+        LOGGER.info("GremlinQueryExecutor executeGetTypeInfo");
+        return new GremlinResultSetGetTypeInfo(statement);
     }
 
     @SneakyThrows

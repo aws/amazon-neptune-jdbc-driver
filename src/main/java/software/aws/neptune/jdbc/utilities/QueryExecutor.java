@@ -131,6 +131,16 @@ public abstract class QueryExecutor {
             throws SQLException;
 
     /**
+     * Function to get type info.
+     *
+     * @param statement java.sql.Statement Object required for result set.
+     * @return java.sql.ResultSet Object containing table types.
+     * @throws SQLException if query execution fails, or it was cancelled.
+     */
+    public abstract java.sql.ResultSet executeGetTypeInfo(final java.sql.Statement statement)
+            throws SQLException;
+
+    /**
      * This function is supposed to run the queries and construct the target ResultSet using reflection.
      *
      * @param constructor Target ResultSet type.

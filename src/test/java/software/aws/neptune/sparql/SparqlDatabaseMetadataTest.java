@@ -112,4 +112,15 @@ public class SparqlDatabaseMetadataTest {
         Assertions.assertEquals("TABLE", resultSet.getString(1));
         Assertions.assertFalse(resultSet.next());
     }
+
+    @Test
+    void testGetTypeInfo() throws SQLException {
+        final java.sql.ResultSet resultSet = databaseMetaData.getTypeInfo();
+        Assertions.assertTrue(resultSet.next());
+        final ResultSetMetaData metaData = resultSet.getMetaData();
+        final int columnCount = metaData.getColumnCount();
+        Assertions.assertEquals(18, columnCount);
+        Assertions.assertEquals("XSDboolean", resultSet.getString(1));
+        Assertions.assertTrue(resultSet.next());
+    }
 }
