@@ -49,7 +49,15 @@ import software.aws.neptune.jdbc.utilities.AuthScheme;
 import software.aws.neptune.jdbc.utilities.QueryExecutor;
 import software.aws.neptune.jdbc.utilities.SqlError;
 import software.aws.neptune.jdbc.utilities.SqlState;
-import software.aws.neptune.sparql.resultset.*;
+import software.aws.neptune.sparql.resultset.SparqlAskResultSet;
+import software.aws.neptune.sparql.resultset.SparqlResultSetGetCatelogs;
+import software.aws.neptune.sparql.resultset.SparqlResultSetGetColumns;
+import software.aws.neptune.sparql.resultset.SparqlResultSetGetSchemas;
+import software.aws.neptune.sparql.resultset.SparqlResultSetGetTableTypes;
+import software.aws.neptune.sparql.resultset.SparqlResultSetGetTables;
+import software.aws.neptune.sparql.resultset.SparqlResultSetGetTypeInfo;
+import software.aws.neptune.sparql.resultset.SparqlSelectResultSet;
+import software.aws.neptune.sparql.resultset.SparqlTriplesResultSet;
 
 import java.lang.reflect.Constructor;
 import java.sql.ResultSet;
