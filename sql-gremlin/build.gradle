@@ -79,8 +79,7 @@ jacocoTestReport {
     }
     afterEvaluate {
         classDirectories.setFrom(files(classDirectories.files.collect {
-            fileTree(dir: it,
-                    exclude: ['**/resources/**', '**janino**', '**commons**'])
+            fileTree(dir: it, exclude: [])
         }))
     }
 }
@@ -117,7 +116,7 @@ repositories {
 
 ext {
     tinkerpopVersion = '3.4.8'
-    calciteVersion = '1.26.0'
+    calciteVersion = '1.28.0'
     lombokVersion = '1.18.16'
     jupiterVersion = '5.4.0'
 }
