@@ -74,4 +74,19 @@ public class GremlinSqlAggregateTest extends GremlinSqlBaseTest {
         // Validate that the output column is COUNT(*) and the value is correct.
         runQueryTestResults("SELECT COUNT(*) FROM person", columns("COUNT(*)"), rows(r(6L)));
     }
+
+    @Test
+    public void testCountWhereGroupBy() throws SQLException {
+        runQueryTestResults("SELECT wentToSpace, COUNT(age) FROM person WHERE age > 30 GROUP BY wentToSpace",
+                columns("wentToSpace", "COUNT(age)"), rows(r(false, 2L), r(true, 2L)));
+        runQueryTestResults("SELECT wentToSpace, COUNT(age) FROM person WHERE age > 50 GROUP BY wentToSpace",
+                columns("wentToSpace", "COUNT(age)"), rows());
+        runQueryTestResults("SELECT wentToSpace, COUNT(age) FROM person WHERE age > 0 GROUP BY wentToSpace",
+                columns("wentToSpace", "COUNT(age)"), rows(r(false, 3L), r(true, 3L)));
+        runQueryTestResults("SELECT wentToSpace, COUNT(age) FROM person WHERE age < 100 AND wentToSpace = FALSE GROUP BY wentToSpace",
+                columns("wentToSpace", "COUNT(age)"), rows(r(false, 3L)));
+        runQueryTestResults("SELECT wentToSpace, COUNT(age) FROM person WHERE age > 31 AND wentToSpace = FALSE GROUP BY wentToSpace",
+                columns("wentToSpace", "COUNT(age)"), rows(r(false, 1L)));
+
+    }
 }
