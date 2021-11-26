@@ -21,7 +21,6 @@ package org.twilmes.sql.gremlin.adapter.results;
 
 import lombok.Getter;
 import org.twilmes.sql.gremlin.adapter.converter.SqlMetadata;
-import org.twilmes.sql.gremlin.adapter.converter.schema.gremlin.GremlinProperty;
 import org.twilmes.sql.gremlin.adapter.converter.schema.gremlin.GremlinTableBase;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -30,16 +29,13 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
 @Getter
-public class SqlGremlinQueryResult {
+public class SqlGremlinQueryResult implements AutoCloseable {
     public static final String EMPTY_MESSAGE = "No more results.";
     public static final String NULL_VALUE = "$%#NULL#%$";
     private final List<String> columns;
     private final List<String> columnTypes = new ArrayList<>();
-    private final Object assertEmptyLock = new Object();
     private final BlockingQueue<List<Object>> blockingQueueRows = new LinkedBlockingQueue<>();
-    private boolean isEmpty = false;
     private SQLException paginationException = null;
-    private Thread currThread = null;
 
     public SqlGremlinQueryResult(final List<String> columns, final List<GremlinTableBase> gremlinTableBases,
                                  final SqlMetadata sqlMetadata) throws SQLException {
@@ -49,7 +45,8 @@ public class SqlGremlinQueryResult {
         }
     }
 
-    private String getType(final String column, final SqlMetadata sqlMetadata, final List<GremlinTableBase> gremlinTableBases) throws SQLException {
+    private String getType(final String column, final SqlMetadata sqlMetadata,
+                           final List<GremlinTableBase> gremlinTableBases) throws SQLException {
         if (sqlMetadata.aggregateTypeExists(column)) {
             return sqlMetadata.getOutputType(column, "string");
         }
@@ -67,60 +64,38 @@ public class SqlGremlinQueryResult {
     }
 
     public void setPaginationException(final SQLException e) {
-        synchronized (assertEmptyLock) {
-            paginationException = e;
-            if (currThread != null && blockingQueueRows.size() == 0) {
-                currThread.interrupt();
-            }
-        }
+        paginationException = e;
+        close();
     }
 
-    public boolean getIsEmpty() throws SQLException {
-        if (paginationException == null) {
-            return isEmpty;
-        }
-        throw paginationException;
-    }
-
-    public void assertIsEmpty() {
-        synchronized (assertEmptyLock) {
-            if (currThread != null && blockingQueueRows.size() == 0) {
-                currThread.interrupt();
-            }
-            isEmpty = true;
-        }
+    @Override
+    public void close() {
+        blockingQueueRows.add(new EmptyResult());
     }
 
     public void addResults(final List<List<Object>> rows) {
-        for (final List<Object> row : rows) {
-            for (int i = 0; i < row.size(); i++) {
-                if (row.get(i) instanceof String && row.get(i).toString().equals(NULL_VALUE)) {
-                    row.set(i, null);
-                }
-            }
-        }
+        // This is a workaround for Gremlin null support not being in any version of Gremlin that is
+        // widely supported by database vendors.
+        rows.forEach(row -> row.replaceAll(col -> (col instanceof String && col.equals(NULL_VALUE) ? null : col)));
         blockingQueueRows.addAll(rows);
     }
 
-    private boolean getShouldExit() throws SQLException {
-        synchronized (assertEmptyLock) {
-            return (getIsEmpty() && blockingQueueRows.size() == 0);
-        }
-    }
-
-    public Object getResult() throws SQLException {
-        synchronized (assertEmptyLock) {
-            this.currThread = Thread.currentThread();
-        }
-        while (!getShouldExit()) {
+    public List<Object> getResult() throws SQLException {
+        while (true) {
             try {
-                return this.blockingQueueRows.take();
-            } catch (final InterruptedException ignored) {
+                final List<Object> result = blockingQueueRows.take();
+
+                // If a pagination exception occurs, an EmptyResult Object will be inserted into the BlockingQueue.
+                // The pagination exception needs to be checked before returning.
                 if (paginationException != null) {
                     throw paginationException;
                 }
+                return result;
+            } catch (final InterruptedException ignored) {
             }
         }
-        throw new SQLException(EMPTY_MESSAGE);
+    }
+
+    public static class EmptyResult extends ArrayList<Object> {
     }
 }

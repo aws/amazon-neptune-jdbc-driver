@@ -147,6 +147,7 @@ task writeProperties(type: WriteProperties) {
 jacoco {
     toolVersion = "0.8.5"
 }
+
 jacocoTestReport {
     reports {
         html.enabled true
@@ -259,7 +260,7 @@ dependencies {
 
     // Testing
     testImplementation group: 'com.googlecode.json-simple', name: 'json-simple', version: '1.1.1'
-    testImplementation  group: 'junit', name: 'junit', version: '4.13.2'
+    testImplementation group: 'junit', name: 'junit', version: '4.13.2'
     testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-api', version: jupiterVersion
     testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-engine', version: jupiterVersion
     testImplementation group: 'org.mockito', name: 'mockito-core', version: '4.1.0'
