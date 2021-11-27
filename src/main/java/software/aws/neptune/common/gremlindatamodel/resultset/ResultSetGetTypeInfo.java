@@ -34,6 +34,7 @@ import java.util.Map;
 
 import static java.sql.DatabaseMetaData.typeNullable;
 import static java.sql.DatabaseMetaData.typeSearchable;
+import static software.aws.neptune.jdbc.ResultSetMetaData.getTypePrecision;
 
 public abstract class ResultSetGetTypeInfo extends ResultSet {
     /**
@@ -56,6 +57,25 @@ public abstract class ResultSetGetTypeInfo extends ResultSet {
      * SQL_DATETIME_SUB int => unused
      * NUM_PREC_RADIX int => usually 2 or 10
      */
+    
+    private static final String TYPE_NAME = "TYPE_NAME";
+    private static final String DATA_TYPE = "DATA_TYPE";
+    private static final String PRECISION = "PRECISION";
+    private static final String LITERAL_PREFIX = "LITERAL_PREFIX";
+    private static final String LITERAL_SUFFIX = "LITERAL_SUFFIX";
+    private static final String CREATE_PARAMS = "CREATE_PARAMS";
+    private static final String NULLABLE = "NULLABLE";
+    private static final String CASE_SENSITIVE = "CASE_SENSITIVE";
+    private static final String SEARCHABLE = "SEARCHABLE";
+    private static final String UNSIGNED_ATTRIBUTE = "UNSIGNED_ATTRIBUTE";
+    private static final String FIXED_PREC_SCALE = "FIXED_PREC_SCALE";
+    private static final String AUTO_INCREMENT = "AUTO_INCREMENT";
+    private static final String LOCAL_TYPE_NAME = "LOCAL_TYPE_NAME";
+    private static final String MINIMUM_SCALE = "MINIMUM_SCALE";
+    private static final String MAXIMUM_SCALE = "MAXIMUM_SCALE";
+    private static final String SQL_DATA_TYPE = "SQL_DATA_TYPE";
+    private static final String SQL_DATETIME_SUB = "SQL_DATETIME_SUB";
+    private static final String NUM_PREC_RADIX = "NUM_PREC_RADIX";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ResultSetGetTypeInfo.class);
     private static final List<String> ORDERED_COLUMNS = new ArrayList<>();
@@ -64,43 +84,43 @@ public abstract class ResultSetGetTypeInfo extends ResultSet {
     private final List<Map<String, Object>> typeInformation;
 
     static {
-        ORDERED_COLUMNS.add("TYPE_NAME");
-        ORDERED_COLUMNS.add("DATA_TYPE");
-        ORDERED_COLUMNS.add("PRECISION");
-        ORDERED_COLUMNS.add("LITERAL_PREFIX");
-        ORDERED_COLUMNS.add("LITERAL_SUFFIX");
-        ORDERED_COLUMNS.add("CREATE_PARAMS");
-        ORDERED_COLUMNS.add("NULLABLE");
-        ORDERED_COLUMNS.add("CASE_SENSITIVE");
-        ORDERED_COLUMNS.add("SEARCHABLE");
-        ORDERED_COLUMNS.add("UNSIGNED_ATTRIBUTE");
-        ORDERED_COLUMNS.add("FIXED_PREC_SCALE");
-        ORDERED_COLUMNS.add("AUTO_INCREMENT");
-        ORDERED_COLUMNS.add("LOCAL_TYPE_NAME");
-        ORDERED_COLUMNS.add("MINIMUM_SCALE");
-        ORDERED_COLUMNS.add("MAXIMUM_SCALE");
-        ORDERED_COLUMNS.add("SQL_DATA_TYPE");
-        ORDERED_COLUMNS.add("SQL_DATETIME_SUB");
-        ORDERED_COLUMNS.add("NUM_PREC_RADIX");
+        ORDERED_COLUMNS.add(TYPE_NAME);
+        ORDERED_COLUMNS.add(DATA_TYPE);
+        ORDERED_COLUMNS.add(PRECISION);
+        ORDERED_COLUMNS.add(LITERAL_PREFIX);
+        ORDERED_COLUMNS.add(LITERAL_SUFFIX);
+        ORDERED_COLUMNS.add(CREATE_PARAMS);
+        ORDERED_COLUMNS.add(NULLABLE);
+        ORDERED_COLUMNS.add(CASE_SENSITIVE);
+        ORDERED_COLUMNS.add(SEARCHABLE);
+        ORDERED_COLUMNS.add(UNSIGNED_ATTRIBUTE);
+        ORDERED_COLUMNS.add(FIXED_PREC_SCALE);
+        ORDERED_COLUMNS.add(AUTO_INCREMENT);
+        ORDERED_COLUMNS.add(LOCAL_TYPE_NAME);
+        ORDERED_COLUMNS.add(MINIMUM_SCALE);
+        ORDERED_COLUMNS.add(MAXIMUM_SCALE);
+        ORDERED_COLUMNS.add(SQL_DATA_TYPE);
+        ORDERED_COLUMNS.add(SQL_DATETIME_SUB);
+        ORDERED_COLUMNS.add(NUM_PREC_RADIX);
 
-        COLUMN_TYPE_MAP.put("TYPE_NAME", String.class);
-        COLUMN_TYPE_MAP.put("DATA_TYPE", Types.class);
-        COLUMN_TYPE_MAP.put("PRECISION", Integer.class);
-        COLUMN_TYPE_MAP.put("LITERAL_PREFIX", String.class);
-        COLUMN_TYPE_MAP.put("LITERAL_SUFFIX", String.class);
-        COLUMN_TYPE_MAP.put("CREATE_PARAMS", String.class);
-        COLUMN_TYPE_MAP.put("NULLABLE", Short.class);
-        COLUMN_TYPE_MAP.put("CASE_SENSITIVE", Boolean.class);
-        COLUMN_TYPE_MAP.put("SEARCHABLE", Short.class);
-        COLUMN_TYPE_MAP.put("UNSIGNED_ATTRIBUTE", Boolean.class);
-        COLUMN_TYPE_MAP.put("FIXED_PREC_SCALE", Boolean.class);
-        COLUMN_TYPE_MAP.put("AUTO_INCREMENT", Boolean.class);
-        COLUMN_TYPE_MAP.put("LOCAL_TYPE_NAME", String.class);
-        COLUMN_TYPE_MAP.put("MINIMUM_SCALE", Short.class);
-        COLUMN_TYPE_MAP.put("MAXIMUM_SCALE", Short.class);
-        COLUMN_TYPE_MAP.put("SQL_DATA_TYPE", Integer.class);
-        COLUMN_TYPE_MAP.put("SQL_DATETIME_SUB", Integer.class);
-        COLUMN_TYPE_MAP.put("NUM_PREC_RADIX", Integer.class);
+        COLUMN_TYPE_MAP.put(TYPE_NAME, String.class);
+        COLUMN_TYPE_MAP.put(DATA_TYPE, Types.class);
+        COLUMN_TYPE_MAP.put(PRECISION, Integer.class);
+        COLUMN_TYPE_MAP.put(LITERAL_PREFIX, String.class);
+        COLUMN_TYPE_MAP.put(LITERAL_SUFFIX, String.class);
+        COLUMN_TYPE_MAP.put(CREATE_PARAMS, String.class);
+        COLUMN_TYPE_MAP.put(NULLABLE, Short.class);
+        COLUMN_TYPE_MAP.put(CASE_SENSITIVE, Boolean.class);
+        COLUMN_TYPE_MAP.put(SEARCHABLE, Short.class);
+        COLUMN_TYPE_MAP.put(UNSIGNED_ATTRIBUTE, Boolean.class);
+        COLUMN_TYPE_MAP.put(FIXED_PREC_SCALE, Boolean.class);
+        COLUMN_TYPE_MAP.put(AUTO_INCREMENT, Boolean.class);
+        COLUMN_TYPE_MAP.put(LOCAL_TYPE_NAME, String.class);
+        COLUMN_TYPE_MAP.put(MINIMUM_SCALE, Short.class);
+        COLUMN_TYPE_MAP.put(MAXIMUM_SCALE, Short.class);
+        COLUMN_TYPE_MAP.put(SQL_DATA_TYPE, Integer.class);
+        COLUMN_TYPE_MAP.put(SQL_DATETIME_SUB, Integer.class);
+        COLUMN_TYPE_MAP.put(NUM_PREC_RADIX, Integer.class);
     }
 
     protected static void populateConstants(List<Map<String, Object>> typeInfo) {
@@ -108,18 +128,48 @@ public abstract class ResultSetGetTypeInfo extends ResultSet {
             info.put("CREATE_PARAMS", null);
             info.put("NULLABLE", typeNullable);
             info.put("SEARCHABLE", typeSearchable);
-            info.putIfAbsent("UNSIGNED_ATTRIBUTE", false);
             info.put("FIXED_PREC_SCALE", false);
             info.put("AUTO_INCREMENT", false);
             info.put("LOCAL_TYPE_NAME", null);
             info.put("SQL_DATA_TYPE", null);
             info.put("SQL_DATETIME_SUB", null);
-
-            // Null for non-numerics
-            info.putIfAbsent("MINIMUM_SCALE", null);
-            info.putIfAbsent("MAXIMUM_SCALE", null);
-            info.putIfAbsent("NUM_PREC_RADIX", null);
         }
+    }
+
+    protected static void putInfo(List<Map<String, Object>> typeInfo, String typeName, int dataType, boolean isText,
+                                  boolean isNumeric, boolean isUnsignedAttribute) {
+        final Map<String, Object> info = new HashMap<>();
+        info.put(TYPE_NAME, typeName);
+        info.put("DATA_TYPE", dataType);
+        info.put("PRECISION", getTypePrecision(dataType));
+        info.putIfAbsent("UNSIGNED_ATTRIBUTE", isUnsignedAttribute);
+
+        if (isText) {
+            info.put("LITERAL_PREFIX", "'");
+            info.put("LITERAL_SUFFIX", "'");
+            info.put("CASE_SENSITIVE", true);
+        } else {
+            info.put("LITERAL_PREFIX", null);
+            info.put("LITERAL_SUFFIX", null);
+            info.put("CASE_SENSITIVE", false);
+        }
+
+        if (isNumeric) {
+            info.put("MINIMUM_SCALE", 0);
+            info.put("MAXIMUM_SCALE", 0);
+            info.put("NUM_PREC_RADIX", 10);
+        } else {
+            info.put("MINIMUM_SCALE", null);
+            info.put("MAXIMUM_SCALE", null);
+            info.put("NUM_PREC_RADIX", null); 
+        }
+        
+        typeInfo.add(info);
+    }
+
+    protected static void putInfo(List<Map<String, Object>> typeInfo, String typeName, int dataType, boolean isText,
+                                  boolean isNumeric) {
+        putInfo(typeInfo, typeName, dataType, isText, isNumeric, false);
     }
 
     public ResultSetGetTypeInfo(Statement statement, List<Map<String, Object>> rows) {
@@ -148,7 +198,9 @@ public abstract class ResultSetGetTypeInfo extends ResultSet {
             this.wasNull = (data == null);
             return data;
         } else {
-            throw SqlError.createSQLFeatureNotSupportedException(LOGGER);
+            final String errorMessage = "Could not get TypeInfo column: " + key;
+            LOGGER.error(errorMessage);
+            throw new SQLException(errorMessage);
         }
     }
 

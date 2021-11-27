@@ -104,6 +104,10 @@ public abstract class ResultSetMetaData implements java.sql.ResultSetMetaData {
     public int getPrecision(final int column) throws SQLException {
         verifyColumnIndex(column);
         final int type = getColumnType(column);
+        return getTypePrecision(type);
+    }
+
+    static public int getTypePrecision(int type) {
         switch (type) {
             case Types.BOOLEAN:
                 return 5;

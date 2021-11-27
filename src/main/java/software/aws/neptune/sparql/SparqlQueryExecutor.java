@@ -351,7 +351,6 @@ public class SparqlQueryExecutor extends QueryExecutor {
         return new SparqlResultSetGetTypeInfo(statement);
     }
 
-
     @Override
     @SuppressWarnings("unchecked")
     protected <T> T runQuery(final String query) throws SQLException {

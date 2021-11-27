@@ -776,6 +776,7 @@ public abstract class DatabaseMetaData implements java.sql.DatabaseMetaData {
 
     @Override
     public String getURL() throws SQLException {
+        // "contactPoint" is the property key for the hostname for the connection
         return this.connection.getClientInfo("contactPoint");
     }
 

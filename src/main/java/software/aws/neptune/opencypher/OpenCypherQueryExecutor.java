@@ -249,7 +249,6 @@ public class OpenCypherQueryExecutor extends QueryExecutor {
         return new OpenCypherResultSetGetTypeInfo(statement);
     }
 
-
     @Override
     @SuppressWarnings("unchecked")
     protected <T> T runQuery(final String query) throws SQLException {
