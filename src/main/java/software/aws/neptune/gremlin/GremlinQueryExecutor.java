@@ -30,6 +30,7 @@ import software.aws.neptune.gremlin.resultset.GremlinResultSetGetColumns;
 import software.aws.neptune.gremlin.resultset.GremlinResultSetGetSchemas;
 import software.aws.neptune.gremlin.resultset.GremlinResultSetGetTableTypes;
 import software.aws.neptune.gremlin.resultset.GremlinResultSetGetTables;
+import software.aws.neptune.gremlin.resultset.GremlinResultSetGetTypeInfo;
 import software.aws.neptune.jdbc.utilities.AuthScheme;
 import software.aws.neptune.jdbc.utilities.QueryExecutor;
 import software.aws.neptune.jdbc.utilities.SqlError;
@@ -370,6 +371,19 @@ public class GremlinQueryExecutor extends QueryExecutor {
         return new GremlinResultSetGetColumns(statement,
                 MetadataCache.getFilteredCacheNodeColumnInfos(nodes),
                 MetadataCache.getFilteredResultSetInfoWithoutRowsForColumns(nodes));
+    }
+
+    /**
+     * Function to get type info.
+     *
+     * @param statement java.sql.Statement Object required for result set.
+     * @return java.sql.ResultSet Object containing type info.
+     */
+    @Override
+    public java.sql.ResultSet executeGetTypeInfo(final java.sql.Statement statement)
+            throws SQLException {
+        LOGGER.info("GremlinQueryExecutor executeGetTypeInfo");
+        return new GremlinResultSetGetTypeInfo(statement);
     }
 
     @SneakyThrows

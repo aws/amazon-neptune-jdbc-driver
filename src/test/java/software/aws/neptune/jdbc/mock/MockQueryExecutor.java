@@ -63,6 +63,11 @@ public class MockQueryExecutor extends QueryExecutor {
     }
 
     @Override
+    public ResultSet executeGetTypeInfo(final Statement statement) throws SQLException {
+        return null;
+    }
+
+    @Override
     protected <T> T runQuery(final String query) throws SQLException {
         return null;
     }

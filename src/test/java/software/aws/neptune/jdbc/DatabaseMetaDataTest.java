@@ -261,4 +261,9 @@ public class DatabaseMetaDataTest {
         HelperFunctions.expectFunctionDoesntThrow(() -> databaseMetaData.storesMixedCaseQuotedIdentifiers(), true);
         HelperFunctions.expectFunctionDoesntThrow(() -> databaseMetaData.supportsANSI92EntryLevelSQL(), true);
     }
+
+    @Test
+    void testGetTypeInfo() {
+        HelperFunctions.expectFunctionDoesntThrow(() -> databaseMetaData.getTypeInfo());
+    }
 }
