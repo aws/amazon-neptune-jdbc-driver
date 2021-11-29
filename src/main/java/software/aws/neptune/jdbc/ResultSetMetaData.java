@@ -107,7 +107,13 @@ public abstract class ResultSetMetaData implements java.sql.ResultSetMetaData {
         return getTypePrecision(type);
     }
 
-    static public int getTypePrecision(int type) {
+    /**
+     * Get the supported precision of the JDBC Type.
+     *
+     * @param type The int mapping value of the JDBC Type.
+     * @return The supported precision of the JDBC Type.
+     */
+    public static int getTypePrecision(final int type) {
         switch (type) {
             case Types.BOOLEAN:
                 return 5;

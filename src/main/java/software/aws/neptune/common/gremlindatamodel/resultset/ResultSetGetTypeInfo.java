@@ -13,7 +13,7 @@
  * permissions and limitations under the License.
  *
  */
- 
+
 package software.aws.neptune.common.gremlindatamodel.resultset;
 
 import org.slf4j.Logger;
@@ -57,7 +57,7 @@ public abstract class ResultSetGetTypeInfo extends ResultSet {
      * SQL_DATETIME_SUB int => unused
      * NUM_PREC_RADIX int => usually 2 or 10
      */
-    
+
     private static final String TYPE_NAME = "TYPE_NAME";
     private static final String DATA_TYPE = "DATA_TYPE";
     private static final String PRECISION = "PRECISION";
@@ -123,7 +123,7 @@ public abstract class ResultSetGetTypeInfo extends ResultSet {
         COLUMN_TYPE_MAP.put(NUM_PREC_RADIX, Integer.class);
     }
 
-    protected static void populateConstants(List<Map<String, Object>> typeInfo) {
+    protected static void populateConstants(final List<Map<String, Object>> typeInfo) {
         for (Map<String, Object> info : typeInfo) {
             info.put("CREATE_PARAMS", null);
             info.put("NULLABLE", typeNullable);
@@ -136,43 +136,37 @@ public abstract class ResultSetGetTypeInfo extends ResultSet {
         }
     }
 
-    protected static void putInfo(List<Map<String, Object>> typeInfo, String typeName, int dataType, boolean isText,
-                                  boolean isNumeric, boolean isUnsignedAttribute) {
+    protected static void putInfo(final List<Map<String, Object>> typeInfo, final String typeName, final int dataType,
+                                  final boolean isText, final boolean isNumeric, final boolean isUnsignedAttribute) {
         final Map<String, Object> info = new HashMap<>();
         info.put(TYPE_NAME, typeName);
         info.put("DATA_TYPE", dataType);
         info.put("PRECISION", getTypePrecision(dataType));
-        info.putIfAbsent("UNSIGNED_ATTRIBUTE", isUnsignedAttribute);
+        info.put("UNSIGNED_ATTRIBUTE", isUnsignedAttribute);
 
-        if (isText) {
-            info.put("LITERAL_PREFIX", "'");
-            info.put("LITERAL_SUFFIX", "'");
-            info.put("CASE_SENSITIVE", true);
-        } else {
-            info.put("LITERAL_PREFIX", null);
-            info.put("LITERAL_SUFFIX", null);
-            info.put("CASE_SENSITIVE", false);
-        }
+        info.put("CASE_SENSITIVE", isText);
+        info.put("LITERAL_PREFIX", isText ? "'" : null);
+        info.put("LITERAL_SUFFIX", isText ? "'" : null);
 
-        if (isNumeric) {
-            info.put("MINIMUM_SCALE", 0);
-            info.put("MAXIMUM_SCALE", 0);
-            info.put("NUM_PREC_RADIX", 10);
-        } else {
-            info.put("MINIMUM_SCALE", null);
-            info.put("MAXIMUM_SCALE", null);
-            info.put("NUM_PREC_RADIX", null); 
-        }
-        
+        info.put("MINIMUM_SCALE", isNumeric ? 0 : null);
+        info.put("MAXIMUM_SCALE", isNumeric ? 0 : null);
+        info.put("NUM_PREC_RADIX", isNumeric ? 10 : null);
+
         typeInfo.add(info);
     }
 
-    protected static void putInfo(List<Map<String, Object>> typeInfo, String typeName, int dataType, boolean isText,
-                                  boolean isNumeric) {
+    protected static void putInfo(final List<Map<String, Object>> typeInfo, final String typeName, final int dataType,
+                                  final boolean isText, final boolean isNumeric) {
         putInfo(typeInfo, typeName, dataType, isText, isNumeric, false);
     }
 
-    public ResultSetGetTypeInfo(Statement statement, List<Map<String, Object>> rows) {
+    /**
+     * ResultSetGetTypeInfo constructor, initializes super class.
+     *
+     * @param statement                Statement Object.
+     * @param rows                     List of type information.
+     */
+    public ResultSetGetTypeInfo(final Statement statement, final List<Map<String, Object>> rows) {
         super(statement, ORDERED_COLUMNS, rows.size());
         this.typeInformation = rows;
     }
