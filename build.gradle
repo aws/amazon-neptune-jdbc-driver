@@ -226,6 +226,7 @@ ext {
     rdf4jVersion = '3.5.0'
     amazonSigv4SignerVersion = '2.4.0'
     nettyVersion = '4.1.52.Final'
+    immutablesVersion = '2.8.8'
 }
 
 subprojects {
@@ -255,6 +256,7 @@ dependencies {
     implementation group: 'org.apache.calcite', name: 'calcite-linq4j', version: calciteVersion
     compileOnly group: 'org.projectlombok', name: 'lombok', version: lombokVersion
     compileOnly group: 'com.puppycrawl.tools', name: 'checkstyle', version: puppyCrawlVersion
+    compileOnly group: 'org.immutables', name: 'value', version: immutablesVersion
     annotationProcessor group: 'org.projectlombok', name: 'lombok', version: lombokVersion
 
     // Testing

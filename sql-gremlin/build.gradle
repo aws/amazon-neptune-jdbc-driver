@@ -119,6 +119,7 @@ ext {
     calciteVersion = '1.28.0'
     lombokVersion = '1.18.16'
     jupiterVersion = '5.4.0'
+    immutablesVersion = '2.8.8'
 }
 
 subprojects {
@@ -138,6 +139,7 @@ dependencies {
     implementation group: 'com.google.guava', name: 'guava', version: '30.1.1-jre'
     implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.13.0'
     compileOnly group: 'org.projectlombok', name: 'lombok', version: lombokVersion
+    compileOnly group: 'org.immutables', name: 'value', version: immutablesVersion
     annotationProcessor group: 'org.projectlombok', name: 'lombok', version: lombokVersion
 
     testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-engine', version: jupiterVersion
