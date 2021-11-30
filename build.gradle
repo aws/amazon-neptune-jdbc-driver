@@ -155,8 +155,7 @@ jacocoTestReport {
     }
     afterEvaluate {
         classDirectories.setFrom(files(classDirectories.files.collect {
-            fileTree(dir: it,
-                exclude: ['**janino**', '**commons**'])
+            fileTree(dir: it, exclude: [])
         }))
     }
 }
@@ -213,7 +212,7 @@ repositories {
 }
 
 ext {
-    calciteVersion = '1.26.0'
+    calciteVersion = '1.28.0'
     log4jVersion = '2.13.3'
     lombokVersion = '1.18.16'
     jupiterVersion = '5.4.0'
@@ -227,6 +226,7 @@ ext {
     rdf4jVersion = '3.5.0'
     amazonSigv4SignerVersion = '2.4.0'
     nettyVersion = '4.1.52.Final'
+    immutablesVersion = '2.8.8'
 }
 
 subprojects {
@@ -256,6 +256,7 @@ dependencies {
     implementation group: 'org.apache.calcite', name: 'calcite-linq4j', version: calciteVersion
     compileOnly group: 'org.projectlombok', name: 'lombok', version: lombokVersion
     compileOnly group: 'com.puppycrawl.tools', name: 'checkstyle', version: puppyCrawlVersion
+    compileOnly group: 'org.immutables', name: 'value', version: immutablesVersion
     annotationProcessor group: 'org.projectlombok', name: 'lombok', version: lombokVersion
 
     // Testing
@@ -269,7 +270,6 @@ dependencies {
     testImplementation group: 'org.neo4j.community', name: 'it-test-support', version: neo4jDBVersion
     testImplementation group: 'org.neo4j', name: 'neo4j-kernel', version: neo4jDBVersion, classifier: "tests"
     testImplementation group: 'org.neo4j', name: 'neo4j-io', version: neo4jDBVersion, classifier: "tests"
-    testImplementation 'org.codehaus.janino:janino:3.1.0'
     testImplementation group: 'com.google.code.findbugs', name: 'annotations', version: findBugsVersion
     testImplementation group: 'com.github.javafaker', name: 'javafaker', version: '1.0.2'
     testImplementation group: 'org.apache.jena', name: 'jena-fuseki-main', version: '3.17.0'
@@ -339,6 +339,5 @@ shadowJar {
 
     dependencies {
         exclude(dependency('org.slf4j:.*'))
-        exclude(dependency('org.codehaus.janino::'))
     }
 }

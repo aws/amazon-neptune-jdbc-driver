@@ -71,8 +71,8 @@ Package: net.hydromatic:aggdesigner-algorithm:6.0
 Package: net.minidev:accessors-smart:1.2
 Package: net.minidev:json-smart:2.3
 Package: net.objecthunter:exp4j:0.4.8
-Package: org.apache.calcite:calcite-core:1.26.0
-Package: org.apache.calcite:calcite-linq4j:1.26.0
+Package: org.apache.calcite:calcite-core:1.28.0
+Package: org.apache.calcite:calcite-linq4j:1.28.0
 Package: org.apache.calcite.avatica:avatica-core:1.17.0
 Package: org.apache.calcite.avatica:avatica-metrics:1.17.0
 Package: org.apache.commons:commons-compress:1.20
@@ -110,8 +110,8 @@ Package: org.codehaus.groovy:groovy-jsr223:2.5.11
 Package: org.codehaus.groovy:groovy-swing:2.5.11
 Package: org.codehaus.groovy:groovy-templates:2.5.11
 Package: org.codehaus.groovy:groovy-xml:2.5.11
-Package: org.codehaus.janino:commons-compiler:3.0.11
-Package: org.codehaus.janino:janino:3.0.11
+Package: org.codehaus.janino:commons-compiler:3.1.6
+Package: org.codehaus.janino:janino:3.1.6
 Package: org.javatuples:javatuples:1.2
 Package: org.mindrot:jbcrypt:0.4
 Package: org.neo4j.driver:neo4j-java-driver:4.0.0
@@ -10960,7 +10960,7 @@ The following copyrights and licenses were found in the source code of this pack
 
 ----
 
-Package: org.apache.calcite:calcite-core:1.26.0
+Package: org.apache.calcite:calcite-core:1.28.0
 
 The following copyrights and licenses were found in the source code of this package:
 
@@ -11168,7 +11168,7 @@ The following copyrights and licenses were found in the source code of this pack
 
 ----
 
-Package: org.apache.calcite:calcite-linq4j:1.26.0
+Package: org.apache.calcite:calcite-linq4j:1.28.0
 
 The following copyrights and licenses were found in the source code of this package:
 
@@ -18706,7 +18706,7 @@ The following copyrights and licenses were found in the source code of this pack
 
 ----
 
-Package: org.codehaus.janino:commons-compiler:3.0.11
+Package: org.codehaus.janino:commons-compiler:3.1.6
 
 The following copyrights and licenses were found in the source code of this package:
 
@@ -18737,7 +18737,7 @@ THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ----
 
-Package: org.codehaus.janino:janino:3.0.11
+Package: org.codehaus.janino:janino:3.1.6
 
 The following copyrights and licenses were found in the source code of this package:
 
