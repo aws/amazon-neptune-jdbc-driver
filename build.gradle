@@ -3,7 +3,7 @@ plugins {
     id "com.github.spotbugs" version "4.8.0"
     id 'checkstyle'
     id 'com.github.hierynomus.license' version '0.15.0'
-    id 'com.github.johnrengelman.shadow' version '6.1.0'
+    id 'com.github.johnrengelman.shadow' version '7.1.0'
     id 'jacoco'
     id 'maven-publish'
     id 'signing'
