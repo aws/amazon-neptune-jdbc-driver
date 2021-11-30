@@ -5,6 +5,8 @@ plugins {
     id 'com.github.hierynomus.license' version '0.15.0'
     id 'com.github.johnrengelman.shadow' version '6.1.0'
     id 'jacoco'
+    id 'maven-publish'
+    id 'signing'
 }
 
 apply plugin: 'java'
@@ -12,6 +14,69 @@ apply plugin: 'com.github.johnrengelman.shadow'
 group 'software.aws.neptune.jdbc'
 version project.hasProperty("BETA_VERSION") ? "${project.MAJOR_VERSION}.${project.MINOR_VERSION}.${project.PATCH_VERSION}-beta.${project.BETA_VERSION}" : "${project.MAJOR_VERSION}.${project.MINOR_VERSION}.${project.PATCH_VERSION}"
 description 'neptune-jdbc-driver'
+
+task sourcesJar(type: Jar) {
+    from sourceSets.main.allJava
+}
+
+task javadocJar(type: Jar) {
+    classifier "javadoc"
+    from javadoc.destinationDir
+}
+
+publishing {
+    publications {
+        shadow(MavenPublication) { publication ->
+            project.shadow.component(publication)
+            artifact sourcesJar
+            artifact javadocJar
+
+            pom {
+                name = "Amazon Neptune JDBC Driver"
+                packaging = "jar"
+                url = "https://github.com/aws/amazon-neptune-jdbc-driver"
+                description = "Amazon Neptune JDBC Driver"
+                scm {
+                    connection = "scm:git@github.com:aws/amazon-neptune-jdbc-driver.git"
+                    developerConnection = "scm:git@github.com:aws/amazon-neptune-jdbc-driver.git"
+                    url = "git@github.com:aws/amazon-neptune-jdbc-driver.git"
+                }
+                licenses {
+                    license {
+                        name = "The Apache License, Version 2.0"
+                        url = "https://github.com/aws/amazon-neptune-jdbc-driver/blob/develop/LICENSE"
+                    }
+                }
+                developers {
+                    developer {
+                        id = "amazonwebservices"
+                        organization = "Amazon Web Services"
+                        organizationUrl = "https://aws.amazon.com"
+                    }
+                }
+            }
+        }
+    }
+
+    repositories {
+        maven {
+            name = "sonatype-staging"
+            url "https://aws.oss.sonatype.org/service/local/staging/deploy/maven2"
+            credentials {
+                username project.hasProperty('ossrhUsername') ? project.property('ossrhUsername') : ''
+                password project.hasProperty('ossrhPassword') ? project.property('ossrhPassword') : ''
+            }
+        }
+    }
+
+    gradle.startParameter.setShowStacktrace(ShowStacktrace.ALWAYS)
+    gradle.startParameter.setLogLevel(LogLevel.DEBUG)
+}
+
+signing {
+    required { gradle.taskGraph.hasTask("publishShadowPublicationToSonatype-stagingRepository") }
+    sign publishing.publications.shadow
+}
 
 java {
     sourceCompatibility = JavaVersion.VERSION_1_8
