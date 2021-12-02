@@ -47,6 +47,8 @@ import software.aws.neptune.gremlin.GremlinConnectionProperties;
 import software.aws.neptune.jdbc.utilities.AuthScheme;
 import software.aws.neptune.jdbc.utilities.ConnectionProperties;
 
+import java.sql.Connection;
+import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Date;
@@ -65,20 +67,27 @@ import java.util.concurrent.Future;
 
 import static org.apache.tinkerpop.gremlin.process.traversal.AnonymousTraversalSource.traversal;
 import static software.aws.neptune.gremlin.GremlinConnectionProperties.CONTACT_POINT_KEY;
-import static software.aws.neptune.gremlin.GremlinConnectionProperties.ENABLE_SSL_KEY;
 import static software.aws.neptune.gremlin.GremlinConnectionProperties.PORT_KEY;
-import static software.aws.neptune.gremlin.GremlinConnectionProperties.SERVICE_REGION_KEY;
-import static software.aws.neptune.jdbc.utilities.ConnectionProperties.SCAN_TYPE_KEY;
-import static software.aws.neptune.jdbc.utilities.ConnectionProperties.SSH_HOSTNAME;
-import static software.aws.neptune.jdbc.utilities.ConnectionProperties.SSH_PRIVATE_KEY_FILE;
-import static software.aws.neptune.jdbc.utilities.ConnectionProperties.SSH_STRICT_HOST_KEY_CHECKING;
-import static software.aws.neptune.jdbc.utilities.ConnectionProperties.SSH_USER;
 
 // Temporary test file to do ad hoc testing.
 @Disabled
 public class SqlGremlinTest {
-    private static final String ENDPOINT = "jdbc-bug-bash-iam-instance-1.cdubgfjknn5r.us-east-1.neptune.amazonaws.com";
+    private static final String ENDPOINT = "database-1.cluster-cdubgfjknn5r.us-east-1.neptune.amazonaws.com";
     private static final int PORT = 8182;
+    private static final String AUTH = "IamSigV4";
+    private static final String ENABLE_SSL_KEY = "true";
+    private static final String SERVICE_REGION_KEY = "us-east-1";
+    private static final String SSH_USER = "ec2-user";
+    //54.210.60.246
+    private static final String SSH_HOSTNAME = "54.210.60.246";
+    private static final String SSH_PRIVATE_KEY_FILE = "~/Repos/jdbc-ec2-connect.pem";
+    private static final String SSH_STRICT_HOST_KEY_CHECKING = "true";
+    private static final String SCAN_TYPE_KEY = "first";
+    private static final String CONNECTION_STRING =
+            String.format("jdbc:neptune:sqlgremlin://%s;enableSsl=%s;authScheme=%s;sshUser=%s;sshHost=%s;" +
+                            "sshPrivateKeyFile=%s;sshStrictHostKeyChecking=%s;serviceRegion=%s;scanType=%s",
+                    ENDPOINT, ENABLE_SSL_KEY, AUTH, SSH_USER, SSH_HOSTNAME, SSH_PRIVATE_KEY_FILE,
+                    SSH_STRICT_HOST_KEY_CHECKING, SERVICE_REGION_KEY, SCAN_TYPE_KEY);
     private static final Map<Class<?>, String> TYPE_MAP = new HashMap<>();
 
     static {
@@ -165,6 +174,14 @@ public class SqlGremlinTest {
     }
 
     @Test
+    void testQueryThroughDriverAndConnString() throws Exception {
+        final Connection connection = DriverManager.getConnection(CONNECTION_STRING);
+        Assertions.assertTrue(connection.isValid(1));
+        final java.sql.Statement statement = connection.createStatement();
+        statement.execute( "SELECT count(region) from airport limit 10");
+    }
+
+    @Test
     void testSql() throws SQLException {
         final Properties properties = new Properties();
         properties.put(ConnectionProperties.AUTH_SCHEME_KEY, AuthScheme.IAMSigV4); // set default to IAMSigV4
@@ -173,14 +190,15 @@ public class SqlGremlinTest {
         properties.put(ENABLE_SSL_KEY, true);
         properties.put(SERVICE_REGION_KEY, "us-east-1");
         properties.put(SSH_USER, "ec2-user");
-        properties.put(SSH_HOSTNAME, "52.14.185.245");
-        properties.put(SSH_PRIVATE_KEY_FILE, "~/Downloads/EC2/neptune-test.pem");
-        properties.put(SSH_STRICT_HOST_KEY_CHECKING, "false");
+        //54.210.60.246
+        properties.put(SSH_HOSTNAME, "54.210.60.246");
+        properties.put(SSH_PRIVATE_KEY_FILE, "~/Repos/jdbc-ec2-connect.pem");
+        properties.put(SSH_STRICT_HOST_KEY_CHECKING, "true");
         properties.put(SCAN_TYPE_KEY, "first");
 
         final List<String> queries = ImmutableList.of(
-                "SELECT count(region) from airport limit 10"
-        /* "SELECT COUNT(\"Calcs\".\"bool0\") AS \"TEMP(Test)(1133866179)(0)\"\n" +
+                "SELECT count(region) from airport limit 10",
+                "SELECT COUNT(\"Calcs\".\"bool0\") AS \"TEMP(Test)(1133866179)(0)\"\n" +
                         "FROM \"gremlin\".\"Calcs\" \"Calcs\"\n" +
                         "HAVING (COUNT(1) > 0)",
                 "SELECT COUNT(`Calcs`.`int0`) AS `TEMP(Test)(3910975586)(0)` " +
@@ -253,7 +271,7 @@ public class SqlGremlinTest {
                         "                                       GROUP BY `airport`.`lat`, `airport1`.`city`, `airport`.`city`," +
                         "                                                 `airport1`.`ROUTE_OUT_ID`, `airport`.`ROUTE_IN_ID`" +
                         "               ORDER BY `arid1`, `arid0`, `city__airport__`, `city`" +
-                        "   LIMIT 100" */
+                        "   LIMIT 100"
         );
 
         // Issue is in ROUTE / ROUTE_OUT_ID
