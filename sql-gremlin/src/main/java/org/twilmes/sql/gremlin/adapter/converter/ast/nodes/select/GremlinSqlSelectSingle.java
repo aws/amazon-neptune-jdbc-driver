@@ -48,6 +48,8 @@ import org.twilmes.sql.gremlin.adapter.converter.schema.gremlin.GremlinTableBase
 import org.twilmes.sql.gremlin.adapter.results.SqlGremlinQueryResult;
 import org.twilmes.sql.gremlin.adapter.results.pagination.Pagination;
 import org.twilmes.sql.gremlin.adapter.results.pagination.SimpleDataReader;
+import org.twilmes.sql.gremlin.adapter.util.SqlGremlinError;
+
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
@@ -85,7 +87,7 @@ public class GremlinSqlSelectSingle extends GremlinSqlSelect {
                 new ThreadFactoryBuilder().setNameFormat("Data-Insert-Thread-%d").setDaemon(true).build());
         final List<List<String>> columns = new ArrayList<>(sqlMetadata.getColumnOutputListMap().values());
         if (columns.size() != 1) {
-            throw new SQLException("Error: Single select has multi-table return.");
+            throw SqlGremlinError.get(SqlGremlinError.SINGLE_SELECT_MULTI_RETURN);
         }
         executor.execute(new Pagination(new SimpleDataReader(
                 sqlMetadata.getRenameFromActual(sqlMetadata.getTables().iterator().next().getLabel()), columns.get(0)),
@@ -96,19 +98,19 @@ public class GremlinSqlSelectSingle extends GremlinSqlSelect {
     @Override
     public GraphTraversal<?, ?> generateTraversal() throws SQLException {
         if (sqlSelect.getSelectList() == null) {
-            throw new SQLException("Error: GremlinSqlSelect expects select list component.");
+            throw SqlGremlinError.get(SqlGremlinError.SELECT_NO_LIST);
         }
 
         final GremlinSqlOperator gremlinSqlOperator =
                 GremlinSqlFactory.createOperator(sqlBasicCall.getOperator(), sqlBasicCall.getOperandList());
         if (!(gremlinSqlOperator instanceof GremlinSqlAsOperator)) {
-            throw new SQLException("Unexpected format for FROM.");
+            throw SqlGremlinError.get(SqlGremlinError.UNEXPECTED_FROM_FORMAT);
         }
         final List<GremlinSqlNode> gremlinSqlOperands = GremlinSqlFactory.createNodeList(sqlBasicCall.getOperandList());
         final List<GremlinSqlIdentifier> gremlinSqlIdentifiers = new ArrayList<>();
         for (final GremlinSqlNode gremlinSqlOperand : gremlinSqlOperands) {
             if (!(gremlinSqlOperand instanceof GremlinSqlIdentifier)) {
-                throw new SQLException("Unexpected format for FROM.");
+                throw SqlGremlinError.get(SqlGremlinError.UNEXPECTED_FROM_FORMAT);
             }
             gremlinSqlIdentifiers.add((GremlinSqlIdentifier) gremlinSqlOperand);
         }
@@ -134,10 +136,10 @@ public class GremlinSqlSelectSingle extends GremlinSqlSelect {
             generateDataRetrieval(gremlinSqlIdentifiers, graphTraversal);
 
             if (sqlMetadata.getRenamedColumns() == null) {
-                throw new SQLException("Error: Column rename list is empty.");
+                throw SqlGremlinError.get(SqlGremlinError.COLUMN_RENAME_LIST_EMPTY);
             }
             if (sqlMetadata.getTables().size() != 1) {
-                throw new SQLException("Error: Expected one table for traversal execution.");
+                throw SqlGremlinError.get(SqlGremlinError.NO_TRAVERSAL_TABLE);
             }
             return graphTraversal;
         } catch (final SQLException e) {
@@ -218,7 +220,7 @@ public class GremlinSqlSelectSingle extends GremlinSqlSelect {
                             ((GremlinSqlIdentifier) gremlinSqlNode).getColumn());
             if (column.endsWith(GremlinTableBase.IN_ID) || column.endsWith(GremlinTableBase.OUT_ID)) {
                 // TODO: Grouping edges that are not the edge that the vertex are connected - needs to be implemented.
-                throw new SQLException("Error, cannot group by edges.");
+                throw SqlGremlinError.get(SqlGremlinError.CANNOT_GROUP_EDGES);
             } else {
                 graphTraversal.values(sqlMetadata.getActualColumnName(sqlMetadata.getGremlinTable(table), column));
             }
@@ -238,7 +240,7 @@ public class GremlinSqlSelectSingle extends GremlinSqlSelect {
                             ((GremlinSqlIdentifier) gremlinSqlNode).getColumn());
             if (column.endsWith(GremlinTableBase.IN_ID) || column.endsWith(GremlinTableBase.OUT_ID)) {
                 // TODO: Grouping edges that are not the edge that the vertex are connected - needs to be implemented.
-                throw new SQLException("Error, cannot group by edges.");
+                throw SqlGremlinError.get(SqlGremlinError.CANNOT_GROUP_EDGES);
             } else {
                 graphTraversal1.values(sqlMetadata.getActualColumnName(sqlMetadata.getGremlinTable(table), column));
             }
@@ -262,14 +264,13 @@ public class GremlinSqlSelectSingle extends GremlinSqlSelect {
                     appendByGraphTraversal(GremlinSqlFactory.createNode(sqlNodeList.get(value.intValue() - 1)), table,
                             graphTraversal);
                 } else {
-                    throw new SQLException("Error, ordinal value of ORDER BY must be between 1 and the number of columns (inclusive).");
+                    throw SqlGremlinError.get(SqlGremlinError.ORDER_BY_ORDINAL_VALUE);
                 }
             } else {
-                throw new SQLException("Error, invalid ORDER BY column literal.");
+                throw SqlGremlinError.get(SqlGremlinError.CANNOT_ORDER_COLUMN_LITERAL);
             }
         } else {
-            throw new SQLException(
-                    String.format("Error, could not apply ORDER BY to %s. See documentation for ORDER BY limitations.", gremlinSqlNode.getClass().getName()));
+            throw SqlGremlinError.get(SqlGremlinError.CANNOT_ORDER_BY, gremlinSqlNode.getClass().getName());
         }
     }
 
@@ -296,11 +297,9 @@ public class GremlinSqlSelectSingle extends GremlinSqlSelect {
                                         GremlinSqlIdentifier.class), false);
                         return;
                     }
-                    throw new SQLException(
-                            "Error: Unsupported WHERE clause - NOT can only be applied to a single boolean value in WHERE.");
+                    throw SqlGremlinError.get(SqlGremlinError.WHERE_NOT_ONLY_BOOLEAN);
                 }
-                throw new SQLException(
-                        "Error: Unsupported WHERE clause - The only WHERE prefix operator supported is 'NOT'.");
+                throw SqlGremlinError.get(SqlGremlinError.WHERE_UNSUPPORTED_PREFIX);
             }
             GremlinSqlFactory.createNodeCheckType(sqlNode, GremlinSqlBasicCall.class)
                     .generateTraversal(graphTraversal);
@@ -310,7 +309,6 @@ public class GremlinSqlSelectSingle extends GremlinSqlSelect {
                     GremlinSqlFactory.createNodeCheckType(sqlNode, GremlinSqlIdentifier.class), true);
             return;
         }
-        throw new SQLException(
-                "Error: Unsupported WHERE clause - Only basic literal comparisons are supported at this time.");
+        throw SqlGremlinError.get(SqlGremlinError.WHERE_BASIC_LITERALS);
     }
 }

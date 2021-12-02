@@ -30,6 +30,8 @@ import org.twilmes.sql.gremlin.adapter.converter.ast.nodes.operator.GremlinSqlBa
 import org.twilmes.sql.gremlin.adapter.converter.ast.nodes.operator.GremlinSqlOperator;
 import org.twilmes.sql.gremlin.adapter.converter.ast.nodes.operator.GremlinSqlTraversalAppender;
 import org.twilmes.sql.gremlin.adapter.converter.ast.nodes.operator.logic.GremlinSqlLiteral;
+import org.twilmes.sql.gremlin.adapter.util.SqlGremlinError;
+
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.List;
@@ -75,8 +77,7 @@ public class GremlinSqlAggFunction extends GremlinSqlOperator {
             ((GremlinSqlBasicCall) sqlOperands.get(0)).generateTraversal(graphTraversal);
         } else if (!(sqlOperands.get(0) instanceof GremlinSqlIdentifier) &&
                 !(sqlOperands.get(0) instanceof GremlinSqlLiteral)) {
-            throw new SQLException(
-                    "Error: expected operand to be GremlinSqlBasicCall or GremlinSqlIdentifier in GremlinSqlOperator.");
+            throw SqlGremlinError.get(SqlGremlinError.UNEXPECTED_OPERAND);
         }
 
         if (sqlOperands.size() == 1) {
@@ -91,8 +92,7 @@ public class GremlinSqlAggFunction extends GremlinSqlOperator {
         if (AGGREGATE_APPENDERS.containsKey(sqlAggFunction.kind)) {
             AGGREGATE_APPENDERS.get(sqlAggFunction.kind).appendTraversal(graphTraversal, sqlOperands);
         } else {
-            throw new SQLException(
-                    String.format("Error: Aggregate function %s is not supported.", sqlAggFunction.kind.sql));
+            throw SqlGremlinError.get(SqlGremlinError.AGGREGATE_NOT_SUPPORTED, sqlAggFunction.kind.sql);
         }
         updateOutputTypeMap();
     }
@@ -110,7 +110,7 @@ public class GremlinSqlAggFunction extends GremlinSqlOperator {
             return String.format("%s(%s)", sqlAggFunction.kind.name(),
                     ((GremlinSqlLiteral) sqlOperands.get(sqlOperands.size() - 1)).getValue().toString());
         }
-        throw new SQLException("Error, unable to get rename name in GremlinSqlAggOperator.");
+        throw SqlGremlinError.get(SqlGremlinError.FAILED_RENAME_GREMLINSQLAGGOPERATOR);
     }
 
     public String getActual() throws SQLException {
@@ -119,7 +119,7 @@ public class GremlinSqlAggFunction extends GremlinSqlOperator {
         } else if (sqlOperands.get((sqlOperands.size() - 1)) instanceof GremlinSqlLiteral) {
             return ((GremlinSqlLiteral) sqlOperands.get(sqlOperands.size() - 1)).getValue().toString();
         }
-        throw new SQLException("Error, unable to get rename name in GremlinSqlAggOperator.");
+        throw SqlGremlinError.get(SqlGremlinError.FAILED_RENAME_GREMLINSQLAGGOPERATOR);
     }
 
     private void updateOutputTypeMap() throws SQLException {

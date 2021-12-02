@@ -22,6 +22,8 @@ package org.twilmes.sql.gremlin.adapter.converter.ast.nodes.operands;
 import org.apache.calcite.sql.SqlIdentifier;
 import org.twilmes.sql.gremlin.adapter.converter.SqlMetadata;
 import org.twilmes.sql.gremlin.adapter.converter.ast.nodes.GremlinSqlNode;
+import org.twilmes.sql.gremlin.adapter.util.SqlGremlinError;
+
 import java.sql.SQLException;
 
 /**
@@ -40,7 +42,7 @@ public class GremlinSqlIdentifier extends GremlinSqlNode {
 
     public String getName(final int idx) throws SQLException {
         if (idx >= sqlIdentifier.names.size()) {
-            throw new SQLException("Index of identifier > size of name list for identifier");
+            throw SqlGremlinError.get(SqlGremlinError.IDENTIFIER_INDEX_OUT_OF_BOUNDS);
         }
         return sqlIdentifier.names.get(idx);
     }
@@ -48,7 +50,7 @@ public class GremlinSqlIdentifier extends GremlinSqlNode {
 
     public String getColumn() throws SQLException {
         if (sqlIdentifier.names.size() < 1) {
-            throw new SQLException("Expected at least one name in list for identifier");
+            throw SqlGremlinError.get(SqlGremlinError.IDENTIFIER_LIST_EMPTY);
         }
         return sqlIdentifier.names.get(sqlIdentifier.names.size() - 1);
     }

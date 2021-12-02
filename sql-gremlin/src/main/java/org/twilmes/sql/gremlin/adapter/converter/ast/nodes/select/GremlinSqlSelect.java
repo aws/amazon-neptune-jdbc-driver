@@ -33,6 +33,8 @@ import org.twilmes.sql.gremlin.adapter.converter.ast.nodes.operands.GremlinSqlId
 import org.twilmes.sql.gremlin.adapter.converter.ast.nodes.operator.GremlinSqlBasicCall;
 import org.twilmes.sql.gremlin.adapter.converter.schema.gremlin.GremlinTableBase;
 import org.twilmes.sql.gremlin.adapter.results.SqlGremlinQueryResult;
+import org.twilmes.sql.gremlin.adapter.util.SqlGremlinError;
+
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
@@ -107,8 +109,7 @@ public abstract class GremlinSqlSelect extends GremlinSqlNode {
             } else if (gremlinSqlNode instanceof GremlinSqlBasicCall) {
                 columnsRenamed.add(((GremlinSqlBasicCall) gremlinSqlNode).getRename());
             } else {
-                throw new SQLException(String.format(
-                        "Error: Unknown sql node type for select list %s.", gremlinSqlNode.getClass().getName()));
+                throw SqlGremlinError.get(SqlGremlinError.UNKNOWN_NODE_SELECTLIST, gremlinSqlNode.getClass().getName());
             }
         }
 
@@ -140,8 +141,7 @@ public abstract class GremlinSqlSelect extends GremlinSqlNode {
                 ((GremlinSqlBasicCall) gremlinSqlNode).generateTraversal(subSubGraphTraversal);
                 SqlTraversalEngine.applyTraversal(subGraphTraversal, subSubGraphTraversal);
             } else {
-                throw new SQLException(String.format(
-                        "Error: Unknown sql node type for select list %s.", gremlinSqlNode.getClass().getName()));
+                throw SqlGremlinError.get(SqlGremlinError.UNKNOWN_NODE_SELECTLIST, gremlinSqlNode.getClass().getName());
             }
         }
         SqlTraversalEngine.applyTraversal(graphTraversal, subGraphTraversal);

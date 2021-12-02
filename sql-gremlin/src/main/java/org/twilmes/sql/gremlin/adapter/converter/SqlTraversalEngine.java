@@ -28,6 +28,8 @@ import org.twilmes.sql.gremlin.adapter.converter.ast.nodes.operands.GremlinSqlId
 import org.twilmes.sql.gremlin.adapter.converter.ast.nodes.select.StepDirection;
 import org.twilmes.sql.gremlin.adapter.converter.schema.gremlin.GremlinTableBase;
 import org.twilmes.sql.gremlin.adapter.results.SqlGremlinQueryResult;
+import org.twilmes.sql.gremlin.adapter.util.SqlGremlinError;
+
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
@@ -48,7 +50,7 @@ public class SqlTraversalEngine {
                                                           final SqlMetadata sqlMetadata,
                                                           final GraphTraversalSource g) throws SQLException {
         if (gremlinSqlIdentifiers.size() != 2) {
-            throw new SQLException("Expected GremlinSqlIdentifier List size to be 2.");
+            throw SqlGremlinError.get(SqlGremlinError.IDENTIFIER_SIZE_INCORRECT);
         }
         final String label = sqlMetadata.getActualTableName(gremlinSqlIdentifiers.get(0).getName(1));
         final GraphTraversal<?, ?> graphTraversal = sqlMetadata.isVertex(label) ? g.V() : g.E();
@@ -84,7 +86,7 @@ public class SqlTraversalEngine {
                                      final SqlMetadata sqlMetadata,
                                      final GraphTraversal<?, ?> graphTraversal) throws SQLException {
         if (gremlinSqlIdentifiers.size() != 2) {
-            throw new SQLException("Expected GremlinSqlIdentifier List size to be 2.");
+            throw SqlGremlinError.get(SqlGremlinError.IDENTIFIER_SIZE_INCORRECT);
         }
         final String label = sqlMetadata.getActualTableName(gremlinSqlIdentifiers.get(0).getName(1));
         final String projectLabel = gremlinSqlIdentifiers.get(1).getName(0);
@@ -175,7 +177,7 @@ public class SqlTraversalEngine {
                                              final GraphTraversal<?, ?> graphTraversal) throws SQLException {
         // Primary/foreign key, need to traverse appropriately.
         if (columnName.endsWith(GremlinTableBase.ID)) {
-            throw new SQLException("Error, cannot apply ID based traversal appension.");
+            throw SqlGremlinError.get(SqlGremlinError.ID_BASED_APPEND);
         }
         if (sqlMetadata.getIsAggregate()) {
             graphTraversal.has(columnName).values(columnName);

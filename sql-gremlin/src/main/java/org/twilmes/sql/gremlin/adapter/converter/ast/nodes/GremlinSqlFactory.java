@@ -47,6 +47,8 @@ import org.twilmes.sql.gremlin.adapter.converter.ast.nodes.select.GremlinSqlSele
 import org.twilmes.sql.gremlin.adapter.converter.ast.nodes.select.GremlinSqlSelectMulti;
 import org.twilmes.sql.gremlin.adapter.converter.ast.nodes.select.GremlinSqlSelectSingle;
 import org.twilmes.sql.gremlin.adapter.converter.ast.nodes.select.join.GremlinSqlJoinComparison;
+import org.twilmes.sql.gremlin.adapter.util.SqlGremlinError;
+
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
@@ -66,7 +68,7 @@ public class GremlinSqlFactory {
 
     public static SqlMetadata getGremlinSqlMetadata() throws SQLException {
         if (sqlMetadata == null) {
-            throw new SQLException("Error: Schema must be set.");
+            throw SqlGremlinError.get(SqlGremlinError.SCHEMA_NOT_SET);
         }
         return sqlMetadata;
     }
@@ -81,7 +83,7 @@ public class GremlinSqlFactory {
                         getGremlinSqlMetadata());
             }
         }
-        throw new SQLException(String.format("Error: Unknown node: %s.", sqlNode.getClass().getName()));
+        throw SqlGremlinError.get(SqlGremlinError.UNKNOWN_NODE, sqlNode.getClass().getName());
     }
 
     public static GremlinSqlOperator createOperator(final SqlOperator sqlOperator, final List<SqlNode> sqlOperands)
@@ -102,7 +104,7 @@ public class GremlinSqlFactory {
             return new GremlinSqlPrefixOperator((SqlPrefixOperator) sqlOperator, createNodeList(sqlOperands),
                     getGremlinSqlMetadata());
         }
-        throw new SQLException(String.format("Error: Unknown operator: %s.", sqlOperator.getKind().sql));
+        throw SqlGremlinError.get(SqlGremlinError.UNKNOWN_OPERATOR, sqlOperator.getKind().sql);
     }
 
     public static GremlinSqlNode createNode(final SqlNode sqlNode) throws SQLException {
@@ -113,7 +115,7 @@ public class GremlinSqlFactory {
         } else if (sqlNode instanceof SqlLiteral) {
             return new GremlinSqlLiteral((SqlLiteral) sqlNode, getGremlinSqlMetadata());
         }
-        throw new SQLException(String.format("Error: Unknown node: %s.", sqlNode.getClass().getName()));
+        throw SqlGremlinError.get(SqlGremlinError.UNKNOWN_NODE, sqlNode.getClass().getName());
     }
 
     public static List<GremlinSqlNode> createNodeList(final List<SqlNode> sqlNodes) throws SQLException {
@@ -128,7 +130,7 @@ public class GremlinSqlFactory {
     public static <T> T createNodeCheckType(final SqlNode sqlNode, final Class<T> clazz) throws SQLException {
         final GremlinSqlNode gremlinSqlNode = createNode(sqlNode);
         if (!gremlinSqlNode.getClass().equals(clazz)) {
-            throw new SQLException("Error: Type mismatch.");
+            throw SqlGremlinError.get(SqlGremlinError.TYPE_MISMATCH);
         }
         return (T) gremlinSqlNode;
     }
@@ -140,7 +142,7 @@ public class GremlinSqlFactory {
         } else if (selectRoot.getFrom() instanceof SqlBasicCall) {
             return new GremlinSqlSelectSingle(selectRoot, (SqlBasicCall) selectRoot.getFrom(), sqlMetadata, g);
         }
-        throw new SQLException(String.format("Error: Unknown node for getFrom: %s.", selectRoot.getFrom().getClass().getName()));
+        throw SqlGremlinError.get(SqlGremlinError.UNKNOWN_NODE_GETFROM, selectRoot.getFrom().getClass().getName());
     }
 
     public static boolean isTable(final SqlNode sqlNode, final String renamedTable) throws SQLException {
@@ -153,7 +155,7 @@ public class GremlinSqlFactory {
                 }
             }
         } else {
-            throw new SQLException("Error: Unknown node type for isTable.");
+            throw SqlGremlinError.get(SqlGremlinError.UNKNOWN_NODE_ISTABLE);
         }
         return false;
     }
