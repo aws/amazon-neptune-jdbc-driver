@@ -67,7 +67,14 @@ import java.util.concurrent.Future;
 
 import static org.apache.tinkerpop.gremlin.process.traversal.AnonymousTraversalSource.traversal;
 import static software.aws.neptune.gremlin.GremlinConnectionProperties.CONTACT_POINT_KEY;
+import static software.aws.neptune.gremlin.GremlinConnectionProperties.ENABLE_SSL_KEY;
 import static software.aws.neptune.gremlin.GremlinConnectionProperties.PORT_KEY;
+import static software.aws.neptune.jdbc.utilities.ConnectionProperties.SCAN_TYPE_KEY;
+import static software.aws.neptune.jdbc.utilities.ConnectionProperties.SERVICE_REGION_KEY;
+import static software.aws.neptune.jdbc.utilities.ConnectionProperties.SSH_HOSTNAME;
+import static software.aws.neptune.jdbc.utilities.ConnectionProperties.SSH_PRIVATE_KEY_FILE;
+import static software.aws.neptune.jdbc.utilities.ConnectionProperties.SSH_STRICT_HOST_KEY_CHECKING;
+import static software.aws.neptune.jdbc.utilities.ConnectionProperties.SSH_USER;
 
 // Temporary test file to do ad hoc testing.
 @Disabled
@@ -75,19 +82,19 @@ public class SqlGremlinTest {
     private static final String ENDPOINT = "database-1.cluster-cdubgfjknn5r.us-east-1.neptune.amazonaws.com";
     private static final int PORT = 8182;
     private static final String AUTH = "IamSigV4";
-    private static final String ENABLE_SSL_KEY = "true";
-    private static final String SERVICE_REGION_KEY = "us-east-1";
-    private static final String SSH_USER = "ec2-user";
+    private static final String ENABLE_SSL = "true";
+    private static final String SERVICE_REGION = "us-east-1";
+    private static final String USER = "ec2-user";
     //54.210.60.246
-    private static final String SSH_HOSTNAME = "54.210.60.246";
-    private static final String SSH_PRIVATE_KEY_FILE = "~/Repos/jdbc-ec2-connect.pem";
-    private static final String SSH_STRICT_HOST_KEY_CHECKING = "true";
-    private static final String SCAN_TYPE_KEY = "first";
+    private static final String HOSTNAME = "54.210.60.246";
+    private static final String SSH_PRIVATE_KEY = "~/Repos/jdbc-ec2-connect.pem";
+    private static final String SSH_STRICT_HOST = "true";
+    private static final String SCAN_TYPE = "first";
     private static final String CONNECTION_STRING =
             String.format("jdbc:neptune:sqlgremlin://%s;enableSsl=%s;authScheme=%s;sshUser=%s;sshHost=%s;" +
                             "sshPrivateKeyFile=%s;sshStrictHostKeyChecking=%s;serviceRegion=%s;scanType=%s",
-                    ENDPOINT, ENABLE_SSL_KEY, AUTH, SSH_USER, SSH_HOSTNAME, SSH_PRIVATE_KEY_FILE,
-                    SSH_STRICT_HOST_KEY_CHECKING, SERVICE_REGION_KEY, SCAN_TYPE_KEY);
+                    ENDPOINT, ENABLE_SSL, AUTH, USER, HOSTNAME, SSH_PRIVATE_KEY,
+                    SSH_STRICT_HOST, SERVICE_REGION, SCAN_TYPE);
     private static final Map<Class<?>, String> TYPE_MAP = new HashMap<>();
 
     static {
@@ -187,14 +194,13 @@ public class SqlGremlinTest {
         properties.put(ConnectionProperties.AUTH_SCHEME_KEY, AuthScheme.IAMSigV4); // set default to IAMSigV4
         properties.put(CONTACT_POINT_KEY, ENDPOINT);
         properties.put(PORT_KEY, PORT);
-        properties.put(ENABLE_SSL_KEY, true);
-        properties.put(SERVICE_REGION_KEY, "us-east-1");
-        properties.put(SSH_USER, "ec2-user");
-        //54.210.60.246
-        properties.put(SSH_HOSTNAME, "54.210.60.246");
-        properties.put(SSH_PRIVATE_KEY_FILE, "~/Repos/jdbc-ec2-connect.pem");
-        properties.put(SSH_STRICT_HOST_KEY_CHECKING, "true");
-        properties.put(SCAN_TYPE_KEY, "first");
+        properties.put(ENABLE_SSL_KEY, ENABLE_SSL);
+        properties.put(SERVICE_REGION_KEY, SERVICE_REGION);
+        properties.put(SSH_USER, USER);
+        properties.put(SSH_HOSTNAME, HOSTNAME);
+        properties.put(SSH_PRIVATE_KEY_FILE, SSH_PRIVATE_KEY);
+        properties.put(SSH_STRICT_HOST_KEY_CHECKING, SSH_STRICT_HOST);
+        properties.put(SCAN_TYPE_KEY, SCAN_TYPE);
 
         final List<String> queries = ImmutableList.of(
                 "SELECT count(region) from airport limit 10",

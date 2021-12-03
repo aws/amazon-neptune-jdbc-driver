@@ -39,7 +39,7 @@ Example for connecting to an instance without IAM authentication:
 <p align="center">
 <img alt="non-auth" src="../images/non_auth.png" width="55%"/>
 </p>
-Example for connecting to an instance IAM authentication. Note that service region is a required field:
+Example for connecting to an instance with IAM authentication. Note that service region is a required field:
 <p align="center">
 <img alt="iam-auth" src="../images/iam_auth.png" width="55%"/>
 </p>

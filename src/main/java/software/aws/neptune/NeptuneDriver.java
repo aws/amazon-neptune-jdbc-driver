@@ -91,27 +91,26 @@ public class NeptuneDriver extends Driver implements java.sql.Driver {
             final String language = getLanguage(url, connStringPattern);
             final String propertyString = getPropertyString(url, connStringPattern);
             final String firstPropertyKey = getFirstPropertyKey(language);
-            final Properties properties = setProperties(propertyString, firstPropertyKey, info);
+            final Properties properties = createProperties(propertyString, firstPropertyKey, info);
 
-            if (OPENCYPHER.equalsIgnoreCase(language)) {
-                return new OpenCypherConnection(new OpenCypherConnectionProperties(properties));
+            switch (language.toLowerCase()) {
+                case OPENCYPHER:
+                    return new OpenCypherConnection(new OpenCypherConnectionProperties(properties));
+                case GREMLIN:
+                    return new GremlinConnection(new GremlinConnectionProperties(properties));
+                case SQL_GREMLIN:
+                    return new SqlGremlinConnection(new GremlinConnectionProperties(properties));
+                case SPARQL:
+                    return new SparqlConnection(new SparqlConnectionProperties(properties));
+                default:
+                    LOGGER.error("Encountered Neptune JDBC connection string but failed to parse driver language.");
+                    throw SqlError.createSQLException(
+                            LOGGER, SqlState.CONNECTION_EXCEPTION,
+                            SqlError.INVALID_CONNECTION_PROPERTY);
             }
-            if (GREMLIN.equalsIgnoreCase(language)) {
-                return new GremlinConnection(new GremlinConnectionProperties(properties));
-            }
-            if (SQL_GREMLIN.equalsIgnoreCase(language)) {
-                return new SqlGremlinConnection(new GremlinConnectionProperties(properties));
-            }
-            if (SPARQL.equalsIgnoreCase(language)) {
-                return new SparqlConnection(new SparqlConnectionProperties(properties));
-            }
-            LOGGER.error("Encountered Neptune JDBC connection string but failed to parse driver language.");
-            throw SqlError.createSQLException(
-                    LOGGER, SqlState.CONNECTION_EXCEPTION,
-                    SqlError.INVALID_CONNECTION_PROPERTY);
         }
 
-        private Properties setProperties(final String propertyString, final String firstPropertyKey,
+        private Properties createProperties(final String propertyString, final String firstPropertyKey,
                                          final Properties info) {
             final Properties properties =
                     parsePropertyString(propertyString, firstPropertyKey);
