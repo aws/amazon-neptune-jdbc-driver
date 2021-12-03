@@ -109,7 +109,7 @@ public abstract class GremlinSqlSelect extends GremlinSqlNode {
             } else if (gremlinSqlNode instanceof GremlinSqlBasicCall) {
                 columnsRenamed.add(((GremlinSqlBasicCall) gremlinSqlNode).getRename());
             } else {
-                throw SqlGremlinError.get(SqlGremlinError.UNKNOWN_NODE_SELECTLIST, gremlinSqlNode.getClass().getName());
+                throw SqlGremlinError.create(SqlGremlinError.UNKNOWN_NODE_SELECTLIST, gremlinSqlNode.getClass().getName());
             }
         }
 
@@ -141,7 +141,7 @@ public abstract class GremlinSqlSelect extends GremlinSqlNode {
                 ((GremlinSqlBasicCall) gremlinSqlNode).generateTraversal(subSubGraphTraversal);
                 SqlTraversalEngine.applyTraversal(subGraphTraversal, subSubGraphTraversal);
             } else {
-                throw SqlGremlinError.get(SqlGremlinError.UNKNOWN_NODE_SELECTLIST, gremlinSqlNode.getClass().getName());
+                throw SqlGremlinError.create(SqlGremlinError.UNKNOWN_NODE_SELECTLIST, gremlinSqlNode.getClass().getName());
             }
         }
         SqlTraversalEngine.applyTraversal(graphTraversal, subGraphTraversal);

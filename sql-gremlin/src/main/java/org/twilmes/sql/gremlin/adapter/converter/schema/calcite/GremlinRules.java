@@ -29,8 +29,6 @@ import org.apache.calcite.rel.convert.ConverterRule;
 import org.apache.calcite.rel.logical.LogicalFilter;
 import org.twilmes.sql.gremlin.adapter.util.SqlGremlinError;
 
-import java.sql.SQLException;
-
 /**
  * List of rules that get pushed down and converted into GremlinTraversals.  Right now
  * only filter is pushed down using rules.  Joins are converted, but handled the by RelWalker
@@ -71,7 +69,7 @@ class GremlinRules {
         @SneakyThrows
         public RelNode convert(final RelNode rel) {
             if (!(rel instanceof LogicalFilter)) {
-                throw SqlGremlinError.get(SqlGremlinError.NOT_LOGICAL_FILTER, rel.getClass().getName(),
+                throw SqlGremlinError.create(SqlGremlinError.NOT_LOGICAL_FILTER, rel.getClass().getName(),
                         LogicalFilter.class.getName());
             }
             final LogicalFilter filter = (LogicalFilter) rel;

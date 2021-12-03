@@ -42,7 +42,7 @@ public class GremlinSqlIdentifier extends GremlinSqlNode {
 
     public String getName(final int idx) throws SQLException {
         if (idx >= sqlIdentifier.names.size()) {
-            throw SqlGremlinError.get(SqlGremlinError.IDENTIFIER_INDEX_OUT_OF_BOUNDS);
+            throw SqlGremlinError.create(SqlGremlinError.IDENTIFIER_INDEX_OUT_OF_BOUNDS);
         }
         return sqlIdentifier.names.get(idx);
     }
@@ -50,7 +50,7 @@ public class GremlinSqlIdentifier extends GremlinSqlNode {
 
     public String getColumn() throws SQLException {
         if (sqlIdentifier.names.size() < 1) {
-            throw SqlGremlinError.get(SqlGremlinError.IDENTIFIER_LIST_EMPTY);
+            throw SqlGremlinError.create(SqlGremlinError.IDENTIFIER_LIST_EMPTY);
         }
         return sqlIdentifier.names.get(sqlIdentifier.names.size() - 1);
     }

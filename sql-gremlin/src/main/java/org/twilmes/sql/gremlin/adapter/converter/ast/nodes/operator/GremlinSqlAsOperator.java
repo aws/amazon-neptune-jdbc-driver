@@ -60,7 +60,7 @@ public class GremlinSqlAsOperator extends GremlinSqlOperator {
             ((GremlinSqlBasicCall) sqlOperands.get(0)).generateTraversal(graphTraversal);
         } else if (!(sqlOperands.get(0) instanceof GremlinSqlIdentifier) &&
                 !(sqlOperands.get(0) instanceof GremlinSqlLiteral)) {
-            throw SqlGremlinError.get(SqlGremlinError.UNEXPECTED_OPERAND);
+            throw SqlGremlinError.create(SqlGremlinError.UNEXPECTED_OPERAND);
         }
 
         if (sqlOperands.size() == 1) {
@@ -77,14 +77,14 @@ public class GremlinSqlAsOperator extends GremlinSqlOperator {
 
     public String getName(final int operandIdx, final int nameIdx) throws SQLException {
         if (operandIdx >= sqlOperands.size() || !(sqlOperands.get(operandIdx) instanceof GremlinSqlIdentifier)) {
-            throw SqlGremlinError.get(SqlGremlinError.UNEXPECTED_OPERAND_INDEX);
+            throw SqlGremlinError.create(SqlGremlinError.UNEXPECTED_OPERAND_INDEX);
         }
         return ((GremlinSqlIdentifier) sqlOperands.get(operandIdx)).getName(nameIdx);
     }
 
     public String getActual() throws SQLException {
         if (sqlOperands.size() != 2) {
-            throw SqlGremlinError.get(SqlGremlinError.OPERANDS_EXPECTED_TWO_SQL_AS);
+            throw SqlGremlinError.create(SqlGremlinError.OPERANDS_EXPECTED_TWO_SQL_AS);
         }
         if (sqlOperands.get(0) instanceof GremlinSqlIdentifier) {
             return ((GremlinSqlIdentifier) sqlOperands.get(0)).getColumn();
@@ -93,18 +93,18 @@ public class GremlinSqlAsOperator extends GremlinSqlOperator {
         } else if (sqlOperands.get(0) instanceof GremlinSqlLiteral) {
             return ((GremlinSqlLiteral) sqlOperands.get(0)).getValue().toString();
         }
-        throw SqlGremlinError.get(SqlGremlinError.FAILED_GET_NAME_ACTUAL);
+        throw SqlGremlinError.create(SqlGremlinError.FAILED_GET_NAME_ACTUAL);
     }
 
     public String getRename() throws SQLException {
         if (sqlOperands.size() != 2) {
-            throw SqlGremlinError.get(SqlGremlinError.OPERANDS_EXPECTED_TWO_SQL_AS);
+            throw SqlGremlinError.create(SqlGremlinError.OPERANDS_EXPECTED_TWO_SQL_AS);
         }
         if (sqlOperands.get(1) instanceof GremlinSqlIdentifier) {
             return ((GremlinSqlIdentifier) sqlOperands.get(1)).getColumn();
         } else if (sqlOperands.get(1) instanceof GremlinSqlBasicCall) {
             return ((GremlinSqlBasicCall) sqlOperands.get(1)).getRename();
         }
-        throw SqlGremlinError.get(SqlGremlinError.FAILED_GET_NAME_RENAME);
+        throw SqlGremlinError.create(SqlGremlinError.FAILED_GET_NAME_RENAME);
     }
 }

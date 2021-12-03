@@ -50,7 +50,7 @@ public class SqlTraversalEngine {
                                                           final SqlMetadata sqlMetadata,
                                                           final GraphTraversalSource g) throws SQLException {
         if (gremlinSqlIdentifiers.size() != 2) {
-            throw SqlGremlinError.get(SqlGremlinError.IDENTIFIER_SIZE_INCORRECT);
+            throw SqlGremlinError.create(SqlGremlinError.IDENTIFIER_SIZE_INCORRECT);
         }
         final String label = sqlMetadata.getActualTableName(gremlinSqlIdentifiers.get(0).getName(1));
         final GraphTraversal<?, ?> graphTraversal = sqlMetadata.isVertex(label) ? g.V() : g.E();
@@ -86,7 +86,7 @@ public class SqlTraversalEngine {
                                      final SqlMetadata sqlMetadata,
                                      final GraphTraversal<?, ?> graphTraversal) throws SQLException {
         if (gremlinSqlIdentifiers.size() != 2) {
-            throw SqlGremlinError.get(SqlGremlinError.IDENTIFIER_SIZE_INCORRECT);
+            throw SqlGremlinError.create(SqlGremlinError.IDENTIFIER_SIZE_INCORRECT);
         }
         final String label = sqlMetadata.getActualTableName(gremlinSqlIdentifiers.get(0).getName(1));
         final String projectLabel = gremlinSqlIdentifiers.get(1).getName(0);
@@ -177,7 +177,7 @@ public class SqlTraversalEngine {
                                              final GraphTraversal<?, ?> graphTraversal) throws SQLException {
         // Primary/foreign key, need to traverse appropriately.
         if (columnName.endsWith(GremlinTableBase.ID)) {
-            throw SqlGremlinError.get(SqlGremlinError.ID_BASED_APPEND);
+            throw SqlGremlinError.create(SqlGremlinError.ID_BASED_APPEND);
         }
         if (sqlMetadata.getIsAggregate()) {
             graphTraversal.has(columnName).values(columnName);

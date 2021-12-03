@@ -47,9 +47,9 @@ public abstract class GremlinSqlOperator {
 
     public void appendOperatorTraversal(final GraphTraversal<?, ?> graphTraversal) throws SQLException {
         if (sqlOperands.size() > 2) {
-            throw SqlGremlinError.get(SqlGremlinError.OPERANDS_MORE_THAN_TWO);
+            throw SqlGremlinError.create(SqlGremlinError.OPERANDS_MORE_THAN_TWO);
         } else if (sqlOperands.isEmpty()) {
-            throw SqlGremlinError.get(SqlGremlinError.OPERANDS_EMPTY);
+            throw SqlGremlinError.create(SqlGremlinError.OPERANDS_EMPTY);
         }
 
         appendTraversal(graphTraversal);

@@ -84,7 +84,7 @@ public class SqlConverter {
         if (sqlNode instanceof SqlSelect) {
             return GremlinSqlFactory.createSelect((SqlSelect) sqlNode, g);
         } else {
-            throw SqlGremlinError.get(SqlGremlinError.SQL_SELECT_ONLY);
+            throw SqlGremlinError.create(SqlGremlinError.SQL_SELECT_ONLY);
         }
     }
 
@@ -113,7 +113,7 @@ public class SqlConverter {
             try {
                 validate = planner.validate(planner.parse(sql));
             } catch (final Exception e) {
-                throw SqlGremlinError.get(SqlGremlinError.PARSE_ERROR, e, sql);
+                throw SqlGremlinError.create(SqlGremlinError.PARSE_ERROR, e, sql);
             }
         }
     }

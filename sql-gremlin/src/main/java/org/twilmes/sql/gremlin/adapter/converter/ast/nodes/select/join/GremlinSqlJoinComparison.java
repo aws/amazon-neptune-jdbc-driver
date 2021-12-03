@@ -64,13 +64,13 @@ public class GremlinSqlJoinComparison {
     public String getColumn(final String renamedTable) throws SQLException {
         for (final GremlinSqlNode gremlinSqlNode : gremlinSqlNodes) {
             if (!(gremlinSqlNode instanceof GremlinSqlIdentifier)) {
-                throw SqlGremlinError.get(SqlGremlinError.UNEXPECTED_JOIN_NODES);
+                throw SqlGremlinError.create(SqlGremlinError.UNEXPECTED_JOIN_NODES);
             }
             final GremlinSqlIdentifier gremlinSqlIdentifier = (GremlinSqlIdentifier) gremlinSqlNode;
             if (gremlinSqlIdentifier.getName(0).equals(renamedTable)) {
                 return gremlinSqlIdentifier.getName(1);
             }
         }
-        throw SqlGremlinError.get(SqlGremlinError.NO_JOIN_COLUMN);
+        throw SqlGremlinError.create(SqlGremlinError.NO_JOIN_COLUMN);
     }
 }

@@ -62,7 +62,7 @@ public class GremlinTableBase extends AbstractQueryableTable implements Translat
                 return entry.getValue();
             }
         }
-        throw SqlGremlinError.get(SqlGremlinError.COLUMN_NOT_FOUND, column, isVertex ? "vertex" : "edge", label);
+        throw SqlGremlinError.create(SqlGremlinError.COLUMN_NOT_FOUND, column, isVertex ? "vertex" : "edge", label);
     }
 
     public boolean hasColumn(final String column) {

@@ -87,7 +87,7 @@ public class GremlinSqlSelectSingle extends GremlinSqlSelect {
                 new ThreadFactoryBuilder().setNameFormat("Data-Insert-Thread-%d").setDaemon(true).build());
         final List<List<String>> columns = new ArrayList<>(sqlMetadata.getColumnOutputListMap().values());
         if (columns.size() != 1) {
-            throw SqlGremlinError.get(SqlGremlinError.SINGLE_SELECT_MULTI_RETURN);
+            throw SqlGremlinError.create(SqlGremlinError.SINGLE_SELECT_MULTI_RETURN);
         }
         executor.execute(new Pagination(new SimpleDataReader(
                 sqlMetadata.getRenameFromActual(sqlMetadata.getTables().iterator().next().getLabel()), columns.get(0)),
@@ -98,19 +98,19 @@ public class GremlinSqlSelectSingle extends GremlinSqlSelect {
     @Override
     public GraphTraversal<?, ?> generateTraversal() throws SQLException {
         if (sqlSelect.getSelectList() == null) {
-            throw SqlGremlinError.get(SqlGremlinError.SELECT_NO_LIST);
+            throw SqlGremlinError.create(SqlGremlinError.SELECT_NO_LIST);
         }
 
         final GremlinSqlOperator gremlinSqlOperator =
                 GremlinSqlFactory.createOperator(sqlBasicCall.getOperator(), sqlBasicCall.getOperandList());
         if (!(gremlinSqlOperator instanceof GremlinSqlAsOperator)) {
-            throw SqlGremlinError.get(SqlGremlinError.UNEXPECTED_FROM_FORMAT);
+            throw SqlGremlinError.create(SqlGremlinError.UNEXPECTED_FROM_FORMAT);
         }
         final List<GremlinSqlNode> gremlinSqlOperands = GremlinSqlFactory.createNodeList(sqlBasicCall.getOperandList());
         final List<GremlinSqlIdentifier> gremlinSqlIdentifiers = new ArrayList<>();
         for (final GremlinSqlNode gremlinSqlOperand : gremlinSqlOperands) {
             if (!(gremlinSqlOperand instanceof GremlinSqlIdentifier)) {
-                throw SqlGremlinError.get(SqlGremlinError.UNEXPECTED_FROM_FORMAT);
+                throw SqlGremlinError.create(SqlGremlinError.UNEXPECTED_FROM_FORMAT);
             }
             gremlinSqlIdentifiers.add((GremlinSqlIdentifier) gremlinSqlOperand);
         }
@@ -136,10 +136,10 @@ public class GremlinSqlSelectSingle extends GremlinSqlSelect {
             generateDataRetrieval(gremlinSqlIdentifiers, graphTraversal);
 
             if (sqlMetadata.getRenamedColumns() == null) {
-                throw SqlGremlinError.get(SqlGremlinError.COLUMN_RENAME_LIST_EMPTY);
+                throw SqlGremlinError.create(SqlGremlinError.COLUMN_RENAME_LIST_EMPTY);
             }
             if (sqlMetadata.getTables().size() != 1) {
-                throw SqlGremlinError.get(SqlGremlinError.NO_TRAVERSAL_TABLE);
+                throw SqlGremlinError.create(SqlGremlinError.NO_TRAVERSAL_TABLE);
             }
             return graphTraversal;
         } catch (final SQLException e) {
@@ -220,7 +220,7 @@ public class GremlinSqlSelectSingle extends GremlinSqlSelect {
                             ((GremlinSqlIdentifier) gremlinSqlNode).getColumn());
             if (column.endsWith(GremlinTableBase.IN_ID) || column.endsWith(GremlinTableBase.OUT_ID)) {
                 // TODO: Grouping edges that are not the edge that the vertex are connected - needs to be implemented.
-                throw SqlGremlinError.get(SqlGremlinError.CANNOT_GROUP_EDGES);
+                throw SqlGremlinError.create(SqlGremlinError.CANNOT_GROUP_EDGES);
             } else {
                 graphTraversal.values(sqlMetadata.getActualColumnName(sqlMetadata.getGremlinTable(table), column));
             }
@@ -240,7 +240,7 @@ public class GremlinSqlSelectSingle extends GremlinSqlSelect {
                             ((GremlinSqlIdentifier) gremlinSqlNode).getColumn());
             if (column.endsWith(GremlinTableBase.IN_ID) || column.endsWith(GremlinTableBase.OUT_ID)) {
                 // TODO: Grouping edges that are not the edge that the vertex are connected - needs to be implemented.
-                throw SqlGremlinError.get(SqlGremlinError.CANNOT_GROUP_EDGES);
+                throw SqlGremlinError.create(SqlGremlinError.CANNOT_GROUP_EDGES);
             } else {
                 graphTraversal1.values(sqlMetadata.getActualColumnName(sqlMetadata.getGremlinTable(table), column));
             }
@@ -264,13 +264,13 @@ public class GremlinSqlSelectSingle extends GremlinSqlSelect {
                     appendByGraphTraversal(GremlinSqlFactory.createNode(sqlNodeList.get(value.intValue() - 1)), table,
                             graphTraversal);
                 } else {
-                    throw SqlGremlinError.get(SqlGremlinError.ORDER_BY_ORDINAL_VALUE);
+                    throw SqlGremlinError.create(SqlGremlinError.ORDER_BY_ORDINAL_VALUE);
                 }
             } else {
-                throw SqlGremlinError.get(SqlGremlinError.CANNOT_ORDER_COLUMN_LITERAL);
+                throw SqlGremlinError.create(SqlGremlinError.CANNOT_ORDER_COLUMN_LITERAL);
             }
         } else {
-            throw SqlGremlinError.get(SqlGremlinError.CANNOT_ORDER_BY, gremlinSqlNode.getClass().getName());
+            throw SqlGremlinError.create(SqlGremlinError.CANNOT_ORDER_BY, gremlinSqlNode.getClass().getName());
         }
     }
 
@@ -297,9 +297,9 @@ public class GremlinSqlSelectSingle extends GremlinSqlSelect {
                                         GremlinSqlIdentifier.class), false);
                         return;
                     }
-                    throw SqlGremlinError.get(SqlGremlinError.WHERE_NOT_ONLY_BOOLEAN);
+                    throw SqlGremlinError.create(SqlGremlinError.WHERE_NOT_ONLY_BOOLEAN);
                 }
-                throw SqlGremlinError.get(SqlGremlinError.WHERE_UNSUPPORTED_PREFIX);
+                throw SqlGremlinError.create(SqlGremlinError.WHERE_UNSUPPORTED_PREFIX);
             }
             GremlinSqlFactory.createNodeCheckType(sqlNode, GremlinSqlBasicCall.class)
                     .generateTraversal(graphTraversal);
@@ -309,6 +309,6 @@ public class GremlinSqlSelectSingle extends GremlinSqlSelect {
                     GremlinSqlFactory.createNodeCheckType(sqlNode, GremlinSqlIdentifier.class), true);
             return;
         }
-        throw SqlGremlinError.get(SqlGremlinError.WHERE_BASIC_LITERALS);
+        throw SqlGremlinError.create(SqlGremlinError.WHERE_BASIC_LITERALS);
     }
 }

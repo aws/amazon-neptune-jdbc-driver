@@ -77,7 +77,7 @@ public class GremlinSqlAggFunction extends GremlinSqlOperator {
             ((GremlinSqlBasicCall) sqlOperands.get(0)).generateTraversal(graphTraversal);
         } else if (!(sqlOperands.get(0) instanceof GremlinSqlIdentifier) &&
                 !(sqlOperands.get(0) instanceof GremlinSqlLiteral)) {
-            throw SqlGremlinError.get(SqlGremlinError.UNEXPECTED_OPERAND);
+            throw SqlGremlinError.create(SqlGremlinError.UNEXPECTED_OPERAND);
         }
 
         if (sqlOperands.size() == 1) {
@@ -92,7 +92,7 @@ public class GremlinSqlAggFunction extends GremlinSqlOperator {
         if (AGGREGATE_APPENDERS.containsKey(sqlAggFunction.kind)) {
             AGGREGATE_APPENDERS.get(sqlAggFunction.kind).appendTraversal(graphTraversal, sqlOperands);
         } else {
-            throw SqlGremlinError.get(SqlGremlinError.AGGREGATE_NOT_SUPPORTED, sqlAggFunction.kind.sql);
+            throw SqlGremlinError.create(SqlGremlinError.AGGREGATE_NOT_SUPPORTED, sqlAggFunction.kind.sql);
         }
         updateOutputTypeMap();
     }
@@ -110,7 +110,7 @@ public class GremlinSqlAggFunction extends GremlinSqlOperator {
             return String.format("%s(%s)", sqlAggFunction.kind.name(),
                     ((GremlinSqlLiteral) sqlOperands.get(sqlOperands.size() - 1)).getValue().toString());
         }
-        throw SqlGremlinError.get(SqlGremlinError.FAILED_RENAME_GREMLINSQLAGGOPERATOR);
+        throw SqlGremlinError.create(SqlGremlinError.FAILED_RENAME_GREMLINSQLAGGOPERATOR);
     }
 
     public String getActual() throws SQLException {
@@ -119,7 +119,7 @@ public class GremlinSqlAggFunction extends GremlinSqlOperator {
         } else if (sqlOperands.get((sqlOperands.size() - 1)) instanceof GremlinSqlLiteral) {
             return ((GremlinSqlLiteral) sqlOperands.get(sqlOperands.size() - 1)).getValue().toString();
         }
-        throw SqlGremlinError.get(SqlGremlinError.FAILED_RENAME_GREMLINSQLAGGOPERATOR);
+        throw SqlGremlinError.create(SqlGremlinError.FAILED_RENAME_GREMLINSQLAGGOPERATOR);
     }
 
     private void updateOutputTypeMap() throws SQLException {

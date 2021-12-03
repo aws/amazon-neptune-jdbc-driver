@@ -58,7 +58,7 @@ public class GremlinSqlPostfixOperator extends GremlinSqlOperator {
         if (sqlPostfixOperator.kind.equals(SqlKind.DESCENDING)) {
             return Order.desc;
         }
-        throw SqlGremlinError.get(SqlGremlinError.NO_ORDER, sqlPostfixOperator.kind.sql);
+        throw SqlGremlinError.create(SqlGremlinError.NO_ORDER, sqlPostfixOperator.kind.sql);
     }
 
     @Override
@@ -66,7 +66,7 @@ public class GremlinSqlPostfixOperator extends GremlinSqlOperator {
         if (sqlOperands.get(0) instanceof GremlinSqlBasicCall) {
             ((GremlinSqlBasicCall) sqlOperands.get(0)).generateTraversal(graphTraversal);
         } else if (!(sqlOperands.get(0) instanceof GremlinSqlIdentifier) && !(sqlOperands.get(0) instanceof GremlinSqlLiteral)) {
-            throw SqlGremlinError.get(SqlGremlinError.UNEXPECTED_OPERAND);
+            throw SqlGremlinError.create(SqlGremlinError.UNEXPECTED_OPERAND);
         }
 
         if (sqlOperands.size() == 1) {

@@ -82,7 +82,7 @@ public class GremlinSqlSelectMulti extends GremlinSqlSelect {
                 new ThreadFactoryBuilder().setNameFormat("Data-Insert-Thread-%d").setDaemon(true).build());
         final Map<String, List<String>> tableColumns = sqlMetadata.getColumnOutputListMap();
         if (tableColumns.keySet().size() > 2) {
-            throw SqlGremlinError.get(SqlGremlinError.JOIN_TABLE_COUNT);
+            throw SqlGremlinError.create(SqlGremlinError.JOIN_TABLE_COUNT);
         }
         executor.execute(new Pagination(new JoinDataReader(tableColumns), graphTraversal, sqlGremlinQueryResult));
         executor.shutdown();
@@ -101,17 +101,17 @@ public class GremlinSqlSelectMulti extends GremlinSqlSelect {
                 GremlinSqlFactory.createJoinEquality(sqlJoin.getCondition());
 
         if (!joinType.name().equals(JoinType.INNER.name())) {
-            throw SqlGremlinError.get(SqlGremlinError.INNER_JOIN_ONLY);
+            throw SqlGremlinError.create(SqlGremlinError.INNER_JOIN_ONLY);
         }
         if (!conditionType.equals(JoinConditionType.ON)) {
-            throw SqlGremlinError.get(SqlGremlinError.JOIN_ON_ONLY);
+            throw SqlGremlinError.create(SqlGremlinError.JOIN_ON_ONLY);
         }
         if ((left.getGremlinSqlNodes().size() != 2) || (right.getGremlinSqlNodes().size() != 2)) {
-            throw SqlGremlinError.get(SqlGremlinError.LEFT_RIGHT_CONDITION_OPERANDS);
+            throw SqlGremlinError.create(SqlGremlinError.LEFT_RIGHT_CONDITION_OPERANDS);
         }
         if (!(left.getGremlinSqlOperator() instanceof GremlinSqlAsOperator) ||
                 !(right.getGremlinSqlOperator() instanceof GremlinSqlAsOperator)) {
-            throw SqlGremlinError.get(SqlGremlinError.LEFT_RIGHT_AS_OPERATOR);
+            throw SqlGremlinError.create(SqlGremlinError.LEFT_RIGHT_AS_OPERATOR);
         }
         final GremlinSqlAsOperator leftAsOperator = (GremlinSqlAsOperator) left.getGremlinSqlOperator();
         final String leftTableName = leftAsOperator.getActual();
@@ -127,19 +127,19 @@ public class GremlinSqlSelectMulti extends GremlinSqlSelect {
 
         if (!sqlMetadata.getIsColumnEdge(leftTableRename, leftColumn) ||
                 !sqlMetadata.getIsColumnEdge(rightTableRename, rightColumn)) {
-            throw SqlGremlinError.get(SqlGremlinError.JOIN_EDGELESS_VERTICES);
+            throw SqlGremlinError.create(SqlGremlinError.JOIN_EDGELESS_VERTICES);
         }
 
         if (rightColumn.endsWith(GremlinTableBase.IN_ID)) {
             if (!leftColumn.endsWith(GremlinTableBase.OUT_ID)) {
-                throw SqlGremlinError.get(SqlGremlinError.JOIN_EDGELESS_VERTICES);
+                throw SqlGremlinError.create(SqlGremlinError.JOIN_EDGELESS_VERTICES);
             }
         } else if (rightColumn.endsWith(GremlinTableBase.OUT_ID)) {
             if (!leftColumn.endsWith(GremlinTableBase.IN_ID)) {
-                throw SqlGremlinError.get(SqlGremlinError.JOIN_EDGELESS_VERTICES);
+                throw SqlGremlinError.create(SqlGremlinError.JOIN_EDGELESS_VERTICES);
             }
         } else {
-            throw SqlGremlinError.get(SqlGremlinError.JOIN_EDGELESS_VERTICES);
+            throw SqlGremlinError.create(SqlGremlinError.JOIN_EDGELESS_VERTICES);
         }
 
         final String edgeLabel = sqlMetadata.getColumnEdgeLabel(leftColumn);
@@ -247,7 +247,7 @@ public class GremlinSqlSelectMulti extends GremlinSqlSelect {
                     byUnion.add(__.id());
                 } else if (column.endsWith(GremlinTableBase.ID)) {
                     // TODO: Grouping edges that are not the edge that the vertex are connected - needs to be implemented.
-                    throw SqlGremlinError.get(SqlGremlinError.CANNOT_GROUP_EDGES);
+                    throw SqlGremlinError.create(SqlGremlinError.CANNOT_GROUP_EDGES);
                 } else {
                     if (inVRename.equals(table)) {
                         byUnion.add(__.inV().hasLabel(table)
@@ -256,7 +256,7 @@ public class GremlinSqlSelectMulti extends GremlinSqlSelect {
                         byUnion.add(__.outV().hasLabel(table)
                                 .values(sqlMetadata.getActualColumnName(sqlMetadata.getGremlinTable(table), column)));
                     } else {
-                        throw SqlGremlinError.get(SqlGremlinError.CANNOT_GROUP_TABLE, table);
+                        throw SqlGremlinError.create(SqlGremlinError.CANNOT_GROUP_TABLE, table);
                     }
                 }
             }
@@ -282,7 +282,7 @@ public class GremlinSqlSelectMulti extends GremlinSqlSelect {
             final String column = gremlinSqlIdentifier.getColumn();
             if (column.endsWith(GremlinTableBase.IN_ID) || column.endsWith(GremlinTableBase.OUT_ID)) {
                 // TODO: Grouping edges that are not the edge that the vertex are connected - needs to be implemented.
-                throw SqlGremlinError.get(SqlGremlinError.CANNOT_GROUP_EDGES);
+                throw SqlGremlinError.create(SqlGremlinError.CANNOT_GROUP_EDGES);
             } else {
                 if (sqlMetadata.getTableHasColumn(inVTable, column)) {
                     graphTraversal.by(__.unfold().inV().hasLabel(inVTable.getLabel())
@@ -291,7 +291,7 @@ public class GremlinSqlSelectMulti extends GremlinSqlSelect {
                     graphTraversal.by(__.unfold().outV().hasLabel(outVTable.getLabel())
                             .values(sqlMetadata.getActualColumnName(outVTable, column)));
                 } else {
-                    throw SqlGremlinError.get(SqlGremlinError.CANNOT_GROUP_COLUMN, column);
+                    throw SqlGremlinError.create(SqlGremlinError.CANNOT_GROUP_COLUMN, column);
                 }
             }
         }
@@ -301,6 +301,6 @@ public class GremlinSqlSelectMulti extends GremlinSqlSelect {
         if (sqlSelect.getHaving() == null) {
             return;
         }
-        throw SqlGremlinError.get(SqlGremlinError.JOIN_HAVING_UNSUPPORTED);
+        throw SqlGremlinError.create(SqlGremlinError.JOIN_HAVING_UNSUPPORTED);
     }
 }

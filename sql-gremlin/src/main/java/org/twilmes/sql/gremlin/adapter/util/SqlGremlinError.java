@@ -1,3 +1,22 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 package org.twilmes.sql.gremlin.adapter.util;
 
 import org.slf4j.Logger;
@@ -5,6 +24,9 @@ import org.slf4j.Logger;
 import java.sql.SQLException;
 import java.util.ResourceBundle;
 
+/**
+ * Enum representing the possible error messages and lookup facilities for localization.
+ */
 public enum SqlGremlinError {
     IDENTIFIER_INDEX_OUT_OF_BOUNDS,
     IDENTIFIER_LIST_EMPTY,
@@ -67,12 +89,29 @@ public enum SqlGremlinError {
 
     private static final ResourceBundle RESOURCE = ResourceBundle.getBundle("error-messages");
 
+    /**
+     * Looks up the resource bundle string corresponding to the key, and formats it with the provided
+     * arguments.
+     *
+     * @param key        Resource key for bundle provided to constructor.
+     * @param formatArgs Any additional arguments to format the resource string with.
+     * @return resource String, formatted with formatArgs.
+     */
     private static String getMessage(final SqlGremlinError key, final Object... formatArgs) {
         return String.format(RESOURCE.getString(key.name()), formatArgs);
     }
 
-    public static SQLException get(final SqlGremlinError key, final Logger logger, final Exception cause,
-                                   final Object... formatArgs) {
+    /**
+     * Helper method for creating an appropriate SQLException.
+     *
+     * @param key           Key for the error message.
+     * @param logger        Logger for logging the error message.
+     * @param cause         The underlying cause for the SQLException.
+     * @param formatArgs    Any additional arguments to format the error message with.
+     * @return SQLException
+     */
+    public static SQLException create(final SqlGremlinError key, final Logger logger, final Throwable cause,
+                                      final Object... formatArgs) {
         final String message = getMessage(key, formatArgs);
         final SQLException exception;
 
@@ -91,15 +130,38 @@ public enum SqlGremlinError {
         return exception;
     }
 
-     public static SQLException get(final SqlGremlinError key, final Logger logger, final Object... formatArgs) {
-        return get(key, logger, null, formatArgs);
+    /**
+     * Helper method for creating an appropriate SQLException.
+     *
+     * @param key           Key for the error message.
+     * @param logger        Logger for logging the error message.
+     * @param formatArgs    Any additional arguments to format the error message with.
+     * @return SQLException
+     */
+     public static SQLException create(final SqlGremlinError key, final Logger logger, final Object... formatArgs) {
+        return create(key, logger, null, formatArgs);
      }
 
-     public static SQLException get(final SqlGremlinError key, final Exception cause, final Object... formatArgs) {
-        return get(key, null, cause, formatArgs);
+    /**
+     * Helper method for creating an appropriate SQLException.
+     *
+     * @param key           Key for the error message.
+     * @param cause         The underlying cause for the SQLException.
+     * @param formatArgs    Any additional arguments to format the error message with.
+     * @return SQLException
+     */
+     public static SQLException create(final SqlGremlinError key, final Throwable cause, final Object... formatArgs) {
+        return create(key, null, cause, formatArgs);
      }
 
-     public static SQLException get(final SqlGremlinError key, final Object... formatArgs) {
-        return get(key, null, null, formatArgs);
+    /**
+     * Helper method for creating an appropriate SQLException.
+     *
+     * @param key           Key for the error message.
+     * @param formatArgs    Any additional arguments to format the error message with.
+     * @return SQLException
+     */
+     public static SQLException create(final SqlGremlinError key, final Object... formatArgs) {
+        return create(key, null, null, formatArgs);
      }
 }

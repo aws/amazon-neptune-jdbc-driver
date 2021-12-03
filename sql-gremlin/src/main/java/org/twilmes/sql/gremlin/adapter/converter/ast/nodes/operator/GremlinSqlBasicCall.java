@@ -59,11 +59,11 @@ public class GremlinSqlBasicCall extends GremlinSqlNode {
     void validate() throws SQLException {
         if (gremlinSqlOperator instanceof GremlinSqlAsOperator) {
             if (gremlinSqlNodes.size() != 2) {
-                throw SqlGremlinError.get(SqlGremlinError.UNEXPECTED_NODE_GREMLINSQLBASICCALL);
+                throw SqlGremlinError.create(SqlGremlinError.UNEXPECTED_NODE_GREMLINSQLBASICCALL);
             }
         } else if (gremlinSqlOperator instanceof GremlinSqlAggFunction) {
             if (gremlinSqlNodes.size() != 1) {
-                throw SqlGremlinError.get(SqlGremlinError.UNEXPECTED_NODE_GREMLINSQLAGGFUNCTION);
+                throw SqlGremlinError.create(SqlGremlinError.UNEXPECTED_NODE_GREMLINSQLAGGFUNCTION);
             }
         }
     }
@@ -84,7 +84,7 @@ public class GremlinSqlBasicCall extends GremlinSqlNode {
                 return ((GremlinSqlAggFunction) gremlinSqlOperator).getNewName();
             }
         }
-        throw SqlGremlinError.get(SqlGremlinError.COLUMN_RENAME_UNDETERMINED);
+        throw SqlGremlinError.create(SqlGremlinError.COLUMN_RENAME_UNDETERMINED);
     }
 
     public String getActual() throws SQLException {
@@ -93,6 +93,6 @@ public class GremlinSqlBasicCall extends GremlinSqlNode {
         } else if (gremlinSqlOperator instanceof GremlinSqlAggFunction) {
             return ((GremlinSqlAggFunction) gremlinSqlOperator).getNewName();
         }
-        throw SqlGremlinError.get(SqlGremlinError.COLUMN_ACTUAL_NAME_UNDETERMINED);
+        throw SqlGremlinError.create(SqlGremlinError.COLUMN_ACTUAL_NAME_UNDETERMINED);
     }
 }
