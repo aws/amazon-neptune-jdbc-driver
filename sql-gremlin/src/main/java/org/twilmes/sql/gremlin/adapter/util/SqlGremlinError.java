@@ -22,6 +22,7 @@ package org.twilmes.sql.gremlin.adapter.util;
 import org.slf4j.Logger;
 
 import java.sql.SQLException;
+import java.util.Locale;
 import java.util.ResourceBundle;
 
 /**
@@ -87,7 +88,12 @@ public enum SqlGremlinError {
     NO_JOIN_COLUMN,
     NOT_LOGICAL_FILTER;
 
-    private static final ResourceBundle RESOURCE = ResourceBundle.getBundle("error-messages");
+    private static final ResourceBundle RESOURCE;
+
+    static {
+        Locale.setDefault(Locale.ENGLISH);
+        RESOURCE = ResourceBundle.getBundle("error-messages");
+    }
 
     /**
      * Looks up the resource bundle string corresponding to the key, and formats it with the provided
