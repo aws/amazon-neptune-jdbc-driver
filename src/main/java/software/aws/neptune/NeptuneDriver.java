@@ -135,7 +135,5 @@ public class NeptuneDriver extends Driver implements java.sql.Driver {
                     LOGGER, SqlState.CONNECTION_EXCEPTION,
                     SqlError.INVALID_CONNECTION_PROPERTY);
         }
-
     }
-
 }
