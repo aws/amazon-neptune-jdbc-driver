@@ -32,6 +32,8 @@ import org.apache.calcite.schema.TranslatableTable;
 import org.apache.calcite.util.Pair;
 import org.twilmes.sql.gremlin.adapter.converter.schema.calcite.GremlinRel;
 import org.twilmes.sql.gremlin.adapter.converter.schema.calcite.GremlinTableScan;
+import org.twilmes.sql.gremlin.adapter.util.SqlGremlinError;
+
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
@@ -60,8 +62,7 @@ public class GremlinTableBase extends AbstractQueryableTable implements Translat
                 return entry.getValue();
             }
         }
-        throw new SQLException(String.format(
-                "Error: Could not find column '%s' on %s with label '%s'.", column, isVertex ? "vertex" : "edge", label));
+        throw SqlGremlinError.create(SqlGremlinError.COLUMN_NOT_FOUND, column, isVertex ? "vertex" : "edge", label);
     }
 
     public boolean hasColumn(final String column) {

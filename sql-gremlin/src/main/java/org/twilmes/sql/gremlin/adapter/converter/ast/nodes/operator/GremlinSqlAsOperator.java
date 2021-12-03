@@ -28,6 +28,8 @@ import org.twilmes.sql.gremlin.adapter.converter.SqlTraversalEngine;
 import org.twilmes.sql.gremlin.adapter.converter.ast.nodes.GremlinSqlNode;
 import org.twilmes.sql.gremlin.adapter.converter.ast.nodes.operands.GremlinSqlIdentifier;
 import org.twilmes.sql.gremlin.adapter.converter.ast.nodes.operator.logic.GremlinSqlLiteral;
+import org.twilmes.sql.gremlin.adapter.util.SqlGremlinError;
+
 import java.sql.SQLException;
 import java.util.List;
 
@@ -58,8 +60,7 @@ public class GremlinSqlAsOperator extends GremlinSqlOperator {
             ((GremlinSqlBasicCall) sqlOperands.get(0)).generateTraversal(graphTraversal);
         } else if (!(sqlOperands.get(0) instanceof GremlinSqlIdentifier) &&
                 !(sqlOperands.get(0) instanceof GremlinSqlLiteral)) {
-            throw new SQLException(
-                    "Error: expected operand to be GremlinSqlBasicCall or GremlinSqlIdentifier in GremlinSqlOperator.");
+            throw SqlGremlinError.create(SqlGremlinError.UNEXPECTED_OPERAND);
         }
 
         if (sqlOperands.size() == 1) {
@@ -76,15 +77,14 @@ public class GremlinSqlAsOperator extends GremlinSqlOperator {
 
     public String getName(final int operandIdx, final int nameIdx) throws SQLException {
         if (operandIdx >= sqlOperands.size() || !(sqlOperands.get(operandIdx) instanceof GremlinSqlIdentifier)) {
-            throw new SQLException(
-                    "Error: Expected operand idx less than number of operands and GremlinSqlIdentifier for operand");
+            throw SqlGremlinError.create(SqlGremlinError.UNEXPECTED_OPERAND_INDEX);
         }
         return ((GremlinSqlIdentifier) sqlOperands.get(operandIdx)).getName(nameIdx);
     }
 
     public String getActual() throws SQLException {
         if (sqlOperands.size() != 2) {
-            throw new SQLException("Error: Expected two operands for SQL AS statement.");
+            throw SqlGremlinError.create(SqlGremlinError.OPERANDS_EXPECTED_TWO_SQL_AS);
         }
         if (sqlOperands.get(0) instanceof GremlinSqlIdentifier) {
             return ((GremlinSqlIdentifier) sqlOperands.get(0)).getColumn();
@@ -93,18 +93,18 @@ public class GremlinSqlAsOperator extends GremlinSqlOperator {
         } else if (sqlOperands.get(0) instanceof GremlinSqlLiteral) {
             return ((GremlinSqlLiteral) sqlOperands.get(0)).getValue().toString();
         }
-        throw new SQLException("Error, unable to get actual name in GremlinSqlAsOperator.");
+        throw SqlGremlinError.create(SqlGremlinError.FAILED_GET_NAME_ACTUAL);
     }
 
     public String getRename() throws SQLException {
         if (sqlOperands.size() != 2) {
-            throw new SQLException("Error: Expected two operands for SQL AS statement.");
+            throw SqlGremlinError.create(SqlGremlinError.OPERANDS_EXPECTED_TWO_SQL_AS);
         }
         if (sqlOperands.get(1) instanceof GremlinSqlIdentifier) {
             return ((GremlinSqlIdentifier) sqlOperands.get(1)).getColumn();
         } else if (sqlOperands.get(1) instanceof GremlinSqlBasicCall) {
             return ((GremlinSqlBasicCall) sqlOperands.get(1)).getRename();
         }
-        throw new SQLException("Error, unable to get rename name in GremlinSqlAsOperator.");
+        throw SqlGremlinError.create(SqlGremlinError.FAILED_GET_NAME_RENAME);
     }
 }

@@ -44,6 +44,8 @@ import org.twilmes.sql.gremlin.adapter.converter.ast.nodes.GremlinSqlFactory;
 import org.twilmes.sql.gremlin.adapter.converter.ast.nodes.select.GremlinSqlSelect;
 import org.twilmes.sql.gremlin.adapter.converter.schema.calcite.GremlinSchema;
 import org.twilmes.sql.gremlin.adapter.results.SqlGremlinQueryResult;
+import org.twilmes.sql.gremlin.adapter.util.SqlGremlinError;
+
 import java.sql.SQLException;
 import java.util.List;
 
@@ -82,7 +84,7 @@ public class SqlConverter {
         if (sqlNode instanceof SqlSelect) {
             return GremlinSqlFactory.createSelect((SqlSelect) sqlNode, g);
         } else {
-            throw new SQLException("Only sql select statements are supported right now.");
+            throw SqlGremlinError.create(SqlGremlinError.SQL_SELECT_ONLY);
         }
     }
 
@@ -111,7 +113,7 @@ public class SqlConverter {
             try {
                 validate = planner.validate(planner.parse(sql));
             } catch (final Exception e) {
-                throw new SQLException(String.format("Error parsing: \"%s\". Error: \"%s\".", sql, e), e);
+                throw SqlGremlinError.create(SqlGremlinError.PARSE_ERROR, e, sql);
             }
         }
     }

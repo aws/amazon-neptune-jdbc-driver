@@ -30,6 +30,8 @@ import org.twilmes.sql.gremlin.adapter.converter.SqlTraversalEngine;
 import org.twilmes.sql.gremlin.adapter.converter.ast.nodes.GremlinSqlNode;
 import org.twilmes.sql.gremlin.adapter.converter.ast.nodes.operands.GremlinSqlIdentifier;
 import org.twilmes.sql.gremlin.adapter.converter.ast.nodes.operator.logic.GremlinSqlLiteral;
+import org.twilmes.sql.gremlin.adapter.util.SqlGremlinError;
+
 import java.sql.SQLException;
 import java.util.List;
 
@@ -56,7 +58,7 @@ public class GremlinSqlPostfixOperator extends GremlinSqlOperator {
         if (sqlPostfixOperator.kind.equals(SqlKind.DESCENDING)) {
             return Order.desc;
         }
-        throw new SQLException("Error, no appropriate order for GremlinSqlPostFixOperator of " + sqlPostfixOperator.kind.sql + ".");
+        throw SqlGremlinError.create(SqlGremlinError.NO_ORDER, sqlPostfixOperator.kind.sql);
     }
 
     @Override
@@ -64,8 +66,7 @@ public class GremlinSqlPostfixOperator extends GremlinSqlOperator {
         if (sqlOperands.get(0) instanceof GremlinSqlBasicCall) {
             ((GremlinSqlBasicCall) sqlOperands.get(0)).generateTraversal(graphTraversal);
         } else if (!(sqlOperands.get(0) instanceof GremlinSqlIdentifier) && !(sqlOperands.get(0) instanceof GremlinSqlLiteral)) {
-            throw new SQLException(
-                    "Error: expected operand to be GremlinSqlBasicCall or GremlinSqlIdentifier in GremlinSqlOperator.");
+            throw SqlGremlinError.create(SqlGremlinError.UNEXPECTED_OPERAND);
         }
 
         if (sqlOperands.size() == 1) {

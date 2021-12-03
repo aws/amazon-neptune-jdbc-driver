@@ -27,7 +27,7 @@ import org.apache.calcite.plan.RelTraitSet;
 import org.apache.calcite.rel.RelNode;
 import org.apache.calcite.rel.convert.ConverterRule;
 import org.apache.calcite.rel.logical.LogicalFilter;
-import java.sql.SQLException;
+import org.twilmes.sql.gremlin.adapter.util.SqlGremlinError;
 
 /**
  * List of rules that get pushed down and converted into GremlinTraversals.  Right now
@@ -69,9 +69,8 @@ class GremlinRules {
         @SneakyThrows
         public RelNode convert(final RelNode rel) {
             if (!(rel instanceof LogicalFilter)) {
-                throw new SQLException(
-                        "Error: Cannot convert " + rel.getClass().getName() + " to " + LogicalFilter.class.getName() +
-                                ".");
+                throw SqlGremlinError.create(SqlGremlinError.NOT_LOGICAL_FILTER, rel.getClass().getName(),
+                        LogicalFilter.class.getName());
             }
             final LogicalFilter filter = (LogicalFilter) rel;
             final RelTraitSet traitSet = filter.getTraitSet().replace(getOut());

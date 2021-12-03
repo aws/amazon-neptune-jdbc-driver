@@ -30,6 +30,8 @@ import org.twilmes.sql.gremlin.adapter.converter.ast.nodes.GremlinSqlNode;
 import org.twilmes.sql.gremlin.adapter.converter.ast.nodes.operands.GremlinSqlIdentifier;
 import org.twilmes.sql.gremlin.adapter.converter.ast.nodes.operator.aggregate.GremlinSqlAggFunction;
 import org.twilmes.sql.gremlin.adapter.converter.ast.nodes.operator.logic.GremlinSqlLiteral;
+import org.twilmes.sql.gremlin.adapter.util.SqlGremlinError;
+
 import java.sql.SQLException;
 import java.util.List;
 
@@ -57,11 +59,11 @@ public class GremlinSqlBasicCall extends GremlinSqlNode {
     void validate() throws SQLException {
         if (gremlinSqlOperator instanceof GremlinSqlAsOperator) {
             if (gremlinSqlNodes.size() != 2) {
-                throw new SQLException("Error, expected only two sub nodes for GremlinSqlBasicCall.");
+                throw SqlGremlinError.create(SqlGremlinError.UNEXPECTED_NODE_GREMLINSQLBASICCALL);
             }
         } else if (gremlinSqlOperator instanceof GremlinSqlAggFunction) {
             if (gremlinSqlNodes.size() != 1) {
-                throw new SQLException("Error, expected only one sub node for GremlinSqlAggFunction.");
+                throw SqlGremlinError.create(SqlGremlinError.UNEXPECTED_NODE_GREMLINSQLAGGFUNCTION);
             }
         }
     }
@@ -82,7 +84,7 @@ public class GremlinSqlBasicCall extends GremlinSqlNode {
                 return ((GremlinSqlAggFunction) gremlinSqlOperator).getNewName();
             }
         }
-        throw new SQLException("Unable to determine column rename.");
+        throw SqlGremlinError.create(SqlGremlinError.COLUMN_RENAME_UNDETERMINED);
     }
 
     public String getActual() throws SQLException {
@@ -91,6 +93,6 @@ public class GremlinSqlBasicCall extends GremlinSqlNode {
         } else if (gremlinSqlOperator instanceof GremlinSqlAggFunction) {
             return ((GremlinSqlAggFunction) gremlinSqlOperator).getNewName();
         }
-        throw new SQLException("Unable to determine actual column name.");
+        throw SqlGremlinError.create(SqlGremlinError.COLUMN_ACTUAL_NAME_UNDETERMINED);
     }
 }

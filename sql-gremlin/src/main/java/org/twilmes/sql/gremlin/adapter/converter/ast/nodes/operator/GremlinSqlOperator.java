@@ -26,6 +26,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.twilmes.sql.gremlin.adapter.converter.SqlMetadata;
 import org.twilmes.sql.gremlin.adapter.converter.ast.nodes.GremlinSqlNode;
+import org.twilmes.sql.gremlin.adapter.util.SqlGremlinError;
+
 import java.sql.SQLException;
 import java.util.List;
 
@@ -45,9 +47,9 @@ public abstract class GremlinSqlOperator {
 
     public void appendOperatorTraversal(final GraphTraversal<?, ?> graphTraversal) throws SQLException {
         if (sqlOperands.size() > 2) {
-            throw new SQLException("Error: Expected 2 or less operands in operations.");
+            throw SqlGremlinError.create(SqlGremlinError.OPERANDS_MORE_THAN_TWO);
         } else if (sqlOperands.isEmpty()) {
-            throw new SQLException("Error: Expected at least 1 operand in operations.");
+            throw SqlGremlinError.create(SqlGremlinError.OPERANDS_EMPTY);
         }
 
         appendTraversal(graphTraversal);

@@ -242,7 +242,7 @@ public class GremlinSqlAdvancedSelectTest extends GremlinSqlBaseTest {
 
         // NULLS FIRST predicate is not currently supported.
         runQueryTestThrows("SELECT name FROM \"gremlin\".\"person\" ORDER BY name NULLS FIRST",
-                "Error, no appropriate order for GremlinSqlPostFixOperator of NULLS_FIRST.");
+                "Error: No appropriate order for GremlinSqlPostFixOperator of NULLS_FIRST.");
     }
 
     @Test

@@ -34,6 +34,8 @@ import org.twilmes.sql.gremlin.adapter.converter.ast.nodes.operator.GremlinSqlBa
 import org.twilmes.sql.gremlin.adapter.converter.ast.nodes.operator.GremlinSqlOperator;
 import org.twilmes.sql.gremlin.adapter.converter.ast.nodes.operator.GremlinSqlPrefixOperator;
 import org.twilmes.sql.gremlin.adapter.converter.ast.nodes.operator.GremlinSqlTraversalAppender;
+import org.twilmes.sql.gremlin.adapter.util.SqlGremlinError;
+
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.List;
@@ -99,8 +101,7 @@ public class GremlinSqlBinaryOperator extends GremlinSqlOperator {
         if (BINARY_APPENDERS.containsKey(sqlBinaryOperator.kind)) {
             BINARY_APPENDERS.get(sqlBinaryOperator.kind).appendTraversal(graphTraversal, sqlOperands);
         } else {
-            throw new SQLException(
-                    String.format("Error: Aggregate function %s is not supported.", sqlBinaryOperator.kind.sql));
+            throw SqlGremlinError.create(SqlGremlinError.AGGREGATE_NOT_SUPPORTED, sqlBinaryOperator.kind.sql);
         }
     }
 
@@ -116,7 +117,7 @@ public class GremlinSqlBinaryOperator extends GremlinSqlOperator {
                 if (gremlinSqlPrefixOperator.isNot()) {
                     appendBooleanEquals(sqlMetadata, graphTraversal, gremlinSqlIdentifier, false);
                 } else {
-                    throw new SQLException("Error: Only NOT prefix is supported in the WHERE clause.");
+                    throw SqlGremlinError.create(SqlGremlinError.ONLY_NOT_PREFIX_SUPPORTED);
                 }
             } else {
                 appendBooleanEquals(sqlMetadata, graphTraversal, gremlinSqlIdentifier, true);
@@ -129,7 +130,7 @@ public class GremlinSqlBinaryOperator extends GremlinSqlOperator {
     private GraphTraversal<?, ?>[] getEmbeddedLogicOperators(final List<GremlinSqlNode> operands)
             throws SQLException {
         if (operands.size() != 2) {
-            throw new SQLException("Error: Binary operator without 2 operands received.");
+            throw SqlGremlinError.create(SqlGremlinError.BINARY_OPERAND_COUNT);
         }
         final GraphTraversal<?, ?>[] graphTraversals = new GraphTraversal[2];
         for (int i = 0; i < operands.size(); i++) {
@@ -157,7 +158,7 @@ public class GremlinSqlBinaryOperator extends GremlinSqlOperator {
     private GraphTraversal<?, ?>[] getTraversalEqualities(final List<GremlinSqlNode> operands)
             throws SQLException {
         if (operands.size() != 2) {
-            throw new SQLException("Error: Binary operator without 2 operands received.");
+            throw SqlGremlinError.create(SqlGremlinError.BINARY_OPERAND_COUNT);
         }
         final GraphTraversal<?, ?>[] graphTraversals = new GraphTraversal[2];
         for (int i = 0; i < operands.size(); i++) {

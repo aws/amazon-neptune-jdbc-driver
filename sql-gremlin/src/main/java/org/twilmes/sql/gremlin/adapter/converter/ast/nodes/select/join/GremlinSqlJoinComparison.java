@@ -27,6 +27,8 @@ import org.slf4j.LoggerFactory;
 import org.twilmes.sql.gremlin.adapter.converter.SqlMetadata;
 import org.twilmes.sql.gremlin.adapter.converter.ast.nodes.GremlinSqlNode;
 import org.twilmes.sql.gremlin.adapter.converter.ast.nodes.operands.GremlinSqlIdentifier;
+import org.twilmes.sql.gremlin.adapter.util.SqlGremlinError;
+
 import java.sql.SQLException;
 import java.util.List;
 
@@ -62,13 +64,13 @@ public class GremlinSqlJoinComparison {
     public String getColumn(final String renamedTable) throws SQLException {
         for (final GremlinSqlNode gremlinSqlNode : gremlinSqlNodes) {
             if (!(gremlinSqlNode instanceof GremlinSqlIdentifier)) {
-                throw new SQLException("Error: Expected nodes in join comparison to be GremlinSqlIdentifiers.");
+                throw SqlGremlinError.create(SqlGremlinError.UNEXPECTED_JOIN_NODES);
             }
             final GremlinSqlIdentifier gremlinSqlIdentifier = (GremlinSqlIdentifier) gremlinSqlNode;
             if (gremlinSqlIdentifier.getName(0).equals(renamedTable)) {
                 return gremlinSqlIdentifier.getName(1);
             }
         }
-        throw new SQLException("Error: Expected to find join column for renamed table.");
+        throw SqlGremlinError.create(SqlGremlinError.NO_JOIN_COLUMN);
     }
 }

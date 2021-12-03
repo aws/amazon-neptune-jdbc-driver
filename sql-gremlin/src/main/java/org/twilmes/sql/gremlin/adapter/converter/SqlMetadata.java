@@ -25,7 +25,6 @@ import org.apache.calcite.sql.SqlCall;
 import org.apache.calcite.sql.SqlNode;
 import org.apache.calcite.sql.SqlNodeList;
 import org.apache.calcite.sql.SqlOperator;
-import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.twilmes.sql.gremlin.adapter.converter.schema.calcite.GremlinSchema;
@@ -33,6 +32,8 @@ import org.twilmes.sql.gremlin.adapter.converter.schema.gremlin.GremlinEdgeTable
 import org.twilmes.sql.gremlin.adapter.converter.schema.gremlin.GremlinProperty;
 import org.twilmes.sql.gremlin.adapter.converter.schema.gremlin.GremlinTableBase;
 import org.twilmes.sql.gremlin.adapter.converter.schema.gremlin.GremlinVertexTable;
+import org.twilmes.sql.gremlin.adapter.util.SqlGremlinError;
+
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -105,12 +106,12 @@ public class SqlMetadata {
         } else if (columnName.endsWith(GremlinTableBase.OUT_ID)) {
             gremlinTableBase = getGremlinTable(column.substring(0, column.length() - GremlinTableBase.OUT_ID.length()));
         } else {
-            throw new SQLException(String.format("Error: Edge labels must end with %s or %s.", GremlinTableBase.IN_ID,
-                    GremlinTableBase.OUT_ID));
+            throw SqlGremlinError.create(SqlGremlinError.EDGE_LABEL_END_MISMATCH, GremlinTableBase.IN_ID,
+                    GremlinTableBase.OUT_ID);
         }
 
         if (gremlinTableBase.getIsVertex()) {
-            throw new SQLException("Error: Expected edge table.");
+            throw SqlGremlinError.create(SqlGremlinError.EDGE_EXPECTED);
         }
         return gremlinTableBase.getLabel();
     }
@@ -161,7 +162,7 @@ public class SqlMetadata {
                 return false;
             }
         }
-        throw new SQLException("Error: Table {} does not exist.", renamedTableName);
+        throw SqlGremlinError.create(SqlGremlinError.TABLE_DOES_NOT_EXIST, renamedTableName);
     }
 
     public GremlinTableBase getGremlinTable(final String table) throws SQLException {
@@ -171,7 +172,7 @@ public class SqlMetadata {
                 return gremlinTableBase;
             }
         }
-        throw new SQLException(String.format("Error: Table %s does not exist.", renamedTableName));
+        throw SqlGremlinError.create(SqlGremlinError.TABLE_DOES_NOT_EXIST, renamedTableName);
     }
 
     public void addRenamedTable(final String actualName, final String renameName) {
@@ -225,7 +226,7 @@ public class SqlMetadata {
                 return gremlinEdgeTable.getLabel();
             }
         }
-        throw new SQLException(String.format("Error: Table %s.", table));
+        throw SqlGremlinError.create(SqlGremlinError.ERROR_TABLE, table);
     }
 
     public void checkAggregate(final SqlNodeList sqlNodeList) {
