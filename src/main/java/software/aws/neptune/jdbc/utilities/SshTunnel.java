@@ -27,6 +27,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.sql.SQLException;
+import java.util.Arrays;
 import java.util.regex.Matcher;
 
 public class SshTunnel {
@@ -41,7 +42,6 @@ public class SshTunnel {
     private static final Logger LOGGER = LoggerFactory.getLogger(SshTunnel.class);
     private static final int DEFAULT_PORT = 22;
     private static final String LOCALHOST = "localhost";
-    private static final int PORT = 8182;
     private static final int CONNECTION_TIMEOUT_MILLISECONDS = 3000;
     private Integer localPort = null;
     private Session session = null;
@@ -120,7 +120,7 @@ public class SshTunnel {
         if (!Files.exists(Paths.get(knowHostsFilename))) {
             throw SqlError.createSQLException(
                     LOGGER,
-                    SqlState.CONNECTION_EXCEPTION,
+                    SqlState.INVALID_AUTHORIZATION_SPECIFICATION,
                     SqlError.KNOWN_HOSTS_FILE_NOT_FOUND,
                     connectionProperties.getSshKnownHostsFile());
         }
@@ -132,8 +132,14 @@ public class SshTunnel {
         }
 
         final HostKey[] hostKeys = jSch.getHostKeyRepository().getHostKey();
-        if (hostKeys.length > 0 && hostKeys[0].getType() != null) {
-            session.setConfig(SERVER_HOST_KEY, hostKeys[0].getType());
+        final HostKey hostKey = Arrays.stream(hostKeys)
+                .filter(hk -> hk.getHost().equals(getHostName(connectionProperties)))
+                .findFirst().orElse(null);
+        // This will ensure a match between how the host key was hashed in the known_hosts file.
+        final String hostKeyType = (hostKey != null) ? hostKey.getType() : null;
+        // Set the hash algorithm
+        if (hostKeyType != null) {
+            session.setConfig(SERVER_HOST_KEY, hostKeyType);
         }
         session.setConfig(HASH_KNOWN_HOSTS, YES);
     }

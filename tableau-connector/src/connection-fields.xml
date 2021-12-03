@@ -29,4 +29,55 @@
     </boolean-options>
   </field>
 
+  <field name="v-additional-properties" label="Additional Connection Options" category="general" value-type="string" default-value="" optional="true"/>
+
+
+  <!-- Advanced tab. -->
+  <field name="v-ssh-tunnel" label="Enable SSH Tunnel" value-type="boolean" category="advanced" optional="true" default-value="false">
+    <boolean-options>
+      <false-value value="false" />
+      <true-value value="true" />
+    </boolean-options>
+  </field>
+
+  <field name="v-ssh-user" label="SSH User" value-type="string" category="advanced" optional="true" default-value="">
+    <conditions>
+      <condition field="v-ssh-tunnel" value="true" />
+    </conditions>
+  </field>
+
+  <field name="v-ssh-host" label="SSH Hostname" value-type="string" category="advanced" optional="true" default-value="">
+    <conditions>
+      <condition field="v-ssh-tunnel" value="true" />
+    </conditions>
+  </field>
+
+  <field name="v-ssh-priv-key-filename" label="SSH Private Key File" value-type="file" category="advanced" optional="true" default-value="">
+    <conditions>
+      <condition field="v-ssh-tunnel" value="true" />
+    </conditions>
+  </field>
+
+  <field name="v-ssh-priv-key-passphrase" label="SSH Private Key File Passphrase" value-type="string" category="advanced" optional="true" default-value="">
+    <conditions>
+      <condition field="v-ssh-tunnel" value="true" />
+    </conditions>
+  </field>
+
+  <field name="v-ssh-strict-host-key-check" label="SSH Strict Host Key Check (disabling option is less secure)" value-type="boolean" category="advanced" optional="true" default-value="true">
+    <conditions>
+      <condition field="v-ssh-tunnel" value="true" />
+    </conditions>
+    <boolean-options>
+      <false-value value="false" />
+      <true-value value="true" />
+    </boolean-options>
+  </field>
+
+  <field name="v-ssh-known-hosts-file" label="SSH Known Hosts File" value-type="file" category="advanced" optional="true" default-value="~/.ssh/known_hosts">
+    <conditions>
+      <condition field="v-ssh-strict-host-key-check" value="true" />
+    </conditions>
+  </field>
+
 </connection-fields>
