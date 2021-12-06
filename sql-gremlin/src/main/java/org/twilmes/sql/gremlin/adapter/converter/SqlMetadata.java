@@ -20,6 +20,7 @@
 package org.twilmes.sql.gremlin.adapter.converter;
 
 import lombok.Getter;
+import lombok.Setter;
 import org.apache.calcite.sql.SqlAggFunction;
 import org.apache.calcite.sql.SqlCall;
 import org.apache.calcite.sql.SqlNode;
@@ -59,6 +60,7 @@ public class SqlMetadata {
     private final Map<String, String> aggregateTypeMap = new HashMap<>();
     private boolean isAggregate = false;
     private boolean isGrouped = false;
+    private boolean doneFilters = false;
 
     public SqlMetadata(final GremlinSchema gremlinSchema) {
         this.gremlinSchema = gremlinSchema;
@@ -87,6 +89,10 @@ public class SqlMetadata {
         // Grouping invokes an implicit fold before the project that does not require additional unfolding.
         // Folding is required for aggregates that are not grouped.
         return getIsAggregate() && !getIsGrouped();
+    }
+
+    public void setIsDoneFilters(final boolean value) {
+        doneFilters = value;
     }
 
     public boolean getIsGrouped() {

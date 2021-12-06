@@ -319,4 +319,17 @@ public class GremlinSqlAdvancedSelectTest extends GremlinSqlBaseTest {
                 columns("name", "age"),
                 rows(r("Patty", 29), r("Pavel", 30), r("Phil", 31), r("Susan", 45), r("Juanita", 50)));
     }
+
+    @Test
+    void testComparisonOperator() throws SQLException {
+        runQueryTestResults(
+                "SELECT COUNT(wentToSpace) > 0 FROM person GROUP BY wentToSpace HAVING COUNT(wentToSpace) > 1",
+                columns("COUNT(wentToSpace) > 0"), rows(r(true), r(true)));
+        runQueryTestResults(
+                "SELECT COUNT(wentToSpace) <> 0 FROM person GROUP BY wentToSpace",
+                columns("COUNT(wentToSpace) <> 0"), rows(r(true), r(true)));
+        runQueryTestResults(
+                "SELECT COUNT(wentToSpace) = 0 FROM person GROUP BY wentToSpace",
+                columns("COUNT(wentToSpace) = 0"), rows(r(false), r(false)));
+    }
 }

@@ -100,6 +100,9 @@ public class GremlinSqlBinaryOperator extends GremlinSqlOperator {
     protected void appendTraversal(final GraphTraversal<?, ?> graphTraversal) throws SQLException {
         if (BINARY_APPENDERS.containsKey(sqlBinaryOperator.kind)) {
             BINARY_APPENDERS.get(sqlBinaryOperator.kind).appendTraversal(graphTraversal, sqlOperands);
+            if (sqlMetadata.isDoneFilters()) {
+                graphTraversal.choose(__.coalesce(__.count(), __.constant(0L)).is(P.gt(0)), __.constant(true), __.constant(false));
+            }
         } else {
             throw SqlGremlinError.create(SqlGremlinError.AGGREGATE_NOT_SUPPORTED, sqlBinaryOperator.kind.sql);
         }
@@ -176,6 +179,23 @@ public class GremlinSqlBinaryOperator extends GremlinSqlOperator {
         return graphTraversals;
     }
 
+    public String getOperandName(final GremlinSqlNode operand) throws SQLException {
+        if (operand instanceof GremlinSqlIdentifier) {
+            final GremlinSqlIdentifier gremlinSqlIdentifier = (GremlinSqlIdentifier) operand;
+            return gremlinSqlIdentifier.isStar() ? "*" : gremlinSqlIdentifier.getColumn();
+        } else if (operand instanceof GremlinSqlLiteral) {
+            return ((GremlinSqlLiteral) operand).getValue().toString();
+        } else if (operand instanceof GremlinSqlBasicCall) {
+            return ((GremlinSqlBasicCall) operand).getRename();
+        }
+        throw new SQLException("Error, unsupported operand type, cannot rename column.");
+    }
+
+    public String getNewName() throws SQLException {
+        return String.format("%s %s %s", getOperandName(sqlOperands.get(0)), sqlBinaryOperator.kind.sql,
+                getOperandName(sqlOperands.get(1)));
+    }
+
     public class GremlinSqlBinaryOperatorAppenderEquals implements GremlinSqlTraversalAppender {
         public void appendTraversal(final GraphTraversal<?, ?> graphTraversal, final List<GremlinSqlNode> operands)
                 throws SQLException {
@@ -249,5 +269,4 @@ public class GremlinSqlBinaryOperator extends GremlinSqlOperator {
             graphTraversal.or(getEmbeddedLogicOperators(operands));
         }
     }
-
 }
