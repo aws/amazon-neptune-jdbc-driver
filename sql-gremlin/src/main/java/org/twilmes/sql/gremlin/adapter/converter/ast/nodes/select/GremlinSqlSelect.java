@@ -159,7 +159,7 @@ public abstract class GremlinSqlSelect extends GremlinSqlNode {
         // into the pagination and have it know to jump the
         // first X number of results.
         if (sqlSelect.getOffset() != null) {
-            throw new SQLException("Error, OFFSET is not currently supported.");
+            throw SqlGremlinError.createNotSupported(SqlGremlinError.OFFSET_NOT_SUPPORTED);
         }
     }
 

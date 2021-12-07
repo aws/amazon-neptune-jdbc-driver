@@ -86,7 +86,8 @@ public enum SqlGremlinError {
     WHERE_BASIC_LITERALS,
     UNEXPECTED_JOIN_NODES,
     NO_JOIN_COLUMN,
-    NOT_LOGICAL_FILTER;
+    NOT_LOGICAL_FILTER,
+    OFFSET_NOT_SUPPORTED;
 
     private static final ResourceBundle RESOURCE;
 
@@ -103,7 +104,7 @@ public enum SqlGremlinError {
      * @param formatArgs Any additional arguments to format the resource string with.
      * @return resource String, formatted with formatArgs.
      */
-    private static String getMessage(final SqlGremlinError key, final Object... formatArgs) {
+    public static String getMessage(final SqlGremlinError key, final Object... formatArgs) {
         return String.format(RESOURCE.getString(key.name()), formatArgs);
     }
 
@@ -117,17 +118,17 @@ public enum SqlGremlinError {
      * @return SQLException
      */
     public static SQLException create(final SqlGremlinError key, final Logger logger, final Throwable cause,
-                                      final Object... formatArgs) {
+                                      final boolean isNotSupported, final Object... formatArgs) {
         final String message = getMessage(key, formatArgs);
         final SQLException exception;
 
         if (cause == null) {
-            exception = new SQLException(message);
+            exception = isNotSupported ? new SQLNotSupportedException(message) : new SQLException(message);
             if (logger != null) {
                 logger.error(message);
             }
         } else {
-            exception = new SQLException(message, cause);
+            exception = isNotSupported ? new SQLNotSupportedException(message, cause) : new SQLException(message, cause);
             if (logger != null) {
                 logger.error(message, cause);
             }
@@ -145,7 +146,7 @@ public enum SqlGremlinError {
      * @return SQLException
      */
      public static SQLException create(final SqlGremlinError key, final Logger logger, final Object... formatArgs) {
-        return create(key, logger, null, formatArgs);
+        return create(key, logger, null, false, formatArgs);
      }
 
     /**
@@ -157,7 +158,7 @@ public enum SqlGremlinError {
      * @return SQLException
      */
      public static SQLException create(final SqlGremlinError key, final Throwable cause, final Object... formatArgs) {
-        return create(key, null, cause, formatArgs);
+        return create(key, null, cause, false, formatArgs);
      }
 
     /**
@@ -168,6 +169,60 @@ public enum SqlGremlinError {
      * @return SQLException
      */
      public static SQLException create(final SqlGremlinError key, final Object... formatArgs) {
-        return create(key, null, null, formatArgs);
+        return create(key, null, null, false, formatArgs);
      }
+
+    /**
+     * Helper method for creating an appropriate SQLNotSupportedException.
+     *
+     * @param key           Key for the error message.
+     * @param logger        Logger for logging the error message.
+     * @param cause         The underlying cause for the SQLNotSupportedException.
+     * @param formatArgs    Any additional arguments to format the error message with.
+     * @return SQLException
+     */
+    public static SQLNotSupportedException createNotSupported(
+            final SqlGremlinError key,
+            final Logger logger,
+            final Throwable cause,
+            final Object... formatArgs) {
+        return (SQLNotSupportedException)create(key, logger, cause, true, formatArgs);
+    }
+
+    /**
+     * Helper method for creating an appropriate SQLNotSupportedException.
+     *
+     * @param key           Key for the error message.
+     * @param logger        Logger for logging the error message.
+     * @param formatArgs    Any additional arguments to format the error message with.
+     * @return SQLException
+     */
+    public static SQLNotSupportedException createNotSupported(final SqlGremlinError key, final Logger logger,
+                                                  final Object... formatArgs) {
+        return createNotSupported(key, logger, null, formatArgs);
+    }
+
+    /**
+     * Helper method for creating an appropriate SQLNotSupportedException.
+     *
+     * @param key           Key for the error message.
+     * @param cause         The underlying cause for the SQLNotSupportedException.
+     * @param formatArgs    Any additional arguments to format the error message with.
+     * @return SQLException
+     */
+    public static SQLNotSupportedException createNotSupported(final SqlGremlinError key, final Throwable cause,
+                                                  final Object... formatArgs) {
+        return createNotSupported(key, null, cause, formatArgs);
+    }
+
+    /**
+     * Helper method for creating an appropriate SQLNotSupportedException.
+     *
+     * @param key           Key for the error message.
+     * @param formatArgs    Any additional arguments to format the error message with.
+     * @return SQLException
+     */
+    public static SQLNotSupportedException createNotSupported(final SqlGremlinError key, final Object... formatArgs) {
+        return createNotSupported(key, null, null, formatArgs);
+    }
 }

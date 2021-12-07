@@ -117,7 +117,7 @@ public class GremlinSqlBinaryOperator extends GremlinSqlOperator {
                 if (gremlinSqlPrefixOperator.isNot()) {
                     appendBooleanEquals(sqlMetadata, graphTraversal, gremlinSqlIdentifier, false);
                 } else {
-                    throw SqlGremlinError.create(SqlGremlinError.ONLY_NOT_PREFIX_SUPPORTED);
+                    throw SqlGremlinError.createNotSupported(SqlGremlinError.ONLY_NOT_PREFIX_SUPPORTED);
                 }
             } else {
                 appendBooleanEquals(sqlMetadata, graphTraversal, gremlinSqlIdentifier, true);
