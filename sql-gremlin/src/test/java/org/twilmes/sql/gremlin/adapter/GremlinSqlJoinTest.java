@@ -85,5 +85,4 @@ public class GremlinSqlJoinTest extends GremlinSqlBaseTest {
                 columns("model"),
                 rows(r("delta 1"), r("delta 2"), r("delta 3")));
     }
-
 }
