@@ -41,7 +41,7 @@ public class SQLNotSupportedException extends SQLException {
      *
      * @param message   Message of the exception.
      */
-    public SQLNotSupportedException(String message) {
+    public SQLNotSupportedException(final String message) {
         super(message);
     }
 }
