@@ -151,8 +151,8 @@ public class GremlinSqlSelectSingle extends GremlinSqlSelect {
         }
     }
 
-    protected void generateDataRetrieval(final List<GremlinSqlIdentifier> gremlinSqlIdentifiers,
-                                         GraphTraversal<?, ?> graphTraversal) throws SQLException {
+    private void generateDataRetrieval(final List<GremlinSqlIdentifier> gremlinSqlIdentifiers,
+                                       GraphTraversal<?, ?> graphTraversal) throws SQLException {
         final String projectLabel = gremlinSqlIdentifiers.get(1).getName(0);
 
         final GraphTraversal<?, Map<String, ?>> graphTraversalDataPath = __.__();
