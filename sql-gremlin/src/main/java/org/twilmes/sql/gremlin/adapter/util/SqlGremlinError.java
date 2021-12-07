@@ -128,7 +128,7 @@ public enum SqlGremlinError {
                 logger.error(message);
             }
         } else {
-            exception = isNotSupported? new SQLNotSupportedException(message, cause) : new SQLException(message, cause);
+            exception = isNotSupported ? new SQLNotSupportedException(message, cause) : new SQLException(message, cause);
             if (logger != null) {
                 logger.error(message, cause);
             }
