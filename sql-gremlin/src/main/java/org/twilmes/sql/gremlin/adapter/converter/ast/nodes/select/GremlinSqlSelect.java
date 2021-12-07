@@ -24,12 +24,10 @@ import org.apache.calcite.sql.SqlSelect;
 import org.apache.tinkerpop.gremlin.groovy.jsr223.GroovyTranslator;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversal;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource;
-import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.__;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.twilmes.sql.gremlin.adapter.converter.SqlMetadata;
 import org.twilmes.sql.gremlin.adapter.converter.SqlTraversalEngine;
-import org.twilmes.sql.gremlin.adapter.converter.ast.nodes.GremlinSqlFactory;
 import org.twilmes.sql.gremlin.adapter.converter.ast.nodes.GremlinSqlNode;
 import org.twilmes.sql.gremlin.adapter.converter.ast.nodes.operands.GremlinSqlIdentifier;
 import org.twilmes.sql.gremlin.adapter.converter.ast.nodes.operator.GremlinSqlBasicCall;
@@ -38,7 +36,6 @@ import org.twilmes.sql.gremlin.adapter.results.SqlGremlinQueryResult;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 /**
  * This abstract class is a GremlinSql equivalent of Calcite's SqlSelect.
