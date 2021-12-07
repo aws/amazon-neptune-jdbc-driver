@@ -32,7 +32,7 @@ public class SQLNotSupportedException extends SQLException {
      * @param message   Message of the exception.
      * @param cause     Underlying cause for the exception.
      */
-    public SQLNotSupportedException(String message, Throwable cause) {
+    public SQLNotSupportedException(final String message, final Throwable cause) {
         super(message, cause);
     }
 
