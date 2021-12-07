@@ -198,12 +198,6 @@ public class GremlinSqlSelectMulti extends GremlinSqlSelect {
             }
         }
 
-        // This function basically generates the latter parts of the traversal, by doing this it prepares all the
-        // renamed labels in the metadata so that queries like 'SELECT foo AS bar FROM baz ORDER BY bar'
-        // can properly recognize that bar=>foo.
-        // __.__() is passed in as an anonymous traversal that will be discarded.
-        // generateDataRetrieval(gremlinSqlIdentifiers, __.__());
-
         GraphTraversal<?, ?> graphTraversal = null;
         try {
             graphTraversal = g.E().hasLabel(edgeLabel)

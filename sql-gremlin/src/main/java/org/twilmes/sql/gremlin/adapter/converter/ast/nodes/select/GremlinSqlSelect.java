@@ -81,21 +81,6 @@ public abstract class GremlinSqlSelect extends GremlinSqlNode {
         }
     }
 
-    protected void generateDataRetrieval(final List<GremlinSqlIdentifier> gremlinSqlIdentifiers,
-                                       GraphTraversal<?, ?> graphTraversal) throws SQLException {
-        final String projectLabel = gremlinSqlIdentifiers.get(1).getName(0);
-
-        final GraphTraversal<?, Map<String, ?>> graphTraversalDataPath = __.__();
-        SqlTraversalEngine.addProjection(gremlinSqlIdentifiers, sqlMetadata, graphTraversalDataPath);
-        applyColumnRetrieval(graphTraversalDataPath, projectLabel,
-                GremlinSqlFactory.createNodeList(sqlSelect.getSelectList().getList()));
-
-        SqlTraversalEngine.applyAggregateFold(sqlMetadata, graphTraversal);
-        final GraphTraversal<?, ?> graphTraversalChoosePredicate = __.unfold();
-        SqlTraversalEngine.applyAggregateUnfold(sqlMetadata, graphTraversalChoosePredicate);
-        graphTraversal.choose(graphTraversalChoosePredicate, graphTraversalDataPath, __.__());
-    }
-
     private SqlGremlinQueryResult generateSqlGremlinQueryResult() throws SQLException {
         final List<GremlinTableBase> tables = new ArrayList<>();
         final List<String> columns = new ArrayList<>();

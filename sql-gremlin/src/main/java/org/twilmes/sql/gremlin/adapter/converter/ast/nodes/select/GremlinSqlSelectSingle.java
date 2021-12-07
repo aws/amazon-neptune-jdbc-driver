@@ -151,6 +151,21 @@ public class GremlinSqlSelectSingle extends GremlinSqlSelect {
         }
     }
 
+    protected void generateDataRetrieval(final List<GremlinSqlIdentifier> gremlinSqlIdentifiers,
+                                         GraphTraversal<?, ?> graphTraversal) throws SQLException {
+        final String projectLabel = gremlinSqlIdentifiers.get(1).getName(0);
+
+        final GraphTraversal<?, Map<String, ?>> graphTraversalDataPath = __.__();
+        SqlTraversalEngine.addProjection(gremlinSqlIdentifiers, sqlMetadata, graphTraversalDataPath);
+        applyColumnRetrieval(graphTraversalDataPath, projectLabel,
+                GremlinSqlFactory.createNodeList(sqlSelect.getSelectList().getList()));
+
+        SqlTraversalEngine.applyAggregateFold(sqlMetadata, graphTraversal);
+        final GraphTraversal<?, ?> graphTraversalChoosePredicate = __.unfold();
+        SqlTraversalEngine.applyAggregateUnfold(sqlMetadata, graphTraversalChoosePredicate);
+        graphTraversal.choose(graphTraversalChoosePredicate, graphTraversalDataPath, __.__());
+    }
+
     public String getStringTraversal() throws SQLException {
         return GroovyTranslator.of("g").translate(generateTraversal().asAdmin().getBytecode());
     }
