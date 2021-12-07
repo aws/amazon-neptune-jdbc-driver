@@ -28,6 +28,8 @@ import org.twilmes.sql.gremlin.adapter.converter.schema.SqlSchemaGrabber;
 import org.twilmes.sql.gremlin.adapter.converter.schema.calcite.GremlinSchema;
 import org.twilmes.sql.gremlin.adapter.graphs.TestGraphFactory;
 import org.twilmes.sql.gremlin.adapter.results.SqlGremlinQueryResult;
+import org.twilmes.sql.gremlin.adapter.util.SQLNotSupportedException;
+
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -107,6 +109,10 @@ public abstract class GremlinSqlBaseTest {
 
     protected void runQueryTestThrows(final String query, final String errorMessage) {
         Assertions.assertThrows(SQLException.class, () -> converter.executeQuery(g, query), errorMessage);
+    }
+
+    protected void runNotSupportedQueryTestThrows(final String query, final String errorMessage) throws SQLException {
+        Assertions.assertThrows(SQLNotSupportedException.class, () -> converter.executeQuery(g, query), errorMessage);
     }
 
     @SafeVarargs

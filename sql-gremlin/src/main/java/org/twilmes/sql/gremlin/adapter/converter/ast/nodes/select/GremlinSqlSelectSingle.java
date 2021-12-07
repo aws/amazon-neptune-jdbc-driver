@@ -270,7 +270,7 @@ public class GremlinSqlSelectSingle extends GremlinSqlSelect {
                 throw SqlGremlinError.create(SqlGremlinError.CANNOT_ORDER_COLUMN_LITERAL);
             }
         } else {
-            throw SqlGremlinError.create(SqlGremlinError.CANNOT_ORDER_BY, gremlinSqlNode.getClass().getName());
+            throw SqlGremlinError.createNotSupported(SqlGremlinError.CANNOT_ORDER_BY, gremlinSqlNode.getClass().getName());
         }
     }
 
@@ -297,9 +297,9 @@ public class GremlinSqlSelectSingle extends GremlinSqlSelect {
                                         GremlinSqlIdentifier.class), false);
                         return;
                     }
-                    throw SqlGremlinError.create(SqlGremlinError.WHERE_NOT_ONLY_BOOLEAN);
+                    throw SqlGremlinError.createNotSupported(SqlGremlinError.WHERE_NOT_ONLY_BOOLEAN);
                 }
-                throw SqlGremlinError.create(SqlGremlinError.WHERE_UNSUPPORTED_PREFIX);
+                throw SqlGremlinError.createNotSupported(SqlGremlinError.WHERE_UNSUPPORTED_PREFIX);
             }
             GremlinSqlFactory.createNodeCheckType(sqlNode, GremlinSqlBasicCall.class)
                     .generateTraversal(graphTraversal);
@@ -309,6 +309,6 @@ public class GremlinSqlSelectSingle extends GremlinSqlSelect {
                     GremlinSqlFactory.createNodeCheckType(sqlNode, GremlinSqlIdentifier.class), true);
             return;
         }
-        throw SqlGremlinError.create(SqlGremlinError.WHERE_BASIC_LITERALS);
+        throw SqlGremlinError.createNotSupported(SqlGremlinError.WHERE_BASIC_LITERALS);
     }
 }

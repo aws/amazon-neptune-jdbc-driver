@@ -84,7 +84,7 @@ public class SqlConverter {
         if (sqlNode instanceof SqlSelect) {
             return GremlinSqlFactory.createSelect((SqlSelect) sqlNode, g);
         } else {
-            throw SqlGremlinError.create(SqlGremlinError.SQL_SELECT_ONLY);
+            throw SqlGremlinError.createNotSupported(SqlGremlinError.SQL_SELECT_ONLY);
         }
     }
 
