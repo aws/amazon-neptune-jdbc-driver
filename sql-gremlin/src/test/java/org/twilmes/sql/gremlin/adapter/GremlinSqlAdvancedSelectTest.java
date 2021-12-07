@@ -20,6 +20,8 @@
 package org.twilmes.sql.gremlin.adapter;
 
 import org.junit.jupiter.api.Test;
+import org.twilmes.sql.gremlin.adapter.util.SqlGremlinError;
+
 import java.math.BigDecimal;
 import java.sql.SQLException;
 
@@ -236,7 +238,7 @@ public class GremlinSqlAdvancedSelectTest extends GremlinSqlBaseTest {
 
         // NULLS FIRST predicate is not currently supported.
         runQueryTestThrows("SELECT name FROM \"gremlin\".\"person\" ORDER BY name NULLS FIRST",
-                "Error: No appropriate order for GremlinSqlPostFixOperator of NULLS_FIRST.");
+                SqlGremlinError.NO_ORDER, "NULLS_FIRST");
     }
 
     @Test

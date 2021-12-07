@@ -21,6 +21,7 @@ package org.twilmes.sql.gremlin.adapter;
 
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import org.twilmes.sql.gremlin.adapter.util.SqlGremlinError;
 
 import java.sql.SQLException;
 
@@ -37,21 +38,20 @@ public class GremlinSqlNotSupportedTest extends GremlinSqlBaseTest {
     @Test
     public void testOffset() throws SQLException {
         // OFFSET testing - currently not implemented.
-        runNotSupportedQueryTestThrows("SELECT name FROM person OFFSET 1",
-                "Unsupported: OFFSET is not currently supported.");
+        runNotSupportedQueryTestThrows("SELECT name FROM person OFFSET 1", SqlGremlinError.OFFSET_NOT_SUPPORTED);
 
     }
 
     @Test
-    public void testSubQuery() {
+    public void testSubQuery() throws SQLException {
         // Sub Query testing = currently caught by generic catch-all
         runQueryTestThrows("Select name FROM Person WHERE age = (SELECT age FROM person WHERE name = 'Tom')",
-                "Error: Unknown operator: %s.");
+                SqlGremlinError.UNKNOWN_OPERATOR, "SCALAR_QUERY");
     }
 
     // TODO: Handle CAST
     @Disabled
     public void testCast() throws SQLException {
-        runNotSupportedQueryTestThrows("SELECT CAST(17 AS varchar)", "");
+        runNotSupportedQueryTestThrows("SELECT CAST(17 AS varchar)", null);
     }
 }

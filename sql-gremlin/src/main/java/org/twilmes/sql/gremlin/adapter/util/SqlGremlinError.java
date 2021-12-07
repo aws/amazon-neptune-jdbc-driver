@@ -104,7 +104,7 @@ public enum SqlGremlinError {
      * @param formatArgs Any additional arguments to format the resource string with.
      * @return resource String, formatted with formatArgs.
      */
-    private static String getMessage(final SqlGremlinError key, final Object... formatArgs) {
+    public static String getMessage(final SqlGremlinError key, final Object... formatArgs) {
         return String.format(RESOURCE.getString(key.name()), formatArgs);
     }
 

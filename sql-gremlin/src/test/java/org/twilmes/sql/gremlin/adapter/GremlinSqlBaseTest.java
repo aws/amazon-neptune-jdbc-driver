@@ -22,6 +22,7 @@ package org.twilmes.sql.gremlin.adapter;
 import lombok.Getter;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource;
 import org.apache.tinkerpop.gremlin.structure.Graph;
+import org.junit.Assert;
 import org.junit.jupiter.api.Assertions;
 import org.twilmes.sql.gremlin.adapter.converter.SqlConverter;
 import org.twilmes.sql.gremlin.adapter.converter.schema.SqlSchemaGrabber;
@@ -29,6 +30,7 @@ import org.twilmes.sql.gremlin.adapter.converter.schema.calcite.GremlinSchema;
 import org.twilmes.sql.gremlin.adapter.graphs.TestGraphFactory;
 import org.twilmes.sql.gremlin.adapter.results.SqlGremlinQueryResult;
 import org.twilmes.sql.gremlin.adapter.util.SQLNotSupportedException;
+import org.twilmes.sql.gremlin.adapter.util.SqlGremlinError;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -107,12 +109,16 @@ public abstract class GremlinSqlBaseTest {
         assertColumns(result.getColumns(), columnNames);
     }
 
-    protected void runQueryTestThrows(final String query, final String errorMessage) {
-        Assertions.assertThrows(SQLException.class, () -> converter.executeQuery(g, query), errorMessage);
+    protected void runQueryTestThrows(final String query, final SqlGremlinError messageKey,
+                                      final Object... formatArgs) {
+        Throwable t = Assertions.assertThrows(SQLException.class, () -> converter.executeQuery(g, query));
+        Assert.assertEquals(SqlGremlinError.getMessage(messageKey, formatArgs), t.getMessage());
     }
 
-    protected void runNotSupportedQueryTestThrows(final String query, final String errorMessage) throws SQLException {
-        Assertions.assertThrows(SQLNotSupportedException.class, () -> converter.executeQuery(g, query), errorMessage);
+    protected void runNotSupportedQueryTestThrows(final String query, final SqlGremlinError messageKey,
+                                                  final Object... formatArgs) {
+        Throwable t = Assertions.assertThrows(SQLNotSupportedException.class, () -> converter.executeQuery(g, query));
+        Assert.assertEquals(SqlGremlinError.getMessage(messageKey, formatArgs), t.getMessage());
     }
 
     @SafeVarargs
