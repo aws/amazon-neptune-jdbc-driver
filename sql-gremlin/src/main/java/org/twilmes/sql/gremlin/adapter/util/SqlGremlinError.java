@@ -86,7 +86,8 @@ public enum SqlGremlinError {
     WHERE_BASIC_LITERALS,
     UNEXPECTED_JOIN_NODES,
     NO_JOIN_COLUMN,
-    NOT_LOGICAL_FILTER;
+    NOT_LOGICAL_FILTER,
+    UNSUPPORTED_LITERAL_EXPRESSION;
 
     private static final ResourceBundle RESOURCE;
 
