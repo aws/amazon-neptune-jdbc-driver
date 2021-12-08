@@ -19,10 +19,8 @@
 
 package org.twilmes.sql.gremlin.adapter;
 
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.twilmes.sql.gremlin.adapter.util.SqlGremlinError;
-
 import java.sql.SQLException;
 
 public class GremlinSqlNotSupportedTest extends GremlinSqlBaseTest {
@@ -49,9 +47,11 @@ public class GremlinSqlNotSupportedTest extends GremlinSqlBaseTest {
                 SqlGremlinError.UNKNOWN_OPERATOR, "SCALAR_QUERY");
     }
 
-    // TODO: Handle CAST
-    @Disabled
+    @Test
     public void testCast() throws SQLException {
-        runNotSupportedQueryTestThrows("SELECT CAST(17 AS varchar)", null);
+        runNotSupportedQueryTestThrows("SELECT CAST(17 AS varchar)",
+                SqlGremlinError.UNSUPPORTED_LITERAL_EXPRESSION);
+        runQueryTestThrows("SELECT CAST(person.age as CHAR) FROM person",
+                SqlGremlinError.UNKNOWN_OPERATOR, "CAST");
     }
 }

@@ -87,7 +87,8 @@ public enum SqlGremlinError {
     UNEXPECTED_JOIN_NODES,
     NO_JOIN_COLUMN,
     NOT_LOGICAL_FILTER,
-    OFFSET_NOT_SUPPORTED;
+    OFFSET_NOT_SUPPORTED,
+    UNSUPPORTED_LITERAL_EXPRESSION;
 
     private static final ResourceBundle RESOURCE;
 

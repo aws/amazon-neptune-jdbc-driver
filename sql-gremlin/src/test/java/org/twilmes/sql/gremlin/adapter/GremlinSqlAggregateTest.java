@@ -87,6 +87,5 @@ public class GremlinSqlAggregateTest extends GremlinSqlBaseTest {
                 columns("wentToSpace", "COUNT(age)"), rows(r(false, 3L)));
         runQueryTestResults("SELECT wentToSpace, COUNT(age) FROM person WHERE age > 31 AND wentToSpace = FALSE GROUP BY wentToSpace",
                 columns("wentToSpace", "COUNT(age)"), rows(r(false, 1L)));
-
     }
 }
