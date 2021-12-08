@@ -22,16 +22,23 @@ package org.twilmes.sql.gremlin.adapter;
 import lombok.Getter;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource;
 import org.apache.tinkerpop.gremlin.structure.Graph;
+import org.junit.Assert;
 import org.junit.jupiter.api.Assertions;
 import org.twilmes.sql.gremlin.adapter.converter.SqlConverter;
 import org.twilmes.sql.gremlin.adapter.converter.schema.SqlSchemaGrabber;
 import org.twilmes.sql.gremlin.adapter.converter.schema.calcite.GremlinSchema;
 import org.twilmes.sql.gremlin.adapter.graphs.TestGraphFactory;
 import org.twilmes.sql.gremlin.adapter.results.SqlGremlinQueryResult;
+import org.twilmes.sql.gremlin.adapter.util.SQLNotSupportedException;
+import org.twilmes.sql.gremlin.adapter.util.SqlGremlinError;
+
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * Created by twilmes on 12/4/15.
@@ -101,12 +108,29 @@ public abstract class GremlinSqlBaseTest {
                                        final List<List<?>> rows)
             throws SQLException {
         final SqlGremlinTestResult result = new SqlGremlinTestResult(converter.executeQuery(g, query));
-        assertRows(result.getRows(), rows);
         assertColumns(result.getColumns(), columnNames);
+        assertRows(result.getRows(), rows);
     }
 
-    protected void runQueryTestThrows(final String query, final String errorMessage) {
-        Assertions.assertThrows(SQLException.class, () -> converter.executeQuery(g, query), errorMessage);
+    protected void runJoinQueryTestResults(final String query, final List<String> columnNames,
+                                           final List<List<?>> rows)
+            throws SQLException {
+        final SqlGremlinTestResult result = new SqlGremlinTestResult(converter.executeQuery(g, query));
+        assertColumns(new HashSet<>(result.getColumns()), new HashSet<>(columnNames));
+        assertJoinRows(result.getRows().stream().map(HashSet::new).collect(Collectors.toList()),
+                rows.stream().map(HashSet::new).collect(Collectors.toList()));
+    }
+
+    protected void runQueryTestThrows(final String query, final SqlGremlinError messageKey,
+                                      final Object... formatArgs) {
+        Throwable t = Assertions.assertThrows(SQLException.class, () -> converter.executeQuery(g, query));
+        Assert.assertEquals(SqlGremlinError.getMessage(messageKey, formatArgs), t.getMessage());
+    }
+
+    protected void runNotSupportedQueryTestThrows(final String query, final SqlGremlinError messageKey,
+                                                  final Object... formatArgs) {
+        Throwable t = Assertions.assertThrows(SQLNotSupportedException.class, () -> converter.executeQuery(g, query));
+        Assert.assertEquals(SqlGremlinError.getMessage(messageKey, formatArgs), t.getMessage());
     }
 
     @SafeVarargs
@@ -132,11 +156,25 @@ public abstract class GremlinSqlBaseTest {
         }
     }
 
+    public void assertJoinRows(final List<Set<?>> actual, final List<Set<?>> expected) {
+        Assertions.assertEquals(expected.size(), actual.size());
+        for (int i = 0; i < actual.size(); i++) {
+            Assertions.assertEquals(expected.get(i).size(), actual.get(i).size());
+            for (int j = 0; j < actual.get(i).size(); j++) {
+                Assertions.assertEquals(expected.get(i), actual.get(i));
+            }
+        }
+    }
+
     public void assertColumns(final List<String> actual, final List<String> expected) {
         Assertions.assertEquals(expected.size(), actual.size());
         for (int i = 0; i < actual.size(); i++) {
             Assertions.assertEquals(expected.get(i), actual.get(i));
         }
+    }
+
+    public void assertColumns(final Set<String> actual, final Set<String> expected) {
+        Assertions.assertEquals(expected, actual);
     }
 
     public enum DataSet {

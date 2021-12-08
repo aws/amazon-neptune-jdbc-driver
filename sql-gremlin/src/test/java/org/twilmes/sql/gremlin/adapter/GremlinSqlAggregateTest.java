@@ -88,11 +88,4 @@ public class GremlinSqlAggregateTest extends GremlinSqlBaseTest {
         runQueryTestResults("SELECT wentToSpace, COUNT(age) FROM person WHERE age > 31 AND wentToSpace = FALSE GROUP BY wentToSpace",
                 columns("wentToSpace", "COUNT(age)"), rows(r(false, 1L)));
     }
-
-    @Test
-    public void testCastError() throws SQLException {
-        // Validate that the output column is COUNT(*) and the value is correct.
-        runQueryTestResults("SELECT CAST(17 AS varchar)", columns("perseon.age"), rows(r(6L)));
-        runQueryTestResults("SELECT CAST(person.age as CHAR) FROM person", columns("perseon.age"), rows(r(6L)));
-    }
 }

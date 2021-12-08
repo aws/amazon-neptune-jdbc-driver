@@ -117,18 +117,22 @@ public class SqlMetadata {
     }
 
     public boolean isLeftInRightOut(final String leftVertexLabel, final String rightVertexLabel) {
-        for (final GremlinVertexTable gremlinVertexTable : gremlinSchema.getVertices()) {
-            if (gremlinVertexTable.hasInEdge(leftVertexLabel) && gremlinVertexTable.hasOutEdge(rightVertexLabel)) {
-                return true;
+        for (final GremlinVertexTable leftVertexTable : gremlinSchema.getVertices()) {
+            for (final GremlinVertexTable rightVertexTable : gremlinSchema.getVertices()) {
+                if (leftVertexTable.hasInEdge(leftVertexLabel) && rightVertexTable.hasOutEdge(rightVertexLabel)) {
+                    return true;
+                }
             }
         }
         return false;
     }
 
     public boolean isRightInLeftOut(final String leftVertexLabel, final String rightVertexLabel) {
-        for (final GremlinVertexTable gremlinVertexTable : gremlinSchema.getVertices()) {
-            if (gremlinVertexTable.hasInEdge(rightVertexLabel) && gremlinVertexTable.hasOutEdge(leftVertexLabel)) {
-                return true;
+        for (final GremlinVertexTable leftVertexTable : gremlinSchema.getVertices()) {
+            for (final GremlinVertexTable rightVertexTable : gremlinSchema.getVertices()) {
+                if (leftVertexTable.hasOutEdge(leftVertexLabel) && rightVertexTable.hasInEdge(rightVertexLabel)) {
+                    return true;
+                }
             }
         }
         return false;
