@@ -138,7 +138,7 @@ public class GremlinSqlFactory {
     public static GremlinSqlSelect createSelect(final SqlSelect selectRoot, final GraphTraversalSource g)
             throws SQLException {
         if (selectRoot.getFrom() == null) {
-            throw SqlGremlinError.create(SqlGremlinError.UNSUPPORTED_LITERAL_EXPRESSION);
+            throw SqlGremlinError.createNotSupported(SqlGremlinError.UNSUPPORTED_LITERAL_EXPRESSION);
         } else if (selectRoot.getFrom() instanceof SqlJoin) {
             return new GremlinSqlSelectMulti(selectRoot, (SqlJoin) selectRoot.getFrom(), sqlMetadata, g);
         } else if (selectRoot.getFrom() instanceof SqlBasicCall) {
