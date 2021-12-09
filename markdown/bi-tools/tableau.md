@@ -14,9 +14,10 @@ Download the latest version of [Tableau Desktop](https://www.tableau.com/product
 
 2. [Download](https://github.com/aws/amazon-neptune-jdbc-driver/releases) the Neptune Tableau connector (a `TACO` file) and copy it to your `My Tableau Repository/Connectors`
    directory.
+   
    - **_Windows_**: `C:\Users\[user]\Documents\My Tableau Repository\Connectors`
    - **_Mac_**: `/Users/[user]/Documents/My Tableau Repository/Connectors`
-
+   
    For more information, consult the [Tableau documentation](https://tableau.github.io/connector-plugin-sdk/docs/run-taco).
 
 #### Launching Tableau and Opening the Amazon Neptune Connector
@@ -33,7 +34,7 @@ Download the latest version of [Tableau Desktop](https://www.tableau.com/product
 
 1. If connecting from outside the Neptune cluster's VPC, ensure you have followed the [configuration instructions](../setup/configuration.md).
 
-2. Enter the connection parameters as shown below. **Neptune Endpoint**, **Port**, **Use IAM Authentication** (and **Service Region** if IAM is selected), and **Require SSL** are required. Additional Connection Options can be filled in the form of `propertyKey=propertyValue`, with multiple properties spearated by `;`. Descriptions of each required and optional parameters can be found in the [SQL JDBC documentation](../sql.md).
+2. Enter the connection parameters as shown below. **Neptune Endpoint**, **Port**, **Use IAM Authentication** (and **Service Region** if IAM is selected), and **Require SSL** are required. Additional Connection Options can be filled in the form of `propertyKey=propertyValue`, with multiple properties separated by `;`. Descriptions of each required and optional parameters can be found in the [SQL JDBC documentation](../sql.md).
 
 Example for connecting to an instance without IAM authentication:
 <p align="center">

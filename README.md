@@ -6,7 +6,7 @@ This driver provides read-only JDBC connectivity for the Amazon Neptune service 
 
 The driver comes packed in a single jar file. To use the driver, place the jar file in the classpath of the application which is going to use it.
 
-[//]: # (TODO AN-694 - Uncomment this: Alternatively, if using the driver with a Maven/Gradle application, the jar can be used to install the driver via their respective commands.)
+[//]: # "TODO AN-694 - Uncomment this: Alternatively, if using the driver with a Maven/Gradle application, the jar can be used to install the driver via their respective commands."
 
 For the initial public preview release, the driver will be available for download on GitHub along with the driver's .jar file and .taco file.
 
@@ -28,6 +28,10 @@ To set up a connection, the driver requires a JDBC connection URL. The connectio
 jdbc:neptune:[connectionType]://[host];[propertyKey1=value1];[propertyKey2=value2]..;[propertyKeyN=valueN]
 ```
 
+A basic example of a connection string is:
+
+```jdbc:neptune:sqlgremlin://neptune-example;port=8182```
+
 Specific requirements for the string can be found [below](#graph-query-language-support) in the specific query language documentation.
 
 ### Connecting using the DriverManager Interface
@@ -36,13 +40,21 @@ If the jar is in the application's classpath, no other configuration is required
 
 Below is an example where Neptune is accessible through the endpoint neptune-example.com on port 8182.
 
+**Reminder: The Neptune endpoint is only accessible if a SSH tunnel is established to a EC2 instance in the same Amazon VPC as the Neptune cluster.**
+
+In this example, the SSH tunnel would have been established by running something similar to the following in a shell:
+
+```ssh -i "ec2Access.pem" -L 8182:neptune-example.com:8182 ubuntu@ec2-34-229-221-164.compute-1.amazonaws.com -N ```
+
+The full documentation for how to establish the SSH tunnel can once again be found [here](markdown/setup/configuration.md).
+
 ```
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.Statement;
 
 void example() {
-    String url = "jdbc:neptune:opencypher://bolt://neptune-example:8182";
+    String url = "jdbc:neptune:sqlgremlin://neptune-example.com;port=8182";
 
     Connection connection = DriverManager.getConnection(url);
     Statement statement = connection.createStatement();
@@ -83,6 +95,8 @@ SPARQL is an RDF query language supported by Neptune. To issue SPARQL queries to
 
 To learn how to set up the driver in various BI tools, instructions are outlined here for:
 * [Tableau Desktop](markdown/bi-tools/tableau.md)
+* [DbVisualizer](markdown/bi-tools/DbVisualizer.md)
+* [DBeaver](markdown/bi-tools/DBeaver.md)
 
 ## Troubleshooting
 
