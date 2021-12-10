@@ -45,6 +45,12 @@ public class GremlinSqlAdvancedSelectTest extends GremlinSqlBaseTest {
     }
 
     @Test
+    public void testEdges() throws SQLException {
+        runQueryTestResults("select * from worksFor where yearsWorked = 9", columns("person_OUT_ID", "company_IN_ID", "yearsWorked", "worksFor_ID"),
+                rows(r(26L, 2L, 9, 64L)));
+    }
+
+    @Test
     public void testOrder() throws SQLException {
         // ORDER with integer column.
         runQueryTestResults("SELECT name, age FROM person ORDER BY age", columns("name", "age"),
