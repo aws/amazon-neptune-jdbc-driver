@@ -144,7 +144,7 @@ public class SqlTraversalEngine {
             }
         } else {
             // It's this vertex/edge.
-            if (columnName.toLowerCase(Locale.getDefault()).startsWith(gremlinTableBase.getLabel())) {
+            if (columnName.toLowerCase(Locale.getDefault()).startsWith(gremlinTableBase.getLabel().toLowerCase(Locale.getDefault()))) {
                 graphTraversal.id();
             } else {
                 if (columnName.endsWith(IN_ID)) {
@@ -162,7 +162,7 @@ public class SqlTraversalEngine {
                         graphTraversal.coalesce(__.outE().hasLabel(columnName.replace(OUT_ID, "")).id().fold(),
                                 __.constant(new ArrayList<>()));
                     } else {
-                        graphTraversal.coalesce(__.outV().hasLabel(columnName.replace(IN_ID, "")).id(),
+                        graphTraversal.coalesce(__.outV().hasLabel(columnName.replace(OUT_ID, "")).id(),
                                 __.constant(new ArrayList<>()));
                     }
                 } else {
