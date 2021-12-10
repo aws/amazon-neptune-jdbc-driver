@@ -15,7 +15,6 @@ Download the latest version of [Tableau Desktop](https://www.tableau.com/product
    
    - **_Windows_**: `C:\Users\[user]\Documents\My Tableau Repository\Connectors`
    - **_Mac_**: `/Users/[user]/Documents/My Tableau Repository/Connectors`
-   
    For more information, consult the [Tableau documentation](https://tableau.github.io/connector-plugin-sdk/docs/run-taco).
 
 #### Launching Tableau and Opening the Amazon Neptune Connector
