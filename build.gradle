@@ -278,7 +278,7 @@ repositories {
 
 ext {
     calciteVersion = '1.28.0'
-    log4jVersion = '2.13.3'
+    log4jVersion = '2.15.0'
     lombokVersion = '1.18.16'
     jupiterVersion = '5.4.0'
     neo4jDBVersion = '3.5.19'
