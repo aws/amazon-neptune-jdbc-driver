@@ -99,9 +99,13 @@ public class GremlinSqlBinaryOperator extends GremlinSqlOperator {
     @Override
     protected void appendTraversal(final GraphTraversal<?, ?> graphTraversal) throws SQLException {
         if (BINARY_APPENDERS.containsKey(sqlBinaryOperator.kind)) {
-            BINARY_APPENDERS.get(sqlBinaryOperator.kind).appendTraversal(graphTraversal, sqlOperands);
             if (sqlMetadata.isDoneFilters()) {
-                graphTraversal.choose(__.coalesce(__.count(), __.constant(0L)).is(P.gt(0)), __.constant(true), __.constant(false));
+                GraphTraversal<?, ?> subGraphTraversal = __.__();
+                BINARY_APPENDERS.get(sqlBinaryOperator.kind).appendTraversal(subGraphTraversal, sqlOperands);
+                graphTraversal.fold().choose(
+                        subGraphTraversal.count().is(P.gt(0L)), __.constant(true), __.constant(false));
+            } else {
+                BINARY_APPENDERS.get(sqlBinaryOperator.kind).appendTraversal(graphTraversal, sqlOperands);
             }
         } else {
             throw SqlGremlinError.create(SqlGremlinError.AGGREGATE_NOT_SUPPORTED, sqlBinaryOperator.kind.sql);

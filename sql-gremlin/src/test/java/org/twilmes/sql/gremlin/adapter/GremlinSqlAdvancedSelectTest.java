@@ -331,5 +331,20 @@ public class GremlinSqlAdvancedSelectTest extends GremlinSqlBaseTest {
         runQueryTestResults(
                 "SELECT COUNT(wentToSpace) = 0 FROM person GROUP BY wentToSpace",
                 columns("COUNT(wentToSpace) = 0"), rows(r(false), r(false)));
+        runQueryTestResults(
+                "SELECT AVG(age) > 100 FROM person GROUP BY wentToSpace",
+                columns("AVG(age) > 100"), rows(r(false), r(false)));
+        runQueryTestResults(
+                "SELECT AVG(age) < 100 FROM person GROUP BY wentToSpace",
+                columns("AVG(age) < 100"), rows(r(true), r(true)));
+        runQueryTestResults(
+                "SELECT AVG(age) = 100 FROM person GROUP BY wentToSpace",
+                columns("AVG(age) = 100"), rows(r(false), r(false)));
+        runQueryTestResults(
+                "SELECT wentToSpace = 0 FROM person",
+                columns("wentToSpace = false"), rows(r(true), r(true), r(true), r(false), r(false), r(false)));
+        runQueryTestResults(
+                "SELECT age <= 35 FROM person",
+                columns("age <= 35"), rows(r(true), r(true), r(true), r(false), r(false), r(true)));
     }
 }
