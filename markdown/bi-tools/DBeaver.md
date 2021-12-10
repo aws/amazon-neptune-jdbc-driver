@@ -2,9 +2,7 @@
 
 Before proceeding, ensure you have [configured your environment](../setup/configuration.md).
 
-Download the latest version of [DBeaver](https://dbeaver.io/ to use the Driver in DBeaver.
-
-**For Mac you must launch your BI tool through terminal to have the environment variables loaded.**
+Download the latest version of [DBeaver](https://dbeaver.io/) to use the Driver in DBeaver.
 
 #### Adding the Amazon Neptune JDBC Driver to DBeaver
 

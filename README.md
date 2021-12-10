@@ -30,7 +30,7 @@ jdbc:neptune:[connectionType]://[host];[propertyKey1=value1];[propertyKey2=value
 
 A basic example of a connection string is:
 
-```jdbc:neptune:sqlgremlin://neptune-example;port=8182```
+```jdbc:neptune:sqlgremlin://neptune-example.com;port=8182```
 
 Specific requirements for the string can be found [below](#graph-query-language-support) in the specific query language documentation.
 

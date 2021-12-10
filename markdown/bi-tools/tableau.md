@@ -4,8 +4,6 @@ Before proceeding, ensure you have [configured your environment](../setup/config
 
 Download the latest version of [Tableau Desktop](https://www.tableau.com/products/desktop) to use the Driver in Tableau.
 
-**For Mac you must launch your BI tool through terminal to have the environment variables loaded.**
-
 #### Adding the Amazon Neptune JDBC Driver
 
 1. [Download](https://github.com/aws/amazon-neptune-jdbc-driver/releases) the Neptune JDBC driver `JAR` file and copy it to one of these directories according to your operating system:

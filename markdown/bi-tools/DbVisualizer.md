@@ -4,8 +4,6 @@ Before proceeding, ensure you have [configured your environment](../setup/config
 
 Download the latest version of [DbVisualizer](https://www.dbvis.com/) to use the Driver in DbVisualizer.
 
-**For Mac you must launch your BI tool through terminal to have the environment variables loaded.**
-
 #### Adding the Amazon Neptune JDBC Driver to DbVisualizer
 
 1. [Download](https://github.com/aws/amazon-neptune-jdbc-driver/releases) the Neptune JDBC driver `JAR` file and note the directory it is saved/located in.
