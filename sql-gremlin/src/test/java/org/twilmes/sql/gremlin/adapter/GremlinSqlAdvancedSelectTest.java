@@ -321,7 +321,7 @@ public class GremlinSqlAdvancedSelectTest extends GremlinSqlBaseTest {
     }
 
     @Test
-    void testComparisonOperator() throws SQLException {
+    void testSingleComparisonOperator() throws SQLException {
         runQueryTestResults(
                 "SELECT COUNT(wentToSpace) > 0 FROM person GROUP BY wentToSpace HAVING COUNT(wentToSpace) > 1",
                 columns("COUNT(wentToSpace) > 0"), rows(r(true), r(true)));
@@ -344,7 +344,24 @@ public class GremlinSqlAdvancedSelectTest extends GremlinSqlBaseTest {
                 "SELECT wentToSpace = 0 FROM person",
                 columns("wentToSpace = false"), rows(r(true), r(true), r(true), r(false), r(false), r(false)));
         runQueryTestResults(
+                "SELECT name, wentToSpace = 0 FROM person",
+                columns("name", "wentToSpace = false"),
+                rows(r("Tom", true), r("Patty", true), r("Phil", true), r("Susan", false), r("Juanita", false), r("Pavel", false)));
+        runQueryTestResults(
                 "SELECT age <= 35 FROM person",
                 columns("age <= 35"), rows(r(true), r(true), r(true), r(false), r(false), r(true)));
+    }
+
+    @Test
+    void testMultiComparisonOperator() throws SQLException {
+        runQueryTestResults(
+                "SELECT age <= 35 AND age > 30 FROM person",
+                columns("age <= 35 AND age > 30"), rows(r(true), r(false), r(true), r(false), r(false), r(false)));
+        runQueryTestResults(
+                "SELECT age <= 35 OR age > 30 FROM person",
+                columns("age <= 35 OR age > 30"), rows(r(true), r(true), r(true), r(true), r(true), r(true)));
+        runQueryTestResults(
+                "SELECT (age <= 35 AND age > 30) OR age = 29 FROM person",
+                columns("age <= 35 AND age > 30 OR age = 29"), rows(r(true), r(true), r(true), r(false), r(false), r(false)));
     }
 }

@@ -100,6 +100,7 @@ public class GremlinSqlBinaryOperator extends GremlinSqlOperator {
     protected void appendTraversal(final GraphTraversal<?, ?> graphTraversal) throws SQLException {
         if (BINARY_APPENDERS.containsKey(sqlBinaryOperator.kind)) {
             if (sqlMetadata.isDoneFilters()) {
+                // If we are outside of filters, we need this to evaluate to true/false, not just filter the result.
                 GraphTraversal<?, ?> subGraphTraversal = __.__();
                 BINARY_APPENDERS.get(sqlBinaryOperator.kind).appendTraversal(subGraphTraversal, sqlOperands);
                 graphTraversal.fold().choose(
@@ -142,6 +143,10 @@ public class GremlinSqlBinaryOperator extends GremlinSqlOperator {
         final GraphTraversal<?, ?>[] graphTraversals = new GraphTraversal[2];
         for (int i = 0; i < operands.size(); i++) {
             graphTraversals[i] = __.__();
+            if (sqlMetadata.isDoneFilters()) {
+                // If we are outside of filters, the result is grouped so we need to unfold.
+                graphTraversals[i].unfold();
+            }
             if (operands.get(i) instanceof GremlinSqlIdentifier) {
                 // Embedded equalities are SqlBasicCall's.
                 // When the equality is struck, it is a pair of a SqlIdentifier and a SqlLiteral.
@@ -156,6 +161,16 @@ public class GremlinSqlBinaryOperator extends GremlinSqlOperator {
                 handleEmbeddedGremlinSqlBasicCall((GremlinSqlBasicCall) operands.get(i), graphTraversals[i]);
             } else if (operands.get(i) instanceof GremlinSqlLiteral) {
                 ((GremlinSqlLiteral) operands.get(i)).appendTraversal(graphTraversals[i]);
+            }
+        }
+
+        if (sqlMetadata.isDoneFilters()) {
+            // The gremlin and/or do not work on boolean logic. Instead, they evaluate whether a traversal returns
+            // something. Since we are returning true/false for our comparison operators in the SELECT clause,
+            // we need to filter this based on if it is true. If it is false, this will make it return an empty
+            // traversal, as opposed to returning a single element of false. This will make and/or properly evaluate.
+            for (int i = 0; i < operands.size(); i++) {
+                graphTraversals[i].filter(__.is(P.eq(true)));
             }
         }
         return graphTraversals;
