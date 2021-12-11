@@ -182,9 +182,11 @@ public class OpenCypherQueryExecutor extends QueryExecutor {
     @Override
     public java.sql.ResultSet executeGetTables(final java.sql.Statement statement, final String tableName)
             throws SQLException {
+        final String endpoint = this.openCypherConnectionProperties.getEndpoint();
         MetadataCache.updateCacheIfNotUpdated(openCypherConnectionProperties);
-        return new OpenCypherResultSetGetTables(statement, MetadataCache.getFilteredCacheNodeColumnInfos(tableName),
-                MetadataCache.getFilteredResultSetInfoWithoutRowsForTables(tableName));
+        return new OpenCypherResultSetGetTables(statement,
+                MetadataCache.getFilteredCacheNodeColumnInfos(tableName, endpoint),
+                MetadataCache.getFilteredResultSetInfoWithoutRowsForTables(tableName, endpoint));
     }
 
     /**
@@ -232,9 +234,11 @@ public class OpenCypherQueryExecutor extends QueryExecutor {
     @Override
     public java.sql.ResultSet executeGetColumns(final java.sql.Statement statement, final String nodes)
             throws SQLException {
+        final String endpoint = this.openCypherConnectionProperties.getEndpoint();
         MetadataCache.updateCacheIfNotUpdated(openCypherConnectionProperties);
-        return new OpenCypherResultSetGetColumns(statement, MetadataCache.getFilteredCacheNodeColumnInfos(nodes),
-                MetadataCache.getFilteredResultSetInfoWithoutRowsForColumns(nodes));
+        return new OpenCypherResultSetGetColumns(statement,
+                MetadataCache.getFilteredCacheNodeColumnInfos(nodes, endpoint),
+                MetadataCache.getFilteredResultSetInfoWithoutRowsForColumns(nodes, endpoint));
     }
 
     /**

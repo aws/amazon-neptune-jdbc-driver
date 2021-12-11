@@ -18,6 +18,7 @@ package software.aws.neptune.jdbc;
 
 import org.slf4j.LoggerFactory;
 import software.aws.neptune.common.EmptyResultSet;
+import software.aws.neptune.gremlin.GremlinConnectionProperties;
 import software.aws.neptune.jdbc.utilities.CastHelper;
 import software.aws.neptune.jdbc.utilities.SqlError;
 import java.io.PrintWriter;
@@ -777,7 +778,7 @@ public abstract class DatabaseMetaData implements java.sql.DatabaseMetaData {
     @Override
     public String getURL() throws SQLException {
         // "contactPoint" is the property key for the hostname for the connection
-        return this.connection.getClientInfo("contactPoint");
+        return this.connection.getClientInfo(GremlinConnectionProperties.CONTACT_POINT_KEY);
     }
 
     @Override

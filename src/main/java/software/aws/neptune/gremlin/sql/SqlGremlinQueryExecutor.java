@@ -91,7 +91,8 @@ public class SqlGremlinQueryExecutor extends GremlinQueryExecutor {
             throws SQLException {
         MetadataCache.updateCacheIfNotUpdated(gremlinConnectionProperties);
         if (gremlinSqlConverter == null) {
-            gremlinSqlConverter = new SqlConverter(MetadataCache.getGremlinSchema());
+            gremlinSqlConverter = new SqlConverter(MetadataCache.getGremlinSchema(
+                    gremlinConnectionProperties.getContactPoint()));
         }
         return gremlinSqlConverter;
     }
@@ -107,14 +108,15 @@ public class SqlGremlinQueryExecutor extends GremlinQueryExecutor {
     public java.sql.ResultSet executeGetColumns(final java.sql.Statement statement, final String nodes)
             throws SQLException {
         LOGGER.info("Running executeGetColumns.");
-        if (!MetadataCache.isMetadataCached()) {
+        final String endpoint = this.gremlinConnectionProperties.getContactPoint();
+        if (!MetadataCache.isMetadataCached(endpoint)) {
             if (!statement.getConnection().isValid(3000)) {
                 throw new SQLException("Failed to execute getTables, could not connect to database.");
             }
         }
         MetadataCache.updateCacheIfNotUpdated(gremlinConnectionProperties);
-        return new GremlinResultSetGetColumns(statement, MetadataCache.getFilteredCacheNodeColumnInfos(nodes),
-                MetadataCache.getFilteredResultSetInfoWithoutRowsForColumns(nodes));
+        return new GremlinResultSetGetColumns(statement, MetadataCache.getFilteredCacheNodeColumnInfos(nodes, endpoint),
+                MetadataCache.getFilteredResultSetInfoWithoutRowsForColumns(nodes, endpoint));
     }
 
     /**
@@ -129,14 +131,16 @@ public class SqlGremlinQueryExecutor extends GremlinQueryExecutor {
     public java.sql.ResultSet executeGetTables(final java.sql.Statement statement, final String tableName)
             throws SQLException {
         LOGGER.info("Running executeGetTables.");
-        if (!MetadataCache.isMetadataCached()) {
+        final String endpoint = this.gremlinConnectionProperties.getContactPoint();
+        if (!MetadataCache.isMetadataCached(endpoint)) {
             if (!statement.getConnection().isValid(3000)) {
                 throw new SQLException("Failed to execute getTables, could not connect to database.");
             }
         }
         MetadataCache.updateCacheIfNotUpdated(gremlinConnectionProperties);
-        return new GremlinResultSetGetTables(statement, MetadataCache.getFilteredCacheNodeColumnInfos(tableName),
-                MetadataCache.getFilteredResultSetInfoWithoutRowsForTables(tableName));
+        return new GremlinResultSetGetTables(statement,
+                MetadataCache.getFilteredCacheNodeColumnInfos(tableName, endpoint),
+                MetadataCache.getFilteredResultSetInfoWithoutRowsForTables(tableName, endpoint));
     }
 
     /**
