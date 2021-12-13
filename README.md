@@ -1,4 +1,4 @@
-# JDBC Driver for Amazon Neptune [![Amazon Neptune JDBC Driver](https://github.com/aws/amazon-neptune-jdbc-driver/actions/workflows/gradle.yml/badge.svg?branch=develop)](https://github.com/aws/amazon-neptune-jdbc-driver/actions/workflows/gradle.yml)
+# JDBC Driver for Amazon Neptune [![](https://github.com/aws/amazon-neptune-jdbc-driver/actions/workflows/gradle.yml/badge.svg?branch=develop)](https://github.com/aws/amazon-neptune-jdbc-driver/actions/workflows/gradle.yml)
 
 This driver provides read-only JDBC connectivity for the Amazon Neptune service using SQL, Gremlin, openCypher and SPARQL queries.
 
