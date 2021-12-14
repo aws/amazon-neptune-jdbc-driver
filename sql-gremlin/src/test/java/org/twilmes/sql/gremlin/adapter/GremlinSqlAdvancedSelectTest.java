@@ -104,6 +104,8 @@ public class GremlinSqlAdvancedSelectTest extends GremlinSqlBaseTest {
                 rows(r("Patty", 29), r("Pavel", 30), r("Phil", 31)));
         runQueryTestResults("SELECT name, age FROM person WHERE age > 35 ORDER BY age", columns("name", "age"),
                 rows(r("Susan", 45), r("Juanita", 50)));
+        runQueryTestResults("SELECT name, age FROM person WHERE age <> 50 ORDER BY age", columns("name", "age"),
+                rows(r("Patty", 29), r("Pavel", 30), r("Phil", 31), r("Tom", 35), r("Susan", 45)));
 
         // WHERE with numeric literal and descending order (just for fun).
         runQueryTestResults("SELECT name, age FROM person WHERE age >= 35 ORDER BY age DESC", columns("name", "age"),
@@ -142,6 +144,12 @@ public class GremlinSqlAdvancedSelectTest extends GremlinSqlBaseTest {
         runQueryTestResults("SELECT name, age FROM person WHERE name = 'Tom' OR name = 'Juanita' ORDER BY age",
                 columns("name", "age"),
                 rows(r("Tom", 35), r("Juanita", 50)));
+
+        // TODO: NOT only works with boolean and not comparison operators
+        // WHERE with NOT.
+//        runQueryTestResults("SELECT name, age FROM person WHERE NOT name = 'Tom' ORDER BY age",
+//                columns("name", "age"),
+//                rows(r("Patty", 29), r("Pavel", 30), r("Phil", 31), r("Susan", 45)));
     }
 
     @Test
