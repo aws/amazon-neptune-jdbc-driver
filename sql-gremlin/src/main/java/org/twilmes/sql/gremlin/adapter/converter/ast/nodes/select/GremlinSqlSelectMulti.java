@@ -101,10 +101,10 @@ public class GremlinSqlSelectMulti extends GremlinSqlSelect {
                 GremlinSqlFactory.createJoinEquality(sqlJoin.getCondition());
 
         if (!joinType.name().equals(JoinType.INNER.name())) {
-            throw SqlGremlinError.create(SqlGremlinError.INNER_JOIN_ONLY);
+            throw SqlGremlinError.createNotSupported(SqlGremlinError.INNER_JOIN_ONLY);
         }
         if (!conditionType.equals(JoinConditionType.ON)) {
-            throw SqlGremlinError.create(SqlGremlinError.JOIN_ON_ONLY);
+            throw SqlGremlinError.createNotSupported(SqlGremlinError.JOIN_ON_ONLY);
         }
         if ((left.getGremlinSqlNodes().size() != 2) || (right.getGremlinSqlNodes().size() != 2)) {
             throw SqlGremlinError.create(SqlGremlinError.LEFT_RIGHT_CONDITION_OPERANDS);
@@ -302,6 +302,6 @@ public class GremlinSqlSelectMulti extends GremlinSqlSelect {
         if (sqlSelect.getHaving() == null) {
             return;
         }
-        throw SqlGremlinError.create(SqlGremlinError.JOIN_HAVING_UNSUPPORTED);
+        throw SqlGremlinError.createNotSupported(SqlGremlinError.JOIN_HAVING_UNSUPPORTED);
     }
 }

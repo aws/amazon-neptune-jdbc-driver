@@ -20,6 +20,8 @@
 package org.twilmes.sql.gremlin.adapter;
 
 import org.junit.jupiter.api.Test;
+import org.twilmes.sql.gremlin.adapter.util.SqlGremlinError;
+
 import java.math.BigDecimal;
 import java.sql.SQLException;
 
@@ -40,6 +42,12 @@ public class GremlinSqlAdvancedSelectTest extends GremlinSqlBaseTest {
     public void testProject() throws SQLException {
         runQueryTestResults("select name from person", columns("name"),
                 rows(r("Tom"), r("Patty"), r("Phil"), r("Susan"), r("Juanita"), r("Pavel")));
+    }
+
+    @Test
+    public void testEdges() throws SQLException {
+        runQueryTestResults("select * from worksFor where yearsWorked = 9", columns("person_OUT_ID", "company_IN_ID", "yearsWorked", "worksFor_ID"),
+                rows(r(26L, 2L, 9, 64L)));
     }
 
     @Test
@@ -199,12 +207,6 @@ public class GremlinSqlAdvancedSelectTest extends GremlinSqlBaseTest {
     }
 
     @Test
-    public void testOffset() throws SQLException {
-        // OFFSET testing - currently not implemented.
-        runQueryTestThrows("SELECT name FROM person OFFSET 1", "Error, OFFSET is not currently supported.");
-    }
-
-    @Test
     void testMisc() throws SQLException {
         runQueryTestResults(
                 "SELECT wentToSpace, COUNT(wentToSpace) FROM person GROUP BY wentToSpace HAVING COUNT(wentToSpace) > 1",
@@ -242,7 +244,7 @@ public class GremlinSqlAdvancedSelectTest extends GremlinSqlBaseTest {
 
         // NULLS FIRST predicate is not currently supported.
         runQueryTestThrows("SELECT name FROM \"gremlin\".\"person\" ORDER BY name NULLS FIRST",
-                "Error: No appropriate order for GremlinSqlPostFixOperator of NULLS_FIRST.");
+                SqlGremlinError.NO_ORDER, "NULLS_FIRST");
     }
 
     @Test

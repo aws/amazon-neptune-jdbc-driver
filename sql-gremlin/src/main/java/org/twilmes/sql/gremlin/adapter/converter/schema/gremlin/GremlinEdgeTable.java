@@ -55,7 +55,7 @@ public class GremlinEdgeTable extends GremlinTableBase {
             final GremlinProperty inFk = new GremlinProperty(inOutPair.getKey() + GremlinTableBase.IN_ID, "string");
             final GremlinProperty outFk = new GremlinProperty(inOutPair.getValue() + GremlinTableBase.OUT_ID, "string");
             columnsWithPKFK.put(inFk.getName(), inFk);
-            columnsWithPKFK.put(outFk.getName(), inFk);
+            columnsWithPKFK.put(outFk.getName(), outFk);
         });
         return columnsWithPKFK;
     }
