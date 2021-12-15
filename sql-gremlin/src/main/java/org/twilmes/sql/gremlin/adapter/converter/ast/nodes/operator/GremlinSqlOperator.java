@@ -66,6 +66,6 @@ public abstract class GremlinSqlOperator {
         } else if (operand instanceof GremlinSqlBasicCall) {
             return ((GremlinSqlBasicCall) operand).getRename();
         }
-        throw new SQLException("Error, unsupported operand type, cannot rename column.");
+        throw SqlGremlinError.createNotSupported(SqlGremlinError.UNSUPPORTED_OPERAND_TYPE, operand.getClass().getName());
     }
 }

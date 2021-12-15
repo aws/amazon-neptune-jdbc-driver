@@ -32,7 +32,6 @@ import org.twilmes.sql.gremlin.adapter.converter.ast.nodes.operator.aggregate.Gr
 import org.twilmes.sql.gremlin.adapter.converter.ast.nodes.operator.logic.GremlinSqlBinaryOperator;
 import org.twilmes.sql.gremlin.adapter.converter.ast.nodes.operator.logic.GremlinSqlLiteral;
 import org.twilmes.sql.gremlin.adapter.util.SqlGremlinError;
-
 import java.sql.SQLException;
 import java.util.List;
 
@@ -97,6 +96,10 @@ public class GremlinSqlBasicCall extends GremlinSqlNode {
             return ((GremlinSqlAsOperator) gremlinSqlOperator).getActual();
         } else if (gremlinSqlOperator instanceof GremlinSqlAggFunction) {
             return ((GremlinSqlAggFunction) gremlinSqlOperator).getNewName();
+        } else if (gremlinSqlOperator instanceof GremlinSqlBinaryOperator) {
+            return ((GremlinSqlBinaryOperator) gremlinSqlOperator).getNewName();
+        } else if (gremlinSqlOperator instanceof GremlinSqlPrefixOperator) {
+            return ((GremlinSqlPrefixOperator) gremlinSqlOperator).getNewName();
         }
         throw SqlGremlinError.create(SqlGremlinError.COLUMN_ACTUAL_NAME_UNDETERMINED);
     }

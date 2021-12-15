@@ -20,7 +20,6 @@
 package org.twilmes.sql.gremlin.adapter.converter;
 
 import lombok.Getter;
-import lombok.Setter;
 import org.apache.calcite.sql.SqlAggFunction;
 import org.apache.calcite.sql.SqlCall;
 import org.apache.calcite.sql.SqlNode;
