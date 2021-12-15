@@ -128,6 +128,14 @@ public class SqlTraversalEngine {
         return __.project(firstColumn, remaining);
     }
 
+    private static void appendColumnSelect(final SqlMetadata sqlMetadata, final String column, final GraphTraversal<?, ?> graphTraversal) {
+        if (sqlMetadata.isDoneFilters()) {
+            graphTraversal.choose(__.has(column), __.values(column), __.constant(SqlGremlinQueryResult.NULL_VALUE));
+        } else {
+            graphTraversal.values(column);
+        }
+    }
+
     private static void appendGraphTraversal(final String table, final String column,
                                              final SqlMetadata sqlMetadata,
                                              final GraphTraversal<?, ?> graphTraversal) throws SQLException {
@@ -139,8 +147,7 @@ public class SqlTraversalEngine {
             if (sqlMetadata.getIsAggregate()) {
                 graphTraversal.has(columnName).values(columnName);
             } else {
-                graphTraversal.choose(__.has(columnName), __.values(columnName),
-                        __.constant(SqlGremlinQueryResult.NULL_VALUE));
+                appendColumnSelect(sqlMetadata, columnName, graphTraversal);
             }
         } else {
             // It's this vertex/edge.
@@ -182,8 +189,7 @@ public class SqlTraversalEngine {
         if (sqlMetadata.getIsAggregate()) {
             graphTraversal.has(columnName).values(columnName);
         } else {
-            graphTraversal.choose(__.has(columnName), __.values(columnName),
-                    __.constant(SqlGremlinQueryResult.NULL_VALUE));
+            appendColumnSelect(sqlMetadata, columnName, graphTraversal);
         }
     }
 }

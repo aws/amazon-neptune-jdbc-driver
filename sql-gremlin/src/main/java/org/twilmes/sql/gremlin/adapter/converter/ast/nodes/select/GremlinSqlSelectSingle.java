@@ -252,11 +252,11 @@ public class GremlinSqlSelectSingle extends GremlinSqlSelect {
                 final GremlinSqlPostfixOperator gremlinSqlPostFixOperator =
                         (GremlinSqlPostfixOperator) gremlinSqlBasicCall.getGremlinSqlOperator();
                 graphTraversal.by(__.coalesce(graphTraversal1,
-                                __.constant(sqlMetadata.getDefaultCoalesceValue(gremlinSqlBasicCall.getActual()))),
+                                __.constant(sqlMetadata.getDefaultCoalesceValue(gremlinSqlBasicCall.getOutputColumn()))),
                         gremlinSqlPostFixOperator.getOrder());
             } else {
                 graphTraversal.by(__.coalesce(graphTraversal1,
-                        __.constant(sqlMetadata.getDefaultCoalesceValue(gremlinSqlBasicCall.getActual()))));
+                        __.constant(sqlMetadata.getDefaultCoalesceValue(gremlinSqlBasicCall.getOutputColumn()))));
             }
         } else if (gremlinSqlNode instanceof GremlinSqlLiteral) {
             final GremlinSqlLiteral gremlinSqlLiteral = (GremlinSqlLiteral) gremlinSqlNode;
@@ -290,6 +290,7 @@ public class GremlinSqlSelectSingle extends GremlinSqlSelect {
         if (sqlNode == null) {
             return;
         }
+
         if (sqlNode instanceof SqlBasicCall) {
             SqlBasicCall sqlBasicCall = (SqlBasicCall) sqlNode;
             if (sqlBasicCall.getOperator() instanceof SqlPrefixOperator) {
