@@ -215,6 +215,7 @@ public class GremlinSqlSelectMulti extends GremlinSqlSelect {
             applyHaving(graphTraversal);
             SqlTraversalEngine.applyAggregateFold(sqlMetadata, graphTraversal);
             graphTraversal.project(inVRename, outVRename);
+            sqlMetadata.setIsDoneFilters(true);
             applyColumnRetrieval(graphTraversal, inVRename, gremlinSqlNodesIn, StepDirection.In);
             applyColumnRetrieval(graphTraversal, outVRename, gremlinSqlNodesOut, StepDirection.Out);
             return graphTraversal;

@@ -133,6 +133,7 @@ public class GremlinSqlSelectSingle extends GremlinSqlSelect {
             applySelectValues(graphTraversal);
             applyOrderBy(graphTraversal, label);
             applyHaving(graphTraversal);
+            sqlMetadata.setIsDoneFilters(true);
             generateDataRetrieval(gremlinSqlIdentifiers, graphTraversal);
 
             if (sqlMetadata.getRenamedColumns() == null) {

@@ -348,7 +348,6 @@ shadowJar {
     dependsOn('licenseAndNotice')
 
     //  Exclude driver unnecessary classes.
-    exclude 'org/apache/calcite/jdbc/Driver*'
     exclude 'org/apache/calcite/avatica/remote/Driver*'
     exclude 'org/apache/commons/dbcp2/PoolingDriver*'
     exclude 'META-INF/NOTICE*'

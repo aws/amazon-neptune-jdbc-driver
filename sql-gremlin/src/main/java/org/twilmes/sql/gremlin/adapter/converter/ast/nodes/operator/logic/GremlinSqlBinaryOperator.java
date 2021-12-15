@@ -19,8 +19,8 @@
 
 package org.twilmes.sql.gremlin.adapter.converter.ast.nodes.operator.logic;
 
-import org.apache.calcite.sql.SqlBinaryOperator;
 import org.apache.calcite.sql.SqlKind;
+import org.apache.calcite.sql.SqlOperator;
 import org.apache.tinkerpop.gremlin.process.traversal.P;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversal;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.__;
@@ -35,7 +35,6 @@ import org.twilmes.sql.gremlin.adapter.converter.ast.nodes.operator.GremlinSqlOp
 import org.twilmes.sql.gremlin.adapter.converter.ast.nodes.operator.GremlinSqlPrefixOperator;
 import org.twilmes.sql.gremlin.adapter.converter.ast.nodes.operator.GremlinSqlTraversalAppender;
 import org.twilmes.sql.gremlin.adapter.util.SqlGremlinError;
-
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.List;
@@ -61,13 +60,14 @@ public class GremlinSqlBinaryOperator extends GremlinSqlOperator {
                     put(SqlKind.LESS_THAN_OR_EQUAL, new GremlinSqlBinaryOperatorAppenderLessEquals());
                     put(SqlKind.AND, new GremlinSqlBinaryOperatorAppenderAnd());
                     put(SqlKind.OR, new GremlinSqlBinaryOperatorAppenderOr());
+                    put(SqlKind.NOT, new GremlinSqlBinaryOperatorAppenderNot());
                 }
             };
-    private final SqlBinaryOperator sqlBinaryOperator;
+    private final SqlOperator sqlBinaryOperator;
     private final SqlMetadata sqlMetadata;
     private final List<GremlinSqlNode> sqlOperands;
 
-    public GremlinSqlBinaryOperator(final SqlBinaryOperator sqlBinaryOperator,
+    public GremlinSqlBinaryOperator(final SqlOperator sqlBinaryOperator,
                                     final List<GremlinSqlNode> sqlOperands,
                                     final SqlMetadata sqlMetadata) {
         super(sqlBinaryOperator, sqlOperands, sqlMetadata);
@@ -97,15 +97,24 @@ public class GremlinSqlBinaryOperator extends GremlinSqlOperator {
     }
 
     @Override
-    protected void appendTraversal(final GraphTraversal<?, ?> graphTraversal) throws SQLException {
+    public void appendTraversal(final GraphTraversal<?, ?> graphTraversal) throws SQLException {
         if (BINARY_APPENDERS.containsKey(sqlBinaryOperator.kind)) {
-            BINARY_APPENDERS.get(sqlBinaryOperator.kind).appendTraversal(graphTraversal, sqlOperands);
+            if (sqlMetadata.isDoneFilters()) {
+                // If we are outside of filters, we need this to evaluate to true/false, not just filter the result.
+                GraphTraversal<?, ?> subGraphTraversal = __.__();
+                BINARY_APPENDERS.get(sqlBinaryOperator.kind).appendTraversal(subGraphTraversal, sqlOperands);
+                graphTraversal.fold().choose(
+                        subGraphTraversal.count().is(P.gt(0L)), __.constant(true), __.constant(false));
+            } else {
+                BINARY_APPENDERS.get(sqlBinaryOperator.kind).appendTraversal(graphTraversal, sqlOperands);
+            }
         } else {
             throw SqlGremlinError.create(SqlGremlinError.AGGREGATE_NOT_SUPPORTED, sqlBinaryOperator.kind.sql);
         }
     }
 
-    void handleEmbeddedGremlinSqlBasicCall(GremlinSqlBasicCall gremlinSqlBasicCall, GraphTraversal<?, ?> graphTraversal)
+    void handleEmbeddedGremlinSqlBasicCall(final GremlinSqlBasicCall gremlinSqlBasicCall,
+                                           final GraphTraversal<?, ?> graphTraversal)
             throws SQLException {
         if (gremlinSqlBasicCall.getGremlinSqlNodes().size() == 1 &&
                 gremlinSqlBasicCall.getGremlinSqlNodes().get(0) instanceof GremlinSqlIdentifier) {
@@ -127,14 +136,17 @@ public class GremlinSqlBinaryOperator extends GremlinSqlOperator {
         }
     }
 
-    private GraphTraversal<?, ?>[] getEmbeddedLogicOperators(final List<GremlinSqlNode> operands)
-            throws SQLException {
-        if (operands.size() != 2) {
-            throw SqlGremlinError.create(SqlGremlinError.BINARY_OPERAND_COUNT);
+    private GraphTraversal<?, ?>[] getEmbeddedLogicOperators(final List<GremlinSqlNode> operands) throws SQLException {
+        if (operands.size() != 2 && operands.size() != 1) {
+            throw SqlGremlinError.create(SqlGremlinError.BINARY_AND_PREFIX_OPERAND_COUNT);
         }
-        final GraphTraversal<?, ?>[] graphTraversals = new GraphTraversal[2];
+        final GraphTraversal<?, ?>[] graphTraversals = new GraphTraversal[operands.size()];
         for (int i = 0; i < operands.size(); i++) {
             graphTraversals[i] = __.__();
+            if (sqlMetadata.isDoneFilters()) {
+                // If we are outside of filters, the result is grouped so we need to unfold.
+                graphTraversals[i].unfold();
+            }
             if (operands.get(i) instanceof GremlinSqlIdentifier) {
                 // Embedded equalities are SqlBasicCall's.
                 // When the equality is struck, it is a pair of a SqlIdentifier and a SqlLiteral.
@@ -151,14 +163,23 @@ public class GremlinSqlBinaryOperator extends GremlinSqlOperator {
                 ((GremlinSqlLiteral) operands.get(i)).appendTraversal(graphTraversals[i]);
             }
         }
+
+        if (sqlMetadata.isDoneFilters()) {
+            // The gremlin and/or do not work on boolean logic. Instead, they evaluate whether a traversal returns
+            // something. Since we are returning true/false for our comparison operators in the SELECT clause,
+            // we need to filter this based on if it is true. If it is false, this will make it return an empty
+            // traversal, as opposed to returning a single element of false. This will make and/or properly evaluate.
+            for (int i = 0; i < operands.size(); i++) {
+                graphTraversals[i].filter(__.is(P.eq(true)));
+            }
+        }
         return graphTraversals;
     }
-
 
     private GraphTraversal<?, ?>[] getTraversalEqualities(final List<GremlinSqlNode> operands)
             throws SQLException {
         if (operands.size() != 2) {
-            throw SqlGremlinError.create(SqlGremlinError.BINARY_OPERAND_COUNT);
+            throw SqlGremlinError.create(SqlGremlinError.BINARY_AND_PREFIX_OPERAND_COUNT);
         }
         final GraphTraversal<?, ?>[] graphTraversals = new GraphTraversal[2];
         for (int i = 0; i < operands.size(); i++) {
@@ -174,6 +195,11 @@ public class GremlinSqlBinaryOperator extends GremlinSqlOperator {
             }
         }
         return graphTraversals;
+    }
+
+    public String getNewName() throws SQLException {
+        return String.format("%s %s %s", getOperandName(sqlOperands.get(0)), sqlBinaryOperator.kind.sql,
+                getOperandName(sqlOperands.get(1)));
     }
 
     public class GremlinSqlBinaryOperatorAppenderEquals implements GremlinSqlTraversalAppender {
@@ -250,4 +276,16 @@ public class GremlinSqlBinaryOperator extends GremlinSqlOperator {
         }
     }
 
+    public class GremlinSqlBinaryOperatorAppenderNot implements GremlinSqlTraversalAppender {
+        public void appendTraversal(final GraphTraversal<?, ?> graphTraversal, final List<GremlinSqlNode> operands)
+                throws SQLException {
+            final GraphTraversal<?, ?>[] graphTraversals = getEmbeddedLogicOperators(operands);
+
+            // Should never happen.
+            if (graphTraversals.length != 1) {
+                throw SqlGremlinError.create(SqlGremlinError.BINARY_AND_PREFIX_OPERAND_COUNT);
+            }
+            graphTraversal.not(graphTraversals[0]);
+        }
+    }
 }
