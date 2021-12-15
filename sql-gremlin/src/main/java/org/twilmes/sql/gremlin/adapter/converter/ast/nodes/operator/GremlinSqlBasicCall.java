@@ -29,9 +29,9 @@ import org.twilmes.sql.gremlin.adapter.converter.ast.nodes.GremlinSqlFactory;
 import org.twilmes.sql.gremlin.adapter.converter.ast.nodes.GremlinSqlNode;
 import org.twilmes.sql.gremlin.adapter.converter.ast.nodes.operands.GremlinSqlIdentifier;
 import org.twilmes.sql.gremlin.adapter.converter.ast.nodes.operator.aggregate.GremlinSqlAggFunction;
+import org.twilmes.sql.gremlin.adapter.converter.ast.nodes.operator.logic.GremlinSqlBinaryOperator;
 import org.twilmes.sql.gremlin.adapter.converter.ast.nodes.operator.logic.GremlinSqlLiteral;
 import org.twilmes.sql.gremlin.adapter.util.SqlGremlinError;
-
 import java.sql.SQLException;
 import java.util.List;
 
@@ -83,6 +83,10 @@ public class GremlinSqlBasicCall extends GremlinSqlNode {
                 // returns the formatted column name for aggregations
                 return ((GremlinSqlAggFunction) gremlinSqlOperator).getNewName();
             }
+        } else if (gremlinSqlOperator instanceof GremlinSqlBinaryOperator) {
+            return ((GremlinSqlBinaryOperator) gremlinSqlOperator).getNewName();
+        } else if (gremlinSqlOperator instanceof GremlinSqlPrefixOperator) {
+            return ((GremlinSqlPrefixOperator) gremlinSqlOperator).getNewName();
         }
         throw SqlGremlinError.create(SqlGremlinError.COLUMN_RENAME_UNDETERMINED);
     }
@@ -92,6 +96,10 @@ public class GremlinSqlBasicCall extends GremlinSqlNode {
             return ((GremlinSqlAsOperator) gremlinSqlOperator).getActual();
         } else if (gremlinSqlOperator instanceof GremlinSqlAggFunction) {
             return ((GremlinSqlAggFunction) gremlinSqlOperator).getNewName();
+        } else if (gremlinSqlOperator instanceof GremlinSqlBinaryOperator) {
+            return ((GremlinSqlBinaryOperator) gremlinSqlOperator).getNewName();
+        } else if (gremlinSqlOperator instanceof GremlinSqlPrefixOperator) {
+            return ((GremlinSqlPrefixOperator) gremlinSqlOperator).getNewName();
         }
         throw SqlGremlinError.create(SqlGremlinError.COLUMN_ACTUAL_NAME_UNDETERMINED);
     }
