@@ -70,6 +70,21 @@ public class MetadataCache {
 
     /**
      * Function to update the cache of the metadata.
+     * @param gremlinConnectionProperties GremlinConnectionProperties to use.
+     * @throws SQLException
+     */
+    public static void updateGremlinCache(final GremlinConnectionProperties gremlinConnectionProperties)
+            throws SQLException {
+        String endpoint = gremlinConnectionProperties.getContactPoint();
+        synchronized (LOCK) {
+            if (!GREMLIN_SCHEMAS.containsKey(endpoint)) {
+                GREMLIN_SCHEMAS.put(endpoint, SchemaHelperGremlinDataModel.getGremlinGraphSchema(gremlinConnectionProperties));
+            }
+        }
+    }
+
+    /**
+     * Function to update the cache of the metadata.
      *
      * @param gremlinConnectionProperties GremlinConnectionProperties to use.
      * @throws SQLException Thrown if error occurs during update.
@@ -77,12 +92,10 @@ public class MetadataCache {
     public static void updateCacheIfNotUpdated(final GremlinConnectionProperties gremlinConnectionProperties)
             throws SQLException {
         if (!isMetadataCached(gremlinConnectionProperties.getContactPoint())) {
-            updateCache(gremlinConnectionProperties.getContactPoint(), gremlinConnectionProperties.getPort(),
-                    (gremlinConnectionProperties.getAuthScheme() == AuthScheme.IAMSigV4),
-                    gremlinConnectionProperties.getEnableSsl(),
-                    MetadataCache.PathType.Gremlin, gremlinConnectionProperties.getScanType());
+            updateGremlinCache(gremlinConnectionProperties);
         }
     }
+
 
     /**
      * Function to update the cache of the metadata.
