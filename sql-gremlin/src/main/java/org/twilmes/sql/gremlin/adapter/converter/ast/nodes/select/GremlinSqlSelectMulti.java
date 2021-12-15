@@ -44,7 +44,6 @@ import org.twilmes.sql.gremlin.adapter.results.SqlGremlinQueryResult;
 import org.twilmes.sql.gremlin.adapter.results.pagination.JoinDataReader;
 import org.twilmes.sql.gremlin.adapter.results.pagination.Pagination;
 import org.twilmes.sql.gremlin.adapter.util.SqlGremlinError;
-
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
@@ -128,6 +127,14 @@ public class GremlinSqlSelectMulti extends GremlinSqlSelect {
         if (!sqlMetadata.getIsColumnEdge(leftTableRename, leftColumn) ||
                 !sqlMetadata.getIsColumnEdge(rightTableRename, rightColumn)) {
             throw SqlGremlinError.create(SqlGremlinError.JOIN_EDGELESS_VERTICES);
+        }
+
+        final String edgeLabelRight =
+                rightColumn.replaceAll(GremlinTableBase.IN_ID, "").replaceAll(GremlinTableBase.OUT_ID, "");
+        final String edgeLabelLeft =
+                leftColumn.replaceAll(GremlinTableBase.IN_ID, "").replaceAll(GremlinTableBase.OUT_ID, "");
+        if (!edgeLabelRight.equals(edgeLabelLeft)) {
+            throw SqlGremlinError.create(SqlGremlinError.CANNOT_JOIN_DIFFERENT_EDGES, edgeLabelLeft, edgeLabelRight);
         }
 
         if (rightColumn.endsWith(GremlinTableBase.IN_ID)) {
