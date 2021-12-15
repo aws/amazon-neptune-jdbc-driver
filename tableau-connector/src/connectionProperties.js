@@ -50,7 +50,7 @@
     // Format the additional option 'keys=value' pairs into the connection properties.
     if (attr['v-additional-properties']) {
         var additionalProperties = attr['v-additional-properties'].split(";");
-        for (let i = 0; i < additionalProperties.length; i++) {
+        for (var i = 0; i < additionalProperties.length; i++) {
             const val = additionalProperties[i];
             formattedParams.push(val);
         }
