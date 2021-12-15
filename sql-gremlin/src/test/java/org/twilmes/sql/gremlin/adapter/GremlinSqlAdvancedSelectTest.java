@@ -365,5 +365,14 @@ public class GremlinSqlAdvancedSelectTest extends GremlinSqlBaseTest {
         runQueryTestResults(
                 "SELECT (age <= 35 AND age > 30) OR age = 29 FROM person",
                 columns("age <= 35 AND age > 30 OR age = 29"), rows(r(true), r(true), r(true), r(false), r(false), r(false)));
+        runQueryTestResults(
+                "SELECT age <= 35 AND age > 30 or age > 0 FROM person",
+                columns("age <= 35 AND age > 30 OR age > 0"), rows(r(true), r(true), r(true), r(true), r(true), r(true)));
+        runQueryTestResults(
+                "SELECT age <= 35 and NOT age > 30 FROM person",
+                columns("age <= 35 AND NOT age > 30"), rows(r(false), r(true), r(false), r(false), r(false), r(true)));
+        runQueryTestResults(
+                "SELECT NOT age > 0 FROM person",
+                columns("NOT age > 0"), rows(r(false), r(false), r(false), r(false), r(false), r(false)));
     }
 }

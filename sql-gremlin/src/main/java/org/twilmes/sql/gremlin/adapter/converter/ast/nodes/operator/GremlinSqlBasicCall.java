@@ -86,6 +86,8 @@ public class GremlinSqlBasicCall extends GremlinSqlNode {
             }
         } else if (gremlinSqlOperator instanceof GremlinSqlBinaryOperator) {
             return ((GremlinSqlBinaryOperator) gremlinSqlOperator).getNewName();
+        } else if (gremlinSqlOperator instanceof GremlinSqlPrefixOperator) {
+            return ((GremlinSqlPrefixOperator) gremlinSqlOperator).getNewName();
         }
         throw SqlGremlinError.create(SqlGremlinError.COLUMN_RENAME_UNDETERMINED);
     }

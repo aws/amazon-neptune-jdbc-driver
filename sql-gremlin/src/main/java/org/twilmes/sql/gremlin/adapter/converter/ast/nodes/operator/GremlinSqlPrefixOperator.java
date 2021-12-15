@@ -26,6 +26,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.twilmes.sql.gremlin.adapter.converter.SqlMetadata;
 import org.twilmes.sql.gremlin.adapter.converter.ast.nodes.GremlinSqlNode;
+import org.twilmes.sql.gremlin.adapter.converter.ast.nodes.operator.logic.GremlinSqlBinaryOperator;
 import java.sql.SQLException;
 import java.util.List;
 
@@ -40,12 +41,17 @@ public class GremlinSqlPrefixOperator extends GremlinSqlOperator {
     private final SqlMetadata sqlMetadata;
     private final List<GremlinSqlNode> sqlOperands;
 
-    public GremlinSqlPrefixOperator(final SqlPrefixOperator sqlPrefixOperator, final List<GremlinSqlNode> gremlinSqlNodes,
+    public GremlinSqlPrefixOperator(final SqlPrefixOperator sqlPrefixOperator,
+                                    final List<GremlinSqlNode> gremlinSqlNodes,
                                     final SqlMetadata sqlMetadata) {
         super(sqlPrefixOperator, gremlinSqlNodes, sqlMetadata);
         this.sqlPrefixOperator = sqlPrefixOperator;
         this.sqlMetadata = sqlMetadata;
         this.sqlOperands = gremlinSqlNodes;
+    }
+
+    public String getNewName() throws SQLException {
+        return String.format("%s %s", sqlPrefixOperator.kind.sql, getOperandName(sqlOperands.get(0)));
     }
 
     public boolean isNot() {
@@ -54,6 +60,14 @@ public class GremlinSqlPrefixOperator extends GremlinSqlOperator {
 
     @Override
     protected void appendTraversal(final GraphTraversal<?, ?> graphTraversal) throws SQLException {
+        // If we are done our filtering, have a not operator, and have a single GremlinSqlBasicCall operand,
+        // we can then use not(<graph_traversal>).
+        if (sqlMetadata.isDoneFilters() && isNot() &&
+                sqlOperands.size() == 1 && sqlOperands.get(0) instanceof GremlinSqlBasicCall) {
+            final GremlinSqlBinaryOperator pseudoGremlinSqlBinaryOperator =
+                    new GremlinSqlBinaryOperator(sqlPrefixOperator, sqlOperands, sqlMetadata);
+            pseudoGremlinSqlBinaryOperator.appendTraversal(graphTraversal);
+        }
     }
 
 }
