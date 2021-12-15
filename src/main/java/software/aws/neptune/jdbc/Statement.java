@@ -67,7 +67,7 @@ public class Statement implements java.sql.Statement {
     @Override
     public void cancel() throws SQLException {
         verifyOpen();
-        queryExecutor.cancelQuery();
+        queryExecutor.cancelQuery(false);
     }
 
     @Override
@@ -87,8 +87,7 @@ public class Statement implements java.sql.Statement {
         if (!this.isClosed.getAndSet(true)) {
             LOGGER.debug("Cancelling running queries.");
             try {
-                // TODO: Only cancel if query currently in progress?
-                queryExecutor.cancelQuery();
+                queryExecutor.cancelQuery(true);
             } catch (final SQLException e) {
                 LOGGER.warn("Error occurred while closing Statement. Failed to cancel running query: '"
                         + e.getMessage() + "'");
