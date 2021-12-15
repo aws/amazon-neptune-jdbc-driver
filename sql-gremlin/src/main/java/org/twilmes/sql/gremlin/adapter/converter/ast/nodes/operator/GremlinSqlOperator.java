@@ -26,6 +26,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.twilmes.sql.gremlin.adapter.converter.SqlMetadata;
 import org.twilmes.sql.gremlin.adapter.converter.ast.nodes.GremlinSqlNode;
+import org.twilmes.sql.gremlin.adapter.converter.ast.nodes.operands.GremlinSqlIdentifier;
+import org.twilmes.sql.gremlin.adapter.converter.ast.nodes.operator.logic.GremlinSqlLiteral;
 import org.twilmes.sql.gremlin.adapter.util.SqlGremlinError;
 
 import java.sql.SQLException;
@@ -53,5 +55,17 @@ public abstract class GremlinSqlOperator {
         }
 
         appendTraversal(graphTraversal);
+    }
+
+    protected String getOperandName(final GremlinSqlNode operand) throws SQLException {
+        if (operand instanceof GremlinSqlIdentifier) {
+            final GremlinSqlIdentifier gremlinSqlIdentifier = (GremlinSqlIdentifier) operand;
+            return gremlinSqlIdentifier.isStar() ? "*" : gremlinSqlIdentifier.getColumn();
+        } else if (operand instanceof GremlinSqlLiteral) {
+            return ((GremlinSqlLiteral) operand).getValue().toString();
+        } else if (operand instanceof GremlinSqlBasicCall) {
+            return ((GremlinSqlBasicCall) operand).getRename();
+        }
+        throw SqlGremlinError.createNotSupported(SqlGremlinError.UNSUPPORTED_OPERAND_TYPE, operand.getClass().getName());
     }
 }

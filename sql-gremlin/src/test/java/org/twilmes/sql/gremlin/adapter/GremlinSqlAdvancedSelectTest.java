@@ -321,4 +321,83 @@ public class GremlinSqlAdvancedSelectTest extends GremlinSqlBaseTest {
                 columns("name", "age"),
                 rows(r("Patty", 29), r("Pavel", 30), r("Phil", 31), r("Susan", 45), r("Juanita", 50)));
     }
+
+    @Test
+    void testSingleComparisonOperator() throws SQLException {
+        runQueryTestResults(
+                "SELECT COUNT(wentToSpace) > 0 FROM person GROUP BY wentToSpace HAVING COUNT(wentToSpace) > 1",
+                columns("COUNT(wentToSpace) > 0"), rows(r(true), r(true)));
+        runQueryTestResults(
+                "SELECT COUNT(wentToSpace) <> 0 FROM person GROUP BY wentToSpace",
+                columns("COUNT(wentToSpace) <> 0"), rows(r(true), r(true)));
+        runQueryTestResults(
+                "SELECT COUNT(wentToSpace) = 0 FROM person GROUP BY wentToSpace",
+                columns("COUNT(wentToSpace) = 0"), rows(r(false), r(false)));
+        runQueryTestResults(
+                "SELECT AVG(age) > 100 FROM person GROUP BY wentToSpace",
+                columns("AVG(age) > 100"), rows(r(false), r(false)));
+        runQueryTestResults(
+                "SELECT AVG(age) < 100 FROM person GROUP BY wentToSpace",
+                columns("AVG(age) < 100"), rows(r(true), r(true)));
+        runQueryTestResults(
+                "SELECT AVG(age) = 100 FROM person GROUP BY wentToSpace",
+                columns("AVG(age) = 100"), rows(r(false), r(false)));
+        runQueryTestResults(
+                "SELECT wentToSpace = 0 FROM person",
+                columns("wentToSpace = false"), rows(r(true), r(true), r(true), r(false), r(false), r(false)));
+        runQueryTestResults(
+                "SELECT name, wentToSpace = 0 FROM person",
+                columns("name", "wentToSpace = false"),
+                rows(r("Tom", true), r("Patty", true), r("Phil", true), r("Susan", false), r("Juanita", false), r("Pavel", false)));
+        runQueryTestResults(
+                "SELECT age <= 35 FROM person",
+                columns("age <= 35"), rows(r(true), r(true), r(true), r(false), r(false), r(true)));
+    }
+
+    @Test
+    void testMultiComparisonOperator() throws SQLException {
+        runQueryTestResults(
+                "SELECT age <= 35 AND age > 30 FROM person",
+                columns("age <= 35 AND age > 30"), rows(r(true), r(false), r(true), r(false), r(false), r(false)));
+        runQueryTestResults(
+                "SELECT age <= 35 OR age > 30 FROM person",
+                columns("age <= 35 OR age > 30"), rows(r(true), r(true), r(true), r(true), r(true), r(true)));
+        runQueryTestResults(
+                "SELECT (age <= 35 AND age > 30) OR age = 29 FROM person",
+                columns("age <= 35 AND age > 30 OR age = 29"), rows(r(true), r(true), r(true), r(false), r(false), r(false)));
+        runQueryTestResults(
+                "SELECT age <= 35 AND age > 30 or age > 0 FROM person",
+                columns("age <= 35 AND age > 30 OR age > 0"), rows(r(true), r(true), r(true), r(true), r(true), r(true)));
+        runQueryTestResults(
+                "SELECT age <= 35 and NOT age > 30 FROM person",
+                columns("age <= 35 AND NOT age > 30"), rows(r(false), r(true), r(false), r(false), r(false), r(true)));
+        runQueryTestResults(
+                "SELECT NOT age > 0 FROM person",
+                columns("NOT age > 0"), rows(r(false), r(false), r(false), r(false), r(false), r(false)));
+    }
+
+    @Test
+    void testComparisonWithAsOperator() throws SQLException {
+        runQueryTestResults(
+                "SELECT COUNT(wentToSpace) > 0 AS a FROM person GROUP BY wentToSpace HAVING COUNT(wentToSpace) > 1",
+                columns("a"), rows(r(true), r(true)));
+        runQueryTestResults(
+                "SELECT COUNT(wentToSpace) <> 0 AS a FROM person GROUP BY wentToSpace",
+                columns("a"), rows(r(true), r(true)));
+        runQueryTestResults(
+                "SELECT wentToSpace = 0 AS a FROM person",
+                columns("a"), rows(r(true), r(true), r(true), r(false), r(false), r(false)));
+        runQueryTestResults(
+                "SELECT age <= 35 AS a FROM person",
+                columns("a"), rows(r(true), r(true), r(true), r(false), r(false), r(true)));
+        runQueryTestResults(
+                "SELECT age <= 35 AND age > 30 AS a FROM person",
+                columns("a"), rows(r(true), r(false), r(true), r(false), r(false), r(false)));
+        runQueryTestResults(
+                "SELECT age <= 35 AND age > 30 or age > 0 AS a FROM person",
+                columns("a"), rows(r(true), r(true), r(true), r(true), r(true), r(true)));
+        runQueryTestResults(
+                "SELECT NOT age > 0 AS a FROM person",
+                columns("a"), rows(r(false), r(false), r(false), r(false), r(false), r(false)));
+    }
 }
