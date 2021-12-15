@@ -21,9 +21,7 @@ package org.twilmes.sql.gremlin.adapter;
 
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
-import org.twilmes.sql.gremlin.adapter.util.SqlGremlinError;
 
-import java.math.BigDecimal;
 import java.sql.SQLException;
 
 public class GremlinSqlIncompleteSelectTest extends GremlinSqlBaseTest {
