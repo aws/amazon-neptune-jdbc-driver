@@ -49,7 +49,6 @@ import org.twilmes.sql.gremlin.adapter.results.SqlGremlinQueryResult;
 import org.twilmes.sql.gremlin.adapter.results.pagination.Pagination;
 import org.twilmes.sql.gremlin.adapter.results.pagination.SimpleDataReader;
 import org.twilmes.sql.gremlin.adapter.util.SqlGremlinError;
-
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
@@ -118,7 +117,7 @@ public class GremlinSqlSelectSingle extends GremlinSqlSelect {
         GraphTraversal<?, ?> graphTraversal = null;
         try {
             graphTraversal =
-                SqlTraversalEngine.generateInitialSql(gremlinSqlIdentifiers, sqlMetadata, g);
+                    SqlTraversalEngine.generateInitialSql(gremlinSqlIdentifiers, sqlMetadata, g);
             final String label = sqlMetadata.getActualTableName(gremlinSqlIdentifiers.get(0).getName(1));
 
             // This function basically generates the latter parts of the traversal, by doing this it prepares all the
@@ -244,16 +243,19 @@ public class GremlinSqlSelectSingle extends GremlinSqlSelect {
             } else {
                 graphTraversal1.values(sqlMetadata.getActualColumnName(sqlMetadata.getGremlinTable(table), column));
             }
-            graphTraversal.by(graphTraversal1);
+            graphTraversal.by(__.coalesce(graphTraversal1, __.constant(sqlMetadata.getDefaultCoalesceValue(column))));
         } else if (gremlinSqlNode instanceof GremlinSqlBasicCall) {
             final GremlinSqlBasicCall gremlinSqlBasicCall = (GremlinSqlBasicCall) gremlinSqlNode;
             gremlinSqlBasicCall.generateTraversal(graphTraversal1);
             if (gremlinSqlBasicCall.getGremlinSqlOperator() instanceof GremlinSqlPostfixOperator) {
                 final GremlinSqlPostfixOperator gremlinSqlPostFixOperator =
                         (GremlinSqlPostfixOperator) gremlinSqlBasicCall.getGremlinSqlOperator();
-                graphTraversal.by(graphTraversal1, gremlinSqlPostFixOperator.getOrder());
+                graphTraversal.by(__.coalesce(graphTraversal1,
+                                __.constant(sqlMetadata.getDefaultCoalesceValue(gremlinSqlBasicCall.getActual()))),
+                        gremlinSqlPostFixOperator.getOrder());
             } else {
-                graphTraversal.by(graphTraversal1);
+                graphTraversal.by(__.coalesce(graphTraversal1,
+                        __.constant(sqlMetadata.getDefaultCoalesceValue(gremlinSqlBasicCall.getActual()))));
             }
         } else if (gremlinSqlNode instanceof GremlinSqlLiteral) {
             final GremlinSqlLiteral gremlinSqlLiteral = (GremlinSqlLiteral) gremlinSqlNode;
@@ -270,7 +272,8 @@ public class GremlinSqlSelectSingle extends GremlinSqlSelect {
                 throw SqlGremlinError.create(SqlGremlinError.CANNOT_ORDER_COLUMN_LITERAL);
             }
         } else {
-            throw SqlGremlinError.createNotSupported(SqlGremlinError.CANNOT_ORDER_BY, gremlinSqlNode.getClass().getName());
+            throw SqlGremlinError.createNotSupported(SqlGremlinError.CANNOT_ORDER_BY,
+                    gremlinSqlNode.getClass().getName());
         }
     }
 

@@ -25,6 +25,7 @@ import org.twilmes.sql.gremlin.adapter.GremlinSqlBaseTest;
 
 public class TestGraphFactory {
     private static final TestGraph SPACE_GRAPH = new SpaceTestGraph();
+    private static final TestGraph SPACE_GRAPH2 = new SpaceTestGraph2();
     private static final TestGraph DATA_TYPE_GRAPH = new DataTypeGraph();
 
     public static Graph createGraph(final GremlinSqlBaseTest.DataSet dataSet) {
@@ -32,6 +33,9 @@ public class TestGraphFactory {
         switch (dataSet) {
             case SPACE:
                 SPACE_GRAPH.populate(graph);
+                break;
+            case SPACE2:
+                SPACE_GRAPH2.populate(graph);
                 break;
             case DATA_TYPES:
                 DATA_TYPE_GRAPH.populate(graph);

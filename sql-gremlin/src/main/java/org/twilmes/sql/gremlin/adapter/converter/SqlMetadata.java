@@ -35,7 +35,9 @@ import org.twilmes.sql.gremlin.adapter.converter.schema.gremlin.GremlinVertexTab
 import org.twilmes.sql.gremlin.adapter.util.SqlGremlinError;
 
 import java.sql.SQLException;
+import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -256,5 +258,51 @@ public class SqlMetadata {
 
     public String getOutputType(final String outputName, final String colType) {
         return aggregateTypeMap.getOrDefault(outputName, colType);
+    }
+
+    public String getType(final String column) throws SQLException {
+        final List<GremlinTableBase> gremlinTableBases = new ArrayList<>();
+        for (final String table : getColumnOutputListMap().keySet()) {
+            gremlinTableBases.add(getGremlinTable(table));
+        }
+        if (aggregateTypeExists(column)) {
+            return getOutputType(column, "string");
+        }
+        String renamedColumn = getRenamedColumn(column);
+        if (!aggregateTypeExists(renamedColumn)) {
+            // Sometimes columns are double renamed.
+            renamedColumn = getRenamedColumn(renamedColumn);
+            for (final GremlinTableBase gremlinTableBase : gremlinTableBases) {
+                if (getTableHasColumn(gremlinTableBase, renamedColumn)) {
+                    return getGremlinProperty(gremlinTableBase.getLabel(), renamedColumn).getType();
+                }
+            }
+        }
+        return getOutputType(renamedColumn, "string");
+    }
+
+    public Object getDefaultCoalesceValue(final String column) throws SQLException {
+        switch (getType(column)) {
+            case "string":
+                return "";
+            case "boolean":
+                return false;
+            case "byte":
+                return Byte.MAX_VALUE;
+            case "short":
+                return Short.MAX_VALUE;
+            case "integer":
+                return Integer.MAX_VALUE;
+            case "long":
+                return Long.MAX_VALUE;
+            case "float":
+                return Float.MAX_VALUE;
+            case "double":
+                return Double.MAX_VALUE;
+            case "date":
+                return Date.from(Instant.EPOCH);
+        }
+        // TODO
+        throw new SQLException("Error, unrecognized type: ''");
     }
 }
