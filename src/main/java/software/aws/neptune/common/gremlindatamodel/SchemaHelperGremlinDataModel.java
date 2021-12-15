@@ -24,6 +24,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.twilmes.sql.gremlin.adapter.converter.schema.SqlSchemaGrabber;
 import org.twilmes.sql.gremlin.adapter.converter.schema.calcite.GremlinSchema;
+import software.aws.neptune.gremlin.GremlinConnectionProperties;
+import software.aws.neptune.gremlin.GremlinQueryExecutor;
 import software.aws.neptune.jdbc.utilities.SqlError;
 import software.aws.neptune.jdbc.utilities.SqlState;
 import java.sql.SQLException;
@@ -88,5 +90,19 @@ public class SchemaHelperGremlinDataModel {
         return SqlSchemaGrabber.getSchema(
                 traversal().withRemote(DriverRemoteConnection.using(getClient(adjustedEndpoint, port, useIAM, useSsl))),
                 scanType);
+    }
+
+    /**
+     * Function to get the schema of the graph through gremlin connection
+     *
+     * @param gremlinConnectionProperties connection parameters
+     * @return
+     * @throws SQLException
+     */
+    public static GremlinSchema getGremlinGraphSchema(final GremlinConnectionProperties gremlinConnectionProperties)
+            throws SQLException {
+        return SqlSchemaGrabber.getSchema(
+                traversal().withRemote(DriverRemoteConnection.using(GremlinQueryExecutor.getClient(gremlinConnectionProperties))),
+                gremlinConnectionProperties.getScanType());
     }
 }

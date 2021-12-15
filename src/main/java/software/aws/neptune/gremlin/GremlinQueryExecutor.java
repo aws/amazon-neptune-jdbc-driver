@@ -94,7 +94,7 @@ public class GremlinQueryExecutor extends QueryExecutor {
                 builder.serializer(properties.getSerializerObject());
             } else if (properties.isSerializerEnum()) {
                 builder.serializer(properties.getSerializerEnum());
-            } else if (properties.isChannelizerString()) {
+            } else if (properties.isSerializerString()) {
                 builder.serializer(properties.getSerializerString());
             }
         }
@@ -214,7 +214,7 @@ public class GremlinQueryExecutor extends QueryExecutor {
         }
     }
 
-    protected static Client getClient(final GremlinConnectionProperties gremlinConnectionProperties)
+    public static Client getClient(final GremlinConnectionProperties gremlinConnectionProperties)
             throws SQLException {
         synchronized (CLUSTER_LOCK) {
             cluster = getCluster(gremlinConnectionProperties);
