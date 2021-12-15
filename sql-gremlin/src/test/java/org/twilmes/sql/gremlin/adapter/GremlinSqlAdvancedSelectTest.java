@@ -19,6 +19,7 @@
 
 package org.twilmes.sql.gremlin.adapter;
 
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.twilmes.sql.gremlin.adapter.util.SqlGremlinError;
 
@@ -104,6 +105,8 @@ public class GremlinSqlAdvancedSelectTest extends GremlinSqlBaseTest {
                 rows(r("Patty", 29), r("Pavel", 30), r("Phil", 31)));
         runQueryTestResults("SELECT name, age FROM person WHERE age > 35 ORDER BY age", columns("name", "age"),
                 rows(r("Susan", 45), r("Juanita", 50)));
+        runQueryTestResults("SELECT name, age FROM person WHERE age <> 50 ORDER BY age", columns("name", "age"),
+                rows(r("Patty", 29), r("Pavel", 30), r("Phil", 31), r("Tom", 35), r("Susan", 45)));
 
         // WHERE with numeric literal and descending order (just for fun).
         runQueryTestResults("SELECT name, age FROM person WHERE age >= 35 ORDER BY age DESC", columns("name", "age"),
@@ -142,6 +145,14 @@ public class GremlinSqlAdvancedSelectTest extends GremlinSqlBaseTest {
         runQueryTestResults("SELECT name, age FROM person WHERE name = 'Tom' OR name = 'Juanita' ORDER BY age",
                 columns("name", "age"),
                 rows(r("Tom", 35), r("Juanita", 50)));
+    }
+
+    // TODO: Support NOT on operators
+    @Test
+    @Disabled
+    public void testWhereNot() throws SQLException {
+        runQueryTestResults("select name from person WHERE NOT name = 'Tom'", columns("name"),
+                rows(r("Patty"), r("Phil"), r("Susan"), r("Juanita"), r("Pavel")));
     }
 
     @Test

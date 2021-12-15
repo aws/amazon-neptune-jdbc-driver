@@ -132,7 +132,7 @@ public class SqlTraversalEngine {
         if (sqlMetadata.isDoneFilters()) {
             graphTraversal.choose(__.has(column), __.values(column), __.constant(SqlGremlinQueryResult.NULL_VALUE));
         } else {
-            graphTraversal.values(column);
+            graphTraversal.has(column).values(column);
         }
     }
 
