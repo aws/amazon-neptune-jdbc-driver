@@ -45,6 +45,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
+import static org.twilmes.sql.gremlin.adapter.util.SqlGremlinError.UNRECOGNIZED_TYPE;
+
 /**
  * This module contains traversal and query metadata used by the adapter.
  *
@@ -287,6 +289,7 @@ public class SqlMetadata {
     }
 
     public Object getDefaultCoalesceValue(final String column) throws SQLException {
+        final String type = getType(column);
         switch (getType(column)) {
             case "string":
                 return "";
@@ -307,7 +310,6 @@ public class SqlMetadata {
             case "date":
                 return Date.from(Instant.EPOCH);
         }
-        // TODO
-        throw new SQLException("Error, unrecognized type: ''");
+        throw SqlGremlinError.create(UNRECOGNIZED_TYPE, type);
     }
 }

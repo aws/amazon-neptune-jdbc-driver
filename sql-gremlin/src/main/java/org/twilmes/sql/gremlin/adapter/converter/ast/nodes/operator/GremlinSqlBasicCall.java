@@ -110,7 +110,6 @@ public class GremlinSqlBasicCall extends GremlinSqlNode {
 
     public String getOutputColumn() throws SQLException {
         if (gremlinSqlNodes.size() != 1) {
-            // TODO
             throw SqlGremlinError.create(SqlGremlinError.COLUMN_ACTUAL_NAME_UNDETERMINED);
         }
         if (gremlinSqlNodes.get(0) instanceof GremlinSqlIdentifier) {
@@ -118,7 +117,6 @@ public class GremlinSqlBasicCall extends GremlinSqlNode {
         } else if (gremlinSqlOperator instanceof GremlinSqlAsOperator) {
             return ((GremlinSqlAsOperator) gremlinSqlOperator).getActual();
         }
-        // TODO
         throw SqlGremlinError.create(SqlGremlinError.COLUMN_ACTUAL_NAME_UNDETERMINED);
     }
 }
