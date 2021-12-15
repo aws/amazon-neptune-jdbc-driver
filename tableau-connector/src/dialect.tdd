@@ -285,7 +285,7 @@
     <format-datetime-literal formula="(TIMESTAMP '%1')" format='yyyy-MM-dd HH:mm:ss.SSS' />
     <format-false literal='FALSE' predicate='FALSE' />
     <format-is-distinct value='Keyword' />
-    <format-order-by value='Nulls' />
+    <format-order-by value='DirectionOnly' />
     <format-select>
       <part name='Select' value='SELECT %1' />
       <part name='From' value='FROM %1' />
