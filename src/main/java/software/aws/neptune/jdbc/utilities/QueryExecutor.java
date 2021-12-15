@@ -198,12 +198,6 @@ public abstract class QueryExecutor {
             }
         }
     }
-    //
-    //  project("country","region","elev","elev","elev","elev","lat","lat","lat","lat")
-    //      .choose(__.has("country"),__.values("country"),__.constant(""))
-    //      .choose(__.has("region"),__.values("region"),__.constant(""))
-    // Sub traversal:
-    //      unfold().choose(__.has("elev"),__.values("elev"),__.constant(""))
 
     private void resetQueryState() {
         queryState = QueryState.NOT_STARTED;
@@ -217,9 +211,12 @@ public abstract class QueryExecutor {
      *
      * @throws SQLException if query cancellation fails.
      */
-    public void cancelQuery() throws SQLException {
+    public void cancelQuery(final boolean isClosing) throws SQLException {
         synchronized (lock) {
             if (queryState.equals(QueryState.NOT_STARTED)) {
+                if (isClosing) {
+                    return;
+                }
                 throw SqlError.createSQLException(
                         LOGGER,
                         SqlState.OPERATION_CANCELED,

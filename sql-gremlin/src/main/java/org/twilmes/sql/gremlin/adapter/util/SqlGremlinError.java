@@ -89,6 +89,7 @@ public enum SqlGremlinError {
     NOT_LOGICAL_FILTER,
     OFFSET_NOT_SUPPORTED,
     UNSUPPORTED_LITERAL_EXPRESSION,
+    CANNOT_JOIN_DIFFERENT_EDGES,
     UNSUPPORTED_OPERAND_TYPE;
 
     private static final ResourceBundle RESOURCE;

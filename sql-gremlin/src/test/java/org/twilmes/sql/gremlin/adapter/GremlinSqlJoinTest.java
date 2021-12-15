@@ -20,6 +20,7 @@
 package org.twilmes.sql.gremlin.adapter;
 
 import org.junit.jupiter.api.Test;
+import org.twilmes.sql.gremlin.adapter.util.SqlGremlinError;
 import java.sql.SQLException;
 
 public class GremlinSqlJoinTest extends GremlinSqlBaseTest {
@@ -84,5 +85,26 @@ public class GremlinSqlJoinTest extends GremlinSqlBaseTest {
                         "GROUP BY spaceship.model",
                 columns("model"),
                 rows(r("delta 1"), r("delta 2"), r("delta 3")));
+    }
+
+    @Test
+    void testJoinDiffEdge() {
+        // Same vertex label, different edge.
+        runQueryTestThrows("SELECT person.name AS name1, person1.name AS name2 FROM gremlin.person person " +
+                        "INNER JOIN gremlin.person person1 ON (person.worksFor_OUT_ID = person1.friendsWith_IN_ID)",
+                SqlGremlinError.CANNOT_JOIN_DIFFERENT_EDGES, "worksFor", "friendsWith");
+        runQueryTestThrows("SELECT person.name AS name1, person1.name AS name2 FROM gremlin.person person " +
+                        "INNER JOIN gremlin.person person1 ON (person.friendsWith_IN_ID = person1.worksFor_OUT_ID)",
+                SqlGremlinError.CANNOT_JOIN_DIFFERENT_EDGES, "friendsWith", "worksFor");
+
+        // Different vertex label, different edge.
+        runQueryTestThrows("SELECT person.name, spaceship.model FROM gremlin.person person " +
+                        "INNER JOIN gremlin.spaceship spaceship ON (person.worksFor_OUT_ID = spaceship.pilots_IN_ID)",
+                SqlGremlinError.CANNOT_JOIN_DIFFERENT_EDGES, "worksFor", "pilots");
+
+        // Different vertex label, different edge.
+        runQueryTestThrows("SELECT person.name, spaceship.model FROM gremlin.person person " +
+                        "INNER JOIN gremlin.spaceship spaceship ON (spaceship.pilots_IN_ID = person.worksFor_OUT_ID)",
+                SqlGremlinError.CANNOT_JOIN_DIFFERENT_EDGES, "worksFor", "pilots");
     }
 }
