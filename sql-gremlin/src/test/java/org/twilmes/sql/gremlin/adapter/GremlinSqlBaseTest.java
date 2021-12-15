@@ -179,6 +179,7 @@ public abstract class GremlinSqlBaseTest {
 
     public enum DataSet {
         SPACE,
+        SPACE_INCOMPLETE,
         DATA_TYPES
     }
 
