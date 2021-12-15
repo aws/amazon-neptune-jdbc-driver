@@ -81,13 +81,9 @@ public abstract class GremlinSqlSelect extends GremlinSqlNode {
     }
 
     private SqlGremlinQueryResult generateSqlGremlinQueryResult() throws SQLException {
-        final List<GremlinTableBase> tables = new ArrayList<>();
         final List<String> columns = new ArrayList<>();
-        for (final String table : sqlMetadata.getColumnOutputListMap().keySet()) {
-            tables.add(sqlMetadata.getGremlinTable(table));
-        }
         sqlMetadata.getColumnOutputListMap().forEach((key, value) -> columns.addAll(value));
-        return new SqlGremlinQueryResult(columns, tables, sqlMetadata);
+        return new SqlGremlinQueryResult(columns, sqlMetadata);
 
     }
 

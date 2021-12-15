@@ -54,6 +54,10 @@ public class GremlinSqlPostfixOperator extends GremlinSqlOperator {
         this.sqlOperands = gremlinSqlNodes;
     }
 
+    public String getNewName() throws SQLException {
+        return String.format("%s %s", getOperandName(sqlOperands.get(0)), sqlPostfixOperator.kind.sql);
+    }
+
     public Order getOrder() throws SQLException {
         if (sqlPostfixOperator.kind.equals(SqlKind.DESCENDING)) {
             return Order.desc;

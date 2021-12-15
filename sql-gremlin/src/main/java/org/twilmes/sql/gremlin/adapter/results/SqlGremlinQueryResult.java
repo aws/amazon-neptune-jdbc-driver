@@ -37,30 +37,11 @@ public class SqlGremlinQueryResult implements AutoCloseable {
     private final BlockingQueue<List<Object>> blockingQueueRows = new LinkedBlockingQueue<>();
     private SQLException paginationException = null;
 
-    public SqlGremlinQueryResult(final List<String> columns, final List<GremlinTableBase> gremlinTableBases,
-                                 final SqlMetadata sqlMetadata) throws SQLException {
+    public SqlGremlinQueryResult(final List<String> columns, final SqlMetadata sqlMetadata) throws SQLException {
         this.columns = columns;
         for (final String column : columns) {
-            columnTypes.add(getType(column, sqlMetadata, gremlinTableBases));
+            columnTypes.add(sqlMetadata.getType(column));
         }
-    }
-
-    private String getType(final String column, final SqlMetadata sqlMetadata,
-                           final List<GremlinTableBase> gremlinTableBases) throws SQLException {
-        if (sqlMetadata.aggregateTypeExists(column)) {
-            return sqlMetadata.getOutputType(column, "string");
-        }
-        String renamedColumn = sqlMetadata.getRenamedColumn(column);
-        if (!sqlMetadata.aggregateTypeExists(renamedColumn)) {
-            // Sometimes columns are double renamed.
-            renamedColumn = sqlMetadata.getRenamedColumn(renamedColumn);
-            for (final GremlinTableBase gremlinTableBase : gremlinTableBases) {
-                if (sqlMetadata.getTableHasColumn(gremlinTableBase, renamedColumn)) {
-                    return sqlMetadata.getGremlinProperty(gremlinTableBase.getLabel(), renamedColumn).getType();
-                }
-            }
-        }
-        return sqlMetadata.getOutputType(renamedColumn, "string");
     }
 
     public void setPaginationException(final SQLException e) {

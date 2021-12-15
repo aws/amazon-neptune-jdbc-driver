@@ -87,6 +87,8 @@ public class GremlinSqlBasicCall extends GremlinSqlNode {
             return ((GremlinSqlBinaryOperator) gremlinSqlOperator).getNewName();
         } else if (gremlinSqlOperator instanceof GremlinSqlPrefixOperator) {
             return ((GremlinSqlPrefixOperator) gremlinSqlOperator).getNewName();
+        } else if (gremlinSqlOperator instanceof GremlinSqlPostfixOperator) {
+            return ((GremlinSqlPostfixOperator) gremlinSqlOperator).getNewName();
         }
         throw SqlGremlinError.create(SqlGremlinError.COLUMN_RENAME_UNDETERMINED);
     }
@@ -100,6 +102,20 @@ public class GremlinSqlBasicCall extends GremlinSqlNode {
             return ((GremlinSqlBinaryOperator) gremlinSqlOperator).getNewName();
         } else if (gremlinSqlOperator instanceof GremlinSqlPrefixOperator) {
             return ((GremlinSqlPrefixOperator) gremlinSqlOperator).getNewName();
+        } else if (gremlinSqlOperator instanceof GremlinSqlPostfixOperator) {
+            return ((GremlinSqlPostfixOperator) gremlinSqlOperator).getNewName();
+        }
+        throw SqlGremlinError.create(SqlGremlinError.COLUMN_ACTUAL_NAME_UNDETERMINED);
+    }
+
+    public String getOutputColumn() throws SQLException {
+        if (gremlinSqlNodes.size() != 1) {
+            throw SqlGremlinError.create(SqlGremlinError.COLUMN_ACTUAL_NAME_UNDETERMINED);
+        }
+        if (gremlinSqlNodes.get(0) instanceof GremlinSqlIdentifier) {
+            return ((GremlinSqlIdentifier) gremlinSqlNodes.get(0)).getColumn();
+        } else if (gremlinSqlOperator instanceof GremlinSqlAsOperator) {
+            return ((GremlinSqlAsOperator) gremlinSqlOperator).getActual();
         }
         throw SqlGremlinError.create(SqlGremlinError.COLUMN_ACTUAL_NAME_UNDETERMINED);
     }

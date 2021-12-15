@@ -79,11 +79,17 @@ public class GremlinSqlBinaryOperator extends GremlinSqlOperator {
     public static void appendBooleanEquals(final SqlMetadata sqlMetadata, GraphTraversal<?, ?> graphTraversal,
                                            final GremlinSqlIdentifier identifier, boolean expectedValue)
             throws SQLException {
-        GraphTraversal<?, ?> graphTraversal1 = __.unfold();
+        final GraphTraversal graphTraversal1 = __.unfold();
         SqlTraversalEngine.applySqlIdentifier(identifier, sqlMetadata, graphTraversal1);
         final String randomString = getRandomString();
-        graphTraversal.as(randomString).where(randomString, P.eq(randomString)).
-                by(graphTraversal1).by(__.unfold().constant(expectedValue));
+        graphTraversal.as(randomString).where(randomString, P.eq(randomString));
+        if (sqlMetadata.isDoneFilters()) {
+            graphTraversal.by(graphTraversal1);
+        } else {
+            graphTraversal.by(__.coalesce(graphTraversal1,
+                    __.constant(sqlMetadata.getDefaultCoalesceValue(identifier.getColumn()))));
+        }
+        graphTraversal.by(__.unfold().constant(expectedValue));
     }
 
     private static String getRandomString() {
@@ -101,7 +107,7 @@ public class GremlinSqlBinaryOperator extends GremlinSqlOperator {
         if (BINARY_APPENDERS.containsKey(sqlBinaryOperator.kind)) {
             if (sqlMetadata.isDoneFilters()) {
                 // If we are outside of filters, we need this to evaluate to true/false, not just filter the result.
-                GraphTraversal<?, ?> subGraphTraversal = __.__();
+                final GraphTraversal<?, ?> subGraphTraversal = __.__();
                 BINARY_APPENDERS.get(sqlBinaryOperator.kind).appendTraversal(subGraphTraversal, sqlOperands);
                 graphTraversal.fold().choose(
                         subGraphTraversal.count().is(P.gt(0L)), __.constant(true), __.constant(false));
@@ -118,7 +124,7 @@ public class GremlinSqlBinaryOperator extends GremlinSqlOperator {
             throws SQLException {
         if (gremlinSqlBasicCall.getGremlinSqlNodes().size() == 1 &&
                 gremlinSqlBasicCall.getGremlinSqlNodes().get(0) instanceof GremlinSqlIdentifier) {
-            GremlinSqlIdentifier gremlinSqlIdentifier =
+            final GremlinSqlIdentifier gremlinSqlIdentifier =
                     (GremlinSqlIdentifier) gremlinSqlBasicCall.getGremlinSqlNodes().get(0);
             if (gremlinSqlBasicCall.getGremlinSqlOperator() instanceof GremlinSqlPrefixOperator) {
                 GremlinSqlPrefixOperator gremlinSqlPrefixOperator =
@@ -185,8 +191,11 @@ public class GremlinSqlBinaryOperator extends GremlinSqlOperator {
         for (int i = 0; i < operands.size(); i++) {
             graphTraversals[i] = __.unfold();
             if (operands.get(i) instanceof GremlinSqlIdentifier) {
-                SqlTraversalEngine.applySqlIdentifier((GremlinSqlIdentifier) operands.get(i), sqlMetadata,
-                        graphTraversals[i]);
+                GremlinSqlIdentifier gremlinSqlIdentifier = (GremlinSqlIdentifier) operands.get(i);
+                GraphTraversal subtraversal = __.unfold();
+                SqlTraversalEngine.applySqlIdentifier(gremlinSqlIdentifier, sqlMetadata, subtraversal);
+                graphTraversals[i] = __.coalesce(subtraversal,
+                        __.constant(sqlMetadata.getDefaultCoalesceValue(gremlinSqlIdentifier.getColumn())));
             } else if (operands.get(i) instanceof GremlinSqlBasicCall) {
                 GremlinSqlBasicCall gremlinSqlBasicCall = ((GremlinSqlBasicCall) operands.get(i));
                 gremlinSqlBasicCall.generateTraversal(graphTraversals[i]);
