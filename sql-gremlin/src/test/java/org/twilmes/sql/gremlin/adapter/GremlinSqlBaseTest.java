@@ -123,13 +123,13 @@ public abstract class GremlinSqlBaseTest {
 
     protected void runQueryTestThrows(final String query, final SqlGremlinError messageKey,
                                       final Object... formatArgs) {
-        Throwable t = Assertions.assertThrows(SQLException.class, () -> converter.executeQuery(g, query));
+        final Throwable t = Assertions.assertThrows(SQLException.class, () -> converter.executeQuery(g, query));
         Assert.assertEquals(SqlGremlinError.getMessage(messageKey, formatArgs), t.getMessage());
     }
 
     protected void runNotSupportedQueryTestThrows(final String query, final SqlGremlinError messageKey,
                                                   final Object... formatArgs) {
-        Throwable t = Assertions.assertThrows(SQLNotSupportedException.class, () -> converter.executeQuery(g, query));
+        final Throwable t = Assertions.assertThrows(SQLNotSupportedException.class, () -> converter.executeQuery(g, query));
         Assert.assertEquals(SqlGremlinError.getMessage(messageKey, formatArgs), t.getMessage());
     }
 

@@ -209,6 +209,7 @@ public class GremlinSqlSelectMulti extends GremlinSqlSelect {
             graphTraversal = g.E().hasLabel(edgeLabel)
                     .where(__.inV().hasLabel(inVLabel))
                     .where(__.outV().hasLabel(outVLabel));
+            applyWhere(graphTraversal);
             applyGroupBy(graphTraversal, edgeLabel, inVRename, outVRename);
             applySelectValues(graphTraversal);
             applyOrderBy(graphTraversal, edgeLabel, inVRename, outVRename);
@@ -310,5 +311,12 @@ public class GremlinSqlSelectMulti extends GremlinSqlSelect {
             return;
         }
         throw SqlGremlinError.createNotSupported(SqlGremlinError.JOIN_HAVING_UNSUPPORTED);
+    }
+
+    protected void applyWhere(final GraphTraversal<?, ?> graphTraversal) throws SQLException {
+        if (sqlSelect.getWhere() == null) {
+            return;
+        }
+        throw SqlGremlinError.createNotSupported(SqlGremlinError.JOIN_WHERE_UNSUPPORTED);
     }
 }
