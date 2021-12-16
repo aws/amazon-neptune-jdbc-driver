@@ -10,7 +10,7 @@ Download the latest version of [DBeaver](https://dbeaver.io/) to use the Driver 
 
 2. Launch the DBeaver application.
 
-3. Navigate to **Database > Driver Manager** and click **New** to add a new Driver. 
+3. Navigate to **Database > Driver Manager** and click **New** to add a new Driver.
 
 4. Under the `Libraries` tab, click **Add File** and add the `JAR` file. This should also automatically populate the `Driver class` in the dropdown menu.
 
@@ -48,6 +48,7 @@ DBeaver has the ability to configure the SSH tunnel within the application.
 2. Select the Neptune driver that was added in the previous steps.
 
 3. Navigate to the **SSH** tab and fill out the fields. Fill out the **HOST/IP**, **User Name**, and select **Public Key** as the **Authentication Method**. A **Private key** is required. The [configuration instructions](../setup/configuration.md) mentioned above can provide more context for why this is required.
+   Under **Advanced settings** the **Local host** and **Local port** if following the above instructions should be your localhost and the port used for Neptune. The **Remote host** and **Remote port** should be the Neptune URL and port.
 
    <p align="center">
    <img alt="driver" src="../images/dbeaver_ssh_tunnel.png" width="65%"/>
