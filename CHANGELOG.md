@@ -16,7 +16,7 @@ This release provides bug fixes and a new features, details are listed below:
 * Fixed bugs in SSH tunnel
 * Fixed bug with `JOIN` on vertices of different labels
 * Fixed metadata caching to be on database url basis
-* Fixed Log4J security issue
+* Fixed Log4j security issue (CVE-2021-44228 and CVE-2021-45046)
 * Fixed issue with edge mismatch in `JOIN` returning results
 * Fixed `ORDER BY` column on column that has `null` values
 * Fixed issue with aggregate filtering on `null` valued columns
