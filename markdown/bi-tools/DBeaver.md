@@ -32,10 +32,25 @@ Example for connecting to an instance with IAM authentication. Note that your [A
 <img alt="driver" src="../images/dbeaver_new_driver_auth.png" width="65%"/>
 </p>
 
-#### Connecting to Amazon Neptune Using DBeaver - External SSH Tunnel
+#### Connecting to Amazon Neptune using DBeaver - External SSH Tunnel
 
 1. If connecting from outside the Neptune cluster's VPC, ensure you have followed the [configuration instructions](../setup/configuration.md).
 2. Navigate to **Database > New Database Connection**.
 3. Select the Neptune driver that was added in the previous steps.
-4. Click `Finish` and you are now connected.
+4. Click `Finish` to complete setup.
 
+#### Connecting to Amazon Neptune using  DBeaver - Internal SSH Tunnel
+
+DBeaver has the ability to configure the SSH tunnel within the application.
+
+1. Navigate to **Database > New Database Connection**.
+
+2. Select the Neptune driver that was added in the previous steps.
+
+3. Navigate to the **SSH** tab and fill out the fields. Fill out the **HOST/IP**, **User Name**, and select **Public Key** as the **Authentication Method**. A **Private key** is required. The [configuration instructions](../setup/configuration.md) mentioned above can provide more context for why this is required.
+
+   <p align="center">
+   <img alt="driver" src="../images/dbeaver_ssh_tunnel.png" width="65%"/>
+   </p>
+
+   4. Click `Test tunnel configuration` to validate the SSH tunnel, and then `Finish` to complete setup.
