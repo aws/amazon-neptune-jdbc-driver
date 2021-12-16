@@ -33,7 +33,6 @@ import org.twilmes.sql.gremlin.adapter.converter.schema.gremlin.GremlinProperty;
 import org.twilmes.sql.gremlin.adapter.converter.schema.gremlin.GremlinTableBase;
 import org.twilmes.sql.gremlin.adapter.converter.schema.gremlin.GremlinVertexTable;
 import org.twilmes.sql.gremlin.adapter.util.SqlGremlinError;
-
 import java.sql.SQLException;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -218,8 +217,12 @@ public class SqlMetadata {
     }
 
     public String getActualColumnName(final GremlinTableBase table, final String column) throws SQLException {
-        final String actualColumnName = getRenamedColumn(column);
-        return table.getColumn(actualColumnName).getName();
+        if (table.hasColumn(column)) {
+            return table.getColumn(column).getName();
+        }
+        final Optional<String> actualName = columnRenameMap.entrySet().stream().
+                filter(entry -> entry.getValue().equals(column)).map(Map.Entry::getKey).findFirst();
+        return table.getColumn(actualName.orElse(column)).getName();
     }
 
     public boolean getTableHasColumn(final GremlinTableBase table, final String column) {

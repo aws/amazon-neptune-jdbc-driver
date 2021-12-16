@@ -29,7 +29,6 @@ import org.twilmes.sql.gremlin.adapter.converter.ast.nodes.select.StepDirection;
 import org.twilmes.sql.gremlin.adapter.converter.schema.gremlin.GremlinTableBase;
 import org.twilmes.sql.gremlin.adapter.results.SqlGremlinQueryResult;
 import org.twilmes.sql.gremlin.adapter.util.SqlGremlinError;
-
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
@@ -100,9 +99,20 @@ public class SqlTraversalEngine {
     }
 
 
-    public static void applyTraversal(final GraphTraversal<?, ?> graphTraversal,
-                                      final GraphTraversal<?, ?> subGraphTraversal) {
-        graphTraversal.by(subGraphTraversal);
+    public static void applyTraversal(boolean apply,
+                                      final GraphTraversal graphTraversal,
+                                      final GraphTraversal subGraphTraversal) {
+        if (apply) {
+            graphTraversal.by(__.coalesce(subGraphTraversal, __.constant(SqlGremlinQueryResult.NULL_VALUE)));
+        } else {
+            graphTraversal.by(subGraphTraversal);
+        }
+    }
+
+
+    public static void applyTraversal(final GraphTraversal graphTraversal,
+                                      final GraphTraversal subGraphTraversal) {
+        applyTraversal(false, graphTraversal, subGraphTraversal);
     }
 
     public static void applySqlIdentifier(final GremlinSqlIdentifier sqlIdentifier,
@@ -115,7 +125,8 @@ public class SqlTraversalEngine {
             graphTraversal.constant(1);
         } else if (sqlIdentifier.getNameCount() == 2) {
             // With size 2 format of identifier is 'table'.'column' => ['table', 'column']
-            appendGraphTraversal(sqlIdentifier.getName(0), sqlMetadata.getRenamedColumn(sqlIdentifier.getName(1)), sqlMetadata, graphTraversal);
+            appendGraphTraversal(sqlIdentifier.getName(0), sqlMetadata.getRenamedColumn(sqlIdentifier.getName(1)),
+                    sqlMetadata, graphTraversal);
         } else {
             // With size 1, format of identifier is 'column'.
             appendGraphTraversal(sqlMetadata.getRenamedColumn(sqlIdentifier.getName(0)), sqlMetadata, graphTraversal);
@@ -128,7 +139,8 @@ public class SqlTraversalEngine {
         return __.project(firstColumn, remaining);
     }
 
-    private static void appendColumnSelect(final SqlMetadata sqlMetadata, final String column, final GraphTraversal<?, ?> graphTraversal) {
+    private static void appendColumnSelect(final SqlMetadata sqlMetadata, final String column,
+                                           final GraphTraversal<?, ?> graphTraversal) {
         if (sqlMetadata.isDoneFilters()) {
             graphTraversal.choose(__.has(column), __.values(column), __.constant(SqlGremlinQueryResult.NULL_VALUE));
         } else {
@@ -151,7 +163,8 @@ public class SqlTraversalEngine {
             }
         } else {
             // It's this vertex/edge.
-            if (columnName.toLowerCase(Locale.getDefault()).startsWith(gremlinTableBase.getLabel().toLowerCase(Locale.getDefault()))) {
+            if (columnName.toLowerCase(Locale.getDefault())
+                    .startsWith(gremlinTableBase.getLabel().toLowerCase(Locale.getDefault()))) {
                 graphTraversal.id();
             } else {
                 if (columnName.endsWith(IN_ID)) {

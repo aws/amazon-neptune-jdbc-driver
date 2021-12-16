@@ -19,11 +19,7 @@
 
 package org.twilmes.sql.gremlin.adapter;
 
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
-import org.twilmes.sql.gremlin.adapter.util.SqlGremlinError;
-
-import java.math.BigDecimal;
 import java.sql.SQLException;
 
 public class GremlinSqlIncompleteSelectTest extends GremlinSqlBaseTest {
@@ -44,7 +40,8 @@ public class GremlinSqlIncompleteSelectTest extends GremlinSqlBaseTest {
 
     @Test
     public void testEdges() throws SQLException {
-        runQueryTestResults("select * from worksFor where yearsWorked = 9", columns("person_OUT_ID", "company_IN_ID", "yearsWorked", "worksFor_ID"),
+        runQueryTestResults("select * from worksFor where yearsWorked = 9",
+                columns("person_OUT_ID", "company_IN_ID", "yearsWorked", "worksFor_ID"),
                 rows(r(25L, 2L, 9, 61L)));
     }
 
@@ -66,7 +63,7 @@ public class GremlinSqlIncompleteSelectTest extends GremlinSqlBaseTest {
         runQueryTestResults("SELECT name, age AS a FROM person ORDER BY a", columns("name", "a"),
                 rows(r("Patty", 29), r(null, 30), r("Phil", 31), r("Susan", 45), r("Juanita", 50), r("Tom", null)));
         runQueryTestResults("SELECT name, age AS a FROM person ORDER BY a DESC", columns("name", "a"),
-                rows( r("Tom", null), r("Juanita", 50), r("Susan", 45), r("Phil", 31), r(null, 30), r("Patty", 29)));
+                rows(r("Tom", null), r("Juanita", 50), r("Susan", 45), r("Phil", 31), r(null, 30), r("Patty", 29)));
 
         // ORDER with string column.
         runQueryTestResults("SELECT name, age FROM person ORDER BY name", columns("name", "age"),
@@ -90,30 +87,44 @@ public class GremlinSqlIncompleteSelectTest extends GremlinSqlBaseTest {
 
     // TODO: Support aggregates for null values
     @Test
-    @Disabled
     public void testHavingNull() throws SQLException {
-        // HAVING with aggregate literal.
+        runQueryTestResults("SELECT MIN(age) AS age FROM person GROUP BY name HAVING MIN(age) > 1",
+               columns("age"),
+               rows(r((Object) null), r(29), r(31), r(45), r(50), r(30)));
         runQueryTestResults("SELECT wentToSpace, SUM(age) FROM person GROUP BY wentToSpace HAVING SUM(age) > 1000",
-                columns("wentToSpace", "SUM(age)"),
-                rows());
+               columns("wentToSpace", "SUM(age)"),
+               rows());
         runQueryTestResults("SELECT wentToSpace, COUNT(age) FROM person GROUP BY wentToSpace HAVING COUNT(age) < 1000",
                 columns("wentToSpace", "COUNT(age)"),
-                rows(r(false, 3L), r(true, 3L)));
-        runQueryTestResults("SELECT wentToSpace, COUNT(age) FROM person GROUP BY wentToSpace HAVING COUNT(age) <> 3",
+                rows(r(false, 2L), r(true, 2L), r(null, 1L)));
+        runQueryTestResults("SELECT wentToSpace, COUNT(age) FROM person GROUP BY wentToSpace HAVING COUNT(age) <> 2",
                 columns("wentToSpace", "COUNT(age)"),
-                rows());
+                rows(r(null, 1L)));
         runQueryTestResults("SELECT COUNT(age), SUM(age) FROM person GROUP BY wentToSpace HAVING SUM(age) > 100",
                 columns("COUNT(age)", "SUM(age)"),
-                rows(r(3L, 125L)));
+                rows());
+        runQueryTestResults("SELECT COUNT(age), SUM(age) FROM person GROUP BY wentToSpace HAVING SUM(age) > 80",
+                columns("COUNT(age)", "SUM(age)"),
+                rows(r(2L, 95L)));
+
+
+        //        final Vertex tom = graph.addVertex(label, "person", "name", "Tom", "wentToSpace", false);
+        //        final Vertex patty = graph.addVertex(label, "person", "name", "Patty", "age", 29, "wentToSpace", false);
+        //        final Vertex phil = graph.addVertex(label, "person", "name", "Phil", "age", 31, "wentToSpace", false);
+        //        final Vertex susan = graph.addVertex(label, "person", "name", "Susan", "age", 45, "wentToSpace", true);
+        //        final Vertex juanita = graph.addVertex(label, "person", "name", "Juanita", "age", 50, "wentToSpace", true);
+        //        final Vertex pavel = graph.addVertex(label, "person", "age", 30);
+
+
         runQueryTestResults("SELECT COUNT(age), SUM(age) FROM person GROUP BY wentToSpace HAVING SUM(age) < 100",
                 columns("COUNT(age)", "SUM(age)"),
-                rows(r(3L, 95L)));
+                rows(r(2L, 60L), r(2L, 95L), r(1L, 30L)));
         runQueryTestResults("SELECT COUNT(age), SUM(age) FROM person GROUP BY age HAVING SUM(age) <> 1000",
                 columns("COUNT(age)", "SUM(age)"),
-                rows(r(1L, 35L), r(1L, 29L), r(1L, 31L), r(1L, 45L), r(1L, 50L), r(1L, 30L)));
-        runQueryTestResults("SELECT COUNT(age), SUM(age) FROM person GROUP BY age HAVING SUM(age) = 35",
+                rows(r(1L, 29L), r(1L, 31L), r(1L, 45L), r(1L, 50L), r(1L, 30L), r(0L, null)));
+        runQueryTestResults("SELECT COUNT(age), SUM(age) FROM person GROUP BY age HAVING SUM(age) = 29",
                 columns("COUNT(age)", "SUM(age)"),
-                rows(r(1L, 35L)));
+                rows(r(1L, 29L)));
 
         // Having with AND.
         runQueryTestResults(
