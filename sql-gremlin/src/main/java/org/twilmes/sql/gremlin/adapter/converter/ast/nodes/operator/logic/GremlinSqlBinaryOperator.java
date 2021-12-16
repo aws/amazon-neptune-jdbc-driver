@@ -187,18 +187,20 @@ public class GremlinSqlBinaryOperator extends GremlinSqlOperator {
         if (operands.size() != 2) {
             throw SqlGremlinError.create(SqlGremlinError.BINARY_AND_PREFIX_OPERAND_COUNT);
         }
-        final GraphTraversal<?, ?>[] graphTraversals = new GraphTraversal[2];
+        final GraphTraversal[] graphTraversals = new GraphTraversal[2];
         for (int i = 0; i < operands.size(); i++) {
             graphTraversals[i] = __.unfold();
             if (operands.get(i) instanceof GremlinSqlIdentifier) {
-                GremlinSqlIdentifier gremlinSqlIdentifier = (GremlinSqlIdentifier) operands.get(i);
-                GraphTraversal subtraversal = __.unfold();
+                final GremlinSqlIdentifier gremlinSqlIdentifier = (GremlinSqlIdentifier) operands.get(i);
+                final GraphTraversal subtraversal = __.unfold();
                 SqlTraversalEngine.applySqlIdentifier(gremlinSqlIdentifier, sqlMetadata, subtraversal);
                 graphTraversals[i] = __.coalesce(subtraversal,
                         __.constant(sqlMetadata.getDefaultCoalesceValue(gremlinSqlIdentifier.getColumn())));
             } else if (operands.get(i) instanceof GremlinSqlBasicCall) {
-                GremlinSqlBasicCall gremlinSqlBasicCall = ((GremlinSqlBasicCall) operands.get(i));
+                final GremlinSqlBasicCall gremlinSqlBasicCall = ((GremlinSqlBasicCall) operands.get(i));
                 gremlinSqlBasicCall.generateTraversal(graphTraversals[i]);
+                graphTraversals[i] = __.coalesce(graphTraversals[i],
+                        __.constant(sqlMetadata.getDefaultCoalesceValue(gremlinSqlBasicCall.getActual())));
             } else if (operands.get(i) instanceof GremlinSqlLiteral) {
                 ((GremlinSqlLiteral) operands.get(i)).appendTraversal(graphTraversals[i]);
             }

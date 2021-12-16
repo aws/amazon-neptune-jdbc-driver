@@ -107,4 +107,16 @@ public class GremlinSqlJoinTest extends GremlinSqlBaseTest {
                         "INNER JOIN gremlin.spaceship spaceship ON (spaceship.pilots_IN_ID = person.worksFor_OUT_ID)",
                 SqlGremlinError.CANNOT_JOIN_DIFFERENT_EDGES, "worksFor", "pilots");
     }
+
+    @Test
+    void testJoinHavingWhereThrow() {
+        runNotSupportedQueryTestThrows("SELECT person.name AS name1 FROM gremlin.person person " +
+                        "INNER JOIN gremlin.person person1 ON person.friendsWith_OUT_ID = person1.friendsWith_IN_ID " +
+                        "GROUP BY person.name HAVING COUNT(person.name) > 0",
+                SqlGremlinError.JOIN_HAVING_UNSUPPORTED);
+        runNotSupportedQueryTestThrows("SELECT person.name AS name1 FROM gremlin.person person " +
+                        "INNER JOIN gremlin.person person1 ON person.friendsWith_OUT_ID = person1.friendsWith_IN_ID " +
+                        "WHERE person.name = 'foo'",
+                SqlGremlinError.JOIN_WHERE_UNSUPPORTED);
+    }
 }
