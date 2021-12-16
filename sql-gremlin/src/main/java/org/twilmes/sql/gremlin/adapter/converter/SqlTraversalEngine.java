@@ -99,14 +99,10 @@ public class SqlTraversalEngine {
     }
 
 
-    public static void applyTraversal(boolean apply,
+    public static void applyTraversal(final boolean apply,
                                       final GraphTraversal graphTraversal,
                                       final GraphTraversal subGraphTraversal) {
-        if (apply) {
-            graphTraversal.by(__.coalesce(subGraphTraversal, __.constant(SqlGremlinQueryResult.NULL_VALUE)));
-        } else {
-            graphTraversal.by(subGraphTraversal);
-        }
+            graphTraversal.by((apply ? __.coalesce(subGraphTraversal, __.constant(SqlGremlinQueryResult.NULL_VALUE)) : subGraphTraversal));
     }
 
 

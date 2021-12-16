@@ -219,8 +219,7 @@ public class SqlMetadata {
     public String getActualColumnName(final GremlinTableBase table, final String column) throws SQLException {
         if (table.hasColumn(column)) {
             return table.getColumn(column).getName();
-        }
-        if (columnRenameMap.containsKey(column)) {
+        } else if (columnRenameMap.containsKey(column)) {
             return table.getColumn(getRenamedColumn(column)).getName();
         }
         final Optional<String> actualName = columnRenameMap.entrySet().stream().
