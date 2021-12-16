@@ -130,12 +130,12 @@ public abstract class GremlinSqlSelect extends GremlinSqlNode {
                         SqlTraversalEngine.getEmptyTraversal(stepDirection, sqlMetadata);
                 SqlTraversalEngine
                         .applySqlIdentifier((GremlinSqlIdentifier) gremlinSqlNode, sqlMetadata, subSubGraphTraversal);
-                SqlTraversalEngine.applyTraversal(true, subGraphTraversal, subSubGraphTraversal);
+                SqlTraversalEngine.applyTraversal(subGraphTraversal, subSubGraphTraversal, true);
             } else if (gremlinSqlNode instanceof GremlinSqlBasicCall) {
                 final GraphTraversal<?, ?> subSubGraphTraversal =
                         SqlTraversalEngine.getEmptyTraversal(stepDirection, sqlMetadata);
                 ((GremlinSqlBasicCall) gremlinSqlNode).generateTraversal(subSubGraphTraversal);
-                SqlTraversalEngine.applyTraversal(true, subGraphTraversal, subSubGraphTraversal);
+                SqlTraversalEngine.applyTraversal(subGraphTraversal, subSubGraphTraversal, true);
             } else {
                 throw SqlGremlinError.create(SqlGremlinError.UNKNOWN_NODE_SELECTLIST, gremlinSqlNode.getClass().getName());
             }
