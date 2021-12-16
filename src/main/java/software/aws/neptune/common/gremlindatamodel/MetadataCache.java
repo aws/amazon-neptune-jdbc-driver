@@ -75,7 +75,7 @@ public class MetadataCache {
      */
     public static void updateGremlinCache(final GremlinConnectionProperties gremlinConnectionProperties)
             throws SQLException {
-        String endpoint = gremlinConnectionProperties.getContactPoint();
+        final String endpoint = gremlinConnectionProperties.getContactPoint();
         synchronized (LOCK) {
             if (!GREMLIN_SCHEMAS.containsKey(endpoint)) {
                 GREMLIN_SCHEMAS.put(endpoint, SchemaHelperGremlinDataModel.getGremlinGraphSchema(gremlinConnectionProperties));
