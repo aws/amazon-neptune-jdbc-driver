@@ -106,22 +106,12 @@ public class GremlinSqlIncompleteSelectTest extends GremlinSqlBaseTest {
         runQueryTestResults("SELECT COUNT(age), SUM(age) FROM person GROUP BY wentToSpace HAVING SUM(age) > 80",
                 columns("COUNT(age)", "SUM(age)"),
                 rows(r(2L, 95L)));
-
-
-        //        final Vertex tom = graph.addVertex(label, "person", "name", "Tom", "wentToSpace", false);
-        //        final Vertex patty = graph.addVertex(label, "person", "name", "Patty", "age", 29, "wentToSpace", false);
-        //        final Vertex phil = graph.addVertex(label, "person", "name", "Phil", "age", 31, "wentToSpace", false);
-        //        final Vertex susan = graph.addVertex(label, "person", "name", "Susan", "age", 45, "wentToSpace", true);
-        //        final Vertex juanita = graph.addVertex(label, "person", "name", "Juanita", "age", 50, "wentToSpace", true);
-        //        final Vertex pavel = graph.addVertex(label, "person", "age", 30);
-
-
         runQueryTestResults("SELECT COUNT(age), SUM(age) FROM person GROUP BY wentToSpace HAVING SUM(age) < 100",
                 columns("COUNT(age)", "SUM(age)"),
                 rows(r(2L, 60L), r(2L, 95L), r(1L, 30L)));
         runQueryTestResults("SELECT COUNT(age), SUM(age) FROM person GROUP BY age HAVING SUM(age) <> 1000",
                 columns("COUNT(age)", "SUM(age)"),
-                rows(r(1L, 29L), r(1L, 31L), r(1L, 45L), r(1L, 50L), r(1L, 30L), r(0L, null)));
+                rows(r(0L, null), r(1L, 29L), r(1L, 31L), r(1L, 45L), r(1L, 50L), r(1L, 30L)));
         runQueryTestResults("SELECT COUNT(age), SUM(age) FROM person GROUP BY age HAVING SUM(age) = 29",
                 columns("COUNT(age)", "SUM(age)"),
                 rows(r(1L, 29L)));
@@ -130,37 +120,37 @@ public class GremlinSqlIncompleteSelectTest extends GremlinSqlBaseTest {
         runQueryTestResults(
                 "SELECT COUNT(age), SUM(age) FROM person GROUP BY wentToSpace HAVING SUM(age) <> 1000 AND COUNT(age) = 3",
                 columns("COUNT(age)", "SUM(age)"),
-                rows(r(3L, 95L), r(3L, 125L)));
+                rows());
         runQueryTestResults(
                 "SELECT COUNT(age), SUM(age) FROM person GROUP BY wentToSpace HAVING SUM(age) = 125 AND COUNT(age) = 3",
                 columns("COUNT(age)", "SUM(age)"),
-                rows(r(3L, 125L)));
+                rows());
         runQueryTestResults(
                 "SELECT COUNT(age), SUM(age) FROM person GROUP BY wentToSpace HAVING SUM(age) <> 125 AND COUNT(age) = 3",
                 columns("COUNT(age)", "SUM(age)"),
-                rows(r(3L, 95L)));
+                rows());
         runQueryTestResults(
                 "SELECT COUNT(age), SUM(age) FROM person GROUP BY wentToSpace HAVING SUM(age) <> 125 AND COUNT(age) <> 3",
                 columns("COUNT(age)", "SUM(age)"),
-                rows());
+                rows(r(2L, 60L), r(2L, 95L), r(1L, 30L)));
 
         // Having with OR.
         runQueryTestResults(
                 "SELECT COUNT(age), SUM(age) FROM person GROUP BY wentToSpace HAVING SUM(age) = 1000 OR COUNT(age) = 3",
                 columns("COUNT(age)", "SUM(age)"),
-                rows(r(3L, 95L), r(3L, 125L)));
+                rows());
         runQueryTestResults(
                 "SELECT COUNT(age), SUM(age) FROM person GROUP BY wentToSpace HAVING SUM(age) = 1000 OR COUNT(age) <> 3",
                 columns("COUNT(age)", "SUM(age)"),
-                rows());
+                rows(r(2L, 60L), r(2L, 95L), r(1L, 30L)));
         runQueryTestResults(
                 "SELECT COUNT(age), SUM(age) FROM person GROUP BY wentToSpace HAVING SUM(age) = 125 OR COUNT(age) <> 3",
                 columns("COUNT(age)", "SUM(age)"),
-                rows(r(3L, 125L)));
+                rows(r(2L, 60L), r(2L, 95L), r(1L, 30L)));
         runQueryTestResults(
                 "SELECT COUNT(age), SUM(age) FROM person GROUP BY wentToSpace HAVING SUM(age) <> 125 OR COUNT(age) <> 3",
                 columns("COUNT(age)", "SUM(age)"),
-                rows(r(3L, 95L)));
+                rows(r(2L, 60L), r(2L, 95L), r(1L, 30L)));
     }
 
     @Test

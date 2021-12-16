@@ -147,7 +147,7 @@ public class GremlinSqlAdvancedSelectTest extends GremlinSqlBaseTest {
                 rows(r("Tom", 35), r("Juanita", 50)));
     }
 
-    // TODO: Support NOT on operators
+    // TODO: Support where NOT on operators
     @Test
     @Disabled
     public void testWhereNot() throws SQLException {
@@ -385,6 +385,9 @@ public class GremlinSqlAdvancedSelectTest extends GremlinSqlBaseTest {
         runQueryTestResults(
                 "SELECT NOT age > 0 FROM person",
                 columns("NOT age > 0"), rows(r(false), r(false), r(false), r(false), r(false), r(false)));
+        runQueryTestResults(
+                "SELECT NOT name = 'Tom' FROM person",
+                columns("NOT name = Tom"), rows(r(false), r(true), r(true), r(true), r(true), r(true)));
     }
 
     @Test
@@ -410,5 +413,8 @@ public class GremlinSqlAdvancedSelectTest extends GremlinSqlBaseTest {
         runQueryTestResults(
                 "SELECT NOT age > 0 AS a FROM person",
                 columns("a"), rows(r(false), r(false), r(false), r(false), r(false), r(false)));
+        runQueryTestResults(
+                "SELECT NOT name = 'Tom' AS a FROM person",
+                columns("a"), rows(r(false), r(true), r(true), r(true), r(true), r(true)));
     }
 }

@@ -220,6 +220,9 @@ public class SqlMetadata {
         if (table.hasColumn(column)) {
             return table.getColumn(column).getName();
         }
+        if (columnRenameMap.containsKey(column)) {
+            return table.getColumn(getRenamedColumn(column)).getName();
+        }
         final Optional<String> actualName = columnRenameMap.entrySet().stream().
                 filter(entry -> entry.getValue().equals(column)).map(Map.Entry::getKey).findFirst();
         return table.getColumn(actualName.orElse(column)).getName();
