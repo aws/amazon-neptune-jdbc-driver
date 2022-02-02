@@ -337,7 +337,7 @@ dependencies {
     testImplementation group: 'org.neo4j', name: 'neo4j-io', version: neo4jDBVersion, classifier: "tests"
     testImplementation group: 'com.google.code.findbugs', name: 'annotations', version: findBugsVersion
     testImplementation group: 'com.github.javafaker', name: 'javafaker', version: '1.0.2'
-    testImplementation group: 'org.apache.jena', name: 'jena-fuseki-main', version: '3.17.0'
+    testImplementation group: 'org.apache.jena', name: 'jena-fuseki-main', version: '4.4.0'
     testCompileOnly group: 'org.projectlombok', name: 'lombok', version: lombokVersion
     testAnnotationProcessor group: 'org.projectlombok', name: 'lombok', version: lombokVersion
     testCompileOnly group: 'com.google.code.findbugs', name: 'annotations', version: findBugsVersion
