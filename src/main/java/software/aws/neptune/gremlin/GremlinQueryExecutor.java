@@ -16,12 +16,12 @@
 
 package software.aws.neptune.gremlin;
 
+import lombok.NonNull;
 import lombok.SneakyThrows;
 import org.apache.tinkerpop.gremlin.driver.Client;
 import org.apache.tinkerpop.gremlin.driver.Cluster;
 import org.apache.tinkerpop.gremlin.driver.Result;
 import org.apache.tinkerpop.gremlin.driver.SigV4WebSocketChannelizer;
-import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import software.aws.neptune.common.gremlindatamodel.MetadataCache;
@@ -402,7 +402,7 @@ public class GremlinQueryExecutor extends QueryExecutor {
         final List<Result> results = completableFuture.get().all().get();
         final List<Map<String, Object>> rows = new ArrayList<>();
         final Map<String, Class<?>> columns = new HashMap<>();
-        Long unnamedColumnIndex = 0L;
+        long unnamedColumnIndex = 0L;
         for (final Object result : results.stream().map(Result::getObject).collect(Collectors.toList())) {
             if (result instanceof LinkedHashMap) {
                 // We don't know key or value types, so pull it out raw.
@@ -430,29 +430,14 @@ public class GremlinQueryExecutor extends QueryExecutor {
                 }
             } else if (GremlinTypeMapping.checkContains(result.getClass())) {
                 // Result is scalar - generate a new key for the column
-                String key = generateColumnKey(unnamedColumnIndex);
-
-                // While there is a conflict with an existing key increment and regenerate the column key
-                while (columns.containsKey(key)) {
-                    if (unnamedColumnIndex == Long.MAX_VALUE) {
-                        LOGGER.warn(String.format("Reached the maximum number of column keys available for scalar columns: %d",
-                                unnamedColumnIndex));
-                        throw SqlError.createSQLException(
-                                LOGGER,
-                                SqlState.NUMERIC_VALUE_OUT_OF_RANGE,
-                                SqlError.INVALID_MAX_FIELD_SIZE);
-                    }
-                    unnamedColumnIndex++;
-                    key = generateColumnKey(unnamedColumnIndex);
-                }
+                unnamedColumnIndex = findNextValidColumnIndex(columns, unnamedColumnIndex);
+                final String key = generateColumnKey(unnamedColumnIndex);
                 columns.put(key, result.getClass());
 
                 // Create and add new row with generated key
                 final Map<String, Object> row = new HashMap<>();
                 row.put(key, result);
                 rows.add(row);
-
-                unnamedColumnIndex++;
             } else {
                 // If not a map nor scalar best way to handle it seems to be to issue a warning.
                 LOGGER.warn(String.format("Result of type '%s' is not convertible to a Map or Scalar of supported type and will be skipped.",
@@ -464,11 +449,6 @@ public class GremlinQueryExecutor extends QueryExecutor {
         return (T) new GremlinResultSet.ResultSetInfoWithRows(rows, columns, listColumns);
     }
 
-    @NotNull
-    protected String generateColumnKey(final Long unnamedColumnIndex) {
-        return String.format("_col%d", unnamedColumnIndex);
-    }
-
     @Override
     protected void performCancel() throws SQLException {
         synchronized (completableFutureLock) {
@@ -476,5 +456,26 @@ public class GremlinQueryExecutor extends QueryExecutor {
                 completableFuture.cancel(true);
             }
         }
+    }
+
+    private long findNextValidColumnIndex(@NonNull final Map<String, Class<?>> columns, final long currentIndex) throws SQLException {
+        long index = currentIndex;
+        // While there is a conflict with an existing key increment and regenerate the column key
+        while (columns.containsKey(generateColumnKey(index))) {
+            if (index == Long.MAX_VALUE) {
+                LOGGER.error(String.format("Reached the maximum number of column keys available for scalar columns: %d",
+                        index));
+                throw SqlError.createSQLException(
+                        LOGGER,
+                        SqlState.NUMERIC_VALUE_OUT_OF_RANGE,
+                        SqlError.INVALID_MAX_FIELD_SIZE);
+            }
+            index++;
+        }
+        return index;
+    }
+
+    private String generateColumnKey(@NonNull final Long unnamedColumnIndex) {
+        return String.format("_col%d", unnamedColumnIndex);
     }
 }
