@@ -156,7 +156,7 @@ class GremlinResultSetTest {
 
     @Test
     void testScalarResult() throws SQLException {
-        GremlinResultSet scalarResultSet = (GremlinResultSet) connection.createStatement()
+        final GremlinResultSet scalarResultSet = (GremlinResultSet) connection.createStatement()
                 .executeQuery("g.V().count()");
         Assertions.assertNotNull(scalarResultSet);
         Assertions.assertDoesNotThrow(scalarResultSet::next);
@@ -167,7 +167,7 @@ class GremlinResultSetTest {
 
     @Test
     void testMultipleScalarResults() throws SQLException {
-        GremlinResultSet scalarResultSet = (GremlinResultSet) connection.createStatement()
+        final GremlinResultSet scalarResultSet = (GremlinResultSet) connection.createStatement()
                 .executeQuery(String.format("g.V().hasLabel('%s').properties().key()", VERTEX));
         Assertions.assertNotNull(scalarResultSet);
         int unnamedColumnsFound = 0;
