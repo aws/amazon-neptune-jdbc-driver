@@ -465,7 +465,7 @@ public class GremlinQueryExecutor extends QueryExecutor {
     }
 
     @NotNull
-    protected String generateColumnKey(Long unnamedColumnIndex) {
+    protected String generateColumnKey(final Long unnamedColumnIndex) {
         return String.format("_col%d", unnamedColumnIndex);
     }
 
