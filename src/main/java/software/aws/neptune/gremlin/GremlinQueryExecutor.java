@@ -16,6 +16,7 @@
 
 package software.aws.neptune.gremlin;
 
+import lombok.NonNull;
 import lombok.SneakyThrows;
 import org.apache.tinkerpop.gremlin.driver.Client;
 import org.apache.tinkerpop.gremlin.driver.Cluster;
@@ -401,36 +402,46 @@ public class GremlinQueryExecutor extends QueryExecutor {
         final List<Result> results = completableFuture.get().all().get();
         final List<Map<String, Object>> rows = new ArrayList<>();
         final Map<String, Class<?>> columns = new HashMap<>();
+        long unnamedColumnIndex = 0L;
         for (final Object result : results.stream().map(Result::getObject).collect(Collectors.toList())) {
-            if (!(result instanceof LinkedHashMap)) {
-                // Best way to handle it seems to be to issue a warning.
-                LOGGER.warn(String.format("Result of type '%s' is not convertible to a Map and will be skipped.",
-                        result.getClass().getCanonicalName()));
-                continue;
-            }
+            if (result instanceof LinkedHashMap) {
+                // We don't know key or value types, so pull it out raw.
+                final Map<?, ?> uncastedRow = (LinkedHashMap<?, ?>) result;
 
-            // We don't know key or value types, so pull it out raw.
-            final Map<?, ?> uncastedRow = (LinkedHashMap<?, ?>) result;
+                // Convert generic key types to string and insert in new map with corresponding value.
+                final Map<String, Object> row = new HashMap<>();
+                uncastedRow.forEach((key, value) -> row.put(key.toString(), value));
 
-            // Convert generic key types to string and insert in new map with corresponding value.
-            final Map<String, Object> row = new HashMap<>();
-            uncastedRow.forEach((key, value) -> row.put(key.toString(), value));
+                // Add row to List of rows.
+                rows.add(row);
 
-            // Add row to List of rows.
-            rows.add(row);
-
-            // Get columns from row and put in columns List if they aren't already in there.
-            for (final String key : row.keySet()) {
-                if (!columns.containsKey(key)) {
-                    final Object value = row.get(key);
-                    if (GremlinTypeMapping.checkContains(value.getClass())) {
-                        columns.put(key, value.getClass());
-                    } else {
+                // Get columns from row and put in columns List if they aren't already in there.
+                for (final String key : row.keySet()) {
+                    if (!columns.containsKey(key)) {
+                        final Object value = row.get(key);
+                        if (GremlinTypeMapping.checkContains(value.getClass())) {
+                            columns.put(key, value.getClass());
+                        } else {
+                            columns.put(key, String.class);
+                        }
+                    } else if (columns.get(key) != row.get(key)) {
                         columns.put(key, String.class);
                     }
-                } else if (columns.get(key) != row.get(key)) {
-                    columns.put(key, String.class);
                 }
+            } else if (GremlinTypeMapping.checkContains(result.getClass())) {
+                // Result is scalar - generate a new key for the column
+                unnamedColumnIndex = findNextValidColumnIndex(columns, unnamedColumnIndex);
+                final String key = generateColumnKey(unnamedColumnIndex);
+                columns.put(key, result.getClass());
+
+                // Create and add new row with generated key
+                final Map<String, Object> row = new HashMap<>();
+                row.put(key, result);
+                rows.add(row);
+            } else {
+                // If not a map nor scalar best way to handle it seems to be to issue a warning.
+                LOGGER.warn(String.format("Result of type '%s' is not convertible to a Map or Scalar of supported type and will be skipped.",
+                        result.getClass().getCanonicalName()));
             }
         }
 
@@ -445,5 +456,26 @@ public class GremlinQueryExecutor extends QueryExecutor {
                 completableFuture.cancel(true);
             }
         }
+    }
+
+    private long findNextValidColumnIndex(@NonNull final Map<String, Class<?>> columns, final long currentIndex) throws SQLException {
+        long index = currentIndex;
+        // While there is a conflict with an existing key increment and regenerate the column key
+        while (columns.containsKey(generateColumnKey(index))) {
+            if (index == Long.MAX_VALUE) {
+                LOGGER.error(String.format("Reached the maximum number of column keys available for scalar columns: %d",
+                        index));
+                throw SqlError.createSQLException(
+                        LOGGER,
+                        SqlState.NUMERIC_VALUE_OUT_OF_RANGE,
+                        SqlError.INVALID_MAX_FIELD_SIZE);
+            }
+            index++;
+        }
+        return index;
+    }
+
+    private String generateColumnKey(@NonNull final Long unnamedColumnIndex) {
+        return String.format("_col%d", unnamedColumnIndex);
     }
 }

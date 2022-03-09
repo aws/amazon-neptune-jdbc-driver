@@ -153,5 +153,32 @@ class GremlinResultSetTest {
         Assertions.assertThrows(SQLException.class, () -> resultSet.getDouble(col));
         Assertions.assertThrows(SQLException.class, () -> resultSet.getFloat(col));
     }
+
+    @Test
+    void testScalarResult() throws SQLException {
+        final GremlinResultSet scalarResultSet = (GremlinResultSet) connection.createStatement()
+                .executeQuery("g.V().count()");
+        Assertions.assertNotNull(scalarResultSet);
+        Assertions.assertDoesNotThrow(scalarResultSet::next);
+
+        final int col = scalarResultSet.findColumn("_col0");
+        Assertions.assertEquals(1, scalarResultSet.getLong(col));
+    }
+
+    @Test
+    void testMultipleScalarResults() throws SQLException {
+        final GremlinResultSet scalarResultSet = (GremlinResultSet) connection.createStatement()
+                .executeQuery(String.format("g.V().hasLabel('%s').properties().key()", VERTEX));
+        Assertions.assertNotNull(scalarResultSet);
+        int unnamedColumnsFound = 0;
+
+        while (scalarResultSet.next()) {
+            final int col = scalarResultSet.findColumn("_col" + unnamedColumnsFound);
+            Assertions.assertTrue(VERTEX_PROPERTIES_MAP.containsKey(scalarResultSet.getString(col)));
+            unnamedColumnsFound++;
+        }
+
+        Assertions.assertEquals(VERTEX_PROPERTIES_MAP.keySet().size(), unnamedColumnsFound);
+    }
 }
 
