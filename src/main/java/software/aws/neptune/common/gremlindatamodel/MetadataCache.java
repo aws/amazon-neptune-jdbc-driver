@@ -130,10 +130,10 @@ public class MetadataCache {
             LOGGER.info("Getting edges.");
             final List<GremlinEdgeTable> edges = GREMLIN_SCHEMAS.get(endpoint).getEdges();
             final List<GremlinVertexTable> filteredGremlinVertexTables = vertices.stream().filter(
-                    table -> Arrays.stream(nodeFilter.split(":")).allMatch(f -> table.getLabel().contains(f)))
+                    table -> Arrays.stream(nodeFilter.split(":")).allMatch(f -> table.getLabel().equals(f)))
                     .collect(Collectors.toList());
             final List<GremlinEdgeTable> filteredGremlinEdgeTables = edges.stream().filter(
-                    table -> Arrays.stream(nodeFilter.split(":")).allMatch(f -> table.getLabel().contains(f)))
+                    table -> Arrays.stream(nodeFilter.split(":")).allMatch(f -> table.getLabel().equals(f)))
                     .collect(Collectors.toList());
             return new GremlinSchema(filteredGremlinVertexTables, filteredGremlinEdgeTables);
         }
