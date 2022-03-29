@@ -104,6 +104,7 @@ Edges and columns also have their own id as a column with the name `<label>_ID`.
 
 == Additional Limitations
 * Currently JDBC driver supports https://www.tableau.com/about/blog/2014/7/understanding-tableau-data-extracts-part1[Tableau Data Extracts (TDE)] and has limitations which may prevent or significantly limit functionality when using Live Connection in Tableau.
+* The driver does not support `Convert to Custom SQL` in Tableau, due to Tableau's use of embedded SQL. If one wishes to issue SQL commands against a live server, https://github.com/aws/amazon-neptune-jdbc-driver/blob/develop/markdown/bi-tools/DbVisualizer.md[DbVisualizer] does provide such functionality.
 
 == Acknowledgements
 Special thanks goes to the http://tinkerpop.incubator.apache.org/[Apache TinkerPop] and https://calcite.apache.org/[Apache Calcite] teams. The depth and breadth of both of these projects is truly astounding. Also, thanks to Daniel Kuppitz. His work on https://github.com/dkuppitz/sparql-gremlin[SPARQL-Gremlin] served as a model and inspiration for SQL-Gremlin.

@@ -120,23 +120,32 @@ public class MetadataCache {
     public static GremlinSchema getFilteredCacheNodeColumnInfos(final String nodeFilter, final String endpoint)
             throws SQLException {
         synchronized (LOCK) {
-            if (!GREMLIN_SCHEMAS.containsKey(endpoint)) {
+            if (!getGremlinSchemas().containsKey(endpoint)) {
                 throw new SQLException("Error, cache must be updated before filtered cache can be retrieved.");
             } else if (nodeFilter == null || "%".equals(nodeFilter)) {
-                return GREMLIN_SCHEMAS.get(endpoint);
+                return getGremlinSchemas().get(endpoint);
             }
             LOGGER.info("Getting vertices.");
-            final List<GremlinVertexTable> vertices = GREMLIN_SCHEMAS.get(endpoint).getVertices();
+            final List<GremlinVertexTable> vertices = getGremlinSchemas().get(endpoint).getVertices();
             LOGGER.info("Getting edges.");
-            final List<GremlinEdgeTable> edges = GREMLIN_SCHEMAS.get(endpoint).getEdges();
+            final List<GremlinEdgeTable> edges = getGremlinSchemas().get(endpoint).getEdges();
             final List<GremlinVertexTable> filteredGremlinVertexTables = vertices.stream().filter(
-                    table -> Arrays.stream(nodeFilter.split(":")).allMatch(f -> table.getLabel().contains(f)))
+                    table -> Arrays.stream(nodeFilter.split(":")).allMatch(f -> table.getLabel().equals(f)))
                     .collect(Collectors.toList());
             final List<GremlinEdgeTable> filteredGremlinEdgeTables = edges.stream().filter(
-                    table -> Arrays.stream(nodeFilter.split(":")).allMatch(f -> table.getLabel().contains(f)))
+                    table -> Arrays.stream(nodeFilter.split(":")).allMatch(f -> table.getLabel().equals(f)))
                     .collect(Collectors.toList());
             return new GremlinSchema(filteredGremlinVertexTables, filteredGremlinEdgeTables);
         }
+    }
+
+    /**
+     * Helper function to get GREMLIN_SCHEMAS.
+     *
+     * @return A map of Gremlin Schemas.
+     */
+    static Map<String, GremlinSchema> getGremlinSchemas() {
+        return GREMLIN_SCHEMAS;
     }
 
     /**
