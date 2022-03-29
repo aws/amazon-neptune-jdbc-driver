@@ -19,7 +19,6 @@ package software.aws.neptune.common.gremlindatamodel;
 import org.apache.calcite.util.Pair;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.twilmes.sql.gremlin.adapter.converter.schema.calcite.GremlinSchema;
@@ -66,8 +65,8 @@ public class MetadataCacheTest {
                 return invocation.getMock();
             } else {
                 return invocation.callRealMethod();
-            }}))
-        {
+            }
+        })) {
             final Map<String, GremlinSchema> schemaMap = new HashMap<>();
             schemaMap.put(ENDPOINT, testFullSchema);
             mockMetadataCache.when(MetadataCache::getGremlinSchemas).thenReturn(schemaMap);
