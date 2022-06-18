@@ -109,14 +109,189 @@ public class GremlinSqlJoinTest extends GremlinSqlBaseTest {
     }
 
     @Test
-    void testJoinHavingWhereThrow() {
-        runNotSupportedQueryTestThrows("SELECT person.name AS name1 FROM gremlin.person person " +
+    void testJoinWhere() throws SQLException {
+        runJoinQueryTestResults("SELECT person.name FROM gremlin.person person " +
+                        "INNER JOIN gremlin.person person1 ON (person.friendsWith_OUT_ID = person1.friendsWith_IN_ID) " +
+                        "WHERE person.name = 'Tom'" +
+                        "GROUP BY person.name",
+                columns("name"),
+                rows(r("Tom")));
+
+        runJoinQueryTestResults("SELECT person.name FROM gremlin.person person " +
+                        "INNER JOIN gremlin.person person1 ON (person.friendsWith_OUT_ID = person1.friendsWith_IN_ID) " +
+                        "WHERE person.name = 'Tom'",
+                columns("name"),
+                rows(r("Tom")));
+
+        runJoinQueryTestResults("SELECT person.name FROM gremlin.person person " +
+                        "INNER JOIN gremlin.person person1 ON (person.friendsWith_OUT_ID = person1.friendsWith_IN_ID) " +
+                        "WHERE person.name <> 'Tom'",
+                columns("name"),
+                rows(r("Patty"), r("Phil"), r("Susan")));
+
+        runJoinQueryTestResults("SELECT person.name, person.wentToSpace FROM gremlin.person person " +
+                        "INNER JOIN gremlin.person person1 ON (person.friendsWith_OUT_ID = person1.friendsWith_IN_ID) " +
+                        "WHERE person.wentToSpace",
+                columns("name", "wentToSpace"),
+                rows(r("Susan", true)));
+
+        runJoinQueryTestResults("SELECT person.name FROM gremlin.person person " +
+                        "INNER JOIN gremlin.person person1 ON (person.friendsWith_OUT_ID = person1.friendsWith_IN_ID) " +
+                        "WHERE NOT person.wentToSpace",
+                columns("name"),
+                rows(r("Tom"), r("Patty"), r("Phil")));
+
+        runJoinQueryTestResults("SELECT person.name FROM gremlin.person person " +
+                        "INNER JOIN gremlin.person person1 ON (person.friendsWith_OUT_ID = person1.friendsWith_IN_ID) " +
+                        "WHERE person.age = 35",
+                columns("name"),
+                rows(r("Tom")));
+
+        runJoinQueryTestResults("SELECT person.name FROM gremlin.person person " +
+                        "INNER JOIN gremlin.person person1 ON (person.friendsWith_OUT_ID = person1.friendsWith_IN_ID) " +
+                        "WHERE person.age >= 35",
+                columns("name"),
+                rows(r("Tom"), r("Susan")));
+
+        runJoinQueryTestResults("SELECT person.name FROM gremlin.person person " +
+                        "INNER JOIN gremlin.person person1 ON (person.friendsWith_OUT_ID = person1.friendsWith_IN_ID) " +
+                        "WHERE person.age <= 35",
+                columns("name"),
+                rows(r("Tom"), r("Patty"), r("Phil")));
+
+        runJoinQueryTestResults("SELECT person.name FROM gremlin.person person " +
+                        "INNER JOIN gremlin.person person1 ON (person.friendsWith_OUT_ID = person1.friendsWith_IN_ID) " +
+                        "WHERE person.age < 35",
+                columns("name"),
+                rows(r("Patty"), r("Phil")));
+
+        runJoinQueryTestResults("SELECT person.name FROM gremlin.person person " +
+                        "INNER JOIN gremlin.person person1 ON (person.friendsWith_OUT_ID = person1.friendsWith_IN_ID) " +
+                        "WHERE person.age > 35",
+                columns("name"),
+                rows(r("Susan")));
+
+        runJoinQueryTestResults("SELECT person.name FROM gremlin.person person " +
+                        "INNER JOIN gremlin.person person1 ON (person.friendsWith_OUT_ID = person1.friendsWith_IN_ID) " +
+                        "WHERE person.age <> 35",
+                columns("name"),
+                rows(r("Patty"), r("Phil"), r("Susan")));
+
+        runJoinQueryTestResults("SELECT person.name FROM gremlin.person person " +
+                        "INNER JOIN gremlin.person person1 ON (person.friendsWith_OUT_ID = person1.friendsWith_IN_ID) " +
+                        "WHERE person.age >= 35 AND person.name = 'Tom'",
+                columns("name"),
+                rows(r("Tom")));
+
+        runJoinQueryTestResults("SELECT person.name FROM gremlin.person person " +
+                        "INNER JOIN gremlin.person person1 ON (person.friendsWith_OUT_ID = person1.friendsWith_IN_ID) " +
+                        "WHERE person.age <> 35 OR person.name = 'Tom'",
+                columns("name"),
+                rows(r("Tom"), r("Patty"), r("Phil"), r("Susan")));
+
+        runJoinQueryTestResults("SELECT person.name FROM gremlin.person person " +
+                        "INNER JOIN gremlin.person person1 ON (person.friendsWith_OUT_ID = person1.friendsWith_IN_ID) " +
+                        "WHERE person.age <= 35 AND person.name <> 'Tom' AND NOT person.wentToSpace",
+                columns("name"),
+                rows(r("Patty"), r("Phil")));
+
+        runJoinQueryTestResults("SELECT person.name FROM gremlin.person person " +
+                        "INNER JOIN gremlin.person person1 ON (person.friendsWith_OUT_ID = person1.friendsWith_IN_ID) " +
+                        "WHERE NOT person.name = 'Tom'",
+                columns("name"),
+                rows(r("Patty"), r("Phil"), r("Susan")));
+    }
+
+    @Test
+    void testJoinHaving() throws SQLException {
+        runJoinQueryTestResults( "SELECT person.name, COUNT(person1.age) FROM gremlin.person person " +
                         "INNER JOIN gremlin.person person1 ON person.friendsWith_OUT_ID = person1.friendsWith_IN_ID " +
-                        "GROUP BY person.name HAVING COUNT(person.name) > 0",
-                SqlGremlinError.JOIN_HAVING_UNSUPPORTED);
-        runNotSupportedQueryTestThrows("SELECT person.name AS name1 FROM gremlin.person person " +
-                        "INNER JOIN gremlin.person person1 ON person.friendsWith_OUT_ID = person1.friendsWith_IN_ID " +
-                        "WHERE person.name = 'foo'",
-                SqlGremlinError.JOIN_WHERE_UNSUPPORTED);
+                        "GROUP BY person.name HAVING COUNT(person1.age) > 0",
+                columns("name", "COUNT(age)"),
+                rows(r("Tom", 1L), r("Patty", 1L), r("Phil", 1L), r("Susan", 1L)));
+
+        runJoinQueryTestResults("SELECT spaceship.model, COUNT(person.name) FROM gremlin.person person " +
+                        "INNER JOIN gremlin.spaceship spaceship ON (person.pilots_OUT_ID = spaceship.pilots_IN_ID) " +
+                        "GROUP BY spaceship.model HAVING COUNT(person.name) >= 1",
+                columns("model", "COUNT(name)"),
+                rows(r("delta 1", 3L), r("delta 2", 1L), r("delta 3", 2L)));
+
+        runJoinQueryTestResults("SELECT spaceship.model, COUNT(person.name) FROM gremlin.person person " +
+                        "INNER JOIN gremlin.spaceship spaceship ON (person.pilots_OUT_ID = spaceship.pilots_IN_ID) " +
+                        "GROUP BY spaceship.model HAVING COUNT(person.name) <> 2",
+                columns("model", "COUNT(name)"),
+                rows(r("delta 1", 3L), r("delta 2", 1L)));
+
+        runJoinQueryTestResults("SELECT spaceship.model, COUNT(person.name) FROM gremlin.person person " +
+                        "INNER JOIN gremlin.spaceship spaceship ON (person.pilots_OUT_ID = spaceship.pilots_IN_ID) " +
+                        "GROUP BY spaceship.model HAVING COUNT(person.name) > 1",
+                columns("model", "COUNT(name)"),
+                rows(r("delta 1", 3L), r("delta 3", 2L)));
+
+        runJoinQueryTestResults("SELECT spaceship.model, COUNT(person.name) FROM gremlin.person person " +
+                        "INNER JOIN gremlin.spaceship spaceship ON (person.pilots_OUT_ID = spaceship.pilots_IN_ID) " +
+                        "GROUP BY spaceship.model HAVING COUNT(person.name) <= 1 OR COUNT(person.name) >= 3",
+                columns("model", "COUNT(name)"),
+                rows(r("delta 1", 3L), r("delta 2", 1L)));
+
+        runJoinQueryTestResults("SELECT spaceship.model, COUNT(person.name) FROM gremlin.person person " +
+                        "INNER JOIN gremlin.spaceship spaceship ON (person.pilots_OUT_ID = spaceship.pilots_IN_ID) " +
+                        "GROUP BY spaceship.model HAVING COUNT(person.name) <= 1",
+                columns("model", "COUNT(name)"),
+                rows(r("delta 2", 1L)));
+
+        runJoinQueryTestResults("SELECT spaceship.model, SUM(person.age) FROM gremlin.person person " +
+                        "INNER JOIN gremlin.spaceship spaceship ON (person.pilots_OUT_ID = spaceship.pilots_IN_ID) " +
+                        "GROUP BY spaceship.model HAVING SUM(person.age) > 50",
+                columns("model", "SUM(age)"),
+                rows(r("delta 1", 95L), r("delta 3", 80L)));
+
+        runJoinQueryTestResults("SELECT spaceship.model, SUM(person.age) FROM gremlin.person person " +
+                        "INNER JOIN gremlin.spaceship spaceship ON (person.pilots_OUT_ID = spaceship.pilots_IN_ID) " +
+                        "GROUP BY spaceship.model HAVING SUM(person.age) <> 80",
+                columns("model", "SUM(age)"),
+                rows(r("delta 1", 95L), r("delta 2", 45L)));
+
+        runJoinQueryTestResults("SELECT spaceship.model, SUM(person.age) FROM gremlin.person person " +
+                        "INNER JOIN gremlin.spaceship spaceship ON (person.pilots_OUT_ID = spaceship.pilots_IN_ID) " +
+                        "GROUP BY spaceship.model HAVING SUM(person.age) <> 95",
+                columns("model", "SUM(age)"),
+                rows(r("delta 2", 45L), r("delta 3", 80L)));
+
+        runJoinQueryTestResults("SELECT spaceship.model, MAX(person.age) FROM gremlin.person person " +
+                        "INNER JOIN gremlin.spaceship spaceship ON (person.pilots_OUT_ID = spaceship.pilots_IN_ID) " +
+                        "GROUP BY spaceship.model HAVING MAX(person.age) > 40",
+                columns("model", "MAX(age)"),
+                rows(r("delta 2", 45), r("delta 3", 50)));
+
+        runJoinQueryTestResults("SELECT spaceship.model, MIN(person.age) FROM gremlin.person person " +
+                        "INNER JOIN gremlin.spaceship spaceship ON (person.pilots_OUT_ID = spaceship.pilots_IN_ID) " +
+                        "GROUP BY spaceship.model HAVING MIN(person.age) < 40",
+                columns("model", "MIN(age)"),
+                rows(r("delta 1", 29), r("delta 3", 30)));
+
+        runJoinQueryTestResults("SELECT spaceship.model, AVG(person.age) FROM gremlin.person person " +
+                        "INNER JOIN gremlin.spaceship spaceship ON (person.pilots_OUT_ID = spaceship.pilots_IN_ID) " +
+                        "GROUP BY spaceship.model HAVING AVG(person.age) > 35",
+                columns("model", "AVG(age)"),
+                rows(r("delta 2", 45.0), r("delta 3", 40.0)));
+
+        runJoinQueryTestResults("SELECT spaceship.model FROM gremlin.person person " +
+                        "INNER JOIN gremlin.spaceship spaceship ON (person.pilots_OUT_ID = spaceship.pilots_IN_ID) " +
+                        "GROUP BY spaceship.model HAVING MIN(person.age) < 40 AND AVG(person.age) > 35",
+                columns("model"),
+                rows(r("delta 3")));
+
+        runJoinQueryTestResults("SELECT spaceship.model FROM gremlin.person person " +
+                        "INNER JOIN gremlin.spaceship spaceship ON (person.pilots_OUT_ID = spaceship.pilots_IN_ID) " +
+                        "GROUP BY spaceship.model HAVING MIN(person.age) < 40 OR AVG(person.age) > 35",
+                columns("model"),
+                rows(r("delta 1"), r("delta 2"), r("delta 3")));
+
+        runJoinQueryTestResults("SELECT spaceship.model FROM gremlin.person person " +
+                        "INNER JOIN gremlin.spaceship spaceship ON (person.pilots_OUT_ID = spaceship.pilots_IN_ID) " +
+                        "GROUP BY spaceship.model HAVING spaceship.model = 'delta 2'",
+                columns("model"),
+                rows(r("delta 2")));
     }
 }
