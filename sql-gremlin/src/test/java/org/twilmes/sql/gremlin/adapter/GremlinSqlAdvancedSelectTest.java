@@ -147,9 +147,7 @@ public class GremlinSqlAdvancedSelectTest extends GremlinSqlBaseTest {
                 rows(r("Tom", 35), r("Juanita", 50)));
     }
 
-    // TODO #127: Support NOT in WHERE filter.
     @Test
-    @Disabled
     public void testWhereNot() throws SQLException {
         runQueryTestResults("select name from person WHERE NOT name = 'Tom'", columns("name"),
                 rows(r("Patty"), r("Phil"), r("Susan"), r("Juanita"), r("Pavel")));
