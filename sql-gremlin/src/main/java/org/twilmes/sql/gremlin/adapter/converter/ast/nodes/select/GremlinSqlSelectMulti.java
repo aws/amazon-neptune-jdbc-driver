@@ -249,7 +249,8 @@ public class GremlinSqlSelectMulti extends GremlinSqlSelect {
             graphTraversal.group();
             final List<GraphTraversal> byUnion = new ArrayList<>();
             for (final GremlinSqlIdentifier gremlinSqlIdentifier : gremlinSqlIdentifiers) {
-                final String table = sqlMetadata.getRenamedTable(gremlinSqlIdentifier.getName(0));
+                final String renamedTable = gremlinSqlIdentifier.getName(0);
+                final String table = sqlMetadata.getRenamedTable(renamedTable);
                 final String column = sqlMetadata
                         .getActualColumnName(sqlMetadata.getGremlinTable(table), gremlinSqlIdentifier.getName(1));
                 if (column.replace(GremlinTableBase.ID, "").equalsIgnoreCase(edgeLabel)) {
@@ -258,10 +259,10 @@ public class GremlinSqlSelectMulti extends GremlinSqlSelect {
                     // TODO: Grouping edges that are not the edge that the vertex are connected - needs to be implemented.
                     throw SqlGremlinError.create(SqlGremlinError.CANNOT_GROUP_EDGES);
                 } else {
-                    if (inVRename.equals(table)) {
+                    if (inVRename.equals(renamedTable)) {
                         byUnion.add(__.inV().hasLabel(table)
                                 .values(sqlMetadata.getActualColumnName(sqlMetadata.getGremlinTable(table), column)));
-                    } else if (outVRename.equals(table)) {
+                    } else if (outVRename.equals(renamedTable)) {
                         byUnion.add(__.outV().hasLabel(table)
                                 .values(sqlMetadata.getActualColumnName(sqlMetadata.getGremlinTable(table), column)));
                     } else {

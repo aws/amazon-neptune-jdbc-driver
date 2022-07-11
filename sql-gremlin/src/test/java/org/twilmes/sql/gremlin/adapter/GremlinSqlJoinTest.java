@@ -57,6 +57,18 @@ public class GremlinSqlJoinTest extends GremlinSqlBaseTest {
                         "GROUP BY person1.name",
                 columns("name"),
                 rows(r("Patty"), r("Juanita"), r("Susan"), r("Pavel")));
+
+        runJoinQueryTestResults("SELECT p.name FROM gremlin.person p " +
+                        "INNER JOIN gremlin.person p1 ON (p.friendsWith_OUT_ID = p1.friendsWith_IN_ID) " +
+                        "GROUP BY p.name",
+                columns("name"),
+                rows(r("Tom"), r("Patty"), r("Phil"), r("Susan")));
+
+        runJoinQueryTestResults("SELECT p.name, COUNT(p1.name) FROM gremlin.person p " +
+                        "INNER JOIN gremlin.person p1 ON (p.friendsWith_OUT_ID = p1.friendsWith_IN_ID) " +
+                        "GROUP BY p.name",
+                columns("name", "COUNT(name)"),
+                rows(r("Tom", 1L), r("Patty", 1L), r("Phil", 1L), r("Susan", 1L)));
     }
 
     @Test
