@@ -25,6 +25,12 @@ import org.apache.calcite.sql.JoinType;
 import org.apache.calcite.sql.SqlJoin;
 import org.apache.calcite.sql.SqlNode;
 import org.apache.calcite.sql.SqlSelect;
+import org.apache.calcite.sql.SqlBasicCall;
+import org.apache.calcite.sql.SqlPrefixOperator;
+import org.apache.calcite.sql.SqlKind;
+import org.apache.calcite.sql.SqlOperator;
+import org.apache.calcite.sql.SqlIdentifier;
+import org.apache.tinkerpop.gremlin.process.traversal.P;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversal;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.__;
@@ -38,11 +44,13 @@ import org.twilmes.sql.gremlin.adapter.converter.ast.nodes.GremlinSqlNode;
 import org.twilmes.sql.gremlin.adapter.converter.ast.nodes.operands.GremlinSqlIdentifier;
 import org.twilmes.sql.gremlin.adapter.converter.ast.nodes.operator.GremlinSqlAsOperator;
 import org.twilmes.sql.gremlin.adapter.converter.ast.nodes.operator.GremlinSqlBasicCall;
+import org.twilmes.sql.gremlin.adapter.converter.ast.nodes.operator.logic.GremlinSqlLiteral;
 import org.twilmes.sql.gremlin.adapter.converter.ast.nodes.select.join.GremlinSqlJoinComparison;
 import org.twilmes.sql.gremlin.adapter.converter.schema.gremlin.GremlinTableBase;
 import org.twilmes.sql.gremlin.adapter.results.SqlGremlinQueryResult;
 import org.twilmes.sql.gremlin.adapter.results.pagination.JoinDataReader;
 import org.twilmes.sql.gremlin.adapter.results.pagination.Pagination;
+import org.twilmes.sql.gremlin.adapter.util.SQLNotSupportedException;
 import org.twilmes.sql.gremlin.adapter.util.SqlGremlinError;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -50,6 +58,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.function.Function;
+
+import static org.twilmes.sql.gremlin.adapter.converter.ast.nodes.GremlinSqlFactory.createNode;
 
 /**
  * This module is a GremlinSql equivalent of Calcite's SqlSelect for a JOIN operation.
@@ -209,11 +220,11 @@ public class GremlinSqlSelectMulti extends GremlinSqlSelect {
             graphTraversal = g.E().hasLabel(edgeLabel)
                     .where(__.inV().hasLabel(inVLabel))
                     .where(__.outV().hasLabel(outVLabel));
-            applyWhere(graphTraversal);
+            applyWhere(graphTraversal, inVRename, outVRename);
             applyGroupBy(graphTraversal, edgeLabel, inVRename, outVRename);
             applySelectValues(graphTraversal);
             applyOrderBy(graphTraversal, edgeLabel, inVRename, outVRename);
-            applyHaving(graphTraversal);
+            applyHaving(graphTraversal, inVRename, outVRename);
             SqlTraversalEngine.applyAggregateFold(sqlMetadata, graphTraversal);
             graphTraversal.project(inVRename, outVRename);
             sqlMetadata.setIsDoneFilters(true);
@@ -307,17 +318,157 @@ public class GremlinSqlSelectMulti extends GremlinSqlSelect {
         }
     }
 
-    protected void applyHaving(final GraphTraversal<?, ?> graphTraversal) throws SQLException {
-        if (sqlSelect.getHaving() == null) {
+    protected void applyHaving(final GraphTraversal<?, ?> graphTraversal,
+                               final String inVRename, final String outVRename) throws SQLException {
+        SqlNode sqlNode = sqlSelect.getHaving();
+        if (sqlNode == null) {
             return;
         }
-        throw SqlGremlinError.createNotSupported(SqlGremlinError.JOIN_HAVING_UNSUPPORTED);
+        applySqlFilter(sqlNode, graphTraversal, inVRename, outVRename);
     }
 
-    protected void applyWhere(final GraphTraversal<?, ?> graphTraversal) throws SQLException {
-        if (sqlSelect.getWhere() == null) {
+    protected void applyWhere(final GraphTraversal<?, ?> graphTraversal,
+                              final String inVRename, final String outVRename) throws SQLException {
+        SqlNode sqlNode = sqlSelect.getWhere();
+        if (sqlNode == null) {
             return;
         }
-        throw SqlGremlinError.createNotSupported(SqlGremlinError.JOIN_WHERE_UNSUPPORTED);
+        applySqlFilter(sqlNode, graphTraversal, inVRename, outVRename);
+    }
+
+    private void applySqlFilter(final SqlNode sqlNode, final GraphTraversal<?, ?> graphTraversal,
+                       final String inVRename, final String outVRename) throws SQLException {
+        if (sqlNode instanceof SqlBasicCall) {
+            SqlBasicCall sqlBasicCall = (SqlBasicCall) sqlNode;
+            if (sqlBasicCall.getOperator() instanceof SqlPrefixOperator) {
+                if (sqlBasicCall.getOperator().kind.equals(SqlKind.NOT)) {
+                    if (sqlBasicCall.getOperandList().size() == 1) {
+                        // if operator == NOT => recursively calling applySqlFilter() and then apply NOT
+                        final GraphTraversal<?, ?> subGraphTraversal = __.__();
+                        applySqlFilter(sqlBasicCall.getOperandList().get(0), subGraphTraversal, inVRename, outVRename);
+                        graphTraversal.not(subGraphTraversal);
+                        return;
+                    }
+                    throw SqlGremlinError.createNotSupported(SqlGremlinError.WHERE_NOT_ONLY_BOOLEAN);
+                }
+                throw SqlGremlinError.createNotSupported(SqlGremlinError.WHERE_UNSUPPORTED_PREFIX);
+            } else if (sqlBasicCall.getOperandList().size() == 2) {
+                if (sqlBasicCall.getOperator().kind.equals(SqlKind.AND) ||
+                        sqlBasicCall.getOperator().kind.equals(SqlKind.OR)) {
+                    // if operator == AND or OR => recursively calling applySqlFilter() and then apply AND or OR
+                    GraphTraversal<?, ?>[] list = new GraphTraversal[2];
+                    for (int i = 0; i < 2; i++) {
+                        SqlNode node = sqlBasicCall.getOperandList().get(i);
+                        final GraphTraversal<?, ?> subGraphTraversal = __.__();
+                        applySqlFilter(node, subGraphTraversal, inVRename, outVRename);
+                        list[i] = subGraphTraversal;
+                    }
+                    if (sqlBasicCall.getOperator().kind.equals(SqlKind.AND)) {
+                        graphTraversal.and(list);
+                    } else {
+                        graphTraversal.or(list);
+                    }
+                    return;
+                }
+                GremlinSqlNode op1 = createNode(sqlBasicCall.getOperandList().get(0));
+                final GremlinSqlLiteral gremlinSqlLiteral;
+                try {
+                    gremlinSqlLiteral = GremlinSqlFactory
+                            .createNodeCheckType(sqlBasicCall.getOperandList().get(1), GremlinSqlLiteral.class);
+                } catch (SQLException e) {
+                    throw SqlGremlinError.createNotSupported(SqlGremlinError.UNSUPPORTED_BASIC_LITERALS);
+                }
+                P<Object> value = getPBySqlComparison(sqlBasicCall, gremlinSqlLiteral.getValue());
+                if (op1 instanceof GremlinSqlIdentifier) {
+                    // if the first operand == GremlinSqlIdentifier => then a request of the form "op1 OPERATOR value"
+                    final GremlinSqlIdentifier gremlinSqlIdentifier = GremlinSqlFactory
+                            .createNodeCheckType(sqlBasicCall.getOperandList().get(0), GremlinSqlIdentifier.class);
+                    generateTraversal(graphTraversal, gremlinSqlIdentifier, inVRename, outVRename, value);
+                } else if (op1 instanceof GremlinSqlBasicCall) {
+                    // if the first operand == GremlinSqlBasicCall =>
+                    // then a request of the form "FUNCTION(op1) OPERATOR value"
+                    final GremlinSqlBasicCall gremlinSqlBasicCall = ((GremlinSqlBasicCall) op1);
+                    final GremlinSqlIdentifier gremlinSqlIdentifier = GremlinSqlFactory
+                            .createNodeCheckType(
+                                    gremlinSqlBasicCall.getSqlBasicCall().getOperandList().get(0),
+                                    GremlinSqlIdentifier.class);
+                    final SqlOperator operator = gremlinSqlBasicCall.getSqlBasicCall().getOperator();
+                    Function<GraphTraversal<?, ?>, GraphTraversal<?, ?>> function =
+                            getTraversalFunctionByOperator(operator);
+                    String table = gremlinSqlIdentifier.getName(0);
+
+                    // filtering by where FUNCTION(op) is value after group by
+                    if (table.equals(inVRename)) {
+                        graphTraversal.where(__.group().by(
+                                        function.apply(__.unfold()
+                                                .inV()
+                                                .has(gremlinSqlIdentifier.getName(1))
+                                                .values(gremlinSqlIdentifier.getName(1))))
+                                .unfold().where(__.select(Column.keys).is(value)));
+                    } else if (table.equals(outVRename)) {
+                        graphTraversal.where(__.group().by(
+                                        function.apply(__.unfold()
+                                                .outV()
+                                                .has(gremlinSqlIdentifier.getName(1))
+                                                .values(gremlinSqlIdentifier.getName(1))))
+                                .unfold().where(__.select(Column.keys).is(value)));
+                    }
+                }
+            }
+            return;
+        } else if (sqlNode instanceof SqlIdentifier) {
+            final GremlinSqlIdentifier gremlinSqlIdentifier = GremlinSqlFactory
+                    .createNodeCheckType(sqlNode, GremlinSqlIdentifier.class);
+            generateTraversal(graphTraversal, gremlinSqlIdentifier, inVRename, outVRename, true);
+            return;
+        }
+        throw SqlGremlinError.createNotSupported(SqlGremlinError.WHERE_BASIC_LITERALS);
+    }
+
+    private void generateTraversal(final GraphTraversal<?, ?> graphTraversal,
+                                   final GremlinSqlIdentifier gremlinSqlIdentifier, final String inVRename,
+                                   final String outVRename, final Object value) throws SQLException {
+        // filtering by the inV/outV property
+        String table = gremlinSqlIdentifier.getName(0);
+        if (table.equals(inVRename)) {
+            graphTraversal.where(__.unfold().inV().has(gremlinSqlIdentifier.getName(1), value));
+        } else if (table.equals(outVRename)) {
+            graphTraversal.where(__.unfold().outV().has(gremlinSqlIdentifier.getName(1), value));
+        }
+    }
+
+    private P<Object> getPBySqlComparison(SqlBasicCall sqlBasicCall, Object value) throws SQLNotSupportedException {
+        switch (sqlBasicCall.getOperator().kind) {
+            case EQUALS:
+                return P.eq(value);
+            case NOT_EQUALS:
+                return P.neq(value);
+            case GREATER_THAN:
+                return P.gt(value);
+            case GREATER_THAN_OR_EQUAL:
+                return P.gte(value);
+            case LESS_THAN:
+                return P.lt(value);
+            case LESS_THAN_OR_EQUAL:
+                return P.lte(value);
+        }
+        throw SqlGremlinError.createNotSupported(SqlGremlinError.UNKNOWN_OPERATOR);
+    }
+
+    private Function<GraphTraversal<?, ?>, GraphTraversal<?, ?>> getTraversalFunctionByOperator(SqlOperator operator)
+            throws SQLNotSupportedException {
+        switch (operator.kind) {
+            case COUNT:
+                return GraphTraversal::count;
+            case MAX:
+                return GraphTraversal::max;
+            case MIN:
+                return GraphTraversal::min;
+            case AVG:
+                return GraphTraversal::mean;
+            case SUM:
+                return GraphTraversal::sum;
+        }
+        throw SqlGremlinError.createNotSupported(SqlGremlinError.UNKNOWN_OPERATOR);
     }
 }
