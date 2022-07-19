@@ -44,11 +44,9 @@ Identifier matching is case-sensitive and identifiers that match a reserved SQL 
 [[join]]
 === Joins
 Currently, the driver only support `INNER JOIN` on two vertices that are connected by an edge. When looking at vertices you will see `<edge_label>_IN_ID` or `<edge_label>_OUT_ID`.
+Basic literal comparisons are supported in `WHERE` and `HAVING` clauses in conjunction with the `INNER JOIN` clause.
 
-`WHERE` and `HAVING` are not currently supported in conjunction with a `JOIN` clause.
 Foreign keys are not generated and not exposed in JDBC metadata at this time.
-
-Vertices can be joined on columns that have the same edge label and one ends with `IN_ID` while the other ends with an `OUT_ID`.
 
 === Data Types
 The driver recognizes the following SQL data types:
