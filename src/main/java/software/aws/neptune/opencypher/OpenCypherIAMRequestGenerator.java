@@ -16,30 +16,33 @@
 
 package software.aws.neptune.opencypher;
 
+import com.amazonaws.DefaultRequest;
+import com.amazonaws.Request;
+import com.amazonaws.auth.AWS4Signer;
 import com.amazonaws.auth.AWSCredentialsProvider;
 import com.amazonaws.auth.DefaultAWSCredentialsProviderChain;
-import com.amazonaws.neptune.auth.NeptuneNettyHttpSigV4Signer;
-import com.amazonaws.neptune.auth.NeptuneSigV4SignerException;
+import com.amazonaws.http.HttpMethodName;
 import com.google.gson.Gson;
-import io.netty.handler.codec.http.DefaultFullHttpRequest;
-import io.netty.handler.codec.http.FullHttpRequest;
-import io.netty.handler.codec.http.HttpVersion;
 import org.neo4j.driver.AuthToken;
 import org.neo4j.driver.AuthTokens;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import software.aws.neptune.jdbc.utilities.SqlError;
-import software.aws.neptune.jdbc.utilities.SqlState;
-import java.sql.SQLException;
+
+import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
+
+import static com.amazonaws.auth.internal.SignerConstants.AUTHORIZATION;
+import static com.amazonaws.auth.internal.SignerConstants.HOST;
+import static com.amazonaws.auth.internal.SignerConstants.X_AMZ_DATE;
+import static com.amazonaws.auth.internal.SignerConstants.X_AMZ_SECURITY_TOKEN;
 
 /**
  * Class to help with IAM authentication.
  */
 public class OpenCypherIAMRequestGenerator {
-    private static final Logger LOGGER = LoggerFactory.getLogger(OpenCypherIAMRequestGenerator.class);
     private static final AWSCredentialsProvider AWS_CREDENTIALS_PROVIDER = new DefaultAWSCredentialsProviderChain();
+    static final String SERVICE_NAME = "neptune-db";
+    static final String HTTP_METHOD_HDR = "HttpMethod";
+    static final String DUMMY_USERNAME = "username";
     private static final Gson GSON = new Gson();
 
     /**
@@ -48,28 +51,30 @@ public class OpenCypherIAMRequestGenerator {
      * @param url    URL to point at.
      * @param region Region to use.
      * @return AuthToken for IAM authentication.
-     * @throws SQLException If request cannot be generated.
      */
-    public static AuthToken getSignedHeader(final String url, final String region) throws SQLException {
-        final FullHttpRequest request = new DefaultFullHttpRequest(HttpVersion.HTTP_1_1,
-                io.netty.handler.codec.http.HttpMethod.GET, url);
-        try {
-            new NeptuneNettyHttpSigV4Signer(region, AWS_CREDENTIALS_PROVIDER).signRequest(request);
-        } catch (final NeptuneSigV4SignerException e) {
-            throw SqlError.createSQLException(
-                    LOGGER,
-                    SqlState.CONNECTION_EXCEPTION,
-                    SqlError.FAILED_TO_OBTAIN_AUTH_TOKEN, e);
-        }
+    public static AuthToken createAuthToken(final String url, final String region) {
+        final Request<Void> request = new DefaultRequest<>(SERVICE_NAME);
+        request.setHttpMethod(HttpMethodName.GET);
+        request.setEndpoint(URI.create(url));
+        // Comment out the following line if you're using an engine version older than 1.2.0.0
+        // request.setResourcePath("/opencypher");
 
-        final Map<String, Object> requestMap = new HashMap<>();
-        requestMap.put("Authorization", request.headers().get("Authorization"));
-        requestMap.put("HttpVersion", HttpVersion.HTTP_1_1.text());
-        requestMap.put("HttpMethod", io.netty.handler.codec.http.HttpMethod.GET.name());
-        requestMap.put("X-Amz-Date", request.headers().get("X-Amz-Date"));
-        requestMap.put("Host", url);
+        final AWS4Signer signer = new AWS4Signer();
+        signer.setRegionName(region);
+        signer.setServiceName(request.getServiceName());
+        signer.sign(request, AWS_CREDENTIALS_PROVIDER.getCredentials());
 
-        // Convert Map to HTTP form and send as AuthToken password.
-        return AuthTokens.basic("", GSON.toJson(requestMap));
+        return AuthTokens.basic(DUMMY_USERNAME, getAuthInfoJson(request));
+    }
+
+    private static String getAuthInfoJson(final Request<Void> request) {
+        final Map<String, Object> obj = new HashMap<>();
+        obj.put(AUTHORIZATION, request.getHeaders().get(AUTHORIZATION));
+        obj.put(HTTP_METHOD_HDR, request.getHttpMethod());
+        obj.put(X_AMZ_DATE, request.getHeaders().get(X_AMZ_DATE));
+        obj.put(HOST, request.getHeaders().get(HOST));
+        obj.put(X_AMZ_SECURITY_TOKEN, request.getHeaders().get(X_AMZ_SECURITY_TOKEN));
+
+        return GSON.toJson(obj);
     }
 }
