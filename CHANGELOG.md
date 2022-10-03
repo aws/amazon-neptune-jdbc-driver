@@ -1,8 +1,25 @@
 # Amazon Neptune JDBC Driver Change Log
 
-## v1.2.0 Change Log
+## v2.1.0 Change Log
 
-`v1.2.0` of the **Amazon Neptune JDBC Driver** will build on `v1.1.0` but has not been started yet.
+`v2.1.0` of the **Amazon Neptune JDBC Driver** will build on `v2.0.0` but has not been started yet.
+
+## v2.0.0 Change Log
+
+`v2.0.0` of the **Amazon Neptune JDBC Driver** is a major update release which provides compatibility with Neptune engine version 1.1.1.0+.
+
+Additional bug fixes and new features are listed below:
+
+### Bug Fixes
+* Fixed issues with openCypher IAM auth signature with Neptune engine version 1.1.1.0 
+* Fixed `GROUP BY` with renamed table
+* Fixed bug in getting column names for metadata
+ 
+### New Features and Improvements
+* Added `X-Amz-Security-Token` to support session token
+* Added basic literal comparisons in `WHERE` and `HAVING` after `INNER JOIN`
+* Added `NOT` support to `WHERE` clause
+* Added support for scalar values without column names
 
 ## v1.1.0 Change Log
 
