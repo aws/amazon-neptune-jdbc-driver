@@ -20,6 +20,14 @@ To connect to Amazon Neptune using the JDBC driver, the Neptune instance must be
 
 This driver is compatible with JDBC 4.2 and requires a minimum of Java 8.
 
+### Compatibility with AWS Neptune
+
+| Engine Release           | Driver Version |
+|--------------------------|----------------|
+| < 1.1.1.0                | 1.1.0          |
+| < 1.2.0.0 and >= 1.1.1.0 | 2.0.0+         |
+| >= 1.2.0.0               | 3.0.0+         |
+
 ### Connection URL and Settings
 
 To set up a connection, the driver requires a JDBC connection URL. The connection URL is generally of the form:
