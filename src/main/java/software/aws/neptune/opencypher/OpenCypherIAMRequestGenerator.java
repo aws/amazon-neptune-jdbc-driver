@@ -56,8 +56,7 @@ public class OpenCypherIAMRequestGenerator {
         final Request<Void> request = new DefaultRequest<>(SERVICE_NAME);
         request.setHttpMethod(HttpMethodName.GET);
         request.setEndpoint(URI.create(url));
-        // Comment out the following line if you're using an engine version older than 1.2.0.0
-        // request.setResourcePath("/opencypher");
+        request.setResourcePath("/opencypher");
 
         final AWS4Signer signer = new AWS4Signer();
         signer.setRegionName(region);
