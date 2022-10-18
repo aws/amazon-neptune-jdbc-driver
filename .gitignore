@@ -21,7 +21,3 @@ logs/
 *.war
 *.ear
 performance*.csv
-
-# LICENSE and NOTICE
-src/main/resources/LICENSE
-src/main/resources/NOTICE

@@ -7,19 +7,21 @@ on:
 
 jobs:
   build-taco:
-    name: Assemble Tableau Connector
     runs-on: ubuntu-latest
     steps:
-      - name: Check out the repo
-        uses: actions/checkout@v2
-      - name: Ensure Executable Permissions
+      - name: Check out
+        uses: actions/checkout@v3
+
+      - name: Ensure executable permissions
         run: chmod a+x ./tableau-connector/build.sh
+
       - name: Assemble Tableau Connector
         run: ./tableau-connector/build.sh
+
       - name: View assembled file
         run: ls -l tableau-connector/target
+
       - name: Upload Build
-        if: always()
         uses: actions/upload-artifact@v1
         with:
           name: neptune-jdbc.taco

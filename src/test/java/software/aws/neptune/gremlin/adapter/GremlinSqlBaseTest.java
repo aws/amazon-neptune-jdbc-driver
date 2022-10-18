@@ -1,0 +1,199 @@
+/*
+ * Copyright <2022> Amazon.com, Inc. or its affiliates. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License").
+ * You may not use this file except in compliance with the License.
+ * A copy of the License is located at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * or in the "license" file accompanying this file. This file is distributed
+ * on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
+ * express or implied. See the License for the specific language governing
+ * permissions and limitations under the License.
+ *
+ */
+
+package software.aws.neptune.gremlin.adapter;
+
+import lombok.Getter;
+import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource;
+import org.apache.tinkerpop.gremlin.structure.Graph;
+import org.junit.Assert;
+import org.junit.jupiter.api.Assertions;
+import software.aws.neptune.gremlin.adapter.converter.SqlConverter;
+import software.aws.neptune.gremlin.adapter.converter.schema.SqlSchemaGrabber;
+import software.aws.neptune.gremlin.adapter.converter.schema.calcite.GremlinSchema;
+import software.aws.neptune.gremlin.adapter.graphs.TestGraphFactory;
+import software.aws.neptune.gremlin.adapter.results.SqlGremlinQueryResult;
+import software.aws.neptune.gremlin.adapter.util.SQLNotSupportedException;
+import software.aws.neptune.gremlin.adapter.util.SqlGremlinError;
+
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+/**
+ * Created by twilmes on 12/4/15.
+ */
+public abstract class GremlinSqlBaseTest {
+    private final Graph graph;
+    private final GraphTraversalSource g;
+    private final SqlConverter converter;
+
+    GremlinSqlBaseTest() throws SQLException {
+        graph = TestGraphFactory.createGraph(getDataSet());
+        g = graph.traversal();
+        final GremlinSchema gremlinSchema = SqlSchemaGrabber.getSchema(g, SqlSchemaGrabber.ScanType.All);
+        converter = new SqlConverter(gremlinSchema);
+    }
+
+    protected abstract DataSet getDataSet();
+
+    protected void runQueryTestColumnType(final String query) throws SQLException {
+        final SqlGremlinQueryResult sqlGremlinQueryResult = converter.executeQuery(g, query);
+        final int columnCount = sqlGremlinQueryResult.getColumns().size();
+        final SqlGremlinTestResult result = new SqlGremlinTestResult(sqlGremlinQueryResult);
+        final List<Class<?>> returnedColumnType = new ArrayList<>();
+        final List<Class<?>> metadataColumnType = new ArrayList<>();
+        for (int i = 0; i < columnCount; i++) {
+            returnedColumnType.add(result.getRows().get(0).get(i).getClass());
+            metadataColumnType.add(getType(sqlGremlinQueryResult.getColumnTypes().get(i)));
+        }
+
+        assertResultTypes(returnedColumnType, metadataColumnType);
+    }
+
+    public void assertResultTypes(final List<Class<?>> actual, final List<Class<?>> expected) {
+        Assertions.assertEquals(expected.size(), actual.size());
+        for (int i = 0; i < actual.size(); i++) {
+            Assertions.assertEquals(expected.get(i), actual.get(i));
+        }
+    }
+
+    private Class<?> getType(final String className) {
+        if ("string".equalsIgnoreCase(className)) {
+            return String.class;
+        } else if ("integer".equalsIgnoreCase(className)) {
+            return Integer.class;
+        } else if ("float".equalsIgnoreCase(className)) {
+            return Float.class;
+        } else if ("byte".equalsIgnoreCase(className)) {
+            return Byte.class;
+        } else if ("short".equalsIgnoreCase(className)) {
+            return Short.class;
+        } else if ("double".equalsIgnoreCase(className)) {
+            return Double.class;
+        } else if ("long".equalsIgnoreCase(className)) {
+            return Long.class;
+        } else if ("boolean".equalsIgnoreCase(className)) {
+            return Boolean.class;
+        } else if ("date".equalsIgnoreCase(className) || "long_date".equalsIgnoreCase(className)) {
+            return java.sql.Date.class;
+        } else if ("timestamp".equalsIgnoreCase(className) || "long_timestamp".equalsIgnoreCase(className)) {
+            return java.sql.Timestamp.class;
+        } else {
+            return null;
+        }
+    }
+
+    protected void runQueryTestResults(final String query, final List<String> columnNames,
+                                       final List<List<?>> rows)
+            throws SQLException {
+        final SqlGremlinTestResult result = new SqlGremlinTestResult(converter.executeQuery(g, query));
+        assertColumns(result.getColumns(), columnNames);
+        assertRows(result.getRows(), rows);
+    }
+
+    protected void runJoinQueryTestResults(final String query, final List<String> columnNames,
+                                           final List<List<?>> rows)
+            throws SQLException {
+        final SqlGremlinTestResult result = new SqlGremlinTestResult(converter.executeQuery(g, query));
+        assertColumns(new HashSet<>(result.getColumns()), new HashSet<>(columnNames));
+        assertJoinRows(result.getRows().stream().map(HashSet::new).collect(Collectors.toList()),
+                rows.stream().map(HashSet::new).collect(Collectors.toList()));
+    }
+
+    protected void runQueryTestThrows(final String query, final SqlGremlinError messageKey,
+                                      final Object... formatArgs) {
+        final Throwable t = Assertions.assertThrows(SQLException.class, () -> converter.executeQuery(g, query));
+        Assert.assertEquals(SqlGremlinError.getMessage(messageKey, formatArgs), t.getMessage());
+    }
+
+    protected void runNotSupportedQueryTestThrows(final String query, final SqlGremlinError messageKey,
+                                                  final Object... formatArgs) {
+        final Throwable t = Assertions.assertThrows(SQLNotSupportedException.class, () -> converter.executeQuery(g, query));
+        Assert.assertEquals(SqlGremlinError.getMessage(messageKey, formatArgs), t.getMessage());
+    }
+
+    @SafeVarargs
+    public final List<List<?>> rows(final List<Object>... rows) {
+        return new ArrayList<>(Arrays.asList(rows));
+    }
+
+    public List<String> columns(final String... columns) {
+        return new ArrayList<>(Arrays.asList(columns));
+    }
+
+    public List<Object> r(final Object... row) {
+        return new ArrayList<>(Arrays.asList(row));
+    }
+
+    public void assertRows(final List<List<?>> actual, final List<List<?>> expected) {
+        Assertions.assertEquals(expected.size(), actual.size());
+        for (int i = 0; i < actual.size(); i++) {
+            Assertions.assertEquals(expected.get(i).size(), actual.get(i).size());
+            for (int j = 0; j < actual.get(i).size(); j++) {
+                Assertions.assertEquals(expected.get(i).get(j), actual.get(i).get(j));
+            }
+        }
+    }
+
+    public void assertJoinRows(final List<Set<?>> actual, final List<Set<?>> expected) {
+        Assertions.assertEquals(expected.size(), actual.size());
+        for (int i = 0; i < actual.size(); i++) {
+            Assertions.assertEquals(expected.get(i).size(), actual.get(i).size());
+            for (int j = 0; j < actual.get(i).size(); j++) {
+                Assertions.assertEquals(expected.get(i), actual.get(i));
+            }
+        }
+    }
+
+    public void assertColumns(final List<String> actual, final List<String> expected) {
+        Assertions.assertEquals(expected.size(), actual.size());
+        for (int i = 0; i < actual.size(); i++) {
+            Assertions.assertEquals(expected.get(i), actual.get(i));
+        }
+    }
+
+    public void assertColumns(final Set<String> actual, final Set<String> expected) {
+        Assertions.assertEquals(expected, actual);
+    }
+
+    public enum DataSet {
+        SPACE,
+        SPACE_INCOMPLETE,
+        DATA_TYPES
+    }
+
+    @Getter
+    static class SqlGremlinTestResult {
+        private final List<List<?>> rows = new ArrayList<>();
+        private final List<String> columns;
+
+        SqlGremlinTestResult(final SqlGremlinQueryResult sqlGremlinQueryResult) throws SQLException {
+            columns = sqlGremlinQueryResult.getColumns();
+            List<?> res;
+            do {
+                res = sqlGremlinQueryResult.getResult();
+                if (!(res instanceof SqlGremlinQueryResult.EmptyResult)) {
+                    this.rows.add(res);
+                }
+            } while (!(res instanceof SqlGremlinQueryResult.EmptyResult));
+        }
+    }
+}

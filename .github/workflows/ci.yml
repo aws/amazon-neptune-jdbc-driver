@@ -1,0 +1,53 @@
+name: CI Pipeline
+
+on:
+  # Trigger the workflow on push or pull request,
+  # but only for the master and develop branch
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Check out
+      uses: actions/checkout@v3
+
+    - name: Set up JDK
+      uses: actions/setup-java@v3
+      with:
+        distribution: 'zulu'
+        java-version: 8
+
+    - name: Ensure executable permissions
+      run: chmod +x ./gradlew
+
+    - name: Build and test
+      run: ./gradlew build
+
+    - name: Build shadow jar
+      run: ./gradlew shadowJar
+
+    - name: Copy artifacts
+      run: |
+        mkdir output
+        mkdir output/jarfile
+        mkdir output/reports
+        mkdir output/testresults
+        cp build/libs/*.jar output/jarfile
+        cp -R build/reports output/reports
+        cp build/test-results/test/*.xml output/testresults
+
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: output
+        path: output
+
+    - name: Upload to Codecov
+      uses: codecov/codecov-action@v2
+      with:
+        token: ${{ secrets.CODECOV_TOKEN }}

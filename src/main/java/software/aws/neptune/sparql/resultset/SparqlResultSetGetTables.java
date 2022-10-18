@@ -16,7 +16,7 @@
 
 package software.aws.neptune.sparql.resultset;
 
-import org.twilmes.sql.gremlin.adapter.converter.schema.calcite.GremlinSchema;
+import software.aws.neptune.gremlin.adapter.converter.schema.calcite.GremlinSchema;
 import software.aws.neptune.common.ResultSetInfoWithoutRows;
 import software.aws.neptune.common.gremlindatamodel.resultset.ResultSetGetTables;
 import java.sql.ResultSetMetaData;

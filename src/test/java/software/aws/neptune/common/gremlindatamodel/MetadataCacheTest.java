@@ -21,10 +21,10 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
-import org.twilmes.sql.gremlin.adapter.converter.schema.calcite.GremlinSchema;
-import org.twilmes.sql.gremlin.adapter.converter.schema.gremlin.GremlinEdgeTable;
-import org.twilmes.sql.gremlin.adapter.converter.schema.gremlin.GremlinProperty;
-import org.twilmes.sql.gremlin.adapter.converter.schema.gremlin.GremlinVertexTable;
+import software.aws.neptune.gremlin.adapter.converter.schema.calcite.GremlinSchema;
+import software.aws.neptune.gremlin.adapter.converter.schema.gremlin.GremlinEdgeTable;
+import software.aws.neptune.gremlin.adapter.converter.schema.gremlin.GremlinProperty;
+import software.aws.neptune.gremlin.adapter.converter.schema.gremlin.GremlinVertexTable;
 
 import java.lang.reflect.Method;
 import java.sql.SQLException;

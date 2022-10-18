@@ -41,7 +41,7 @@ import org.apache.jena.rdfconnection.RDFConnectionRemote;
 import org.apache.jena.rdfconnection.RDFConnectionRemoteBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.twilmes.sql.gremlin.adapter.converter.schema.calcite.GremlinSchema;
+import software.aws.neptune.gremlin.adapter.converter.schema.calcite.GremlinSchema;
 import software.aws.neptune.common.ResultSetInfoWithoutRows;
 import software.aws.neptune.common.gremlindatamodel.resultset.ResultSetGetTables;
 import software.aws.neptune.jdbc.utilities.AuthScheme;
