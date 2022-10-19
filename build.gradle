@@ -1,227 +1,153 @@
 plugins {
-    id 'java'
-    id "com.github.spotbugs" version "4.8.0"
+    id 'java-library'
+    id "com.github.spotbugs" version "5.0.12"
+    id 'com.github.hierynomus.license' version '0.16.1'
+    id 'com.github.johnrengelman.shadow' version '7.1.2'
     id 'checkstyle'
-    id 'com.github.hierynomus.license' version '0.15.0'
-    id 'com.github.johnrengelman.shadow' version '6.1.0'
     id 'jacoco'
     id 'maven-publish'
+    id 'io.github.gradle-nexus.publish-plugin' version '1.1.0'
     id 'signing'
 }
 
-apply plugin: 'java'
-apply plugin: 'com.github.johnrengelman.shadow'
-group 'software.aws.neptune.jdbc'
+group 'software.amazon.neptune'
 version project.hasProperty("BETA_VERSION") ? "${project.MAJOR_VERSION}.${project.MINOR_VERSION}.${project.PATCH_VERSION}-beta.${project.BETA_VERSION}" : "${project.MAJOR_VERSION}.${project.MINOR_VERSION}.${project.PATCH_VERSION}"
-description 'neptune-jdbc-driver'
+description 'Amazon Neptune JDBC Driver'
 
-task sourcesJar(type: Jar) {
-    from sourceSets.main.allJava
+repositories {
+    mavenCentral()
 }
 
-task javadocJar(type: Jar) {
-    classifier "javadoc"
-    from javadoc.destinationDir
+java {
+    withJavadocJar()
+    withSourcesJar()
 }
+
+// See https://github.com/gradle/gradle/issues/10384#issuecomment-1279708395
+// See https://docs.gradle.org/current/userguide/cross_project_publications.html#sec:variant-aware-sharing
+// See https://docs.gradle.org/current/userguide/variant_model.html
+def shadowElements = configurations.create('shadowElements') {
+    canBeConsumed = true
+    canBeResolved = false
+    attributes {
+        attribute(Category.CATEGORY_ATTRIBUTE, objects.named(Category, Category.LIBRARY))
+        attribute(Usage.USAGE_ATTRIBUTE, objects.named(Usage, Usage.JAVA_RUNTIME))
+        attribute(Bundling.BUNDLING_ATTRIBUTE, objects.named(Bundling, Bundling.SHADOWED))
+    }
+    outgoing.artifact(tasks.named('shadowJar'))
+}
+
+components.java.addVariantsFromConfiguration(shadowElements) {  }
+
+def projectUrl =  "https://$githubOrgPrefix/${project.name}"
 
 publishing {
     publications {
-        shadow(MavenPublication) { publication ->
-            project.shadow.component(publication)
-            artifact sourcesJar
-            artifact javadocJar
-
+        mavenJava(MavenPublication) {
+            from components.java
             pom {
-                name = "Amazon Neptune JDBC Driver"
-                packaging = "jar"
-                url = "https://github.com/aws/amazon-neptune-jdbc-driver"
-                description = "Amazon Neptune JDBC Driver"
+                name = "${project.group}:${project.name}"
+                url = "$projectUrl"
+                description = "${project.description}"
                 scm {
-                    connection = "scm:git@github.com:aws/amazon-neptune-jdbc-driver.git"
-                    developerConnection = "scm:git@github.com:aws/amazon-neptune-jdbc-driver.git"
-                    url = "git@github.com:aws/amazon-neptune-jdbc-driver.git"
+                    connection = "scm:git:git://$githubOrgPrefix/${project.name}.git"
+                    developerConnection = "scm:git:ssh://$githubOrgPrefix/${project.name}.git"
+                    url = "$projectUrl"
                 }
                 licenses {
                     license {
-                        name = "The Apache License, Version 2.0"
-                        url = "https://github.com/aws/amazon-neptune-jdbc-driver/blob/develop/LICENSE"
+                        name = "$licenseName"
+                        url = "$projectUrl/blob/develop/LICENSE"
                     }
                 }
                 developers {
                     developer {
-                        id = "amazonwebservices"
-                        organization = "Amazon Web Services"
-                        organizationUrl = "https://aws.amazon.com"
+                        name = "$developerOrg"
+                        organization = "$developerOrg"
+                        organizationUrl = "$developerOrgUrl"
                     }
                 }
             }
         }
     }
-
-    repositories {
-        maven {
-            name = "sonatype-staging"
-            url "https://aws.oss.sonatype.org/service/local/staging/deploy/maven2"
-            credentials {
-                username project.hasProperty('ossrhUsername') ? project.property('ossrhUsername') : ''
-                password project.hasProperty('ossrhPassword') ? project.property('ossrhPassword') : ''
-            }
-        }
-    }
-
-    gradle.startParameter.setShowStacktrace(ShowStacktrace.ALWAYS)
-    gradle.startParameter.setLogLevel(LogLevel.DEBUG)
 }
 
 signing {
-    required { gradle.taskGraph.hasTask("publishShadowPublicationToSonatype-stagingRepository") }
-    sign publishing.publications.shadow
+    required { gradle.taskGraph.hasTask('publishToOssrh') }
+    sign publishing.publications
 }
+
+nexusPublishing {
+    repositories {
+        ossrh {
+            nexusUrl = uri("https://aws.oss.sonatype.org/service/local/")
+            snapshotRepositoryUrl = uri("https://aws.oss.sonatype.org/content/repositories/snapshots/")
+        }
+    }
+}
+
+// Silently agree to build scan terms.
+//if (hasProperty('buildScan')) {
+//    buildScan {
+//        termsOfServiceUrl = 'https://gradle.com/terms-of-service'
+//        termsOfServiceAgree = 'yes'
+//    }
+//}
+
+jar {
+    manifest {
+        manifest {
+            attributes(
+                    'Implementation-Version': archiveVersion,
+                    'Implementation-Vendor': "$developerOrg"
+            )
+        }
+    }
+}
+
 
 java {
     sourceCompatibility = JavaVersion.VERSION_1_8
     targetCompatibility = JavaVersion.VERSION_1_8
 }
 
-repositories {
-    jcenter()
-}
-
-// Silently agree to build scan terms.
-if (hasProperty('buildScan')) {
-    buildScan {
-        termsOfServiceUrl = 'https://gradle.com/terms-of-service'
-        termsOfServiceAgree = 'yes'
-    }
-}
-
-jar {
-    manifest {
-        attributes 'Implementation-Version': archiveVersion
-    }
-}
-
 test {
     useJUnitPlatform()
     testLogging.showStandardStreams = true
-    testLogging.events("passed", "skipped", "failed")
 }
 
-/**
- * CheckStyle Plugin
- */
-apply plugin: 'checkstyle'
 checkstyle {
     toolVersion '8.37'
-    configFile file("config/checkstyle/checkstyle-rules.xml")
-    ignoreFailures = false
-}
-checkstyleMain {
-    source = 'src/main/java'
-}
-checkstyleTest {
-    source = 'src/test/java'
+    ignoreFailures = true
 }
 
-/**
- * SpotBugs Plugin
- */
 spotbugs {
     showStackTraces = false
     reportsDir = file("$buildDir/reports/spotbugs")
-    ignoreFailures = false
+    ignoreFailures = true
     includeFilter = file("config/spotbugs/spotbugs-exclude.xml")
 }
 spotbugsMain {
-    // Configure HTML report
     reports {
-        xml {
-            enabled = true
-            destination = file("$buildDir/reports/spotbugs/main.xml")
+        html {
+            required = true
+            outputLocation = file("$buildDir/reports/spotbugs/main.html")
         }
     }
 }
 spotbugsTest {
-    // Configure HTML report
     reports {
-        xml {
-            enabled = true
-            destination = file("$buildDir/reports/spotbugs/test.xml")
+        html {
+            required = true
+            outputLocation = file("$buildDir/reports/spotbugs/test.html")
         }
     }
-}
-
-task checkSpotBugsMainReport {
-    doLast {
-        def xmlReport = spotbugsMain.reports.getByName("XML")
-        def slurped = new XmlSlurper().parse(xmlReport.destination)
-        def bugsFound = slurped.BugInstance.size()
-        slurped.BugInstance.each {
-            println "SpotBugs Error"
-            println "\tShort Message:\t\t${it.ShortMessage}"
-            println "\tLong Message:\t\t${it.LongMessage}"
-            println "\tSource of Error:\t${it.SourceLine.Message}"
-        }
-        if (bugsFound > 0) {
-            throw new Exception("Encountered SpotBugs errors, see above.")
-        }
-    }
-}
-
-tasks.register('licenseAndNotice') {
-    copy {
-        from "${rootDir}/LICENSE"
-        into 'src/main/resources'
-    }
-    copy {
-        from "${rootDir}/NOTICE"
-        into 'src/main/resources'
-    }
-}
-
-task checkSpotBugsTestReport {
-    doLast {
-        def xmlReport = spotbugsTest.reports.getByName("XML")
-        def slurped = new XmlSlurper().parse(xmlReport.destination)
-        def bugsFound = slurped.BugInstance.size()
-        slurped.BugInstance.each {
-            println "SpotBugs Error"
-            println "\tShort Message:\t\t${it.ShortMessage}"
-            println "\tLong Message:\t\t${it.LongMessage}"
-            println "\tSource of Error:\t${it.SourceLine.Message}"
-        }
-        if (bugsFound > 0) {
-            throw new Exception("Encountered SpotBugs errors, see above.")
-        }
-    }
-}
-
-spotbugsMain.finalizedBy checkSpotBugsMainReport
-spotbugsTest.finalizedBy checkSpotBugsTestReport
-
-task writeProperties(type: WriteProperties) {
-    outputFile("$projectDir/src/main/resources/project.properties")
-    property("driver.major.version", MAJOR_VERSION)
-    property("driver.minor.version", MINOR_VERSION)
-    property("driver.full.version", project.version)
-}
-
-/**
- * JaCoCo Plugin
- */
-jacoco {
-    toolVersion = "0.8.5"
 }
 
 jacocoTestReport {
     reports {
-        html.enabled true
-        xml.enabled true
-    }
-    afterEvaluate {
-        classDirectories.setFrom(files(classDirectories.files.collect {
-            fileTree(dir: it, exclude: [])
-        }))
+        html.required = true
+        xml.required = true
     }
 }
 test.finalizedBy(project.tasks.jacocoTestReport)
@@ -241,14 +167,18 @@ jacocoTestCoverageVerification {
             }
         }
     }
-    afterEvaluate {
-        classDirectories.setFrom(files(classDirectories.files.collect {
-            fileTree(dir: it)
-        }))
-    }
 }
 check.dependsOn jacocoTestCoverageVerification
 jacocoTestCoverageVerification.dependsOn jacocoTestReport
+
+task persistVersionInfo(type: WriteProperties) {
+    outputFile("$buildDir/resources/main/project.properties")
+    property("driver.major.version", MAJOR_VERSION)
+    property("driver.minor.version", MINOR_VERSION)
+    property("driver.full.version", project.version)
+}
+
+processResources.dependsOn persistVersionInfo
 
 /**
  * License Plugin
@@ -272,82 +202,52 @@ license {
     }
 }
 
-repositories {
-    mavenCentral()
-}
-
-ext {
-    calciteVersion = '1.28.0'
-    log4jVersion = '2.16.0'
-    lombokVersion = '1.18.16'
-    jupiterVersion = '5.4.0'
-    neo4jDBVersion = '3.5.19'
-    neo4jDriverVersion = '4.0.0'
-    puppyCrawlVersion = '8.8'
-    findBugsVersion = '3.0.1'
-    awsSdkVersion = '1.11.932'
-    gremlinVersion = '3.4.8'
-    slf4jVersion = '1.7.29'
-    rdf4jVersion = '3.5.0'
-    amazonSigv4SignerVersion = '2.4.0'
-    nettyVersion = '4.1.52.Final'
-    immutablesVersion = '2.8.8'
-}
-
-subprojects {
-    tasks.withType(Test) {
-        // Gradle documentation suggests using this number of cores.
-        maxParallelForks = Runtime.runtime.availableProcessors().intdiv(2) ?: 1
-    }
-}
-
 dependencies {
-    // Local sql-gremlin build.
-    implementation project(":sql-gremlin")
-
     // Dependencies
-    implementation group: 'commons-beanutils', name: 'commons-beanutils', version: '1.9.4'
-    implementation group: 'org.apache.tinkerpop', name: 'gremlin-driver', version: gremlinVersion
-    implementation group: 'com.amazonaws', name: 'amazon-neptune-sparql-java-sigv4', version: amazonSigv4SignerVersion
-    implementation group: 'com.amazonaws', name: 'amazon-neptune-gremlin-java-sigv4', version: amazonSigv4SignerVersion
-    implementation group: 'com.jcraft', name: 'jsch', version: '0.1.55'
-    implementation group: 'io.netty', name: 'netty-all', version: nettyVersion
-    implementation group: 'org.neo4j.driver', name: 'neo4j-java-driver', version: neo4jDriverVersion
-    implementation group: 'org.apache.jena', name: 'jena-arq', version: '3.17.0'
-    implementation group: 'org.slf4j', name: 'slf4j-log4j12', version: slf4jVersion
-    implementation group: 'com.google.code.gson', name: 'gson', version: '2.8.9'
-    implementation group: 'com.google.guava', name: 'guava', version: '31.0.1-jre'
-    implementation group: 'org.apache.calcite', name: 'calcite-core', version: calciteVersion
-    implementation group: 'org.apache.calcite', name: 'calcite-linq4j', version: calciteVersion
-    compileOnly group: 'org.projectlombok', name: 'lombok', version: lombokVersion
-    compileOnly group: 'com.puppycrawl.tools', name: 'checkstyle', version: puppyCrawlVersion
-    compileOnly group: 'org.immutables', name: 'value', version: immutablesVersion
-    annotationProcessor group: 'org.projectlombok', name: 'lombok', version: lombokVersion
+    implementation group: 'commons-beanutils', name: 'commons-beanutils', version: "$beanutilsVersion"
+    implementation group: 'org.apache.tinkerpop', name: 'gremlin-driver', version: "$gremlinVersion"
+    implementation group: 'org.apache.tinkerpop', name: 'gremlin-groovy', version: "$gremlinVersion"
+    implementation group: 'com.amazonaws', name: 'amazon-neptune-sparql-java-sigv4', version: "$amazonSigv4SignerVersion"
+    implementation group: 'com.amazonaws', name: 'amazon-neptune-gremlin-java-sigv4', version: "$amazonSigv4SignerVersion"
+    implementation group: 'com.jcraft', name: 'jsch', version: "$jschVersion"
+    implementation group: 'io.netty', name: 'netty-all', version: "$nettyVersion"
+    implementation group: 'org.neo4j.driver', name: 'neo4j-java-driver', version: "$neo4jDriverVersion"
+    implementation group: 'org.apache.jena', name: 'jena-arq', version: "$jenaVersion"
+    implementation group: 'org.slf4j', name: 'slf4j-log4j12', version: "$slf4jVersion"
+    implementation group: 'com.google.code.gson', name: 'gson', version: "$gsonVersion"
+    implementation group: 'com.google.guava', name: 'guava', version: "$guavaVersion"
+    implementation group: 'org.apache.calcite', name: 'calcite-core', version: "$calciteVersion"
+    implementation group: 'org.apache.calcite', name: 'calcite-linq4j', version: "$calciteVersion"
+    compileOnly group: 'org.projectlombok', name: 'lombok', version: "$lombokVersion"
+    compileOnly group: 'com.puppycrawl.tools', name: 'checkstyle', version: "$puppyCrawlVersion"
+    compileOnly group: 'org.immutables', name: 'value', version: "$immutablesVersion"
+    annotationProcessor group: 'org.projectlombok', name: 'lombok', version: "$lombokVersion"
 
     // Testing
-    testImplementation group: 'info.picocli', name: 'picocli', version: '4.6.3'
-    testImplementation group: 'com.googlecode.json-simple', name: 'json-simple', version: '1.1.1'
-    testImplementation group: 'junit', name: 'junit', version: '4.13.2'
-    testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-api', version: jupiterVersion
-    testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-engine', version: jupiterVersion
-    testImplementation group: 'org.mockito', name: 'mockito-core', version: '4.1.0'
-    testImplementation group: 'org.mockito', name: 'mockito-inline', version: '4.1.0'
-    testImplementation group: 'com.massisframework', name: 'j-text-utils', version: '0.3.4'
-    testImplementation group: 'org.neo4j.test', name: 'neo4j-harness', version: neo4jDBVersion
-    testImplementation group: 'org.neo4j.community', name: 'it-test-support', version: neo4jDBVersion
-    testImplementation group: 'org.neo4j', name: 'neo4j-kernel', version: neo4jDBVersion, classifier: "tests"
-    testImplementation group: 'org.neo4j', name: 'neo4j-io', version: neo4jDBVersion, classifier: "tests"
-    testImplementation group: 'com.google.code.findbugs', name: 'annotations', version: findBugsVersion
-    testImplementation group: 'com.github.javafaker', name: 'javafaker', version: '1.0.2'
-    testImplementation group: 'org.apache.jena', name: 'jena-fuseki-main', version: '3.17.0'
-    testCompileOnly group: 'org.projectlombok', name: 'lombok', version: lombokVersion
-    testAnnotationProcessor group: 'org.projectlombok', name: 'lombok', version: lombokVersion
-    testCompileOnly group: 'com.google.code.findbugs', name: 'annotations', version: findBugsVersion
-    testCompileOnly group: 'com.puppycrawl.tools', name: 'checkstyle', version: puppyCrawlVersion
+    testImplementation group: 'info.picocli', name: 'picocli', version: "$picocliVersion"
+    testImplementation group: 'com.googlecode.json-simple', name: 'json-simple', version: "$jsonSimpleVersion"
+    testImplementation group: 'junit', name: 'junit', version: "$junitVersion"
+    testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-api', version: "$jupiterVersion"
+    testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-engine', version: "$jupiterVersion"
+    testImplementation group: 'org.mockito', name: 'mockito-core', version: "$mockitoVersion"
+    testImplementation group: 'org.mockito', name: 'mockito-inline', version: "$mockitoVersion"
+    testImplementation group: 'com.massisframework', name: 'j-text-utils', version: "$jtextVersion"
+    testImplementation group: 'org.neo4j.test', name: 'neo4j-harness', version: "$neo4jDBVersion"
+    testImplementation group: 'org.neo4j.community', name: 'it-test-support', version: "$neo4jDBVersion"
+    testImplementation group: 'org.neo4j', name: 'neo4j-kernel', version: "$neo4jDBVersion", classifier: "tests"
+    testImplementation group: 'org.neo4j', name: 'neo4j-io', version: "$neo4jDBVersion", classifier: "tests"
+    testImplementation group: 'com.google.code.findbugs', name: 'annotations', version: "$findBugsVersion"
+    testImplementation group: 'com.github.javafaker', name: 'javafaker', version: "$javafakerVersion"
+    testImplementation group: 'org.apache.jena', name: 'jena-fuseki-main', version: "$jenaVersion"
+    testCompileOnly group: 'org.projectlombok', name: 'lombok', version: "$lombokVersion"
+    testAnnotationProcessor group: 'org.projectlombok', name: 'lombok', version: "$lombokVersion"
+    testCompileOnly group: 'com.google.code.findbugs', name: 'annotations', version: "$findBugsVersion"
+    testCompileOnly group: 'com.puppycrawl.tools', name: 'checkstyle', version: "$puppyCrawlVersion"
+    testImplementation group: 'org.apache.tinkerpop', name: 'tinkergraph-gremlin', version: "$gremlinVersion"
 }
 
 shadowJar {
-    dependsOn('licenseAndNotice')
+    archiveClassifier.set('all')
 
     //  Exclude driver unnecessary classes.
     exclude 'org/apache/calcite/avatica/remote/Driver*'

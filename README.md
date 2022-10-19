@@ -4,11 +4,8 @@ This driver provides read-only JDBC connectivity for the Amazon Neptune service 
 
 ## Using the Driver
 
-The driver comes packed in a single jar file. To use the driver, place the jar file in the classpath of the application which is going to use it.
-
-[//]: # "TODO AN-694 - Uncomment this: Alternatively, if using the driver with a Maven/Gradle application, the jar can be used to install the driver via their respective commands."
-
-For the initial public preview release, the driver will be available for download on GitHub along with the driver's .jar file and .taco file.
+The driver is available on [Maven Central](https://search.maven.org/search?q=g:software.amazon.neptune%20AND%20a:amazon-neptune-jdbc-driver).
+In addition to the regular jar, a shadow/uber/fat jar is also published with the classifier `all`. 
 
 To use the Driver in BI tools, please refer to the documentation below. 
 
@@ -80,9 +77,7 @@ For more example applications, see the [sample applications](./src/test/java/sam
 ### SQL
 The driver supports a subset of SQL-92 and some common extensions. 
 
-To connection to Amazon Neptune using SQL, please see the [SQL connection configurations](markdown/sql.md) for details about connection string configurations. 
-
-#### For information on the limitations of the SQL query support please see the [SQL specifications](sql-gremlin/README.asciidoc).
+To connection to Amazon Neptune using SQL, please see the [SQL connection configurations](markdown/sql.md) for details about connection string configurations.
 
 ### Gremlin
 
@@ -117,8 +112,6 @@ Because the JDBC driver is available as open source, contribution from the commu
 ## Building from Source
 
 If you wish to contribute, you will need to build the driver. The requirements to build the driver are very simple, you only need a Java 8 compiler with a runtime environment and you can build and run the driver.
-
-Git submodules must be updated before attempting to build the driver.
 
 ## Security Issue Notifications
 

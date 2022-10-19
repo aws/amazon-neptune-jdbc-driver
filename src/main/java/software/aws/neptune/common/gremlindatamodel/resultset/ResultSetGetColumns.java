@@ -18,9 +18,9 @@ package software.aws.neptune.common.gremlindatamodel.resultset;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.twilmes.sql.gremlin.adapter.converter.schema.calcite.GremlinSchema;
-import org.twilmes.sql.gremlin.adapter.converter.schema.gremlin.GremlinProperty;
-import org.twilmes.sql.gremlin.adapter.converter.schema.gremlin.GremlinTableBase;
+import software.aws.neptune.gremlin.adapter.converter.schema.calcite.GremlinSchema;
+import software.aws.neptune.gremlin.adapter.converter.schema.gremlin.GremlinProperty;
+import software.aws.neptune.gremlin.adapter.converter.schema.gremlin.GremlinTableBase;
 import software.aws.neptune.common.ResultSetInfoWithoutRows;
 import software.aws.neptune.jdbc.ResultSet;
 import software.aws.neptune.jdbc.utilities.JavaToJdbcTypeConverter;

@@ -22,7 +22,7 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Level;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.twilmes.sql.gremlin.adapter.converter.schema.SqlSchemaGrabber;
+import software.aws.neptune.gremlin.adapter.converter.schema.SqlSchemaGrabber;
 import software.aws.neptune.jdbc.Connection;
 
 import java.nio.file.Files;
