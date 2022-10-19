@@ -1,8 +1,21 @@
 # Amazon Neptune JDBC Driver Change Log
 
-## v2.1.0 Change Log
+## v3.1.0 Change Log
 
-`v2.1.0` of the **Amazon Neptune JDBC Driver** will build on `v2.0.0` but has not been started yet.
+`v3.1.0` of the **Amazon Neptune JDBC Driver** will build on `v3.0.0` but has not been started yet.
+
+## v3.0.0 Change Log
+
+`v3.0.0` of the **Amazon Neptune JDBC Driver** is a major update release which provides compatibility with Neptune engine version >= 1.2.0.0. 
+
+Note, this version is not compatible with engine version <1.2.0.0. If you are using previous version, please refer to the [Compatibility Matrix](README.md#compatibility-with-aws-neptune) to find what JDBC driver version to choose.
+
+### Bug Fixes
+* Fixed issues with openCypher IAM auth signature with Neptune engine version 1.2.0.0
+* Fixed build failures related to checkstyle versions
+
+### New Features and Improvements
+* Refactored SQL-Gremlin submodule into main module for publishing artifacts onto Maven 
 
 ## v2.0.0 Change Log
 
