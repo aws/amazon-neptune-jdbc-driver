@@ -1,5 +1,4 @@
 (function propertiesbuilder(attr) {
-    logging.log("entering propertiesBuilder");
     const SSH_USER="sshUser"
     const SSH_HOST="sshHost"
     const SSH_PRIV_KEY_FILE="sshPrivateKeyFile"
@@ -9,9 +8,6 @@
     const AUTH_SCHEME_KEY = "authScheme";
     const USE_ENCRYPTION_KEY = "enableSsl";
     const SERVICE_REGION_KEY = "serviceRegion";
-
-    var strJSON = JSON.stringify(attr);
-    logging.log("connectionProperties attr:" + strJSON);
 
     // This script is only needed if you are using a JDBC driver.
     var params = {};
@@ -43,7 +39,6 @@
     // Format the attributes as 'key=value'. By default some values are escaped or wrapped in curly braces to follow the JDBC standard, but you can also do it here if needed.
     var formattedParams = [];
     for (var key in params) {
-
         formattedParams.push(connectionHelper.formatKeyValuePair(key, params[key]));
     }
 
@@ -56,6 +51,5 @@
         }
     }
 
-    logging.log("formattedParams: " + formattedParams);
     return formattedParams;
 })
