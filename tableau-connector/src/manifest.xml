@@ -45,6 +45,7 @@
             <customization name="CAP_SUPPORTS_UNION" value="no"/>
             <customization name="CAP_JDBC_QUERY_ASYNC" value="yes"/>
             <customization name="CAP_JDBC_QUERY_CANCEL" value="no"/>
+            <customization name="CAP_EXTRACT_ONLY" value="yes"/>
         </customizations>
     </connection-customization>
     <connection-fields file='connection-fields.xml'/>

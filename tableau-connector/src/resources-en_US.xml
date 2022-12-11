@@ -2,14 +2,12 @@
 
 <resources>
     <string name="amazon_neptune">Amazon Neptune</string>
-
     <string name="server_endpoint">Neptune Endpoint</string>
     <string name="port">Port</string>
     <string name="auth_label_iam">Use IAM Authentication</string>
     <string name="auth_label_region">Service Region</string>
     <string name="auth_label_ssl">Require SSL</string>
     <string name="additional_conn_options">Additional Connection Options</string>
-
     <string name="enable_ssh_tunnel">Enable SSH Tunnel</string>
     <string name="ssh_user">SSH User</string>
     <string name="ssh_hostname">SSH Hostname</string>
