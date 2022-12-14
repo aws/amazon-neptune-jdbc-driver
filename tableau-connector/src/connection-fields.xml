@@ -2,69 +2,72 @@
 
 <connection-fields>
 
-  <field name="server" label="Neptune Endpoint" category="endpoint" value-type="string">
+  <field name="server" label="@string/server_endpoint/" category="endpoint" value-type="string">
     <validation-rule reg-exp="^(([a-zA-Z]|[a-zA-Z][a-zA-Z0-9\-]*[a-zA-Z0-9])\.)*([A-Za-z]|[A-Za-z][A-Za-z0-9\-]*[A-Za-z0-9])$"/>
   </field>
 
-  <field name="port" label="Port" category="endpoint" value-type="string" default-value="8182"/>
+  <field name="port" label="@string/port/" category="endpoint" value-type="string" default-value="8182">
+    <!-- Validates that port range is from 1 to 65535. -->
+    <validation-rule reg-exp="^([1-9][0-9]{0,3}|[1-5][0-9]{4}|6[0-4][0-9]{3}|65[0-4][0-9]{2}|655[0-2][0-9]|6553[0-5])$"/>
+  </field>
 
-  <field name="authentication" label="Use IAM Authentication" category="authentication" value-type="boolean" default-value="auth-user" >
+  <field name="authentication" label="@string/auth_label_iam/" category="authentication" value-type="boolean" default-value="auth-user" >
     <boolean-options>
       <false-value value="auth-none" />
       <true-value value="auth-user" />
     </boolean-options>
   </field>
 
-  <field name="v-service-region" label="Service Region" value-type="string" category="general">
+  <field name="v-service-region" label="@string/auth_label_region/" value-type="string" category="authentication">
     <conditions>
       <condition field="authentication" value="auth-user" />
     </conditions>
     <validation-rule reg-exp="^(([a-zA-Z]|[a-zA-Z][a-zA-Z0-9\-]*[a-zA-Z0-9])\.)*([A-Za-z]|[A-Za-z][A-Za-z0-9\-]*[A-Za-z0-9])$"/>
   </field>
 
-  <field name="sslmode" label="Require SSL" value-type="boolean" category="general" default-value="require" >
+  <field name="sslmode" label="@string/auth_label_ssl/" value-type="boolean" category="authentication" default-value="require" >
     <boolean-options>
       <false-value value="" />
       <true-value value="require" />
     </boolean-options>
   </field>
 
-  <field name="v-additional-properties" label="Additional Connection Options" category="general" value-type="string" default-value="" optional="true"/>
+  <field name="v-additional-properties" label="@string/additional_conn_options/" category="general" value-type="string" default-value="" optional="true"/>
 
 
   <!-- Advanced tab. -->
-  <field name="v-ssh-tunnel" label="Enable SSH Tunnel" value-type="boolean" category="advanced" optional="true" default-value="false">
+  <field name="v-ssh-tunnel" label="@string/enable_ssh_tunnel/" value-type="boolean" category="advanced" optional="true" default-value="false">
     <boolean-options>
       <false-value value="false" />
       <true-value value="true" />
     </boolean-options>
   </field>
 
-  <field name="v-ssh-user" label="SSH User" value-type="string" category="advanced" optional="true" default-value="">
+  <field name="v-ssh-user" label="@string/ssh_user/" value-type="string" category="advanced" optional="true" default-value="">
     <conditions>
       <condition field="v-ssh-tunnel" value="true" />
     </conditions>
   </field>
 
-  <field name="v-ssh-host" label="SSH Hostname" value-type="string" category="advanced" optional="true" default-value="">
+  <field name="v-ssh-host" label="@string/ssh_hostname/" value-type="string" category="advanced" optional="true" default-value="">
     <conditions>
       <condition field="v-ssh-tunnel" value="true" />
     </conditions>
   </field>
 
-  <field name="v-ssh-priv-key-filename" label="SSH Private Key File" value-type="file" category="advanced" optional="true" default-value="">
+  <field name="v-ssh-priv-key-filename" label="@string/ssh_private_key_file/" value-type="file" category="advanced" optional="true" default-value="">
     <conditions>
       <condition field="v-ssh-tunnel" value="true" />
     </conditions>
   </field>
 
-  <field name="v-ssh-priv-key-passphrase" label="SSH Private Key File Passphrase" value-type="string" category="advanced" optional="true" default-value="">
+  <field name="v-ssh-priv-key-passphrase" label="@string/ssh_private_key_file_passphrase/" value-type="string" category="advanced" optional="true" default-value="">
     <conditions>
       <condition field="v-ssh-tunnel" value="true" />
     </conditions>
   </field>
 
-  <field name="v-ssh-strict-host-key-check" label="SSH Strict Host Key Check (disabling option is less secure)" value-type="boolean" category="advanced" optional="true" default-value="true">
+  <field name="v-ssh-strict-host-key-check" label="@string/ssh_strict_host_key_check/" value-type="boolean" category="advanced" optional="true" default-value="true">
     <conditions>
       <condition field="v-ssh-tunnel" value="true" />
     </conditions>
@@ -74,7 +77,7 @@
     </boolean-options>
   </field>
 
-  <field name="v-ssh-known-hosts-file" label="SSH Known Hosts File" value-type="file" category="advanced" optional="true" default-value="~/.ssh/known_hosts">
+  <field name="v-ssh-known-hosts-file" label="@string/ssh_known_hosts_file/" value-type="file" category="advanced" optional="true" default-value="~/.ssh/known_hosts">
     <conditions>
       <condition field="v-ssh-strict-host-key-check" value="true" />
     </conditions>
