@@ -2,7 +2,16 @@
 
 ## v3.1.0 Change Log
 
-`v3.1.0` of the **Amazon Neptune JDBC Driver** will build on `v3.0.0` but has not been started yet.
+`v3.1.0` of the **Amazon Neptune JDBC Driver** will build on `v3.0.1` but has not been started yet.
+
+## v3.0.1 Change Log
+
+`v3.0.1` of the **Amazon Neptune JDBC Driver** is a patch release which provides updates to the Tableau connector files. 
+
+Note, this version is not compatible with engine version <1.2.0.0. If you are using previous version, please refer to the [Compatibility Matrix](README.md#compatibility-with-aws-neptune) to find what JDBC driver version to choose.
+
+### Bug Fixes
+* For Tableau connector, removed unnecessary logging, added string localization, updated connection fields, and set to extract mode only
 
 ## v3.0.0 Change Log
 
