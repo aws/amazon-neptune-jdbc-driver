@@ -1,6 +1,6 @@
 # Using SQL with Amazon Neptune JDBC Driver
 
-This driver supports using SQL, which it will translate into Gremlin for executing statements against Neptune. For additional information about SQL and the type of SQL queries this driver supports, see the [sql-gremlin documentation](../sql-gremlin/README.asciidoc).
+This driver supports using SQL, which it will translate into Gremlin for executing statements against Neptune. For additional information about SQL and the type of SQL queries this driver supports, see the [sql-gremlin documentation](./sql-gremlin.md).
 
 ### Creating a connection
 
