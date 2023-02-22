@@ -10,7 +10,7 @@ assignees: ''
 <!-- A clear and concise description of what the bug is. -->
 
 - [ ] **Have you validated that this is not currently reported in
-    [SQL Support and Limitations](https://github.com/aws/amazon-neptune-jdbc-driver/blob/develop/sql-gremlin/README.asciidoc#sql-support-and-limitations)?**
+    [SQL Support and Limitations](https://github.com/aws/amazon-neptune-jdbc-driver/blob/develop/markdown/sql-gremlin.md)?**
 
 ## Steps to Reproduce
 - [ ] **Is the JDBC Driver being used in a BI tool?**
