@@ -80,7 +80,7 @@ public abstract class Driver implements java.sql.Driver {
 
             if (isWindows) {
                 final Process process = Runtime.getRuntime()
-                        .exec("tasklist /fi \"PID eq " + pid + "\" /fo csv /nh");
+                        .exec(new String[] {"tasklist /fi \"PID eq ", pid, "\" /fo csv /nh"});
                 try (final BufferedReader input = new BufferedReader(
                         new InputStreamReader(process.getInputStream(), StandardCharsets.UTF_8))) {
                     final String line = input.readLine();
