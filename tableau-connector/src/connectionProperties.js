@@ -12,7 +12,6 @@
     var params = {};
 
     // Set keys for properties needed for connecting using JDBC.
-
     var authAttrValue = attr[connectionHelper.attributeAuthentication];
     if (authAttrValue == "auth-none")
         params[AUTH_SCHEME_KEY] = "None";
@@ -32,29 +31,6 @@
     params[SCAN_TYPE] = attr["v-scan-type"];
     params[CONN_TIMEOUT] = attr["v-connection-timeout"];
     params[CONN_RETRY] = attr["v-connection-retry"];
-
-    // Format the attributes as 'key=value'. By default some values are escaped or wrapped in curly braces to follow the JDBC standard, but you can also do it here if needed.
-    // var formattedParams = [];
-    // for (var key in params) {
-    //     formattedParams.push(connectionHelper.formatKeyValuePair(key, params[key]));
-    // }
-
-    // Format the additional option 'keys=value' pairs into the connection properties.
-    // if (attr['v-additional-properties']) {
-    //     var additionalProperties = attr['v-additional-properties'].split(";");
-    //     for (var i = 0; i < additionalProperties.length; i++) {
-    //         const val = additionalProperties[i];
-    //         formattedParams.push(val);
-    //     }
-    // }
-
-    // if (attr['v-additional-properties']) {
-    //     var additionalProperties = attr['v-additional-properties'].split(";");
-    //     for (var i = 0; i < additionalProperties.length; i++) {
-    //         var property = additionalProperties[i].split("=");
-    //         params[property[0]] = property[1];
-    //     }
-    // }
 
     return params;
 })
