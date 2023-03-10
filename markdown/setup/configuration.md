@@ -35,7 +35,7 @@ You can set up an SSH tunnel to the Amazon Neptune cluster `sample-cluster.node.
 
 Note: The username of the ec2 connection depends on the type of your ec2 instance. In the below example, we are using Ubuntu.
 ```
-ssh -i "ec2Access.pem" -L 8182:sample-cluster.node.us-east-1.docdb.amazonaws.com:8182 ubuntu@ec2-34-229-221-164.compute-1.amazonaws.com -N 
+ssh -i "ec2Access.pem" -L 8182:sample-cluster.node.us-east-1.neptune.amazonaws.com:8182 ubuntu@ec2-34-229-221-164.compute-1.amazonaws.com -N 
 ```
 
 This is a prerequisite for connecting to any BI tool running on a client outside your VPC.
@@ -47,7 +47,7 @@ Add the following line to the list of hosts lookup:
 `127.0.0.1        <endpoint>`
 
 From our sample above, we would use:
-`127.0.0.1        sample-cluster.node.us-east-1.docdb.amazonaws.com`
+`127.0.0.1        sample-cluster.node.us-east-1.neptune.amazonaws.com`
 
 ### Setup Environment for IAM Authentication
 

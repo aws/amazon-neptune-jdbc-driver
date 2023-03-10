@@ -7,12 +7,10 @@
     <string name="auth_label_iam">Use IAM Authentication</string>
     <string name="auth_label_region">Service Region</string>
     <string name="auth_label_ssl">Require SSL</string>
-    <string name="additional_conn_options">Additional Connection Options</string>
-    <string name="enable_ssh_tunnel">Enable SSH Tunnel</string>
-    <string name="ssh_user">SSH User</string>
-    <string name="ssh_hostname">SSH Hostname</string>
-    <string name="ssh_private_key_file">SSH Private Key File</string>
-    <string name="ssh_private_key_file_passphrase">SSH Private Key File Passphrase</string>
-    <string name="ssh_strict_host_key_check">SSH Strict Host Key Check (disabling option is less secure)</string>
-    <string name="ssh_known_hosts_file">SSH Known Hosts File</string>
+    <string name="log_level">Log Level</string>
+    <string name="scan_type">Schema Scan Type</string>
+    <string name="conn_timeout">Connection Timeout</string>
+    <string name="conn_timeout_help">Amount of time to wait for initial connection in milliseconds</string>
+    <string name="conn_retry">Connection Retry Count</string>
+    <string name="conn_retry_help">Number of times to retry if establishing initial connection fails</string>
 </resources>
