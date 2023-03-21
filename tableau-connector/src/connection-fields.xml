@@ -32,55 +32,33 @@
     </boolean-options>
   </field>
 
-  <field name="v-additional-properties" label="@string/additional_conn_options/" category="general" value-type="string" default-value="" optional="true"/>
-
-
   <!-- Advanced tab. -->
-  <field name="v-ssh-tunnel" label="@string/enable_ssh_tunnel/" value-type="boolean" category="advanced" optional="true" default-value="false">
-    <boolean-options>
-      <false-value value="false" />
-      <true-value value="true" />
-    </boolean-options>
+  <field name="v-log-level" label="@string/log_level/" value-type="selection" category="advanced" optional="true" default-value="INFO">
+    <selection-group>
+      <option label="OFF" value="OFF"/>
+      <option label="FATAL" value="FATAL"/>
+      <option label="ERROR" value="ERROR"/>
+      <option label="WARN" value="WARN"/>
+      <option label="INFO" value="INFO"/>
+      <option label="DEBUG" value="DEBUG"/>
+      <option label="TRACE" value="TRACE"/>
+      <option label="ALL" value="ALL"/>
+    </selection-group>
   </field>
 
-  <field name="v-ssh-user" label="@string/ssh_user/" value-type="string" category="advanced" optional="true" default-value="">
-    <conditions>
-      <condition field="v-ssh-tunnel" value="true" />
-    </conditions>
+  <field name="v-scan-type" label="@string/scan_type/" value-type="selection" category="advanced" optional="true" default-value="ALL">
+    <selection-group>
+      <option label="ALL" value="ALL"/>
+      <option label="FIRST" value="FIRST"/>
+    </selection-group>
   </field>
 
-  <field name="v-ssh-host" label="@string/ssh_hostname/" value-type="string" category="advanced" optional="true" default-value="">
-    <conditions>
-      <condition field="v-ssh-tunnel" value="true" />
-    </conditions>
+  <field name="v-connection-timeout" label="@string/conn_timeout/" placeholder="@string/conn_timeout_help/" value-type="string" category="advanced" optional="true" default-value="5000">
+    <validation-rule reg-exp="^[0-9]*$"/>
   </field>
 
-  <field name="v-ssh-priv-key-filename" label="@string/ssh_private_key_file/" value-type="file" category="advanced" optional="true" default-value="">
-    <conditions>
-      <condition field="v-ssh-tunnel" value="true" />
-    </conditions>
-  </field>
-
-  <field name="v-ssh-priv-key-passphrase" label="@string/ssh_private_key_file_passphrase/" value-type="string" category="advanced" optional="true" default-value="">
-    <conditions>
-      <condition field="v-ssh-tunnel" value="true" />
-    </conditions>
-  </field>
-
-  <field name="v-ssh-strict-host-key-check" label="@string/ssh_strict_host_key_check/" value-type="boolean" category="advanced" optional="true" default-value="true">
-    <conditions>
-      <condition field="v-ssh-tunnel" value="true" />
-    </conditions>
-    <boolean-options>
-      <false-value value="false" />
-      <true-value value="true" />
-    </boolean-options>
-  </field>
-
-  <field name="v-ssh-known-hosts-file" label="@string/ssh_known_hosts_file/" value-type="file" category="advanced" optional="true" default-value="~/.ssh/known_hosts">
-    <conditions>
-      <condition field="v-ssh-strict-host-key-check" value="true" />
-    </conditions>
+  <field name="v-connection-retry" label="@string/conn_retry/" placeholder="@string/conn_retry_help/" value-type="string" category="advanced" optional="true" default-value="3">
+    <validation-rule reg-exp="^[0-9]*$"/>
   </field>
 
 </connection-fields>

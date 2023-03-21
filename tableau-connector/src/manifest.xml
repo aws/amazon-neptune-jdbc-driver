@@ -1,6 +1,6 @@
 <?xml version='1.0' encoding='utf-8' ?>
 
-<connector-plugin class='neptune-jdbc' superclass='jdbc' plugin-version='1.14.0.0' name='@string/amazon_neptune/' version='18.1' min-version-tableau='2020.3'>
+<connector-plugin class='neptune-jdbc' superclass='jdbc' plugin-version='3.0.1' name='@string/amazon_neptune/' version='18.1' min-version-tableau='2020.3'>
     <vendor-information>
         <company name="Amazon Web Services"/>
         <support-link url="https://github.com/aws/amazon-neptune-jdbc-driver/issues"/>
@@ -46,6 +46,7 @@
             <customization name="CAP_JDBC_QUERY_ASYNC" value="yes"/>
             <customization name="CAP_JDBC_QUERY_CANCEL" value="no"/>
             <customization name="CAP_EXTRACT_ONLY" value="yes"/>
+            <customization name="CAP_EXTRACT_ONLY_REFRESH" value="yes"/>
         </customizations>
     </connection-customization>
     <connection-fields file='connection-fields.xml'/>

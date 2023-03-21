@@ -29,9 +29,9 @@ Download the latest version of [Tableau Desktop](https://www.tableau.com/product
 
 #### Connecting to Amazon Neptune Using Tableau - External SSH Tunnel
 
-1. If connecting from outside the Neptune cluster's VPC, ensure you have followed the [configuration instructions](../setup/configuration.md).
+1. If connecting from outside the Neptune cluster's VPC, ensure you have followed the [configuration instructions](../setup/configuration.md) for your Neptune instance and local SSH tunnel.
 
-2. Enter the connection parameters as shown below. **Neptune Endpoint**, **Port**, **Use IAM Authentication** (and **Service Region** if IAM is selected), and **Require SSL** are required. Additional Connection Options can be filled in the form of `propertyKey=propertyValue`, with multiple properties separated by `;`. Descriptions of each required and optional parameters can be found in the [SQL JDBC documentation](../sql.md).
+2. Enter the connection parameters as shown below. **Neptune Endpoint**, **Port**, **Use IAM Authentication** (and **Service Region** if IAM is selected), and **Require SSL** are required. 
 
 Example for connecting to an instance without IAM authentication:
 <p align="center">
@@ -42,9 +42,9 @@ Example for connecting to an instance with IAM authentication. Note that service
 <img alt="iam-auth" src="../images/iam_auth.png" width="55%"/>
 </p>
 
-3. If you would like an SSH tunnel setup within the driver between the Neptune service and an EC2 instance, an internal SSH tunnel can be configured by the driver by filling in the advanced options tab. **Minimally, an SSH user, SSH host name (or ip address), and private key file must be provided.** A passphrase for the private key file and hosts file may also be provided. Strict host checking can be disabled if required, however this is less secure.
+3. Additional connection options can be configured in the Advanced tab. Descriptions of each parameter can be found in the [SQL JDBC documentation](../sql.md). Please note that we have disabled all SSH tunnel options in the Tableau connector, due to potentially processing sensitive information. Please set up your SSH tunnel according to the [configuration instructions](../setup/configuration.md#using-an-ssh-tunnel-to-connect-to-amazon-neptune). 
 <p align="center">
-<img alt="ssh_tunnel" src="../images/ssh_tunnel.png" width="55%"/>
+<img alt="add_opts" src="../images/add_opts.png" width="55%"/>
 </p>
 
 4. Click the **Sign In** button.
