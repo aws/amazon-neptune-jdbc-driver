@@ -12,7 +12,6 @@
 
 ### Additional Reviewers
 @birschick-bq
-@lyndonb-bq
 @xiazcy
 @alexey-temnikov
 @kylepbit
