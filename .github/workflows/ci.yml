@@ -18,6 +18,7 @@ on:
 
 jobs:
   build:
+    name: JDBC Build and Test
     runs-on: ubuntu-latest
 
     steps:
@@ -67,13 +68,17 @@ jobs:
     steps:
       - name: Check out
         uses: actions/checkout@v3
-      - name: Ensure Executable Permissions
+
+      - name: Ensure executable permissions
         run: chmod a+x ./tableau-connector/build.sh
+
       - name: Assemble Tableau Connector
         run: ./tableau-connector/build.sh
-      - name: View Assembled File
+
+      - name: View assembled file
         run: ls -l tableau-connector/target
-      - name: Add Version to Taco file
+
+      - name: Add version to TACO file
         run: |
           file="./gradle.properties"
           MAJOR_VERSION=$(grep "MAJOR_VERSION" ${file} | cut -d'=' -f2)
@@ -81,6 +86,7 @@ jobs:
           PATCH_VERSION=$(grep "PATCH_VERSION" ${file} | cut -d'=' -f2)
           echo "version=$MAJOR_VERSION.$MINOR_VERSION.$PATCH_VERSION" >> $GITHUB_ENV
           mv  tableau-connector/target/neptune-jdbc.taco tableau-connector/target/neptune-jdbc-$MAJOR_VERSION.$MINOR_VERSION.$PATCH_VERSION.taco
+
       - name: "Configure AWS credentials"
         if: ${{env.SIGNING_ENABLED == 'true'}}
         uses: aws-actions/configure-aws-credentials@v2
@@ -93,7 +99,7 @@ jobs:
           role-external-id: ${{ secrets.AWS_ROLE_EXTERNAL_ID }}
           role-duration-seconds: 3600
 
-      - name: Sign Taco File
+      - name: Sign TACO file
         id: sign-taco-file
         shell: bash
         run: |
@@ -149,7 +155,8 @@ jobs:
           else
             echo "Signing will be skipped"
           fi
-      - name: Upload Build
+
+      - name: Upload build
         if: always()
         uses: actions/upload-artifact@v3
         with:
