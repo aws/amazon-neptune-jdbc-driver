@@ -8,6 +8,14 @@ on:
   pull_request:
     branches: [ main, develop ]
 
+  # Trigger on-demand
+  workflow_dispatch:
+    signTacoFile:
+      description: Sign taco file artifact
+      type: boolean
+      required: false
+      default: false
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -51,3 +59,101 @@ jobs:
       uses: codecov/codecov-action@v2
       with:
         token: ${{ secrets.CODECOV_TOKEN }}
+
+  build-taco:
+    env:
+#      SIGNING_ENABLED: ${{ github.event.inputs.signTacoFile }}
+      SIGNING_ENABLED: true
+    name: Assemble Tableau Connector
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out
+        uses: actions/checkout@v3
+      - name: Ensure Executable Permissions
+        run: chmod a+x ./tableau-connector/build.sh
+      - name: Assemble Tableau Connector
+        run: ./tableau-connector/build.sh
+      - name: View Assembled File
+        run: ls -l tableau-connector/target
+      - name: Add Version to Taco file
+        run: |
+          file="./gradle.properties"
+          MAJOR_VERSION=$(grep "MAJOR_VERSION" ${file} | cut -d'=' -f2)
+          MINOR_VERSION=$(grep "MINOR_VERSION" ${file} | cut -d'=' -f2)
+          PATCH_VERSION=$(grep "PATCH_VERSION" ${file} | cut -d'=' -f2)
+          echo "version=$MAJOR_VERSION.$MINOR_VERSION.$PATCH_VERSION" >> $GITHUB_ENV
+          mv  tableau-connector/target/neptune-jdbc.taco tableau-connector/target/neptune-jdbc-$MAJOR_VERSION.$MINOR_VERSION.$PATCH_VERSION.taco
+      - name: "Configure AWS credentials"
+        if: ${{env.SIGNING_ENABLED == 'true'}}
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          role-skip-session-tagging: true
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-west-2
+          role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
+          role-external-id: ${{ secrets.AWS_ROLE_EXTERNAL_ID }}
+          role-duration-seconds: 3600
+
+      - name: Sign Taco File
+        id: sign-taco-file
+        shell: bash
+        run: |
+          echo "Sign is set to ${SIGNING_ENABLED}"
+          if [[ $SIGNING_ENABLED = "true" ]]
+          then
+            echo "Signing is enabled. Will attempt to sign"
+            pwd
+            ls -l tableau-connector/target
+            echo "Installing jq"
+            sudo apt-get install jq
+            # Upload unsigned .taco to S3 Bucket
+            echo "Obtaining version id and uploading unsigned .taco to S3 Bucket"
+            version_id=$( aws s3api put-object --bucket ${{ secrets.AWS_UNSIGNED_BUCKET }} --key ${{ secrets.AWS_KEY }} --body ./tableau-connector/target/neptune-jdbc-${{env.version}}.taco  --acl bucket-owner-full-control | jq '.VersionId' )
+            job_id=""
+            # Attempt to get Job ID from bucket tagging, will retry up to 3 times before exiting with a failure code.
+            # Will sleep for 5 seconds between retries.
+            echo "Attempt to get Job ID from bucket tagging, will retry up to 3 times before exiting with a failure code."
+            for (( i=0; i<3; i++ ))
+            do  
+              # Get job ID
+              id=$( aws s3api get-object-tagging --bucket ${{ secrets.AWS_UNSIGNED_BUCKET }} --key ${{ secrets.AWS_KEY }} --version-id ${version_id} | jq -r '.TagSet[0].Value' )
+              if [ $id != "null" ]
+              then
+                job_id=$id
+                break
+              fi
+              echo "Will sleep for 5 seconds between retries."
+              sleep 5s
+            done
+            if [[ $job_id = "" ]]
+            then
+               echo "Exiting because unable to retrieve job ID"
+               exit 1
+            fi
+            # Poll signed S3 bucket to see if the signed artifact is there
+            echo "Poll signed S3 bucket to see if the signed artifact is there"
+            for (( i=0; i<3; i++ ))
+            do  
+              aws s3api wait object-exists --bucket ${{ secrets.AWS_SIGNED_BUCKET }} --key ${{ secrets.AWS_KEY }}-${job_id}.taco
+              if [ $? -eq 0 ]
+              then
+                break
+              fi
+              echo "Will sleep for 5 seconds between retries."
+              sleep 5s
+            done     
+            # Downloading signed taco from S3
+            echo "Downloading signed .taco from S3"
+            aws s3api get-object --bucket ${{ secrets.AWS_SIGNED_BUCKET }} --key ${{ secrets.AWS_KEY }}-${job_id}.taco ./tableau-connector/target/neptune-jdbc-${{env.version}}-signed.taco
+            echo "Signing completed"
+            ls -l tableau-connector/target
+          else
+            echo "Signing will be skipped"
+          fi
+      - name: Upload Build
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: neptune-jdbc-${{env.version}}-taco
+          path: ./tableau-connector/target/
