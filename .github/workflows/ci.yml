@@ -61,7 +61,8 @@ jobs:
 
   build-taco:
     env:
-      SIGNING_ENABLED: ${{ github.event.inputs.signTacoFile }}
+#      SIGNING_ENABLED: ${{ github.event.inputs.signTacoFile }}
+      SIGNING_ENABLED: true
     name: Assemble Tableau Connector
     runs-on: ubuntu-latest
     steps:
