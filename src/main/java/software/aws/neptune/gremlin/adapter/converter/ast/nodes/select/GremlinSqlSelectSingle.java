@@ -23,7 +23,7 @@ import org.apache.calcite.sql.SqlKind;
 import org.apache.calcite.sql.SqlNode;
 import org.apache.calcite.sql.SqlPrefixOperator;
 import org.apache.calcite.sql.SqlSelect;
-import org.apache.tinkerpop.gremlin.groovy.jsr223.GroovyTranslator;
+import org.apache.tinkerpop.gremlin.process.traversal.translator.GroovyTranslator;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversal;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.__;
@@ -167,7 +167,7 @@ public class GremlinSqlSelectSingle extends GremlinSqlSelect {
     }
 
     public String getStringTraversal() throws SQLException {
-        return GroovyTranslator.of("g").translate(generateTraversal().asAdmin().getBytecode());
+        return GroovyTranslator.of("g").translate(generateTraversal().asAdmin().getBytecode()).toString();
     }
 
     private void applySelectValues(final GraphTraversal<?, ?> graphTraversal) {

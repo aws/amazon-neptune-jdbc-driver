@@ -19,7 +19,7 @@ package software.aws.neptune.gremlin;
 import com.google.common.collect.ImmutableList;
 import io.netty.handler.ssl.SslContext;
 import lombok.NonNull;
-import org.apache.commons.lang.SystemUtils;
+import org.apache.commons.lang3.SystemUtils;
 import org.apache.tinkerpop.gremlin.driver.LoadBalancingStrategy;
 import org.apache.tinkerpop.gremlin.driver.MessageSerializer;
 import org.apache.tinkerpop.gremlin.driver.ser.Serializers;

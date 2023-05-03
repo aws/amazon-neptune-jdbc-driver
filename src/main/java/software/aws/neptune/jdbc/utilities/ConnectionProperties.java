@@ -18,7 +18,7 @@ package software.aws.neptune.jdbc.utilities;
 
 import com.google.common.collect.ImmutableMap;
 import lombok.NonNull;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Level;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

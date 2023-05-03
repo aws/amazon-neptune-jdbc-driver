@@ -247,21 +247,21 @@ public class GremlinQueryExecutor extends QueryExecutor {
                 GremlinQueryExecutor.createClusterBuilder(gremlinConnectionProperties).maxWaitForConnection(timeout * 1000)
                         .create();
         final Client tempClient = tempCluster.connect();
-        tempClient.init();
-
         try {
+            tempClient.init();
+
             // Neptune doesn't support arbitrary math queries, but the below command is valid in Gremlin and is basically
             // saying return 0.
             final CompletableFuture<List<Result>> tempCompletableFuture = tempClient.submit("g.inject(0)").all();
             tempCompletableFuture.get(timeout, TimeUnit.SECONDS);
+
+            return true;
+        } catch (final Exception e) {
+            LOGGER.error("Connecting to database failed.", e);
+        } finally {
             tempClient.close();
             tempCluster.close();
-            return true;
-        } catch (final RuntimeException e) {
-            LOGGER.error("Connecting to database failed.", e);
         }
-        tempClient.close();
-        tempCluster.close();
         return false;
     }
 

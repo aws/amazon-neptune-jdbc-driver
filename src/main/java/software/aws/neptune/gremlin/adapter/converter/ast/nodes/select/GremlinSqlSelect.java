@@ -18,7 +18,7 @@ package software.aws.neptune.gremlin.adapter.converter.ast.nodes.select;
 
 import org.apache.calcite.sql.SqlNumericLiteral;
 import org.apache.calcite.sql.SqlSelect;
-import org.apache.tinkerpop.gremlin.groovy.jsr223.GroovyTranslator;
+import org.apache.tinkerpop.gremlin.process.traversal.translator.GroovyTranslator;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversal;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource;
 import org.slf4j.Logger;
@@ -87,7 +87,7 @@ public abstract class GremlinSqlSelect extends GremlinSqlNode {
                                                  SqlGremlinQueryResult sqlGremlinQueryResult) throws SQLException;
 
     public String getStringTraversal() throws SQLException {
-        return GroovyTranslator.of("g").translate(generateTraversal().asAdmin().getBytecode());
+        return GroovyTranslator.of("g").translate(generateTraversal().asAdmin().getBytecode()).toString();
     }
 
     public abstract GraphTraversal<?, ?> generateTraversal() throws SQLException;
