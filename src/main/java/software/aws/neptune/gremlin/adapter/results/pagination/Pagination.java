@@ -17,7 +17,7 @@
 package software.aws.neptune.gremlin.adapter.results.pagination;
 
 import lombok.AllArgsConstructor;
-import org.apache.tinkerpop.gremlin.groovy.jsr223.GroovyTranslator;
+import org.apache.tinkerpop.gremlin.process.traversal.translator.GroovyTranslator;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversal;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
