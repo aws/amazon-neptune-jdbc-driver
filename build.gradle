@@ -210,6 +210,7 @@ dependencies {
     implementation group: 'commons-beanutils', name: 'commons-beanutils', version: "$beanutilsVersion"
     implementation group: 'org.apache.tinkerpop', name: 'gremlin-driver', version: "$gremlinVersion"
     implementation group: 'org.apache.tinkerpop', name: 'gremlin-groovy', version: "$gremlinVersion"
+    implementation group: 'com.amazonaws', name: 'amazon-neptune-sigv4-signer', version: "$amazonSigv4SignerVersion"
     implementation group: 'com.amazonaws', name: 'amazon-neptune-sparql-java-sigv4', version: "$amazonSigv4SignerVersion"
     implementation group: 'com.amazonaws', name: 'amazon-neptune-gremlin-java-sigv4', version: "$amazonSigv4SignerVersion"
     implementation group: 'com.jcraft', name: 'jsch', version: "$jschVersion"
