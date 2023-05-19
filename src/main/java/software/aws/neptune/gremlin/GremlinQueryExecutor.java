@@ -16,10 +16,6 @@
 
 package software.aws.neptune.gremlin;
 
-import com.amazon.neptune.gremlin.driver.sigv4.ChainedSigV4PropertiesProvider;
-import com.amazonaws.auth.DefaultAWSCredentialsProviderChain;
-import com.amazonaws.neptune.auth.NeptuneNettyHttpSigV4Signer;
-import com.amazonaws.neptune.auth.NeptuneSigV4SignerException;
 import lombok.NonNull;
 import lombok.SneakyThrows;
 import org.apache.tinkerpop.gremlin.driver.Client;
@@ -27,6 +23,7 @@ import org.apache.tinkerpop.gremlin.driver.Cluster;
 import org.apache.tinkerpop.gremlin.driver.Result;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import software.aws.neptune.common.IAMHelper;
 import software.aws.neptune.common.gremlindatamodel.MetadataCache;
 import software.aws.neptune.gremlin.resultset.GremlinResultSet;
 import software.aws.neptune.gremlin.resultset.GremlinResultSetGetCatalogs;
@@ -160,20 +157,7 @@ public class GremlinQueryExecutor extends QueryExecutor {
             builder.minSimultaneousUsagePerConnection(properties.getMinSimultaneousUsagePerConnection());
         }
         if (properties.getAuthScheme() == AuthScheme.IAMSigV4) {
-            builder.handshakeInterceptor( r ->
-                    {
-                        try {
-                            NeptuneNettyHttpSigV4Signer sigV4Signer =
-                                    new NeptuneNettyHttpSigV4Signer(
-                                            new ChainedSigV4PropertiesProvider().getSigV4Properties().getServiceRegion(),
-                                            new DefaultAWSCredentialsProviderChain());
-                            sigV4Signer.signRequest(r);
-                        } catch (NeptuneSigV4SignerException e) {
-                            throw new RuntimeException("Exception occurred while signing the request", e);
-                        }
-                        return r;
-                    }
-            );
+            IAMHelper.addHandshakeInterceptor(builder);
         } else if (properties.containsKey(GremlinConnectionProperties.CHANNELIZER_KEY)) {
             if (properties.isChannelizerGeneric()) {
                 builder.channelizer(properties.getChannelizerGeneric());

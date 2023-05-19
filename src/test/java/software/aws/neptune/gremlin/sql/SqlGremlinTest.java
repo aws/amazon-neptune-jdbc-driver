@@ -16,10 +16,6 @@
 
 package software.aws.neptune.gremlin.sql;
 
-import com.amazon.neptune.gremlin.driver.sigv4.ChainedSigV4PropertiesProvider;
-import com.amazonaws.auth.DefaultAWSCredentialsProviderChain;
-import com.amazonaws.neptune.auth.NeptuneNettyHttpSigV4Signer;
-import com.amazonaws.neptune.auth.NeptuneSigV4SignerException;
 import com.github.javafaker.Address;
 import com.github.javafaker.Cat;
 import com.github.javafaker.Commerce;
@@ -39,6 +35,7 @@ import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSo
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import software.aws.neptune.common.IAMHelper;
 import software.aws.neptune.gremlin.adapter.converter.SqlConverter;
 import software.aws.neptune.gremlin.adapter.converter.schema.calcite.GremlinSchema;
 import software.aws.neptune.gremlin.adapter.converter.schema.gremlin.GremlinEdgeTable;
@@ -128,20 +125,7 @@ public class SqlGremlinTest {
         builder.addContactPoint(ENDPOINT);
         builder.port(PORT);
         builder.enableSsl(true);
-        builder.handshakeInterceptor( r ->
-                {
-                    try {
-                        NeptuneNettyHttpSigV4Signer sigV4Signer =
-                                new NeptuneNettyHttpSigV4Signer(
-                                        new ChainedSigV4PropertiesProvider().getSigV4Properties().getServiceRegion(),
-                                        new DefaultAWSCredentialsProviderChain());
-                        sigV4Signer.signRequest(r);
-                    } catch (NeptuneSigV4SignerException e) {
-                        throw new RuntimeException("Exception occurred while signing the request", e);
-                    }
-                    return r;
-                }
-        );
+        IAMHelper.addHandshakeInterceptor(builder);
 
         final Cluster cluster = builder.create();
         final Client client = cluster.connect().init();
