@@ -10,11 +10,15 @@ on:
 
   # Trigger on-demand
   workflow_dispatch:
-    signTacoFile:
-      description: Sign taco file artifact
-      type: boolean
-      required: false
-      default: false
+    inputs:
+      signTacoFile:
+        description: Sign taco file artifact
+        type: boolean
+        required: false
+        default: false
+
+env:
+  SIGNING_ENABLED: ${{ github.event.inputs.signTacoFile }}
 
 jobs:
   build:
@@ -60,8 +64,6 @@ jobs:
       uses: codecov/codecov-action@v3
 
   build-taco:
-    env:
-      SIGNING_ENABLED: ${{ github.event.inputs.signTacoFile }}
     name: Assemble Tableau Connector
     runs-on: ubuntu-latest
     steps:
