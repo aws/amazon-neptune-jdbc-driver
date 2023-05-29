@@ -32,7 +32,7 @@ import org.apache.calcite.tools.Frameworks;
 import org.apache.calcite.tools.Planner;
 import org.apache.calcite.tools.Program;
 import org.apache.calcite.tools.Programs;
-import org.apache.tinkerpop.gremlin.groovy.jsr223.GroovyTranslator;
+import org.apache.tinkerpop.gremlin.process.traversal.translator.GroovyTranslator;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversal;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource;
 import org.slf4j.Logger;
@@ -94,7 +94,7 @@ public class SqlConverter {
     }
 
     public String getStringTraversal(final GraphTraversalSource g, final String query) throws SQLException {
-        return GroovyTranslator.of("g").translate(getGraphTraversal(g, query).asAdmin().getBytecode());
+        return GroovyTranslator.of("g").translate(getGraphTraversal(g, query).asAdmin().getBytecode()).toString();
     }
 
     @Getter

@@ -21,9 +21,9 @@ import lombok.SneakyThrows;
 import org.apache.tinkerpop.gremlin.driver.Client;
 import org.apache.tinkerpop.gremlin.driver.Cluster;
 import org.apache.tinkerpop.gremlin.driver.Result;
-import org.apache.tinkerpop.gremlin.driver.SigV4WebSocketChannelizer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import software.aws.neptune.common.IAMHelper;
 import software.aws.neptune.common.gremlindatamodel.MetadataCache;
 import software.aws.neptune.gremlin.resultset.GremlinResultSet;
 import software.aws.neptune.gremlin.resultset.GremlinResultSetGetCatalogs;
@@ -157,7 +157,7 @@ public class GremlinQueryExecutor extends QueryExecutor {
             builder.minSimultaneousUsagePerConnection(properties.getMinSimultaneousUsagePerConnection());
         }
         if (properties.getAuthScheme() == AuthScheme.IAMSigV4) {
-            builder.channelizer(SigV4WebSocketChannelizer.class);
+            IAMHelper.addHandshakeInterceptor(builder);
         } else if (properties.containsKey(GremlinConnectionProperties.CHANNELIZER_KEY)) {
             if (properties.isChannelizerGeneric()) {
                 builder.channelizer(properties.getChannelizerGeneric());
@@ -247,21 +247,21 @@ public class GremlinQueryExecutor extends QueryExecutor {
                 GremlinQueryExecutor.createClusterBuilder(gremlinConnectionProperties).maxWaitForConnection(timeout * 1000)
                         .create();
         final Client tempClient = tempCluster.connect();
-        tempClient.init();
-
         try {
+            tempClient.init();
+
             // Neptune doesn't support arbitrary math queries, but the below command is valid in Gremlin and is basically
             // saying return 0.
             final CompletableFuture<List<Result>> tempCompletableFuture = tempClient.submit("g.inject(0)").all();
             tempCompletableFuture.get(timeout, TimeUnit.SECONDS);
+
+            return true;
+        } catch (final Exception e) {
+            LOGGER.error("Connecting to database failed.", e);
+        } finally {
             tempClient.close();
             tempCluster.close();
-            return true;
-        } catch (final RuntimeException e) {
-            LOGGER.error("Connecting to database failed.", e);
         }
-        tempClient.close();
-        tempCluster.close();
         return false;
     }
 

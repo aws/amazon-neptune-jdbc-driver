@@ -18,10 +18,10 @@ package software.aws.neptune.common.gremlindatamodel;
 
 import org.apache.tinkerpop.gremlin.driver.Client;
 import org.apache.tinkerpop.gremlin.driver.Cluster;
-import org.apache.tinkerpop.gremlin.driver.SigV4WebSocketChannelizer;
 import org.apache.tinkerpop.gremlin.driver.remote.DriverRemoteConnection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import software.aws.neptune.common.IAMHelper;
 import software.aws.neptune.gremlin.adapter.converter.schema.SqlSchemaGrabber;
 import software.aws.neptune.gremlin.adapter.converter.schema.calcite.GremlinSchema;
 import software.aws.neptune.jdbc.utilities.SqlError;
@@ -45,7 +45,7 @@ public class SchemaHelperGremlinDataModel {
         builder.maxConnectionPoolSize(MAX_CONNECTION_POOL_SIZE);
         builder.minConnectionPoolSize(MIN_CONNECTION_POOL_SIZE);
         if (useIam) {
-            builder.channelizer(SigV4WebSocketChannelizer.class);
+            IAMHelper.addHandshakeInterceptor(builder);
         }
         final Cluster cluster = builder.create();
         final Client client = cluster.connect();

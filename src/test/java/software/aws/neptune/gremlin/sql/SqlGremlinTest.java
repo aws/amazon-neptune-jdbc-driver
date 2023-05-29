@@ -30,12 +30,12 @@ import org.apache.tinkerpop.gremlin.driver.Client;
 import org.apache.tinkerpop.gremlin.driver.Cluster;
 import org.apache.tinkerpop.gremlin.driver.Result;
 import org.apache.tinkerpop.gremlin.driver.ResultSet;
-import org.apache.tinkerpop.gremlin.driver.SigV4WebSocketChannelizer;
 import org.apache.tinkerpop.gremlin.driver.remote.DriverRemoteConnection;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import software.aws.neptune.common.IAMHelper;
 import software.aws.neptune.gremlin.adapter.converter.SqlConverter;
 import software.aws.neptune.gremlin.adapter.converter.schema.calcite.GremlinSchema;
 import software.aws.neptune.gremlin.adapter.converter.schema.gremlin.GremlinEdgeTable;
@@ -125,7 +125,7 @@ public class SqlGremlinTest {
         builder.addContactPoint(ENDPOINT);
         builder.port(PORT);
         builder.enableSsl(true);
-        builder.channelizer(SigV4WebSocketChannelizer.class);
+        IAMHelper.addHandshakeInterceptor(builder);
 
         final Cluster cluster = builder.create();
         final Client client = cluster.connect().init();

@@ -112,6 +112,10 @@ java {
 }
 
 test {
+    environment.remove("AWS_ACCESS_KEY_ID")
+    environment.remove("AWS_SECRET_ACCESS_KEY")
+    environment.remove("AWS_SESSION_TOKEN")
+
     useJUnitPlatform()
     testLogging.showStandardStreams = true
 }
@@ -206,6 +210,7 @@ dependencies {
     implementation group: 'commons-beanutils', name: 'commons-beanutils', version: "$beanutilsVersion"
     implementation group: 'org.apache.tinkerpop', name: 'gremlin-driver', version: "$gremlinVersion"
     implementation group: 'org.apache.tinkerpop', name: 'gremlin-groovy', version: "$gremlinVersion"
+    implementation group: 'com.amazonaws', name: 'amazon-neptune-sigv4-signer', version: "$amazonSigv4SignerVersion"
     implementation group: 'com.amazonaws', name: 'amazon-neptune-sparql-java-sigv4', version: "$amazonSigv4SignerVersion"
     implementation group: 'com.amazonaws', name: 'amazon-neptune-gremlin-java-sigv4', version: "$amazonSigv4SignerVersion"
     implementation group: 'com.jcraft', name: 'jsch', version: "$jschVersion"
@@ -236,7 +241,8 @@ dependencies {
     testImplementation group: 'org.neo4j', name: 'neo4j-kernel', version: "$neo4jDBVersion", classifier: "tests"
     testImplementation group: 'org.neo4j', name: 'neo4j-io', version: "$neo4jDBVersion", classifier: "tests"
     testImplementation group: 'com.google.code.findbugs', name: 'annotations', version: "$findBugsVersion"
-    testImplementation group: 'com.github.javafaker', name: 'javafaker', version: "$javafakerVersion"
+    testImplementation (group: 'com.github.javafaker', name: 'javafaker', version: "$javafakerVersion")
+            { exclude group: 'org.yaml', module: 'snakeyaml' }
     testImplementation group: 'org.apache.jena', name: 'jena-fuseki-main', version: "$jenaVersion"
     testCompileOnly group: 'org.projectlombok', name: 'lombok', version: "$lombokVersion"
     testAnnotationProcessor group: 'org.projectlombok', name: 'lombok', version: "$lombokVersion"
