@@ -101,4 +101,4 @@ The driver does not support `Convert to Custom SQL` in Tableau, due to Tableauâ€
 
 # Acknowledgements
 
-Special thanks goes to the [Apache TinkerPop](http://tinkerpop.incubator.apache.org/) and [Apache Calcite](https://calcite.apache.org/) teams. The depth and breadth of both of these projects is truly astounding. Also, thanks to Daniel Kuppitz. His work on [SPARQL-Gremlin](https://github.com/dkuppitz/sparql-gremlin) served as a model and inspiration for SQL-Gremlin.
+Special thanks goes to the [Apache TinkerPop](http://tinkerpop.apache.org/) and [Apache Calcite](https://calcite.apache.org/) teams. The depth and breadth of both of these projects is truly astounding. Also, thanks to Daniel Kuppitz. His work on [SPARQL-Gremlin](https://github.com/dkuppitz/sparql-gremlin) served as a model and inspiration for SQL-Gremlin.

@@ -2,7 +2,16 @@
 
 ## v3.1.0 Change Log
 
-`v3.1.0` of the **Amazon Neptune JDBC Driver** will build on `v3.0.1` but has not been started yet.
+`v3.1.0` of the **Amazon Neptune JDBC Driver** will build on `v3.0.2` but has not been started yet.
+
+## v3.0.2 Change Log
+
+`v3.0.2` of the **Amazon Neptune JDBC Driver** is a patch release which brings compatibility with Neptune engine versions &ge; 1.2.1.0 by upgrading to Apache TinkerPop 3.6.4.
+
+### New Features and Improvements
+
+* Upgraded Apache TinkerPop to version 3.6.4.
+* Updates to Tableau Connector Fields.
 
 ## v3.0.1 Change Log
 
