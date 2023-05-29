@@ -19,11 +19,12 @@ This driver is compatible with JDBC 4.2 and requires a minimum of Java 8.
 
 ### Compatibility with AWS Neptune
 
-| Engine Release           | Driver Version |
-|--------------------------|----------------|
-| < 1.1.1.0                | 1.1.0          |
-| < 1.2.0.0 and >= 1.1.1.0 | 2.0.0+         |
-| >= 1.2.0.0               | 3.0.0+         |
+| Engine Release             | Driver Version |
+|----------------------------|----------------|
+| < 1.1.1.0                  | 1.1.0          |
+| &ge; 1.1.1.0 and < 1.2.0.0 | 2.0.0+         |
+| &ge; 1.2.0.0 and < 1.2.1.0 | 3.0.0+         |
+| &ge; 1.2.1.0               | 3.0.2+         |
 
 ### Connection URL and Settings
 
