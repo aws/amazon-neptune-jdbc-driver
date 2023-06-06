@@ -18,6 +18,42 @@ Make sure your port and url are both correct in your endpoint. The format should
 
 If you get `No suitable driver found for <connection string>` from the `DriverManager.getConnection` call, then you have an issue with your connection string. This is likely due to an issue in the beginning of the connection string, double check that your connection string starts with `jdbc:neptune:opencypher://`. 
 
+### Maven Issues
+
+If you use the regular thin JDBC driver (e.g. [amazon-neptune-jdbc-driver-3.0.0.jar](https://repo1.maven.org/maven2/software/amazon/neptune/amazon-neptune-jdbc-driver/3.0.0/amazon-neptune-jdbc-driver-3.0.0.jar)) as a dependency for your Maven project, you may encounter errors with transitive dependencies. If you notice exceptions like `java.lang.ClassNotFoundException: com.fasterxml.jackson.core.util.JacksonFeature` when running your application, then you probably have a version conflict with the dependencies. You must add an exclusion for that particular artifact and include the correct version. Since the JDBC driver is built using Gradle, you can emulate how Gradle resolves dependencies and include the highest version from the dependency graph.
+
+The example below shows how to exclude Jackson Library in case of conflicts and include the version that is required in the project.
+
+```
+<dependencies>
+    <dependency>
+        <groupId>software.amazon.neptune</groupId>
+        <artifactId>amazon-neptune-jdbc-driver</artifactId>
+        <version>3.0.2</version>
+        <exclusions>
+            <exclusion>
+                <groupId>com.fasterxml.jackson.core</groupId>
+                <artifactId>jackson-core</artifactId>
+            </exclusion>
+            <exclusion>
+                <groupId>com.fasterxml.jackson.core</groupId>
+                <artifactId>jackson-annotations</artifactId>
+            </exclusion>
+        </exclusions>
+    </dependency>
+    <dependency>
+        <groupId>com.fasterxml.jackson.core</groupId>
+        <artifactId>jackson-core</artifactId>
+        <version>2.12.3</version>
+    </dependency>
+    <dependency>
+        <groupId>com.fasterxml.jackson.core</groupId>
+        <artifactId>jackson-annotations</artifactId>
+        <version>2.12.3</version>
+    </dependency>
+</dependencies>
+```
+
 ## Tips to Gather Useful Information
 
 By adding a LogLevel to your connection string as `jdbc:neptune:opencypher://<url>:<port>;logLevel=trace` or add `properties.put("logLevel", "trace")` in your input properties to increase the amount of logging that is output.
