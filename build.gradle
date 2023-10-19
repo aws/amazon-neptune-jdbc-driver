@@ -1,6 +1,6 @@
 plugins {
     id 'java-library'
-    id "com.github.spotbugs" version "5.0.12"
+    id "com.github.spotbugs" version "5.2.1"
     id 'com.github.hierynomus.license' version '0.16.1'
     id 'com.github.johnrengelman.shadow' version '7.1.2'
     id 'checkstyle'
