@@ -307,4 +307,6 @@ shadowJar {
     relocate 'com.jcraft', 'shadow.com.jcraft'
     relocate 'com.squareup', 'shadow.com.squareup'
     relocate 'com.yahoo', 'shadow.com.yahoo'
+
+    mergeServiceFiles()
 }
