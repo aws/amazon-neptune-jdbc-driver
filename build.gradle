@@ -267,6 +267,7 @@ shadowJar {
         exclude(dependency('org.apache.tinkerpop::'))
         exclude(dependency('org.apache.log4j.*::'))
         exclude(dependency('com.jcraft::'))
+        exclude(dependency('org.apache.jena::'))
     }
 
     // NOTE: DO NOT relocate 'javax' 'org.apache.log4j', 'org.codehaus'
