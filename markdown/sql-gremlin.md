@@ -23,6 +23,8 @@ A `tableExpression` must specify 1 or more tables as a comma separated list or u
 
 A `projectItem` in `SELECT` can be a reference to a column, or aggregation expression using the supported aggregation functions listed in [Operators and Functions](#operators-and-functions). A `booleanExpression` is the same but must resolve to a `boolean` value.
 
+**NOTE**: As of `v3.x.x`, a `projectItem` in `SELECT` must be unique, duplicated `projectItem` is no longer allowed and will throw an `SqlGremlinError`. Please raise an issue in the repository for feature implementation if this is impacting your usability. 
+
 To order by a value, it must be part of the `SELECT` list. Group by and order by using column aliases is currently not supported.
 
 Type Conversion is not supported, and thus `CAST` is not supported. Set operations `UNION`, `INTERSECT` and `EXCEPT` are not supported. Grouping operations using `CUBE`, `ROLLUP` or `GROUPING SETS` are not supported. Ordering using `NULLS FIRST` and `NULLS LAST` or by referencing column ordinals is not supported.

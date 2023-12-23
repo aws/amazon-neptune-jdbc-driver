@@ -130,7 +130,11 @@ public class SqlTraversalEngine {
     public static GraphTraversal<?, ?> applyColumnRenames(final List<String> columnsRenamed) throws SQLException {
         final String firstColumn = columnsRenamed.remove(0);
         final String[] remaining = columnsRenamed.toArray(new String[] {});
-        return __.project(firstColumn, remaining);
+        try {
+            return __.project(firstColumn, remaining);
+        } catch (IllegalArgumentException ile) {
+            throw SqlGremlinError.create(SqlGremlinError.DUPLICATED_COLUMN_NAME_NOT_ALLOWED);
+        }
     }
 
     private static void appendColumnSelect(final SqlMetadata sqlMetadata, final String column,

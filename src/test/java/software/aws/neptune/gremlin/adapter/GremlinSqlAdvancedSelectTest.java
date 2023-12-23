@@ -216,7 +216,7 @@ public class GremlinSqlAdvancedSelectTest extends GremlinSqlBaseTest {
         runQueryTestResults(
                 "SELECT wentToSpace, COUNT(wentToSpace) FROM person GROUP BY wentToSpace HAVING COUNT(wentToSpace) > 1",
                 columns("wentToSpace", "COUNT(wentToSpace)"), rows(r(false, 3L), r(true, 3L)));
-        runQueryTestResults("SELECT COUNT(name), COUNT(name) FROM person error", columns("COUNT(name)", "COUNT(name)"),
+        runQueryTestResults("SELECT COUNT(name), COUNT(age) FROM person error", columns("COUNT(name)", "COUNT(age)"),
                 rows(r(6L, 6L)));
         runQueryTestResults("SELECT SUM(age) FROM \"gremlin\".\"person\" WHERE name = 'test'", columns("SUM(age)"),
                 rows());
@@ -250,6 +250,9 @@ public class GremlinSqlAdvancedSelectTest extends GremlinSqlBaseTest {
         // NULLS FIRST predicate is not currently supported.
         runQueryTestThrows("SELECT name FROM \"gremlin\".\"person\" ORDER BY name NULLS FIRST",
                 SqlGremlinError.NO_ORDER, "NULLS_FIRST");
+        // Duplicated entries in SELECT are not supported as of Gremlin 3.6.6+
+        runQueryTestThrows("SELECT COUNT(name), COUNT(name) FROM person error",
+                SqlGremlinError.DUPLICATED_COLUMN_NAME_NOT_ALLOWED);
     }
 
     @Test
