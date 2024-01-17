@@ -12,13 +12,15 @@ Download the latest version of [DBeaver](https://dbeaver.io/) to use the Driver 
 
 3. Navigate to **Database > Driver Manager** and click **New** to add a new Driver.
 
-4. Under the `Libraries` tab, click **Add File** and add the `JAR` file. This should also automatically populate the `Driver class` in the dropdown menu.
+4. Under the `Libraries` tab, click **Add File** and add the `JAR` file. 
+5. Click `Find Class` to populate the `Driver class` in the dropdown menu.
 
    <p align="center">
    <img alt="driver" src="../images/dbeaver_new_driver_library.png" width="65%"/>
    </p>
 
-5. Fill out the fields on the right with a `Driver Name` and `URL Template`. The `Default Port` for Neptune is 8182, but this can be left blank if it is in the `URL Template`. Check `No authentication` and `Allow Empty Password` as desired.
+6. Fill out the fields on the right with a `Driver Name`, `Class Name`, and `URL Template`. `Class Name` should match the `Driver class` in the `Libraries` tab. 
+7. The `Default Port` for Neptune is 8182, but this can be left blank if it is in the `URL Template`. Check `No authentication` and `Allow Empty Password` as desired.
 
 Example for connecting to an instance without IAM authentication:
 
