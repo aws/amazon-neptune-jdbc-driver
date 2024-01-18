@@ -2,7 +2,7 @@
 
 Before proceeding, ensure you have [configured your environment](../setup/configuration.md).
 
-Download the latest version of [DbVisualizer](https://www.dbvis.com/) to use the Driver in DbVisualizer.
+Download the latest compatible version of [DbVisualizer](https://www.dbvis.com/) to use the Driver in DbVisualizer. Note that as of release 3.0.2, users should instead download [DbVisualizer 13](https://www.dbvis.com/download/13.0/) until the Driver is compatible with Java 17.
 
 #### Adding the Amazon Neptune JDBC Driver to DbVisualizer
 
@@ -19,10 +19,8 @@ Download the latest version of [DbVisualizer](https://www.dbvis.com/) to use the
 #### Connecting to Amazon Neptune Using DbVisualizer - External SSH Tunnel
 
 1. If connecting from outside the Neptune cluster's VPC, ensure you have followed the [configuration instructions](../setup/configuration.md).
-2. Navigate to **Tools > Connection Wizard**.
-3. Enter a name/connection alias.
-4. Select the Neptune driver that was added in the previous steps.
-5. Enter the `Database URL`. Additional configurations can be filled in the form of `propertyKey=propertyValue`, with multiple properties separated by `;` on the connection string. Descriptions of each required and optional parameters can be found in the [SQL JDBC documentation](../sql.md).
+2. **Create new database connection** and select the Neptune driver that was added in the previous steps.
+3. Enter the `Database URL`. Additional configurations can be filled in the form of `propertyKey=propertyValue`, with multiple properties separated by `;` on the connection string. Descriptions of each required and optional parameters can be found in the [SQL JDBC documentation](../sql.md).
 
 Example for connecting to an instance without IAM authentication:
 
