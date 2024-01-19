@@ -43,7 +43,7 @@ public class Statement implements java.sql.Statement {
     private boolean shouldCloseOnCompletion = false;
     private SQLWarning warnings;
     private int fetchSize = 0;
-    private ResultSet resultSet;
+    protected ResultSet resultSet;
 
     /**
      * Constructor for seeding the statement with the parent connection.

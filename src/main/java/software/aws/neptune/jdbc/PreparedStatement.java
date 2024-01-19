@@ -50,7 +50,6 @@ public class PreparedStatement extends Statement implements java.sql.PreparedSta
     private final String sql;
     @Getter
     private final QueryExecutor queryExecutor;
-    private ResultSet resultSet;
 
     /**
      * Constructor for seeding the prepared statement with the parent connection.
