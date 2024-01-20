@@ -2,7 +2,7 @@
 
 Before proceeding, ensure you have [configured your environment](../setup/configuration.md).
 
-Download the latest compatible version of [DbVisualizer](https://www.dbvis.com/) to use the Driver in DbVisualizer. Note that as of release 3.0.2, users should instead download [DbVisualizer 13](https://www.dbvis.com/download/13.0/) until the Driver is compatible with Java 17.
+Download the latest version of [DbVisualizer](https://www.dbvis.com/) to use the Driver in DbVisualizer.
 
 #### Adding the Amazon Neptune JDBC Driver to DbVisualizer
 
