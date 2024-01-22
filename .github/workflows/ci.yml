@@ -86,7 +86,13 @@ jobs:
           MINOR_VERSION=$(grep "MINOR_VERSION" ${file} | cut -d'=' -f2)
           PATCH_VERSION=$(grep "PATCH_VERSION" ${file} | cut -d'=' -f2)
           echo "version=$MAJOR_VERSION.$MINOR_VERSION.$PATCH_VERSION" >> $GITHUB_ENV
-          mv  tableau-connector/target/neptune-jdbc.taco tableau-connector/target/neptune-jdbc-$MAJOR_VERSION.$MINOR_VERSION.$PATCH_VERSION.taco
+          if [ -f "tableau-connector/target/neptune-jdbc.taco" ]; then
+            mv tableau-connector/target/neptune-jdbc.taco tableau-connector/target/neptune-jdbc-$MAJOR_VERSION.$MINOR_VERSION.$PATCH_VERSION.taco
+          else
+            echo "neptune-jdbc.taco does not exist. Exiting."
+            exit 1  # Exit with an error code
+          fi
+#  mv  tableau-connector/target/neptune-jdbc.taco tableau-connector/target/neptune-jdbc-$MAJOR_VERSION.$MINOR_VERSION.$PATCH_VERSION.taco
 
       - name: "Configure AWS credentials"
         if: ${{env.SIGNING_ENABLED == 'true'}}
