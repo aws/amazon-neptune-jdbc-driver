@@ -19,14 +19,14 @@ docker build -t taco-builder $CURRENT_FOLDER --progress=plain --no-cache
 echo "Assembling Tableau Connector"
 docker run -d -it --name=taco-builder --mount type=bind,source=$TARGET_FOLDER,target=/output taco-builder
 echo "Copying Tableau Connector"
-docker exec taco-builder sh -c "cp /tableau-sdk/connector-plugin-sdk/connector-packager/packaged-connector/neptune-jdbc.taco  /output"
+docker exec taco-builder sh -c "cp /tableau-sdk/connector-plugin-sdk/connector-packager/packaged-connector/neptune-jdbc-v3.0.2.taco  /output"
 echo "Verifying Tableau Connector"
 docker exec taco-builder sh -c "ls -l /output"
 docker exec taco-builder pwd
 echo "Getting Logs"
 docker cp taco-builder:/tableau-sdk/connector-plugin-sdk/connector-packager/packaging_logs.txt $TARGET_FOLDER
 echo "Extracting Tableau Connector"
-docker cp taco-builder:/output/neptune-jdbc.taco $TARGET_FOLDER
+docker cp taco-builder:/output/neptune-jdbc-v3.0.2.taco $TARGET_FOLDER
 echo "Checking Logs and Resulting TACO FILE in $TARGET_FOLDER"
 ls -l $TARGET_FOLDER
 docker stop taco-builder
