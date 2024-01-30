@@ -24,19 +24,17 @@ import org.apache.tinkerpop.gremlin.driver.Cluster;
 
 public class IAMHelper {
     public static void addHandshakeInterceptor(Cluster.Builder builder) {
-        builder.handshakeInterceptor( r ->
-                {
-                    try {
-                        NeptuneNettyHttpSigV4Signer sigV4Signer =
-                                new NeptuneNettyHttpSigV4Signer(
-                                        new ChainedSigV4PropertiesProvider().getSigV4Properties().getServiceRegion(),
-                                        new DefaultAWSCredentialsProviderChain());
-                        sigV4Signer.signRequest(r);
-                    } catch (NeptuneSigV4SignerException e) {
-                        throw new RuntimeException("Exception occurred while signing the request", e);
-                    }
-                    return r;
-                }
-        );
+        builder.handshakeInterceptor( r -> {
+            try {
+                NeptuneNettyHttpSigV4Signer sigV4Signer =
+                        new NeptuneNettyHttpSigV4Signer(
+                                new ChainedSigV4PropertiesProvider().getSigV4Properties().getServiceRegion(),
+                                new DefaultAWSCredentialsProviderChain());
+                sigV4Signer.signRequest(r);
+            } catch (NeptuneSigV4SignerException e) {
+                throw new RuntimeException("Exception occurred while signing the request", e);
+            }
+            return r;
+        });
     }
 }

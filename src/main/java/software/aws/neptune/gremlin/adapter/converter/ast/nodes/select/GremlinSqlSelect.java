@@ -18,9 +18,9 @@ package software.aws.neptune.gremlin.adapter.converter.ast.nodes.select;
 
 import org.apache.calcite.sql.SqlNumericLiteral;
 import org.apache.calcite.sql.SqlSelect;
-import org.apache.tinkerpop.gremlin.process.traversal.translator.GroovyTranslator;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversal;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource;
+import org.apache.tinkerpop.gremlin.process.traversal.translator.GroovyTranslator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import software.aws.neptune.gremlin.adapter.converter.SqlMetadata;

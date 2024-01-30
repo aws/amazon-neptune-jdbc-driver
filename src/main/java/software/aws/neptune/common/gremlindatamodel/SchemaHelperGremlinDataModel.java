@@ -22,10 +22,10 @@ import org.apache.tinkerpop.gremlin.driver.remote.DriverRemoteConnection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import software.aws.neptune.common.IAMHelper;
-import software.aws.neptune.gremlin.adapter.converter.schema.SqlSchemaGrabber;
-import software.aws.neptune.gremlin.adapter.converter.schema.calcite.GremlinSchema;
 import software.aws.neptune.gremlin.GremlinConnectionProperties;
 import software.aws.neptune.gremlin.GremlinQueryExecutor;
+import software.aws.neptune.gremlin.adapter.converter.schema.SqlSchemaGrabber;
+import software.aws.neptune.gremlin.adapter.converter.schema.calcite.GremlinSchema;
 import software.aws.neptune.jdbc.utilities.SqlError;
 import software.aws.neptune.jdbc.utilities.SqlState;
 import java.sql.SQLException;
@@ -95,9 +95,9 @@ public class SchemaHelperGremlinDataModel {
     /**
      * Function to get the schema of the graph through gremlin connection
      *
-     * @param gremlinConnectionProperties connection parameters
-     * @return
-     * @throws SQLException
+     * @param gremlinConnectionProperties Connection parameters.
+     * @return Graph Schema.
+     * @throws SQLException If graph schema cannot be obtained.s
      */
     public static GremlinSchema getGremlinGraphSchema(final GremlinConnectionProperties gremlinConnectionProperties)
             throws SQLException {
