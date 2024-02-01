@@ -73,7 +73,7 @@ public class MetadataCache {
      * @param gremlinConnectionProperties GremlinConnectionProperties to use.
      * @throws SQLException
      */
-    public static void updateGremlinCache(final GremlinConnectionProperties gremlinConnectionProperties)
+    public static void updateGremlinMetadataCache(final GremlinConnectionProperties gremlinConnectionProperties)
             throws SQLException {
         final String endpoint = gremlinConnectionProperties.getContactPoint();
         synchronized (LOCK) {
@@ -92,10 +92,9 @@ public class MetadataCache {
     public static void updateCacheIfNotUpdated(final GremlinConnectionProperties gremlinConnectionProperties)
             throws SQLException {
         if (!isMetadataCached(gremlinConnectionProperties.getContactPoint())) {
-            updateGremlinCache(gremlinConnectionProperties);
+            updateGremlinMetadataCache(gremlinConnectionProperties);
         }
     }
-
 
     /**
      * Function to update the cache of the metadata.
