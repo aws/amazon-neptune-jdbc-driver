@@ -148,9 +148,9 @@ public enum SqlGremlinError {
      * @param formatArgs    Any additional arguments to format the error message with.
      * @return SQLException
      */
-     public static SQLException create(final SqlGremlinError key, final Logger logger, final Object... formatArgs) {
+    public static SQLException create(final SqlGremlinError key, final Logger logger, final Object... formatArgs) {
         return create(key, logger, null, false, formatArgs);
-     }
+    }
 
     /**
      * Helper method for creating an appropriate SQLException.
@@ -160,9 +160,9 @@ public enum SqlGremlinError {
      * @param formatArgs    Any additional arguments to format the error message with.
      * @return SQLException
      */
-     public static SQLException create(final SqlGremlinError key, final Throwable cause, final Object... formatArgs) {
+    public static SQLException create(final SqlGremlinError key, final Throwable cause, final Object... formatArgs) {
         return create(key, null, cause, false, formatArgs);
-     }
+    }
 
     /**
      * Helper method for creating an appropriate SQLException.
@@ -171,9 +171,9 @@ public enum SqlGremlinError {
      * @param formatArgs    Any additional arguments to format the error message with.
      * @return SQLException
      */
-     public static SQLException create(final SqlGremlinError key, final Object... formatArgs) {
+    public static SQLException create(final SqlGremlinError key, final Object... formatArgs) {
         return create(key, null, null, false, formatArgs);
-     }
+    }
 
     /**
      * Helper method for creating an appropriate SQLNotSupportedException.

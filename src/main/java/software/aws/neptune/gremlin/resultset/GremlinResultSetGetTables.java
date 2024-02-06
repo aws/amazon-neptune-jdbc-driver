@@ -16,9 +16,9 @@
 
 package software.aws.neptune.gremlin.resultset;
 
-import software.aws.neptune.gremlin.adapter.converter.schema.calcite.GremlinSchema;
 import software.aws.neptune.common.ResultSetInfoWithoutRows;
 import software.aws.neptune.common.gremlindatamodel.resultset.ResultSetGetTables;
+import software.aws.neptune.gremlin.adapter.converter.schema.calcite.GremlinSchema;
 import java.sql.ResultSetMetaData;
 import java.sql.Statement;
 import java.util.ArrayList;
