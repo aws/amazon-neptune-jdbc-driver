@@ -22,6 +22,8 @@ import org.apache.tinkerpop.gremlin.driver.remote.DriverRemoteConnection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import software.aws.neptune.common.IAMHelper;
+import software.aws.neptune.gremlin.GremlinConnectionProperties;
+import software.aws.neptune.gremlin.GremlinQueryExecutor;
 import software.aws.neptune.gremlin.adapter.converter.schema.SqlSchemaGrabber;
 import software.aws.neptune.gremlin.adapter.converter.schema.calcite.GremlinSchema;
 import software.aws.neptune.jdbc.utilities.SqlError;
@@ -88,5 +90,19 @@ public class SchemaHelperGremlinDataModel {
         return SqlSchemaGrabber.getSchema(
                 traversal().withRemote(DriverRemoteConnection.using(getClient(adjustedEndpoint, port, useIAM, useSsl))),
                 scanType);
+    }
+
+    /**
+     * Function to get the schema of the graph through gremlin connection
+     *
+     * @param gremlinConnectionProperties Connection parameters.
+     * @return Graph Schema.
+     * @throws SQLException If graph schema cannot be obtained.s
+     */
+    public static GremlinSchema getGremlinGraphSchema(final GremlinConnectionProperties gremlinConnectionProperties)
+            throws SQLException {
+        return SqlSchemaGrabber.getSchema(
+                traversal().withRemote(DriverRemoteConnection.using(GremlinQueryExecutor.getClient(gremlinConnectionProperties))),
+                gremlinConnectionProperties.getScanType());
     }
 }
