@@ -16,14 +16,12 @@
 
 package software.aws.neptune.gremlin;
 
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import software.aws.neptune.NeptunePreparedStatementTestHelper;
 import software.aws.neptune.gremlin.mock.MockGremlinDatabase;
-import java.io.IOException;
-import java.sql.SQLException;
 
 import static software.aws.neptune.gremlin.GremlinHelper.getProperties;
 
@@ -33,21 +31,21 @@ public class GremlinPreparedStatementTest extends GremlinStatementTestBase {
     private static final String HOSTNAME = "localhost";
     private static final int PORT = 8181; // Mock server uses 8181.
     private static final int MAX_CONTENT_LENGTH = 500000; // Took from PropertyGraphSerializationModule.
-    private NeptunePreparedStatementTestHelper neptunePreparedStatementTestHelper;
+    private static NeptunePreparedStatementTestHelper neptunePreparedStatementTestHelper;
 
-    @BeforeEach
-    void initialize() throws SQLException, IOException, InterruptedException {
-        MockGremlinDatabase.startGraph();
+    @BeforeAll
+    static void initialize() throws Exception {
+        MockGremlinDatabase.startServer();
         final java.sql.Connection connection = new GremlinConnection(
                 new GremlinConnectionProperties(getProperties(HOSTNAME, PORT, MAX_CONTENT_LENGTH)));
         neptunePreparedStatementTestHelper = new NeptunePreparedStatementTestHelper(connection.prepareStatement(""),
                 connection.prepareStatement(getLongQuery()), connection.prepareStatement(QUICK_QUERY));
     }
 
-    @AfterEach
-    void close() throws SQLException, IOException, InterruptedException {
+    @AfterAll
+    static void close() throws Exception {
         neptunePreparedStatementTestHelper.close();
-        MockGremlinDatabase.stopGraph();
+        MockGremlinDatabase.stopServer();
     }
 
     @Test

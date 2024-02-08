@@ -23,7 +23,7 @@ import org.junit.jupiter.api.Test;
 import software.aws.neptune.gremlin.GremlinConnection;
 import software.aws.neptune.gremlin.GremlinConnectionProperties;
 import software.aws.neptune.gremlin.mock.MockGremlinDatabase;
-import java.io.IOException;
+
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
@@ -54,8 +54,8 @@ class GremlinResultSetTest {
     }
 
     @BeforeAll
-    static void beforeAll() throws SQLException, IOException, InterruptedException {
-        MockGremlinDatabase.startGraph();
+    static void beforeAll() throws Exception {
+        MockGremlinDatabase.startServer();
         connection = new GremlinConnection(new GremlinConnectionProperties(getProperties(HOSTNAME, PORT)));
         createVertex(connection, VERTEX, VERTEX_PROPERTIES_MAP);
         resultSet = getVertex(connection, VERTEX);
@@ -64,10 +64,10 @@ class GremlinResultSetTest {
     }
 
     @AfterAll
-    static void shutdown() throws SQLException, IOException, InterruptedException {
+    static void shutdown() throws SQLException {
         dropVertex(connection, VERTEX);
         connection.close();
-        MockGremlinDatabase.stopGraph();
+        MockGremlinDatabase.stopServer();
     }
 
     @Test

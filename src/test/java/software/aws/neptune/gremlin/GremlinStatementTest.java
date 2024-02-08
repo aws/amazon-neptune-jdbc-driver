@@ -16,13 +16,13 @@
 
 package software.aws.neptune.gremlin;
 
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import software.aws.neptune.NeptuneStatementTestHelper;
 import software.aws.neptune.gremlin.mock.MockGremlinDatabase;
-import java.io.IOException;
+
 import java.sql.SQLException;
 
 import static software.aws.neptune.gremlin.GremlinHelper.getProperties;
@@ -36,9 +36,9 @@ public class GremlinStatementTest extends GremlinStatementTestBase {
     private static final int MAX_CONNECT_ATTEMPTS = 10;
     private static NeptuneStatementTestHelper neptuneStatementTestHelper;
 
-    @BeforeEach
-    void initialize() throws SQLException, IOException, InterruptedException {
-        MockGremlinDatabase.startGraph();
+    @BeforeAll
+    static void initialize() throws Exception {
+        MockGremlinDatabase.startServer();
         final java.sql.Connection connection =
                 new GremlinConnection(
                         new GremlinConnectionProperties(getProperties(HOSTNAME, PORT, MAX_CONTENT_LENGTH)));
@@ -61,9 +61,9 @@ public class GremlinStatementTest extends GremlinStatementTestBase {
     /**
      * Function to get a shutdown database after testing.
      */
-    @AfterEach
-    void shutdownDatabase() throws IOException, InterruptedException {
-        MockGremlinDatabase.stopGraph();
+    @AfterAll
+    static void shutdownDatabase() {
+        MockGremlinDatabase.stopServer();
     }
 
     @Test
