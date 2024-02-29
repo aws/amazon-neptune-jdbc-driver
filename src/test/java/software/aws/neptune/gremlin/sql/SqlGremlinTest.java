@@ -488,6 +488,21 @@ public class SqlGremlinTest {
                 operator, table, column, operator, table, table);
     }
 
+    private String generateAggregateGremlinQueries(final String operator, final String table, final String column) {
+        // Returns a simple Gremlin query in the form:
+        return String
+                .format("g.V().hasLabel('%s').group().by(union(values('%s')).fold()).unfold().select(values).order().by(unfold().values())" +
+                                ".fold().project('%s_%s').by(unfold().unfold().values('%s').%s())",
+                        table, column, column, operator.toLowerCase(), column, operator.toLowerCase());
+    }
+
+    private String generateAggregateSQLQueriesWithGroup(final String operator, final String table, final String column,
+                                                        final String groupColumn) {
+        // Returns a simple SQL query in the form:
+        // "SELECT OPERATOR(`table`.`column`) AS `OPERATOR` FROM `gremlin`.`table` `table` GROUP BY `table`.`column`"
+        return String.format("SELECT `%s`.`%s` %s(`%s`.`%s`) AS `%s` FROM `gremlin`.`%s` `%s` GROUP BY `%s`.`%s`",
+                table, groupColumn, operator, table, column, operator, table, table, table, groupColumn);
+    }
 
     private String generateAggregateGremlinQueriesWithGroup(final String operator, final String table,
                                                             final String column, final String groupColumn) {
@@ -502,23 +517,6 @@ public class SqlGremlinTest {
                         "project('%s_%s')." +
                         "by(unfold().values('%s').%s())",
                 table, groupColumn, column, operator.toLowerCase(), column, operator.toLowerCase());
-    }
-
-    private String generateAggregateSQLQueriesWithGroup(final String operator, final String table, final String column,
-                                                        final String groupColumn) {
-        // Returns a simple SQL query in the form:
-        // "SELECT OPERATOR(`table`.`column`) AS `OPERATOR` FROM `gremlin`.`table` `table` GROUP BY `table`.`column`"
-        return String.format("SELECT `%s`.`%s` %s(`%s`.`%s`) AS `%s` FROM `gremlin`.`%s` `%s` GROUP BY `%s`.`%s`",
-                table, groupColumn, operator, table, column, operator, table, table, table, groupColumn);
-    }
-
-
-    private String generateAggregateGremlinQueries(final String operator, final String table, final String column) {
-        // Returns a simple Gremlin query in the form:
-        return String
-                .format("g.V().hasLabel('%s').group().by(union(values('%s')).fold()).unfold().select(values).order().by(unfold().values())" +
-                                ".fold().project('%s_%s').by(unfold().unfold().values('%s').%s())",
-                        table, column, column, operator.toLowerCase(), column, operator.toLowerCase());
     }
 
     void runQueriesCompareResults(final String sqlQuery, final String gremlinQuery,
