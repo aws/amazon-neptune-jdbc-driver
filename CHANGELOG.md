@@ -2,7 +2,16 @@
 
 ## v3.1.0 Change Log
 
-`v3.1.0` of the **Amazon Neptune JDBC Driver** will build on `v3.0.2` but has not been started yet.
+`v3.1.0` of the **Amazon Neptune JDBC Driver** will build on `v3.0.3` but has not been started yet.
+
+## v3.0.3 Change Log
+
+`v3.0.3` of the **Amazon Neptune JDBC Driver** is a patch release which brings bug fixes and minor version upgrades.
+
+### Bug Fixes
+* Fixed initialization error for Jena with shadow jar 
+* Fixed typo in GremlinQueryExecutor that was preventing serializer string from being added to the cluster properly
+* Updated the SqlSchemaGrabber to accept all gremlin connection properties before adding the schema to MetadataCache
 
 ## v3.0.2 Change Log
 
