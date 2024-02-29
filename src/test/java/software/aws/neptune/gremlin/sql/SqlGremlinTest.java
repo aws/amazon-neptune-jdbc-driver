@@ -87,14 +87,14 @@ public class SqlGremlinTest {
     private static final String AUTH = "None";
     private static final String ENABLE_SSL = "true";
     private static final String USER = "ec2-user";
-    private static final String HOSTNAME = "ec2-publicIP";
+    private static final String SSH_HOST = "ec2-publicIP";
     private static final String SSH_PRIVATE_KEY = "~/path/to/pem-file.pem";
     private static final String SSH_STRICT_HOST = "true";
     private static final String SCAN_TYPE = "first";
     private static final String CONNECTION_STRING =
             String.format("jdbc:neptune:sqlgremlin://%s;enableSsl=%s;authScheme=%s;sshUser=%s;sshHost=%s;" +
                             "sshPrivateKeyFile=%s;sshStrictHostKeyChecking=%s;serviceRegion=%s;scanType=%s",
-                    ENDPOINT, ENABLE_SSL, AUTH, USER, HOSTNAME, SSH_PRIVATE_KEY,
+                    ENDPOINT, ENABLE_SSL, AUTH, USER, SSH_HOST, SSH_PRIVATE_KEY,
                     SSH_STRICT_HOST, SERVICE_REGION, SCAN_TYPE);
     private static final Map<Class<?>, String> TYPE_MAP = new HashMap<>();
 
@@ -192,13 +192,13 @@ public class SqlGremlinTest {
     @Test
     void testSql() throws SQLException {
         final Properties properties = new Properties();
-        properties.put(ConnectionProperties.AUTH_SCHEME_KEY, AuthScheme.IAMSigV4); // set default to IAMSigV4
+        properties.put(ConnectionProperties.AUTH_SCHEME_KEY, AUTH); // set default to IAMSigV4
         properties.put(CONTACT_POINT_KEY, ENDPOINT);
         properties.put(PORT_KEY, PORT);
         properties.put(ENABLE_SSL_KEY, ENABLE_SSL);
         properties.put(SERVICE_REGION_KEY, SERVICE_REGION);
         properties.put(SSH_USER, USER);
-        properties.put(SSH_HOSTNAME, HOSTNAME);
+        properties.put(SSH_HOSTNAME, SSH_HOST);
         properties.put(SSH_PRIVATE_KEY_FILE, SSH_PRIVATE_KEY);
         properties.put(SSH_STRICT_HOST_KEY_CHECKING, SSH_STRICT_HOST);
         properties.put(SCAN_TYPE_KEY, SCAN_TYPE);
@@ -291,15 +291,16 @@ public class SqlGremlinTest {
     @Test
     void testHaving() throws SQLException {
         final Properties properties = new Properties();
-        properties.put(ConnectionProperties.AUTH_SCHEME_KEY, AuthScheme.IAMSigV4); // set default to IAMSigV4
+        properties.put(ConnectionProperties.AUTH_SCHEME_KEY, AUTH);
         properties.put(CONTACT_POINT_KEY, ENDPOINT);
         properties.put(PORT_KEY, PORT);
-        properties.put(ENABLE_SSL_KEY, true);
-        properties.put(SSH_USER, "ec2-user");
-        properties.put(SSH_HOSTNAME, "52.14.185.245");
-        properties.put(SSH_PRIVATE_KEY_FILE, "~/Downloads/EC2/neptune-test.pem");
-        properties.put(SSH_STRICT_HOST_KEY_CHECKING, "false");
-        properties.put(SCAN_TYPE_KEY, "first");
+        properties.put(ENABLE_SSL_KEY, ENABLE_SSL);
+        properties.put(SERVICE_REGION_KEY, SERVICE_REGION);
+        properties.put(SSH_USER, USER);
+        properties.put(SSH_HOSTNAME, SSH_HOST);
+        properties.put(SSH_PRIVATE_KEY_FILE, SSH_PRIVATE_KEY);
+        properties.put(SSH_STRICT_HOST_KEY_CHECKING, SSH_STRICT_HOST);
+        properties.put(SCAN_TYPE_KEY, SCAN_TYPE);
 
         final List<String> queries = ImmutableList.of(
                 /*"SELECT `airport`.`country`, `airport`.`region`, " +
@@ -403,15 +404,16 @@ public class SqlGremlinTest {
     @Test
     void testAggregateFunctions() throws SQLException {
         final Properties properties = new Properties();
-        properties.put(ConnectionProperties.AUTH_SCHEME_KEY, AuthScheme.IAMSigV4); // set default to IAMSigV4
+        properties.put(ConnectionProperties.AUTH_SCHEME_KEY, AUTH);
         properties.put(CONTACT_POINT_KEY, ENDPOINT);
         properties.put(PORT_KEY, PORT);
-        properties.put(ENABLE_SSL_KEY, true);
-        properties.put(SSH_USER, "ec2-user");
-        properties.put(SSH_HOSTNAME, "52.14.185.245");
-        properties.put(SSH_PRIVATE_KEY_FILE, "~/Downloads/EC2/neptune-test.pem");
-        properties.put(SSH_STRICT_HOST_KEY_CHECKING, "false");
-        properties.put(SCAN_TYPE_KEY, "first");
+        properties.put(ENABLE_SSL_KEY, ENABLE_SSL);
+        properties.put(SERVICE_REGION_KEY, SERVICE_REGION);
+        properties.put(SSH_USER, USER);
+        properties.put(SSH_HOSTNAME, SSH_HOST);
+        properties.put(SSH_PRIVATE_KEY_FILE, SSH_PRIVATE_KEY);
+        properties.put(SSH_STRICT_HOST_KEY_CHECKING, SSH_STRICT_HOST);
+        properties.put(SCAN_TYPE_KEY, SCAN_TYPE);
 
         final Properties gremlinProperties = new Properties();
         gremlinProperties.put(ConnectionProperties.AUTH_SCHEME_KEY, AuthScheme.IAMSigV4); // set default to IAMSigV4
@@ -542,15 +544,16 @@ public class SqlGremlinTest {
     @Test
     void testSqlConnectionExecution() throws SQLException {
         final Properties properties = new Properties();
-        properties.put(ConnectionProperties.AUTH_SCHEME_KEY, AuthScheme.IAMSigV4); // set default to IAMSigV4
+        properties.put(ConnectionProperties.AUTH_SCHEME_KEY, AUTH);
         properties.put(CONTACT_POINT_KEY, ENDPOINT);
         properties.put(PORT_KEY, PORT);
-        properties.put(ENABLE_SSL_KEY, true);
-        properties.put(SSH_USER, "ec2-user");
-        properties.put(SSH_HOSTNAME, "52.14.185.245");
-        properties.put(SSH_PRIVATE_KEY_FILE, "~/Downloads/EC2/neptune-test.pem");
-        properties.put(SSH_STRICT_HOST_KEY_CHECKING, "false");
-        properties.put(SCAN_TYPE_KEY, "first");
+        properties.put(ENABLE_SSL_KEY, ENABLE_SSL);
+        properties.put(SERVICE_REGION_KEY, SERVICE_REGION);
+        properties.put(SSH_USER, USER);
+        properties.put(SSH_HOSTNAME, SSH_HOST);
+        properties.put(SSH_PRIVATE_KEY_FILE, SSH_PRIVATE_KEY);
+        properties.put(SSH_STRICT_HOST_KEY_CHECKING, SSH_STRICT_HOST);
+        properties.put(SCAN_TYPE_KEY, SCAN_TYPE);
 
         final List<String> queries = ImmutableList.of("SELECT * FROM Person",
                 "SELECT `Person`.`firstName` AS `firstName`, `Cat`.`name` AS `name` FROM `Cat` INNER JOIN `Person` ON (`Cat`.`name` = `Person`.`name`) GROUP BY `Person`.`firstName`, `Cat`.`name`",
@@ -633,14 +636,16 @@ public class SqlGremlinTest {
     @Test
     void getGremlinSchema() throws Exception {
         final Properties properties = new Properties();
-        properties.put(ConnectionProperties.AUTH_SCHEME_KEY, AuthScheme.IAMSigV4); // set default to IAMSigV4
+        properties.put(ConnectionProperties.AUTH_SCHEME_KEY, AUTH);
         properties.put(CONTACT_POINT_KEY, ENDPOINT);
         properties.put(PORT_KEY, PORT);
-        properties.put(ENABLE_SSL_KEY, true);
-        properties.put(SSH_USER, "ec2-user");
-        properties.put(SSH_HOSTNAME, "52.14.185.245");
-        properties.put(SSH_PRIVATE_KEY_FILE, "~/Downloads/EC2/neptune-test.pem");
-        properties.put(SSH_STRICT_HOST_KEY_CHECKING, "false");
+        properties.put(ENABLE_SSL_KEY, ENABLE_SSL);
+        properties.put(SERVICE_REGION_KEY, SERVICE_REGION);
+        properties.put(SSH_USER, USER);
+        properties.put(SSH_HOSTNAME, SSH_HOST);
+        properties.put(SSH_PRIVATE_KEY_FILE, SSH_PRIVATE_KEY);
+        properties.put(SSH_STRICT_HOST_KEY_CHECKING, SSH_STRICT_HOST);
+
         final GremlinConnectionProperties gremlinConnectionProperties = new GremlinConnectionProperties(properties);
 
         final java.sql.Connection connection = new SqlGremlinConnection(gremlinConnectionProperties);
