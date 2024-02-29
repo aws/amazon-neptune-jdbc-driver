@@ -23,7 +23,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import software.aws.neptune.gremlin.mock.MockGremlinDatabase;
-import java.io.IOException;
+
 import java.sql.SQLException;
 import java.util.Properties;
 import static software.aws.neptune.gremlin.GremlinHelper.getProperties;
@@ -39,16 +39,16 @@ public class GremlinConnectionTest {
      * Function to get a random available port and initialize database before testing.
      */
     @BeforeAll
-    public static void initializeDatabase() throws IOException, InterruptedException {
-        MockGremlinDatabase.startGraph();
+    public static void initializeDatabase() throws Exception {
+        MockGremlinDatabase.startServer();
     }
 
     /**
      * Function to get a shutdown database after testing.
      */
     @AfterAll
-    public static void shutdownDatabase() throws IOException, InterruptedException {
-        MockGremlinDatabase.stopGraph();
+    public static void shutdownDatabase() throws Exception {
+        MockGremlinDatabase.stopServer();
     }
 
     @BeforeEach

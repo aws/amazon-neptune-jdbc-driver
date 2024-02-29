@@ -41,10 +41,12 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class OpenCypherManualIAMTest {
+
+    // Before starting manual tests, modify parameters to your specific cluster
+    private static final String HOSTNAME = "neptune-cluster-url.cluster-xxxxxxxxx.mock-region-1.neptune.amazonaws.com";
+    private static final String REGION = "mock-region-1";
     private static final int PORT = 8182;
-    private static final String HOSTNAME = "jdbc-bug-bash-iam-instance-1.cdubgfjknn5r.us-east-1.neptune.amazonaws.com";
     private static final String ENDPOINT = String.format("bolt://%s:%d", HOSTNAME, PORT);
-    private static final String REGION = "us-east-1";
     private static final String AUTH = "IamSigV4";
     private static final String ENCRYPTION = "TRUE";
     private static final String CONNECTION_STRING =

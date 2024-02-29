@@ -8,6 +8,7 @@ plugins {
     id 'maven-publish'
     id 'io.github.gradle-nexus.publish-plugin' version '1.1.0'
     id 'signing'
+    id 'com.github.jk1.dependency-license-report' version '2.5'
 }
 
 group 'software.amazon.neptune'
@@ -205,18 +206,28 @@ license {
     }
 }
 
+/**
+ * License Report Plugin
+ */
+import com.github.jk1.license.render.*
+
+licenseReport {
+    configurations = ['runtimeClasspath']
+    renderers = [new TextReportRenderer(), new SimpleHtmlReportRenderer()]
+}
+
 dependencies {
     // Dependencies
     implementation group: 'commons-beanutils', name: 'commons-beanutils', version: "$beanutilsVersion"
     implementation group: 'org.apache.tinkerpop', name: 'gremlin-driver', version: "$gremlinVersion"
     implementation group: 'org.apache.tinkerpop', name: 'gremlin-groovy', version: "$gremlinVersion"
     implementation group: 'com.amazonaws', name: 'amazon-neptune-sigv4-signer', version: "$amazonSigv4SignerVersion"
-    implementation group: 'com.amazonaws', name: 'amazon-neptune-sparql-java-sigv4', version: "$amazonSigv4SignerVersion"
     implementation group: 'com.amazonaws', name: 'amazon-neptune-gremlin-java-sigv4', version: "$amazonSigv4SignerVersion"
     implementation group: 'com.jcraft', name: 'jsch', version: "$jschVersion"
     implementation group: 'io.netty', name: 'netty-all', version: "$nettyVersion"
     implementation group: 'org.neo4j.driver', name: 'neo4j-java-driver', version: "$neo4jDriverVersion"
     implementation group: 'org.apache.jena', name: 'jena-arq', version: "$jenaVersion"
+    implementation group: 'org.apache.jena', name: 'jena-rdfconnection', version: "$jenaVersion"
     implementation group: 'org.slf4j', name: 'slf4j-log4j12', version: "$slf4jVersion"
     implementation group: 'com.google.code.gson', name: 'gson', version: "$gsonVersion"
     implementation group: 'com.google.guava', name: 'guava', version: "$guavaVersion"
@@ -249,6 +260,7 @@ dependencies {
     testCompileOnly group: 'com.google.code.findbugs', name: 'annotations', version: "$findBugsVersion"
     testCompileOnly group: 'com.puppycrawl.tools', name: 'checkstyle', version: "$puppyCrawlVersion"
     testImplementation group: 'org.apache.tinkerpop', name: 'tinkergraph-gremlin', version: "$gremlinVersion"
+    testImplementation group: 'org.apache.tinkerpop', name: 'gremlin-server', version: "$gremlinVersion"
 }
 
 shadowJar {
@@ -280,7 +292,6 @@ shadowJar {
     relocate 'org.neo4j', 'shadow.org.neo4j'
     relocate 'org.joda', 'shadow.org.joda'
     relocate 'org.javatuples', 'shadow.org.javatuples'
-    relocate 'org.eclipse', 'shadow.org.eclipse'
     relocate 'org.checkerframework', 'shadow.org.checkerframework'
     relocate 'org.apiguardian', 'shadow.org.apiguardian'
     relocate 'org.apache.tinkerpop', 'shadow.org.apache.tinkerpop'

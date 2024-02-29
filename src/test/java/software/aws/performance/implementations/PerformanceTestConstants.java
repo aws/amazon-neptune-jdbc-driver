@@ -19,9 +19,11 @@ package software.aws.performance.implementations;
 import software.aws.neptune.jdbc.utilities.AuthScheme;
 
 public class PerformanceTestConstants {
-    public static final String ENDPOINT = "no-auth-oc-enabled.cluster-cdubgfjknn5r.us-east-1.neptune.amazonaws.com";
-    public static final String REGION = "us-east-1";
-    public static final String SPARQL_ENDPOINT = "https://no-auth-oc-enabled.cluster-cdubgfjknn5r.us-east-1.neptune.amazonaws.com";
+
+    // Before starting manual tests, modify parameters to your specific cluster
+    public static final String ENDPOINT = "neptune-cluster-url.cluster-xxxxxxxxx.mock-region-1.neptune.amazonaws.com";
+    public static final String REGION = "mock-region-1";
+    public static final String SPARQL_ENDPOINT = "https://" + ENDPOINT;
     public static final String SPARQL_QUERY = "sparql";
     public static final AuthScheme AUTH_SCHEME = AuthScheme.None;
     public static final int PORT = 8182;

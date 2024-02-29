@@ -294,7 +294,7 @@ public class GremlinSqlSelectSingle extends GremlinSqlSelect {
             if (sqlBasicCall.getOperator() instanceof SqlPrefixOperator) {
                 SqlPrefixOperator sqlPrefixOperator = (SqlPrefixOperator) sqlBasicCall.getOperator();
                 if (sqlPrefixOperator.kind.equals(SqlKind.NOT)) {
-                    if (sqlBasicCall.getOperandList().size() == 1 && sqlBasicCall.operands.length == 1) {
+                    if (sqlBasicCall.getOperandList().size() == 1 && sqlBasicCall.getOperandList().size() == 1) {
                         final GraphTraversal<?, ?> subGraphTraversal = __.__();
                         applySqlFilter(sqlBasicCall.getOperandList().get(0), subGraphTraversal);
                         graphTraversal.not(subGraphTraversal);

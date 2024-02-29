@@ -56,7 +56,8 @@ import static software.aws.neptune.jdbc.utilities.ConnectionProperties.SSH_USER;
 
 @Disabled
 public class TDVTDataUpload {
-    private static final String ENDPOINT = "database-1.cluster-cdffsmv2nzf7.us-east-2.neptune.amazonaws.com";
+    // Before starting manual tests, modify parameters to your specific cluster and SSH tunnel
+    private static final String ENDPOINT = "neptune-cluster-url.cluster-xxxxxxxxx.mock-region-1.neptune.amazonaws.com";
     private static final String SAMPLE_QUERY = "g.V().count()";
     private static final int PORT = 8182;
     private static final int COUNT_PER = 20;
@@ -74,8 +75,8 @@ public class TDVTDataUpload {
         properties.put(PORT_KEY, PORT);
         properties.put(ENABLE_SSL_KEY, true);
         properties.put(SSH_USER, "ec2-user");
-        properties.put(SSH_HOSTNAME, "52.14.185.245");
-        properties.put(SSH_PRIVATE_KEY_FILE, "~/Downloads/EC2/neptune-test.pem");
+        properties.put(SSH_HOSTNAME, "ec2-publicIP");
+        properties.put(SSH_PRIVATE_KEY_FILE, "~/path/to/pem-file.pem");
         properties.put(SSH_STRICT_HOST_KEY_CHECKING, "false");
         final GremlinConnectionProperties gremlinConnectionProperties = new GremlinConnectionProperties(properties);
 

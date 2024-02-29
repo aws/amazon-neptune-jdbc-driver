@@ -34,7 +34,8 @@ import static software.aws.neptune.jdbc.utilities.ConnectionProperties.SSH_USER;
 @Disabled
 public class OpenCypherManualNeptuneVerificationTest {
 
-    private static final String HOSTNAME = "database-1.cluster-cdffsmv2nzf7.us-east-2.neptune.amazonaws.com";
+    // Before starting manual tests, modify parameters to your specific cluster and SSH tunnel
+    private static final String HOSTNAME = "neptune-cluster-url.cluster-xxxxxxxxx.mock-region-1.neptune.amazonaws.com";
     private static final Properties PROPERTIES = new Properties();
     private static final String CREATE_NODES;
     private static java.sql.Connection connection;
@@ -56,8 +57,8 @@ public class OpenCypherManualNeptuneVerificationTest {
     static void initialize() throws SQLException {
         final String endpoint = String.format("bolt://%s:%d", HOSTNAME, 8182);
         PROPERTIES.put(SSH_USER, "ec2-user");
-        PROPERTIES.put(SSH_HOSTNAME, "52.14.185.245");
-        PROPERTIES.put(SSH_PRIVATE_KEY_FILE, "~/Downloads/EC2/neptune-test.pem");
+        PROPERTIES.put(SSH_HOSTNAME, "ec2-publicIP");
+        PROPERTIES.put(SSH_PRIVATE_KEY_FILE, "~/path/to/pem-file.pem");
         PROPERTIES.put(SSH_STRICT_HOST_KEY_CHECKING, "false");
         PROPERTIES.put(OpenCypherConnectionProperties.AUTH_SCHEME_KEY, AuthScheme.None); // reverse default to None
         PROPERTIES.putIfAbsent(OpenCypherConnectionProperties.ENDPOINT_KEY, endpoint);

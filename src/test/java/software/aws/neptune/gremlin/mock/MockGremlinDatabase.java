@@ -16,68 +16,85 @@
 
 package software.aws.neptune.gremlin.mock;
 
-import org.apache.commons.lang3.SystemUtils;
-import java.io.BufferedReader;
+import org.apache.tinkerpop.gremlin.jsr223.ScriptFileGremlinPlugin;
+import org.apache.tinkerpop.gremlin.server.GremlinServer;
+import org.apache.tinkerpop.gremlin.server.Settings;
+import org.apache.tinkerpop.gremlin.structure.io.Storage;
+
 import java.io.File;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import java.nio.file.Paths;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 public class MockGremlinDatabase {
-    private static final String WINDOWS_SERVER = "gremlin-server.bat";
-    private static final String NIX_SERVER = "gremlin-server.sh";
-    private static final String SERVER_PATH =
-            "./gremlin-server/target/apache-tinkerpop-gremlin-server-3.5.0-SNAPSHOT-standalone/bin/";
-    private static final String SERVER_COMMAND = SERVER_PATH + NIX_SERVER;
-    private static final String START_COMMAND = String.format("%s start", SERVER_COMMAND);
-    private static final String STOP_COMMAND = String.format("%s stop", SERVER_COMMAND);
-    private static Process serverProcess = null;
 
+    private static GremlinServer server;
 
     /**
-     * Simple function to start the database.
-     *
-     * @throws IOException          thrown if command fails.
-     * @throws InterruptedException thrown if command fails.
+     * Starts a new instance of Gremlin Server.
      */
-    public static void startGraph() throws IOException, InterruptedException {
-        final String output = runCommand(START_COMMAND);
-        if (output.startsWith("Server already running with PID")) {
-            return;
-        }
-        Thread.sleep(10000);
+    public static void startServer() throws Exception {
+        final Settings settings = Settings.read(Objects.requireNonNull(MockGremlinDatabase.class.getResourceAsStream("/gremlin-server.yaml")));
+        rewritePathsInGremlinServerSettings(settings);
+        server = new GremlinServer(settings);
+        server.start().join();
     }
 
     /**
-     * Simple function to shut the database down.
-     *
-     * @throws IOException thrown if command fails.
+     * Stops a current instance of Gremlin Server.
      */
-    public static void stopGraph() throws IOException, InterruptedException {
-        runCommand(STOP_COMMAND);
-        Thread.sleep(10000);
+    public static void stopServer() {
+        server.stop().join();
+        server = null;
     }
 
-    private static String runCommand(final String command) throws IOException {
-        if (SystemUtils.IS_OS_WINDOWS) {
-            runWindowsCommand(command);
-        } else {
-            serverProcess = Runtime.getRuntime().exec(command);
+    /**
+     *  Need to rewrite for the test server to properly reference necessary scripts needed.
+     *  Referenced from TinkerPop Gremlin Server test set-up.
+     */
+    private static void rewritePathsInGremlinServerSettings(final Settings overridenSettings) {
+        final Map<String, Map<String, Object>> plugins;
+        final Map<String, Object> scriptFileGremlinPlugin;
+        final File homeDir;
+
+        homeDir = new File(Paths.get("./src/test/scripts").toAbsolutePath().toString());
+
+        plugins = overridenSettings.scriptEngines.get("gremlin-groovy").plugins;
+        scriptFileGremlinPlugin = plugins.get(ScriptFileGremlinPlugin.class.getName());
+
+        if (scriptFileGremlinPlugin != null) {
+            scriptFileGremlinPlugin
+                    .put("files",
+                            ((List<String>) scriptFileGremlinPlugin.get("files")).stream()
+                                    .map(s -> new File(s))
+                                    .map(f -> f.isAbsolute() ? f
+                                            : new File(relocateFile( homeDir, f)))
+                                    .map(f -> Storage.toPath(f))
+                                    .collect(Collectors.toList()));
         }
 
-        final BufferedReader input = new BufferedReader(new InputStreamReader(serverProcess.getInputStream()));
-        return input.readLine();
+        overridenSettings.graphs = overridenSettings.graphs.entrySet().stream()
+                .map(kv -> {
+                    kv.setValue(relocateFile( homeDir, new File(kv.getValue())));
+                    return kv;
+                }).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+
     }
 
-    private static void runWindowsCommand(final String command) throws IOException {
-        if (command.equals(START_COMMAND)) {
-            final ProcessBuilder pb = new ProcessBuilder("cmd", "/c", WINDOWS_SERVER);
-            final File directoryFile = new File(SERVER_PATH);
-            pb.directory(directoryFile);
-            serverProcess = pb.start();
-        }
+    /**
+     * Strip the directories from the configured filePath, replace them with homeDir, this way relocating
+     * the files
+     *
+     * @param homeDir
+     * @param filePath absolute or relative file path
+     * @return the absolute storage path of the relocated file
+     */
+    private static String relocateFile(final File homeDir, File filePath) {
+        final String plainFileName = filePath.getName();
 
-        if (command.equals(STOP_COMMAND) && serverProcess != null) {
-            serverProcess.destroy();
-        }
+        return Storage.toPath(new File(homeDir, plainFileName));
     }
+
 }

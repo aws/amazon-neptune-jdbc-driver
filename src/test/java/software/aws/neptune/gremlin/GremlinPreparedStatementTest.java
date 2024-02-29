@@ -22,8 +22,6 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import software.aws.neptune.NeptunePreparedStatementTestHelper;
 import software.aws.neptune.gremlin.mock.MockGremlinDatabase;
-import java.io.IOException;
-import java.sql.SQLException;
 
 import static software.aws.neptune.gremlin.GremlinHelper.getProperties;
 
@@ -36,8 +34,8 @@ public class GremlinPreparedStatementTest extends GremlinStatementTestBase {
     private NeptunePreparedStatementTestHelper neptunePreparedStatementTestHelper;
 
     @BeforeEach
-    void initialize() throws SQLException, IOException, InterruptedException {
-        MockGremlinDatabase.startGraph();
+    void initialize() throws Exception {
+        MockGremlinDatabase.startServer();
         final java.sql.Connection connection = new GremlinConnection(
                 new GremlinConnectionProperties(getProperties(HOSTNAME, PORT, MAX_CONTENT_LENGTH)));
         neptunePreparedStatementTestHelper = new NeptunePreparedStatementTestHelper(connection.prepareStatement(""),
@@ -45,9 +43,9 @@ public class GremlinPreparedStatementTest extends GremlinStatementTestBase {
     }
 
     @AfterEach
-    void close() throws SQLException, IOException, InterruptedException {
+    void close() throws Exception {
         neptunePreparedStatementTestHelper.close();
-        MockGremlinDatabase.stopGraph();
+        MockGremlinDatabase.stopServer();
     }
 
     @Test
