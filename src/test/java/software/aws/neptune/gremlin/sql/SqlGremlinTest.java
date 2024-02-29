@@ -483,9 +483,9 @@ public class SqlGremlinTest {
 
     private String generateAggregateSQLQueries(final String operator, final String table, final String column) {
         // Returns a simple SQL query in the form:
-        // "SELECT OPERATOR(`table`.`column`) AS `OPERATOR` FROM `gremlin`.`table` `table` GROUP BY `table`.`column`"
-        return String.format("SELECT %s(`%s`.`%s`) AS `%s` FROM `gremlin`.`%s` `%s` GROUP BY `%s`.`%s`",
-                operator, table, column, operator, table, table, table, column);
+        // "SELECT OPERATOR(`table`.`column`) AS `OPERATOR` FROM `gremlin`.`table` `table`"
+        return String.format("SELECT %s(`%s`.`%s`) AS `%s` FROM `gremlin`.`%s` `%s`",
+                operator, table, column, operator, table, table);
     }
 
 
