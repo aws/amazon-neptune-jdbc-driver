@@ -22,10 +22,10 @@ import org.apache.tinkerpop.gremlin.server.Settings;
 import org.apache.tinkerpop.gremlin.structure.io.Storage;
 
 import java.io.File;
-import java.io.InputStream;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 public class MockGremlinDatabase {
@@ -36,8 +36,7 @@ public class MockGremlinDatabase {
      * Starts a new instance of Gremlin Server.
      */
     public static void startServer() throws Exception {
-        final InputStream stream = MockGremlinDatabase.class.getResourceAsStream("/gremlin-server.yaml");
-        final Settings settings = Settings.read(stream);
+        final Settings settings = Settings.read(Objects.requireNonNull(MockGremlinDatabase.class.getResourceAsStream("/gremlin-server.yaml")));
         rewritePathsInGremlinServerSettings(settings);
         server = new GremlinServer(settings);
         server.start().join();
@@ -52,9 +51,8 @@ public class MockGremlinDatabase {
     }
 
     /**
-     *  Tests from maven will pass this value in via failsafe plugin. basically we want to home this in on the
-     *  gremlin-server directory to get stuff to reference scripts properly from the file system from any directory.
-     *  If an overriden path is determined to be absolute then the path is not re-written.
+     *  Need to rewrite for the test server to properly reference necessary scripts needed.
+     *  Referenced from TinkerPop Gremlin Server test set-up.
      */
     private static void rewritePathsInGremlinServerSettings(final Settings overridenSettings) {
         final Map<String, Map<String, Object>> plugins;

@@ -16,8 +16,8 @@
 
 package software.aws.neptune.gremlin;
 
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import software.aws.neptune.NeptunePreparedStatementTestHelper;
@@ -31,10 +31,10 @@ public class GremlinPreparedStatementTest extends GremlinStatementTestBase {
     private static final String HOSTNAME = "localhost";
     private static final int PORT = 8181; // Mock server uses 8181.
     private static final int MAX_CONTENT_LENGTH = 500000; // Took from PropertyGraphSerializationModule.
-    private static NeptunePreparedStatementTestHelper neptunePreparedStatementTestHelper;
+    private NeptunePreparedStatementTestHelper neptunePreparedStatementTestHelper;
 
-    @BeforeAll
-    static void initialize() throws Exception {
+    @BeforeEach
+    void initialize() throws Exception {
         MockGremlinDatabase.startServer();
         final java.sql.Connection connection = new GremlinConnection(
                 new GremlinConnectionProperties(getProperties(HOSTNAME, PORT, MAX_CONTENT_LENGTH)));
@@ -42,8 +42,8 @@ public class GremlinPreparedStatementTest extends GremlinStatementTestBase {
                 connection.prepareStatement(getLongQuery()), connection.prepareStatement(QUICK_QUERY));
     }
 
-    @AfterAll
-    static void close() throws Exception {
+    @AfterEach
+    void close() throws Exception {
         neptunePreparedStatementTestHelper.close();
         MockGremlinDatabase.stopServer();
     }

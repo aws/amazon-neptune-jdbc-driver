@@ -41,16 +41,20 @@ import static software.aws.neptune.gremlin.GremlinHelper.dropAll;
 import static software.aws.neptune.gremlin.GremlinHelper.dropVertex;
 import static software.aws.neptune.gremlin.GremlinHelper.getAll;
 import static software.aws.neptune.gremlin.GremlinHelper.getVertex;
+import static software.aws.neptune.jdbc.utilities.ConnectionProperties.SERVICE_REGION_KEY;
 
 @Disabled
 public class GremlinIntegrationTest extends GremlinStatementTestBase {
+
+    // Before starting manual tests, modify parameters to your specific cluster
+    private static final String ENDPOINT = "neptune-cluster-url.cluster-xxxxxxxxx.mock-region-1.neptune.amazonaws.com";
+    private static final String REGION = "mock-region-1";
     private static final int PORT = 8182;
-    private static final String ENDPOINT = "iam-auth-test-lyndon.cluster-cdubgfjknn5r.us-east-1.neptune.amazonaws.com";
     private static final String AUTH = "IamSigV4";
     private static final String ENCRYPTION = "TRUE";
     private static final String CONNECTION_STRING =
-            String.format("jdbc:neptune:gremlin://%s;enableSsl=%s;authScheme=%s;",
-                    ENDPOINT, ENCRYPTION, AUTH);
+            String.format("jdbc:neptune:gremlin://%s;enableSsl=%s;authScheme=%s;serviceRegion=%s;",
+                    ENDPOINT, ENCRYPTION, AUTH, REGION);
     private static final String VERTEX_1 = "vertex1";
     @SuppressWarnings({"unchecked", "rawtypes"})
     private static final Map<String, Object> VERTEX_1_MAP = new HashMap();
@@ -84,6 +88,7 @@ public class GremlinIntegrationTest extends GremlinStatementTestBase {
         properties.put(CONTACT_POINT_KEY, ENDPOINT);
         properties.put(PORT_KEY, PORT);
         properties.put(ENABLE_SSL_KEY, ENCRYPTION);
+        properties.put(SERVICE_REGION_KEY, REGION);
         connection = new GremlinConnection(new GremlinConnectionProperties(properties));
         dropAll(connection);
     }

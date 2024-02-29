@@ -79,15 +79,16 @@ import static software.aws.neptune.jdbc.utilities.ConnectionProperties.SSH_USER;
 // Temporary test file to do ad hoc testing.
 @Disabled
 public class SqlGremlinTest {
-    private static final String ENDPOINT = "database-1.cluster-cdubgfjknn5r.us-east-1.neptune.amazonaws.com";
+
+    // Before starting manual tests, modify parameters to your specific cluster
+    private static final String ENDPOINT = "neptune-cluster-url.cluster-xxxxxxxxx.mock-region-1.neptune.amazonaws.com";
+    private static final String SERVICE_REGION = "mock-region-1";
     private static final int PORT = 8182;
-    private static final String AUTH = "IamSigV4";
+    private static final String AUTH = "None";
     private static final String ENABLE_SSL = "true";
-    private static final String SERVICE_REGION = "us-east-1";
     private static final String USER = "ec2-user";
-    //54.210.60.246
-    private static final String HOSTNAME = "54.210.60.246";
-    private static final String SSH_PRIVATE_KEY = "~/Repos/jdbc-ec2-connect.pem";
+    private static final String HOSTNAME = "ec2-publicIP";
+    private static final String SSH_PRIVATE_KEY = "~/path/to/pem-file.pem";
     private static final String SSH_STRICT_HOST = "true";
     private static final String SCAN_TYPE = "first";
     private static final String CONNECTION_STRING =
@@ -185,7 +186,7 @@ public class SqlGremlinTest {
         final Connection connection = DriverManager.getConnection(CONNECTION_STRING);
         Assertions.assertTrue(connection.isValid(1));
         final java.sql.Statement statement = connection.createStatement();
-        statement.execute( "SELECT count(region) from airport limit 10");
+        statement.execute("SELECT count(region) from airport limit 10");
     }
 
     @Test

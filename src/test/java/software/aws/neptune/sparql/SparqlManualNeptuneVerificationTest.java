@@ -48,11 +48,12 @@ import java.util.Properties;
 @Disabled
 public class SparqlManualNeptuneVerificationTest {
 
-    private static final String NEPTUNE_HOSTNAME =
-            "https://jdbc-bug-bash-iam-instance-1.cdubgfjknn5r.us-east-1.neptune.amazonaws.com";
+    // Before starting manual tests, modify parameters to your specific cluster and SSH tunnel
+     private static final String HOSTNAME = "neptune-cluster-url.cluster-xxxxxxxxx.mock-region-1.neptune.amazonaws.com";
+     private static final String REGION = "mock-region-1";
+    private static final String NEPTUNE_HOSTNAME = "https://" + HOSTNAME;
     private static final int NEPTUNE_DEFAULT_PORT = 8182;
-    private static final String AUTH = "IamSigV4";
-    private static final String REGION = "us-east-1";
+    private static final String AUTH = AuthScheme.IAMSigV4.toString();
     private static final String NEPTUNE_QUERY_ENDPOINT = "sparql";
     private static final String NEPTUNE_DESTINATION_STRING =
             String.format("%s:%d", NEPTUNE_HOSTNAME, NEPTUNE_DEFAULT_PORT);
@@ -70,10 +71,10 @@ public class SparqlManualNeptuneVerificationTest {
         properties.put(SparqlConnectionProperties.PORT_KEY, NEPTUNE_DEFAULT_PORT);
         properties.put(SparqlConnectionProperties.QUERY_ENDPOINT_KEY, NEPTUNE_QUERY_ENDPOINT);
         properties.put(SparqlConnectionProperties.SERVICE_REGION_KEY, REGION);
-        //        properties.put(SSH_USER, "ec2-user");
-        //        properties.put(SSH_HOSTNAME, "52.14.185.245");
-        //        properties.put(SSH_PRIVATE_KEY_FILE, "~/Downloads/EC2/neptune-test.pem");
-        //        properties.put(SSH_STRICT_HOST_KEY_CHECKING, "false");
+        properties.put(SparqlConnectionProperties.SSH_USER, "ec2-user");
+        properties.put(SparqlConnectionProperties.SSH_HOSTNAME, "ec2-publicIP");
+        properties.put(SparqlConnectionProperties.SSH_PRIVATE_KEY_FILE, "~/path/to/pem-file.pem");
+        properties.put(SparqlConnectionProperties.SSH_STRICT_HOST_KEY_CHECKING, "false");
         return properties;
     }
 
@@ -114,11 +115,11 @@ public class SparqlManualNeptuneVerificationTest {
 
     @Test
     @Disabled
+    // This is a test written for usage of SigV4 signer with SPARQL requests, this is now implemented in driver, kept as reference only
     void testRunBasicAuthConnection() throws NeptuneSigV4SignerException {
-        //TODO: remove this test after completing the driver and rest of this test class
         final AWSCredentialsProvider awsCredentialsProvider = new DefaultAWSCredentialsProviderChain();
         final NeptuneApacheHttpSigV4Signer v4Signer =
-                new NeptuneApacheHttpSigV4Signer("us-east-1", awsCredentialsProvider);
+                new NeptuneApacheHttpSigV4Signer(REGION, awsCredentialsProvider);
 
         final HttpClient v4SigningClient =
                 HttpClientBuilder.create().addInterceptorLast(new HttpRequestInterceptor() {
