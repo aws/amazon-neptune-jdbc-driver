@@ -89,7 +89,7 @@ jobs:
 
       - name: Verify TACO filename
         run: |
-          if [ ! -f "tableau-connector/target/neptune-jdbc-v${{env.version}}.taco" ]
+          if [ ! -f "tableau-connector/target/neptune-jdbc-${{env.version}}.taco" ]
           then
             echo "Error: The TACO file is either incorrectly named or missing from tableau-connector/target/."
             echo "Contents of tableau-connector/target/:"
