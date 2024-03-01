@@ -23,7 +23,7 @@ then
     DRIVER_VERSION=$MAJOR_VERSION.$MINOR_VERSION.$PATCH_VERSION
 fi
 echo DRIVER_VERSION=$DRIVER_VERSION
-TACO_NAME="neptune-jdbc-v${DRIVER_VERSION}.taco"
+TACO_NAME="neptune-jdbc-${DRIVER_VERSION}.taco"
 echo TACO_NAME=${TACO_NAME}
 
 echo "Building Docker Image"
