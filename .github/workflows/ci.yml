@@ -89,7 +89,7 @@ jobs:
 
       - name: Verify TACO filename
         run: |
-          if [ ! -f "tableau-connector/target/neptune-jdbc-${{env.version}}.taco" ]
+          if [ ! -f "tableau-connector/target/neptune-jdbc-v${{env.version}}.taco" ]
           then
             echo "Error: The TACO file is either incorrectly named or missing from tableau-connector/target/."
             echo "Contents of tableau-connector/target/:"
@@ -123,7 +123,7 @@ jobs:
             sudo apt-get install jq
             # Upload unsigned .taco to S3 Bucket
             echo "Obtaining version id and uploading unsigned .taco to S3 Bucket"
-            version_id=$( aws s3api put-object --bucket ${{ secrets.AWS_UNSIGNED_BUCKET }} --key ${{ secrets.AWS_KEY }} --body ./tableau-connector/target/neptune-jdbc-${{env.version}}.taco  --acl bucket-owner-full-control | jq '.VersionId' )
+            version_id=$( aws s3api put-object --bucket ${{ secrets.AWS_UNSIGNED_BUCKET }} --key ${{ secrets.AWS_KEY }} --body ./tableau-connector/target/neptune-jdbc-v${{env.version}}.taco  --acl bucket-owner-full-control | jq '.VersionId' )
             job_id=""
             # Attempt to get Job ID from bucket tagging, will retry up to 3 times before exiting with a failure code.
             # Will sleep for 5 seconds between retries.
@@ -159,7 +159,7 @@ jobs:
             done     
             # Downloading signed taco from S3
             echo "Downloading signed .taco from S3"
-            aws s3api get-object --bucket ${{ secrets.AWS_SIGNED_BUCKET }} --key ${{ secrets.AWS_KEY }}-${job_id}.taco ./tableau-connector/target/neptune-jdbc-${{env.version}}-signed.taco
+            aws s3api get-object --bucket ${{ secrets.AWS_SIGNED_BUCKET }} --key ${{ secrets.AWS_KEY }}-${job_id}.taco ./tableau-connector/target/neptune-jdbc-v${{env.version}}-signed.taco
             echo "Signing completed"
             ls -l tableau-connector/target
           else
