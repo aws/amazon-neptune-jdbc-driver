@@ -266,6 +266,8 @@ dependencies {
 shadowJar {
     archiveClassifier.set('all')
 
+    metaInf { from 'THIRD-PARTY-LICENSES.txt' }
+
     //  Exclude driver unnecessary classes.
     exclude 'org/apache/calcite/avatica/remote/Driver*'
     exclude 'org/apache/commons/dbcp2/PoolingDriver*'
