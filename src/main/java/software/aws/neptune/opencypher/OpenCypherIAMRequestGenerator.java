@@ -24,9 +24,11 @@ import com.amazonaws.auth.DefaultAWSCredentialsProviderChain;
 import com.amazonaws.http.HttpMethodName;
 import com.google.gson.Gson;
 import org.neo4j.driver.AuthToken;
-import org.neo4j.driver.AuthTokens;
+import org.neo4j.driver.Values;
+import org.neo4j.driver.internal.security.InternalAuthToken;
 
 import java.net.URI;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -34,6 +36,11 @@ import static com.amazonaws.auth.internal.SignerConstants.AUTHORIZATION;
 import static com.amazonaws.auth.internal.SignerConstants.HOST;
 import static com.amazonaws.auth.internal.SignerConstants.X_AMZ_DATE;
 import static com.amazonaws.auth.internal.SignerConstants.X_AMZ_SECURITY_TOKEN;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NonNull;
+import org.neo4j.driver.Value;
+import org.neo4j.driver.internal.value.StringValue;
 
 /**
  * Class to help with IAM authentication.
@@ -53,17 +60,7 @@ public class OpenCypherIAMRequestGenerator {
      * @return AuthToken for IAM authentication.
      */
     public static AuthToken createAuthToken(final String url, final String region) {
-        final Request<Void> request = new DefaultRequest<>(SERVICE_NAME);
-        request.setHttpMethod(HttpMethodName.GET);
-        request.setEndpoint(URI.create(url));
-        request.setResourcePath("/opencypher");
-
-        final AWS4Signer signer = new AWS4Signer();
-        signer.setRegionName(region);
-        signer.setServiceName(request.getServiceName());
-        signer.sign(request, AWS_CREDENTIALS_PROVIDER.getCredentials());
-
-        return AuthTokens.basic(DUMMY_USERNAME, getAuthInfoJson(request));
+        return new NeptuneAuthToken(region, url, AWS_CREDENTIALS_PROVIDER);
     }
 
     private static String getAuthInfoJson(final Request<Void> request) {
@@ -75,5 +72,64 @@ public class OpenCypherIAMRequestGenerator {
         obj.put(X_AMZ_SECURITY_TOKEN, request.getHeaders().get(X_AMZ_SECURITY_TOKEN));
 
         return GSON.toJson(obj);
+    }
+
+    /**
+     * This class is derived from the AWS documentation on accessing Amazon Neptune with IAM authentication.
+     * For more details and information, please refer to:
+     * <a href="https://docs.aws.amazon.com/neptune/latest/userguide/access-graph-opencypher-bolt.html#access-graph-opencypher-bolt-java-iam-auth">Using the Bolt protocol to make openCypher queries to Neptune</a>.
+     */
+
+    public static class NeptuneAuthToken extends InternalAuthToken {
+        private static final String SCHEME = "basic";
+        private static final String REALM = "realm";
+        private static final String SERVICE_NAME = "neptune-db";
+        private static final String DUMMY_USERNAME = "username";
+        @NonNull
+        private final String region;
+        @NonNull
+        @Getter
+        private final String url;
+        @NonNull
+        private final AWSCredentialsProvider credentialsProvider;
+
+        @Builder
+        private NeptuneAuthToken(
+                @NonNull final String region,
+                @NonNull final String url,
+                @NonNull final AWSCredentialsProvider credentialsProvider
+        ) {
+            // The superclass caches the result of toMap(), which we don't want
+            super(Collections.emptyMap());
+            this.region = region;
+            this.url = url;
+            this.credentialsProvider = credentialsProvider;
+        }
+
+        @Override
+        public Map<String, Value> toMap() {
+            final Map<String, Value> map = new HashMap<>();
+            map.put(SCHEME_KEY, Values.value(SCHEME));
+            map.put(PRINCIPAL_KEY, Values.value(DUMMY_USERNAME));
+            map.put(CREDENTIALS_KEY, new StringValue(getSignedHeader()));
+            map.put(REALM_KEY, Values.value(REALM));
+
+            return map;
+        }
+
+        private String getSignedHeader() {
+            final Request<Void> request = new DefaultRequest<>(SERVICE_NAME);
+            request.setHttpMethod(HttpMethodName.GET);
+            request.setEndpoint(URI.create(url));
+            // Comment out the following line if you're using an engine version older than 1.2.0.0
+            request.setResourcePath("/opencypher");
+
+            final AWS4Signer signer = new AWS4Signer();
+            signer.setRegionName(region);
+            signer.setServiceName(request.getServiceName());
+            signer.sign(request, credentialsProvider.getCredentials());
+
+            return getAuthInfoJson(request);
+        }
     }
 }

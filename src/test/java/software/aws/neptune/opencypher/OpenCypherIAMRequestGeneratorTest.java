@@ -99,8 +99,7 @@ class OpenCypherIAMRequestGeneratorTest {
 
         assertEquals(value("basic"), internalAuthToken.get(SCHEME_KEY));
         assertEquals(value(DUMMY_USERNAME), internalAuthToken.get(PRINCIPAL_KEY));
-
-        assertFalse(internalAuthToken.containsKey(REALM_KEY));
+        assertTrue(internalAuthToken.containsKey(REALM_KEY));
 
         assertTrue(internalAuthToken.containsKey(CREDENTIALS_KEY));
         final Value credentialsValue = internalAuthToken.get(CREDENTIALS_KEY);
