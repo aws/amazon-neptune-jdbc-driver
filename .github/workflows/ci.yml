@@ -20,6 +20,9 @@ on:
 env:
   SIGNING_ENABLED: ${{ github.event.inputs.signTacoFile }}
 
+permissions:
+  contents: read
+
 jobs:
   build:
     name: JDBC Build and Test
