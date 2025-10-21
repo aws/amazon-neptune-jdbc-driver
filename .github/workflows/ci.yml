@@ -17,6 +17,11 @@ on:
         required: false
         default: false
 
+
+permissions:
+  contents: read
+  actions: write
+
 env:
   SIGNING_ENABLED: ${{ github.event.inputs.signTacoFile }}
 
